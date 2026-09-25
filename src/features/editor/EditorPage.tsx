@@ -4,6 +4,7 @@ import { useApp } from '@/app/store';
 import { HandView } from '@/components/HandView';
 import { TilePalette } from '@/components/TilePalette';
 import { TileFace } from '@/components/TileFace';
+import { WanpaiDora } from '@/components/WanpaiDora';
 import { createId, nowIso } from '@/domain/ids';
 import { createMeld } from '@/domain/melds';
 import { maybeSortConcealed } from '@/domain/sort';
@@ -54,6 +55,28 @@ const SEAT_OPTS: Array<{ value: Wind; label: string }> = [
 /** 手牌の上限（副露1組=3枚相当）。ツモ枠は使わない。 */
 function handTileMax(meldCount: number): number {
   return Math.max(0, 14 - meldCount * 3);
+}
+
+function windLabel(w: Wind | null): string {
+  if (w === '1z') return '東';
+  if (w === '2z') return '南';
+  if (w === '3z') return '西';
+  if (w === '4z') return '北';
+  return '';
+}
+
+function contextSummary(ctx: Problem['context']): string {
+  const parts: string[] = [];
+  const rw = windLabel(ctx.roundWind);
+  if (rw && ctx.handNumber) parts.push(`${rw}${ctx.handNumber}局`);
+  else if (rw) parts.push(`${rw}場`);
+  else if (ctx.handNumber) parts.push(`${ctx.handNumber}局`);
+  if (ctx.honba !== null) parts.push(`${ctx.honba}本場`);
+  const sw = windLabel(ctx.seatWind);
+  if (sw) parts.push(`${sw}家`);
+  if (ctx.turn !== null) parts.push(`${ctx.turn}巡目`);
+  if (ctx.riichiSticks !== null) parts.push(`供託${ctx.riichiSticks}`);
+  return parts.join(' ') || '条件未設定';
 }
 
 function initialHand(existing?: Problem): TileCode[] {
@@ -317,9 +340,7 @@ export function EditorPage() {
       </header>
 
       <section className="panel context-panel">
-        <h2 className="section-title">対局条件</h2>
-        <div className="seg-block">
-          <span className="seg-label">場風</span>
+        <div className="ctx-toolbar" aria-label="対局条件">
           <div className="seg" role="group" aria-label="場風">
             {ROUND_OPTS.map((o) => (
               <button
@@ -335,9 +356,10 @@ export function EditorPage() {
               </button>
             ))}
           </div>
-          <label className="inline-field">
-            <span>局</span>
+          <label className="ctx-mini">
+            <span className="sr-only">局</span>
             <select
+              aria-label="局"
               value={context.handNumber ?? ''}
               onChange={(e) => {
                 setContext({
@@ -347,18 +369,14 @@ export function EditorPage() {
                 mark();
               }}
             >
-              <option value="">—</option>
+              <option value="">局</option>
               {[1, 2, 3, 4].map((n) => (
                 <option key={n} value={n}>
-                  {n}
+                  {n}局
                 </option>
               ))}
             </select>
           </label>
-        </div>
-
-        <div className="seg-block">
-          <span className="seg-label">自風</span>
           <div className="seg" role="group" aria-label="自風">
             {SEAT_OPTS.map((o) => (
               <button
@@ -374,12 +392,10 @@ export function EditorPage() {
               </button>
             ))}
           </div>
-        </div>
-
-        <div className="seg-block seg-block--wrap">
-          <label className="inline-field">
-            <span>巡目</span>
+          <label className="ctx-mini">
+            <span className="sr-only">巡目</span>
             <select
+              aria-label="巡目"
               value={context.turn ?? ''}
               onChange={(e) => {
                 setContext({
@@ -389,20 +405,22 @@ export function EditorPage() {
                 mark();
               }}
             >
-              <option value="">未入力</option>
+              <option value="">巡目</option>
               {Array.from({ length: 18 }, (_, i) => i + 1).map((n) => (
                 <option key={n} value={n}>
-                  {n} 巡目
+                  {n}巡
                 </option>
               ))}
             </select>
           </label>
-          <label className="inline-field">
-            <span>本場</span>
+          <label className="ctx-mini">
+            <span className="sr-only">本場</span>
             <input
+              aria-label="本場"
               type="number"
               min={0}
               max={99}
+              placeholder="本場"
               value={context.honba ?? ''}
               onChange={(e) => {
                 setContext({
@@ -413,12 +431,14 @@ export function EditorPage() {
               }}
             />
           </label>
-          <label className="inline-field">
-            <span>供託</span>
+          <label className="ctx-mini">
+            <span className="sr-only">供託</span>
             <input
+              aria-label="供託"
               type="number"
               min={0}
               max={99}
+              placeholder="供託"
               value={context.riichiSticks ?? ''}
               onChange={(e) => {
                 setContext({
@@ -430,34 +450,52 @@ export function EditorPage() {
             />
           </label>
         </div>
+        <div className="ctx-scores" aria-label="点数状況">
+          <span className="ctx-scores__label">点数</span>
+          {([
+            ['east', '東'],
+            ['south', '南'],
+            ['west', '西'],
+            ['north', '北'],
+          ] as const).map(([k, label]) => (
+            <label key={k} className="ctx-score">
+              <span>{label}</span>
+              <input
+                type="number"
+                inputMode="numeric"
+                placeholder="—"
+                value={context.scores[k] ?? ''}
+                onChange={(e) => {
+                  setContext({
+                    ...context,
+                    scores: {
+                      ...context.scores,
+                      [k]: e.target.value === '' ? null : Number(e.target.value),
+                    },
+                  });
+                  mark();
+                }}
+              />
+            </label>
+          ))}
+        </div>
       </section>
 
       <section className="panel tile-input">
-        <h2 className="section-title">牌入力</h2>
-        <p className="hint tile-input__hint">
-          下の牌をタップして追加。牌姿の牌をタップで削除。最大 {handMax} 枚。
-        </p>
-
         <div className="hand-stage" aria-label="牌姿プレビュー">
-          {doraIndicators.length > 0 && (
-            <div className="dora-row">
-              <span>ドラ</span>
-              <div className="tile-row tile-row--wrap">
-                {doraIndicators.map((c, i) => (
-                  <TileFace key={i} code={c} size={28} onClick={() => removeDoraAt(i)} />
-                ))}
-              </div>
-            </div>
-          )}
+          <div className="hand-stage__top">
+            <p className="hand-stage__meta">{contextSummary(context)}</p>
+            <WanpaiDora doras={doraIndicators} onRemove={removeDoraAt} />
+          </div>
           <HandView
             concealed={concealed}
             drawn={null}
             melds={melds}
-            size={34}
+            tight
             onSelectConcealed={removeConcealedAt}
           />
           {handCount === 0 && melds.length === 0 && (
-            <p className="hand-stage__empty">まだ牌がありません</p>
+            <p className="hand-stage__empty">下の牌をタップして入力（最大{handMax}枚）</p>
           )}
         </div>
 
@@ -471,6 +509,7 @@ export function EditorPage() {
           <button type="button" className="btn btn-danger" onClick={clearAll}>
             全消去
           </button>
+          <span className="count-inline">{countLabel}</span>
         </div>
 
         <div className="target-tabs target-tabs--scroll" role="tablist" aria-label="入力先">
@@ -699,7 +738,7 @@ export function EditorPage() {
       </section>
 
       <details className="details panel">
-        <summary>参考資料・点棒など</summary>
+        <summary>参考資料</summary>
         <label className="field">
           <span>出典URL</span>
           <input
@@ -735,45 +774,6 @@ export function EditorPage() {
                 削除
               </button>
             </div>
-          ))}
-        </div>
-        <div className="field-row" style={{ marginTop: 8 }}>
-          <label className="field">
-            <span>順位</span>
-            <input
-              type="number"
-              min={1}
-              max={4}
-              value={context.ownRank ?? ''}
-              onChange={(e) => {
-                setContext({
-                  ...context,
-                  ownRank: e.target.value === '' ? null : Number(e.target.value),
-                });
-                mark();
-              }}
-            />
-          </label>
-        </div>
-        <div className="field-row">
-          {(['east', 'south', 'west', 'north'] as const).map((k) => (
-            <label key={k} className="field">
-              <span>{k === 'east' ? '東' : k === 'south' ? '南' : k === 'west' ? '西' : '北'}家点</span>
-              <input
-                type="number"
-                value={context.scores[k] ?? ''}
-                onChange={(e) => {
-                  setContext({
-                    ...context,
-                    scores: {
-                      ...context.scores,
-                      [k]: e.target.value === '' ? null : Number(e.target.value),
-                    },
-                  });
-                  mark();
-                }}
-              />
-            </label>
           ))}
         </div>
       </details>
