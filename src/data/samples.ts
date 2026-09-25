@@ -7,8 +7,8 @@ export function createSampleProblems(): { problems: Problem[]; tagName: string }
   const p1: Problem = {
     id: createId('prob'),
     title: 'サンプル：リャンメンを残す',
-    concealed: ['2m', '3m', '4m', '5m', '6m', '7m', '2p', '3p', '4p', '5s', '6s', '7s', '1z'],
-    drawn: '8m',
+    concealed: ['2m', '3m', '4m', '5m', '6m', '7m', '8m', '2p', '3p', '4p', '5s', '6s', '7s', '1z'],
+    drawn: null,
     melds: [],
     doraIndicators: ['1p'],
     answerEnabled: true,
@@ -25,8 +25,8 @@ export function createSampleProblems(): { problems: Problem[]; tagName: string }
   const p2: Problem = {
     id: createId('prob'),
     title: 'サンプル：正解なしメモ',
-    concealed: ['1s', '2s', '3s', '4s', '5s', '0s', '6s', '3p', '3p', '3p', '9m', '9m'],
-    drawn: '9m',
+    concealed: ['1s', '2s', '3s', '4s', '5s', '0s', '6s', '3p', '3p', '3p', '9m', '9m', '9m'],
+    drawn: null,
     melds: [],
     doraIndicators: [],
     answerEnabled: false,

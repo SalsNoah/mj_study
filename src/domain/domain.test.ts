@@ -78,11 +78,11 @@ describe('validate A04 A05 A07 A08', () => {
   });
 
   it('no warn for standard 14', () => {
-    // 手牌13 + ツモ1 = 14
+    // 手牌14枚（ツモ枠なし）
     const issues = validateProblem({
       ...base,
-      concealed: t('123456789m1234p').slice(0, 13),
-      drawn: '5p',
+      concealed: t('123456789m12345p').slice(0, 14),
+      drawn: null,
     });
     expect(issues.some((i) => i.code === 'nonstandard_count')).toBe(false);
   });

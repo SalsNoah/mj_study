@@ -19,7 +19,7 @@ function allTilesOf(problem: Pick<
   return tiles;
 }
 
-/** 通常14枚形: 手牌+ツモ+副露組数×3 = 14（槓も3枚相当） */
+/** 通常14枚形: 手牌 + 副露組数×3 = 14（槓も3枚相当。ツモ枠は使わない） */
 export function standardTileCount(problem: Pick<Problem, 'concealed' | 'drawn' | 'melds'>): number {
   return problem.concealed.length + (problem.drawn ? 1 : 0) + problem.melds.length * 3;
 }

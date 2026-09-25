@@ -6,6 +6,8 @@ import { tileImageUrl } from './tileImages';
 type Props = {
   code: TileCode;
   size?: number;
+  /** 親要素の幅に合わせて伸縮（牌パレット用） */
+  fluid?: boolean;
   selected?: boolean;
   dimmed?: boolean;
   rotated?: boolean;
@@ -21,6 +23,7 @@ const RATIO = 90 / 66;
 export function TileFace({
   code,
   size = 44,
+  fluid = false,
   selected = false,
   dimmed = false,
   rotated = false,
@@ -35,14 +38,28 @@ export function TileFace({
   const h = rotated ? uprightW : uprightH;
   const label = tileLabel(code);
 
-  const style: CSSProperties = {
-    width: w,
-    height: h,
-    opacity: dimmed ? 0.45 : 1,
-  };
+  const style: CSSProperties = fluid
+    ? {
+        width: '100%',
+        height: 'auto',
+        aspectRatio: rotated ? `${RATIO}` : `${1 / RATIO}`,
+        opacity: dimmed ? 0.45 : 1,
+      }
+    : {
+        width: w,
+        height: h,
+        opacity: dimmed ? 0.45 : 1,
+      };
+
+  if (fluid && rotated) {
+    style.aspectRatio = `${RATIO}`;
+  } else if (fluid) {
+    style.aspectRatio = `66 / 90`;
+  }
 
   const cls = [
     onClick ? 'tile-btn' : 'tile-face',
+    fluid ? 'is-fluid' : '',
     selected ? 'is-selected' : '',
     back ? 'is-back' : '',
     className,

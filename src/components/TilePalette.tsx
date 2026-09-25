@@ -12,30 +12,26 @@ const ROWS: TileCode[][] = [
 type Props = {
   onPick: (code: TileCode) => void;
   disabled?: boolean;
-  disabledCodes?: ReadonlySet<TileCode>;
 };
 
-export function TilePalette({ onPick, disabled, disabledCodes }: Props) {
+export function TilePalette({ onPick, disabled }: Props) {
   return (
     <div className="tile-palette" aria-label="牌パレット">
-      <p className="tile-palette__hint">
-        下の牌をクリックして入力します。牌姿の牌をクリックすると削除できます。
-      </p>
       <div className="tile-palette__grid">
         {ROWS.map((row, ri) => (
-          <div key={ri} className="tile-palette__row">
-            {row.map((code) => {
-              const off = disabled || disabledCodes?.has(code);
-              return (
-                <TileFace
-                  key={code}
-                  code={code}
-                  size={40}
-                  dimmed={off}
-                  onClick={off ? undefined : () => onPick(code)}
-                />
-              );
-            })}
+          <div
+            key={ri}
+            className={`tile-palette__row${row.length === 7 ? ' tile-palette__row--honors' : ''}`}
+          >
+            {row.map((code) => (
+              <TileFace
+                key={code}
+                code={code}
+                fluid
+                dimmed={disabled}
+                onClick={disabled ? undefined : () => onPick(code)}
+              />
+            ))}
           </div>
         ))}
       </div>

@@ -76,7 +76,7 @@ export function HandView({
         ))}
       </div>
       <div className="hand-view__main">
-        <div className="tile-row tile-row--scroll">
+        <div className="tile-row tile-row--wrap">
           {concealed.map((code, i) => (
             <TileFace
               key={`c-${i}-${code}`}
