@@ -8,10 +8,52 @@ import { createId, nowIso } from '@/domain/ids';
 import { createMeld } from '@/domain/melds';
 import { maybeSortConcealed } from '@/domain/sort';
 import { emptyContext, LIMITS, type Meld, type MeldFrom, type MeldType, type Problem, type TileCode } from '@/domain/types';
-import { hasErrors, validateProblem } from '@/domain/validate';
+import { hasErrors, standardTileCount, validateProblem } from '@/domain/validate';
 import { compressImageFile } from '@/export/renderTiles';
 
-type Target = 'concealed' | 'drawn' | 'dora' | 'meld';
+type Target = 'concealed' | 'dora' | 'meld';
+
+type MeldDraft = {
+  type: MeldType;
+  tiles: TileCode[];
+  from: MeldFrom | null;
+  calledIndex: number | null;
+};
+
+const INPUT_TABS: Array<{ key: Target; label: string; meldType?: MeldType }> = [
+  { key: 'concealed', label: '手牌' },
+  { key: 'dora', label: 'ドラ表示牌' },
+  { key: 'meld', label: '明順子', meldType: 'chi' },
+  { key: 'meld', label: '明刻子', meldType: 'pon' },
+  { key: 'meld', label: '明槓子', meldType: 'openKan' },
+  { key: 'meld', label: '暗槓子', meldType: 'closedKan' },
+  { key: 'meld', label: '加槓子', meldType: 'addedKan' },
+];
+
+/** 手牌+ツモの上限（副露1組=3枚相当） */
+function liveTileMax(meldCount: number): number {
+  return Math.max(0, 14 - meldCount * 3);
+}
+
+/** 14枚相当になったら末尾をツモ、それ未満はすべて手牌 */
+function splitLiveTiles(
+  tiles: TileCode[],
+  meldCount: number,
+  autoSort: boolean,
+): { concealed: TileCode[]; drawn: TileCode | null } {
+  const max = liveTileMax(meldCount);
+  const clipped = tiles.slice(0, max);
+  if (clipped.length === max && max > 0) {
+    return {
+      concealed: maybeSortConcealed(clipped.slice(0, -1), autoSort),
+      drawn: clipped[clipped.length - 1]!,
+    };
+  }
+  return {
+    concealed: maybeSortConcealed(clipped, autoSort),
+    drawn: null,
+  };
+}
 
 export function EditorPage() {
   const { id } = useParams();
@@ -39,16 +81,13 @@ export function EditorPage() {
   const [dirty, setDirty] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [warns, setWarns] = useState<string[]>([]);
-  const [selectedConcealed, setSelectedConcealed] = useState<number | null>(null);
-  const [meldDraft, setMeldDraft] = useState<{
-    type: MeldType;
-    tiles: TileCode[];
-    from: MeldFrom | null;
-    calledIndex: number | null;
-  } | null>(null);
+  const [meldDraft, setMeldDraft] = useState<MeldDraft | null>(null);
+  const [activeMeldType, setActiveMeldType] = useState<MeldType>('chi');
   const [imageMsg, setImageMsg] = useState<string | null>(null);
 
   const autoSort = store.settings.autoSort;
+  const liveMax = liveTileMax(melds.length);
+  const liveCount = concealed.length + (drawn ? 1 : 0);
 
   useEffect(() => {
     const onBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -67,18 +106,23 @@ export function EditorPage() {
     setHistory((h) => [...h.slice(-49), undo]);
   };
 
+  const applyLive = (tiles: TileCode[], prevConcealed: TileCode[], prevDrawn: TileCode | null) => {
+    const next = splitLiveTiles(tiles, melds.length, autoSort);
+    setConcealed(next.concealed);
+    setDrawn(next.drawn);
+    pushHistory(() => {
+      setConcealed(prevConcealed);
+      setDrawn(prevDrawn);
+    });
+  };
+
   const addTile = (code: TileCode) => {
     mark();
     if (target === 'concealed') {
-      if (concealed.length >= LIMITS.concealedMax) return;
-      const prev = concealed;
-      const next = maybeSortConcealed([...concealed, code], autoSort);
-      setConcealed(next);
-      pushHistory(() => setConcealed(prev));
-    } else if (target === 'drawn') {
-      const prev = drawn;
-      setDrawn(code);
-      pushHistory(() => setDrawn(prev));
+      if (liveCount >= liveMax) return;
+      const live: TileCode[] = [...concealed];
+      if (drawn) live.push(drawn);
+      applyLive([...live, code], concealed, drawn);
     } else if (target === 'dora') {
       if (doraIndicators.length >= LIMITS.doraMax) return;
       const prev = doraIndicators;
@@ -89,6 +133,26 @@ export function EditorPage() {
       if (meldDraft.tiles.length >= need) return;
       setMeldDraft({ ...meldDraft, tiles: [...meldDraft.tiles, code] });
     }
+  };
+
+  const removeConcealedAt = (index: number) => {
+    mark();
+    const live: TileCode[] = concealed.filter((_, i) => i !== index);
+    if (drawn) live.push(drawn);
+    applyLive(live, concealed, drawn);
+  };
+
+  const removeDrawn = () => {
+    if (!drawn) return;
+    mark();
+    applyLive([...concealed], concealed, drawn);
+  };
+
+  const removeDoraAt = (index: number) => {
+    mark();
+    const prev = doraIndicators;
+    setDora(doraIndicators.filter((_, i) => i !== index));
+    pushHistory(() => setDora(prev));
   };
 
   const undo = () => {
@@ -114,6 +178,17 @@ export function EditorPage() {
     setConcealed(maybeSortConcealed(concealed, true));
     pushHistory(() => setConcealed(prev));
     mark();
+  };
+
+  const startMeldTab = (type: MeldType) => {
+    setTarget('meld');
+    setActiveMeldType(type);
+    setMeldDraft({
+      type,
+      tiles: [],
+      from: type === 'closedKan' ? null : 'left',
+      calledIndex: type === 'closedKan' ? null : 0,
+    });
   };
 
   const draftProblem = useMemo((): Problem => {
@@ -187,9 +262,19 @@ export function EditorPage() {
       setError('副露は最大4組です');
       return;
     }
-    setMelds([...melds, created.meld]);
-    setMeldDraft(null);
-    setTarget('concealed');
+    const nextMelds = [...melds, created.meld];
+    setMelds(nextMelds);
+    const live: TileCode[] = [...concealed];
+    if (drawn) live.push(drawn);
+    const split = splitLiveTiles(live, nextMelds.length, autoSort);
+    setConcealed(split.concealed);
+    setDrawn(split.drawn);
+    setMeldDraft({
+      type: activeMeldType,
+      tiles: [],
+      from: activeMeldType === 'closedKan' ? null : 'left',
+      calledIndex: activeMeldType === 'closedKan' ? null : 0,
+    });
     mark();
     setError(null);
   };
@@ -243,166 +328,160 @@ export function EditorPage() {
         <input value={title} onChange={(e) => { setTitle(e.target.value); mark(); }} maxLength={LIMITS.title} />
       </label>
 
-      <div className="target-tabs" role="tablist" aria-label="入力先">
-        {(
-          [
-            ['concealed', '手牌'],
-            ['drawn', 'ツモ'],
-            ['meld', '副露'],
-            ['dora', 'ドラ表示牌'],
-          ] as const
-        ).map(([key, label]) => (
-          <button
-            key={key}
-            type="button"
-            role="tab"
-            aria-selected={target === key}
-            className={target === key ? 'is-active' : ''}
-            onClick={() => {
-              setTarget(key);
-              if (key === 'meld' && !meldDraft) {
-                setMeldDraft({ type: 'chi', tiles: [], from: 'left', calledIndex: 0 });
-              }
-            }}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
+      <section className="panel tile-input">
+        <h2 className="section-title">牌入力</h2>
+        <p className="hint">
+          牌ボタンで追加します。手牌が {liveMax} 枚（14枚形）になると末尾がツモになります。
+          現在 {liveCount}/{liveMax} 枚
+          {standardTileCount({ concealed, drawn, melds }) === 14 ? '（14枚形）' : ''}。
+        </p>
 
-      <section className="panel">
-        <h2 className="section-title">牌姿</h2>
-        <HandView concealed={concealed} drawn={drawn} melds={melds} size={40} />
-        {doraIndicators.length > 0 && (
-          <div className="dora-row">
-            <span>ドラ表示牌</span>
-            <div className="tile-row">
-              {doraIndicators.map((c, i) => (
-                <TileFace key={i} code={c} size={32} />
-              ))}
+        <div className="hand-stage" aria-label="牌姿プレビュー">
+          {doraIndicators.length > 0 && (
+            <div className="dora-row">
+              <span>ドラ表示牌</span>
+              <div className="tile-row">
+                {doraIndicators.map((c, i) => (
+                  <TileFace key={i} code={c} size={32} onClick={() => removeDoraAt(i)} />
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+          <HandView
+            concealed={concealed}
+            drawn={drawn}
+            melds={melds}
+            size={42}
+            onSelectConcealed={removeConcealedAt}
+            onSelectDrawn={removeDrawn}
+          />
+          {liveCount === 0 && melds.length === 0 && (
+            <p className="hand-stage__empty">下の牌をクリックして手牌を入力</p>
+          )}
+        </div>
+
         <div className="btn-row">
           <button type="button" className="btn" onClick={doSort}>理牌</button>
           <button type="button" className="btn" onClick={undo} disabled={!history.length}>戻す</button>
           <button type="button" className="btn btn-danger" onClick={clearAll}>全消去</button>
         </div>
-        {selectedConcealed !== null && (
-          <button
-            type="button"
-            className="btn"
-            onClick={() => {
-              const prev = concealed;
-              setConcealed(concealed.filter((_, i) => i !== selectedConcealed));
-              pushHistory(() => setConcealed(prev));
-              setSelectedConcealed(null);
-              mark();
-            }}
-          >
-            選択した手牌を削除
-          </button>
-        )}
-        <div className="tile-row tile-row--scroll" style={{ marginTop: 8 }}>
-          {concealed.map((c, i) => (
-            <TileFace
-              key={`${c}-${i}`}
-              code={c}
-              size={36}
-              selected={selectedConcealed === i}
-              onClick={() => setSelectedConcealed(i)}
-            />
-          ))}
-        </div>
-      </section>
 
-      {target === 'meld' && meldDraft && (
-        <section className="panel">
-          <h2 className="section-title">副露入力</h2>
-          <label className="field">
-            <span>種類</span>
-            <select
-              value={meldDraft.type}
-              onChange={(e) =>
-                setMeldDraft({
-                  ...meldDraft,
-                  type: e.target.value as MeldType,
-                  tiles: [],
-                  from: e.target.value === 'closedKan' ? null : meldDraft.from ?? 'left',
-                  calledIndex: e.target.value === 'closedKan' ? null : 0,
-                })
-              }
-            >
-              <option value="chi">チー</option>
-              <option value="pon">ポン</option>
-              <option value="openKan">明槓</option>
-              <option value="closedKan">暗槓</option>
-              <option value="addedKan">加槓</option>
-            </select>
-          </label>
-          {meldDraft.type !== 'closedKan' && (
-            <label className="field">
-              <span>取得元</span>
-              <select
-                value={meldDraft.from ?? 'left'}
-                onChange={(e) =>
-                  setMeldDraft({ ...meldDraft, from: e.target.value as MeldFrom })
-                }
-                disabled={meldDraft.type === 'chi'}
-              >
-                <option value="left">左家</option>
-                <option value="opposite">対面</option>
-                <option value="right">右家</option>
-              </select>
-            </label>
-          )}
-          <label className="field">
-            <span>鳴いた牌の位置（0始まり）</span>
-            <input
-              type="number"
-              min={0}
-              max={3}
-              value={meldDraft.calledIndex ?? 0}
-              disabled={meldDraft.type === 'closedKan'}
-              onChange={(e) =>
-                setMeldDraft({ ...meldDraft, calledIndex: Number(e.target.value) })
-              }
-            />
-          </label>
-          <div className="tile-row">
-            {meldDraft.tiles.map((c, i) => (
-              <TileFace key={i} code={c} size={36} />
-            ))}
-          </div>
-          <div className="btn-row">
-            <button type="button" className="btn btn-primary" onClick={confirmMeld}>
-              副露を確定
-            </button>
-            <button type="button" className="btn" onClick={() => setMeldDraft({ ...meldDraft, tiles: [] })}>
-              牌をクリア
-            </button>
-          </div>
-          {melds.map((m) => (
-            <div key={m.id} className="btn-row">
-              <span>{m.type}</span>
+        <div className="target-tabs target-tabs--scroll" role="tablist" aria-label="入力先">
+          {INPUT_TABS.map((tab) => {
+            const selected =
+              tab.key === 'meld'
+                ? target === 'meld' && activeMeldType === tab.meldType
+                : target === tab.key;
+            return (
               <button
+                key={`${tab.label}-${tab.meldType ?? tab.key}`}
                 type="button"
-                className="btn btn-danger"
+                role="tab"
+                aria-selected={selected}
+                className={selected ? 'is-active' : ''}
                 onClick={() => {
-                  setMelds(melds.filter((x) => x.id !== m.id));
-                  mark();
+                  if (tab.key === 'meld' && tab.meldType) startMeldTab(tab.meldType);
+                  else {
+                    setTarget(tab.key);
+                    setMeldDraft(null);
+                  }
                 }}
               >
-                削除
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {target === 'meld' && meldDraft && (
+          <div className="meld-draft">
+            <p className="hint">
+              {meldDraft.type === 'chi' && 'チーは3枚。左家からのみ。鳴き位置を指定して確定。'}
+              {meldDraft.type === 'pon' && 'ポンは同牌3枚。取得元と鳴き位置を指定。'}
+              {(meldDraft.type === 'openKan' || meldDraft.type === 'closedKan' || meldDraft.type === 'addedKan') &&
+                '槓は同牌4枚。'}
+            </p>
+            {meldDraft.type !== 'closedKan' && (
+              <div className="field-row">
+                <label className="field">
+                  <span>取得元</span>
+                  <select
+                    value={meldDraft.from ?? 'left'}
+                    onChange={(e) =>
+                      setMeldDraft({ ...meldDraft, from: e.target.value as MeldFrom })
+                    }
+                    disabled={meldDraft.type === 'chi'}
+                  >
+                    <option value="left">左家</option>
+                    <option value="opposite">対面</option>
+                    <option value="right">右家</option>
+                  </select>
+                </label>
+                <label className="field">
+                  <span>鳴き位置</span>
+                  <input
+                    type="number"
+                    min={0}
+                    max={3}
+                    value={meldDraft.calledIndex ?? 0}
+                    onChange={(e) =>
+                      setMeldDraft({ ...meldDraft, calledIndex: Number(e.target.value) })
+                    }
+                  />
+                </label>
+              </div>
+            )}
+            <div className="tile-row">
+              {meldDraft.tiles.map((c, i) => (
+                <TileFace key={i} code={c} size={36} />
+              ))}
+            </div>
+            <div className="btn-row">
+              <button type="button" className="btn btn-primary" onClick={confirmMeld}>
+                副露を確定
+              </button>
+              <button
+                type="button"
+                className="btn"
+                onClick={() => setMeldDraft({ ...meldDraft, tiles: [] })}
+              >
+                牌をクリア
               </button>
             </div>
-          ))}
-        </section>
-      )}
+            {melds.map((m) => (
+              <div key={m.id} className="btn-row">
+                <span>{m.type}</span>
+                <button
+                  type="button"
+                  className="btn btn-danger"
+                  onClick={() => {
+                    const nextMelds = melds.filter((x) => x.id !== m.id);
+                    setMelds(nextMelds);
+                    const live: TileCode[] = [...concealed];
+                    if (drawn) live.push(drawn);
+                    const split = splitLiveTiles(live, nextMelds.length, autoSort);
+                    setConcealed(split.concealed);
+                    setDrawn(split.drawn);
+                    mark();
+                  }}
+                >
+                  削除
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
 
-      <section className="panel">
-        <h2 className="section-title">牌パレット</h2>
-        <TilePalette onPick={addTile} />
+        <TilePalette
+          onPick={addTile}
+          disabled={
+            (target === 'concealed' && liveCount >= liveMax) ||
+            (target === 'dora' && doraIndicators.length >= LIMITS.doraMax) ||
+            (target === 'meld' &&
+              !!meldDraft &&
+              meldDraft.tiles.length >= (meldDraft.type === 'chi' || meldDraft.type === 'pon' ? 3 : 4))
+          }
+        />
       </section>
 
       <section className="panel">

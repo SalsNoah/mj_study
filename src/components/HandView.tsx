@@ -95,7 +95,7 @@ export function HandView({
           ))}
         </div>
         {drawn && (
-          <div className="hand-view__drawn">
+          <div className="hand-view__drawn" aria-label="ツモ">
             <TileFace
               code={drawn}
               size={size}

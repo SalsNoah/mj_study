@@ -197,8 +197,7 @@ textarea { min-height: 96px; resize: vertical; }
 }
 
 .hand-view { display: flex; flex-direction: column; gap: 8px; }
-.hand-view__main { display: flex; align-items: flex-end; gap: 14px; }
-.hand-view__drawn { padding-left: 4px; border-left: 2px solid transparent; }
+.hand-view__main { display: flex; align-items: flex-end; gap: 4px; }
 .hand-view__melds { display: flex; flex-wrap: wrap; gap: 10px; }
 .meld-view { display: flex; align-items: flex-end; gap: 2px; }
 .meld-view__stack { position: relative; display: inline-flex; }
@@ -206,13 +205,6 @@ textarea { min-height: 96px; resize: vertical; }
   position: absolute;
   left: 4px;
   top: -18px;
-}
-
-.tile-palette__suit { margin-bottom: 10px; }
-.tile-palette__label {
-  font-size: 0.8rem;
-  color: var(--muted);
-  margin-bottom: 4px;
 }
 
 .problem-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
@@ -275,6 +267,19 @@ textarea { min-height: 96px; resize: vertical; }
   gap: 6px;
   margin-bottom: 10px;
 }
+.target-tabs--scroll {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  -webkit-overflow-scrolling: touch;
+}
+.target-tabs--scroll button {
+  flex: 0 0 auto;
+  padding: 0 12px;
+  white-space: nowrap;
+}
 .target-tabs button {
   min-height: 44px;
   border-radius: 10px;
@@ -285,6 +290,46 @@ textarea { min-height: 96px; resize: vertical; }
   background: var(--accent);
   color: #fff;
   border-color: var(--accent);
+}
+
+.hand-stage {
+  background: #e8efe9;
+  border-radius: 12px;
+  padding: 14px 12px;
+  min-height: 88px;
+  margin-bottom: 10px;
+}
+.hand-stage__empty {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+  text-align: center;
+}
+.hand-view__drawn {
+  padding-left: 12px;
+  margin-left: 4px;
+  border-left: 2px solid transparent;
+}
+.meld-draft {
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+}
+
+.tile-palette__hint {
+  margin: 0 0 10px;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+.tile-palette__grid {
+  display: grid;
+  gap: 6px;
+}
+.tile-palette__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  align-items: flex-end;
 }
 
 .check-grid { display: grid; gap: 6px; }
