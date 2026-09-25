@@ -2,12 +2,11 @@
 
 スマホ優先の麻雀学習帳です。牌姿・解説・メモをブラウザの localStorage に保存し、牌の形で検索・クイズ復習・URL共有できます。**ログイン・サーバー保存はありません。**
 
-> このディレクトリ（`mahjong-study/`）は **DECKSHOT とは完全に独立**したアプリです。ルートの `package.json` / `src/` は使いません。作業・起動は必ずこのフォルダ内で行ってください。
+> **DECKSHOT とは無関係の独立リポジトリです。**
 
 ## 最初のコマンド
 
 ```bash
-cd mahjong-study
 npm install
 npm run dev
 ```
@@ -44,7 +43,6 @@ npm run dev
 問題データはサーバーに送りません。**アプリ本体だけ**を静的配信します。
 
 ```bash
-cd mahjong-study
 npm run build
 # dist/ を GitHub Pages / Netlify / Cloudflare Pages 等へ
 ```
@@ -64,7 +62,6 @@ GitHub Pages でサブパス配信する場合は `vite.config.ts` の `base` �
 ## 検証
 
 ```bash
-cd mahjong-study
 npm test
 npm run typecheck
 npm run build
