@@ -1,6 +1,6 @@
 import type { TileCode } from '@/domain/types';
 import type { Meld } from '@/domain/types';
-import { tileLabel, isRed, tileRank, tileSuit } from '@/domain/tiles';
+import { tileImageUrl } from '@/components/tileImages';
 
 export type RenderHandInput = {
   concealed: TileCode[];
@@ -9,6 +9,22 @@ export type RenderHandInput = {
   doraIndicators: TileCode[];
 };
 
+const imageCache = new Map<string, HTMLImageElement>();
+
+function loadImage(url: string): Promise<HTMLImageElement> {
+  const hit = imageCache.get(url);
+  if (hit) return Promise.resolve(hit);
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      imageCache.set(url, img);
+      resolve(img);
+    };
+    img.onerror = () => reject(new Error(`牌画像を読み込めません: ${url}`));
+    img.src = url;
+  });
+}
+
 function drawTile(
   ctx: CanvasRenderingContext2D,
   code: TileCode,
@@ -16,65 +32,22 @@ function drawTile(
   y: number,
   w: number,
   h: number,
+  images: Map<string, HTMLImageElement>,
   opts?: { back?: boolean; rotated?: boolean },
 ) {
-  ctx.save();
-  if (opts?.rotated) {
-    ctx.translate(x + h / 2, y + w / 2);
-    ctx.rotate(-Math.PI / 2);
-    ctx.translate(-w / 2, -h / 2);
-  } else {
-    ctx.translate(x, y);
-  }
-
   if (opts?.back) {
     ctx.fillStyle = '#1B4D3E';
-    roundRect(ctx, 0, 0, w, h, 6);
+    roundRect(ctx, x, y, w, h, 6);
     ctx.fill();
-    ctx.restore();
     return;
   }
-
-  const red = isRed(code);
-  ctx.fillStyle = red ? '#FFF5F5' : '#FFFEFA';
-  ctx.strokeStyle = '#C9C2B2';
-  ctx.lineWidth = 2;
-  roundRect(ctx, 0, 0, w, h, 6);
-  ctx.fill();
-  ctx.stroke();
-
-  const suit = tileSuit(code);
-  const rank = tileRank(code);
-  const color =
-    suit === 'm' || (suit === 'z' && rank === 7) || red ? '#C62828' :
-    suit === 'p' ? '#1565C0' :
-    suit === 's' || (suit === 'z' && rank === 6) ? '#2E7D32' : '#222';
-
-  ctx.fillStyle = color;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.font = `700 ${Math.floor(w * 0.38)}px serif`;
-
-  if (suit === 'z') {
-    const marks = ['東', '南', '西', '北', '白', '發', '中'];
-    if (rank === 5) {
-      ctx.strokeStyle = '#999';
-      ctx.strokeRect(w * 0.22, h * 0.22, w * 0.56, h * 0.56);
-    } else {
-      ctx.fillText(marks[rank - 1]!, w / 2, h / 2);
-    }
-  } else {
-    ctx.fillText(String(rank), w / 2, h * 0.36);
-    ctx.font = `700 ${Math.floor(w * 0.28)}px serif`;
-    ctx.fillText(suit === 'm' ? '萬' : suit === 'p' ? '筒' : '索', w / 2, h * 0.7);
-    if (red) {
-      ctx.beginPath();
-      ctx.fillStyle = '#C62828';
-      ctx.arc(w * 0.78, h * 0.18, w * 0.08, 0, Math.PI * 2);
-      ctx.fill();
-    }
+  if (opts?.rotated) {
+    const img = images.get(tileImageUrl(code, true));
+    if (img) ctx.drawImage(img, x, y, h, w);
+    return;
   }
-  ctx.restore();
+  const img = images.get(tileImageUrl(code, false));
+  if (img) ctx.drawImage(img, x, y, w, h);
 }
 
 function roundRect(
@@ -95,7 +68,7 @@ function roundRect(
 }
 
 /** 牌姿PNG。解説・メモ・参考画像・学習履歴は含めない。 */
-export function renderHandPng(input: RenderHandInput): { blob: Blob; dataUrl: string; filename: string } {
+export async function renderHandPng(input: RenderHandInput): Promise<{ blob: Blob; dataUrl: string; filename: string }> {
   const tileW = 72;
   const tileH = 96;
   const pad = 40;
@@ -116,6 +89,22 @@ export function renderHandPng(input: RenderHandInput): { blob: Blob; dataUrl: st
       40,
   );
 
+  const urls = new Set<string>();
+  const collect = (code: TileCode, sideways = false) => urls.add(tileImageUrl(code, sideways));
+  for (const code of input.doraIndicators) collect(code);
+  for (const code of input.concealed) collect(code);
+  if (input.drawn) collect(input.drawn);
+  for (const meld of input.melds) {
+    meld.tiles.forEach((code, i) => {
+      if (meld.type === 'closedKan' && (i === 0 || i === 3)) return;
+      collect(code, meld.type !== 'closedKan' && meld.calledIndex === i);
+    });
+  }
+  const images = new Map<string, HTMLImageElement>();
+  await Promise.all([...urls].map(async (url) => {
+    images.set(url, await loadImage(url));
+  }));
+
   const canvas = document.createElement('canvas');
   canvas.width = width;
   canvas.height = height;
@@ -134,7 +123,7 @@ export function renderHandPng(input: RenderHandInput): { blob: Blob; dataUrl: st
     y += 12;
     let x = pad;
     for (const code of input.doraIndicators) {
-      drawTile(ctx, code, x, y, tileW, tileH);
+      drawTile(ctx, code, x, y, tileW, tileH, images);
       x += tileW + gap;
     }
     y += tileH + 28;
@@ -146,18 +135,18 @@ export function renderHandPng(input: RenderHandInput): { blob: Blob; dataUrl: st
       const tw = tileW * 0.85;
       const th = tileH * 0.85;
       if (meld.type === 'closedKan') {
-        drawTile(ctx, meld.tiles[0]!, x, y, tw, th, { back: true });
+        drawTile(ctx, meld.tiles[0]!, x, y, tw, th, images, { back: true });
         x += tw + 2;
-        drawTile(ctx, meld.tiles[1]!, x, y, tw, th);
+        drawTile(ctx, meld.tiles[1]!, x, y, tw, th, images);
         x += tw + 2;
-        drawTile(ctx, meld.tiles[2]!, x, y, tw, th);
+        drawTile(ctx, meld.tiles[2]!, x, y, tw, th, images);
         x += tw + 2;
-        drawTile(ctx, meld.tiles[3]!, x, y, tw, th, { back: true });
+        drawTile(ctx, meld.tiles[3]!, x, y, tw, th, images, { back: true });
         x += tw + 14;
       } else {
         meld.tiles.forEach((code, i) => {
           const rotated = meld.calledIndex === i;
-          drawTile(ctx, code, x, y, tw, th, { rotated });
+          drawTile(ctx, code, x, y, tw, th, images, { rotated });
           x += (rotated ? th : tw) + 2;
         });
         x += 12;
@@ -168,17 +157,15 @@ export function renderHandPng(input: RenderHandInput): { blob: Blob; dataUrl: st
 
   let x = pad;
   for (const code of input.concealed) {
-    drawTile(ctx, code, x, y, tileW, tileH);
+    drawTile(ctx, code, x, y, tileW, tileH, images);
     x += tileW + gap;
   }
   if (input.drawn) {
     x += 18;
-    drawTile(ctx, input.drawn, x, y, tileW, tileH);
+    drawTile(ctx, input.drawn, x, y, tileW, tileH, images);
   }
 
   // accessibility note in pixel data only via aria on UI; no private text here
-  void tileLabel;
-
   const dataUrl = canvas.toDataURL('image/png');
   const bin = atob(dataUrl.split(',')[1]!);
   const bytes = new Uint8Array(bin.length);

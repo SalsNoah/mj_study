@@ -78,7 +78,7 @@ function AppRoutes() {
             type="button"
             className="btn"
             onClick={() => {
-              window.location.hash = '#/';
+              window.location.hash = '#/library';
               setShare(null);
             }}
           >
@@ -93,8 +93,9 @@ function AppRoutes() {
     <HashRouter>
       <CorruptGate>
         <Routes>
-          <Route path="/" element={<LibraryPage />} />
-          <Route path="/new" element={<EditorPage />} />
+          <Route path="/" element={<EditorPage />} />
+          <Route path="/new" element={<Navigate to="/" replace />} />
+          <Route path="/library" element={<LibraryPage />} />
           <Route path="/edit/:id" element={<EditorPage />} />
           <Route path="/problems/:id" element={<DetailPage />} />
           <Route path="/review" element={<ReviewPage />} />

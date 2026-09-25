@@ -210,7 +210,7 @@ export function LibraryPage() {
       {filtered.length === 0 ? (
         <div className="empty">
           <p>問題がありません。</p>
-          <Link className="btn btn-primary" to="/new">
+          <Link className="btn btn-primary" to="/">
             新規作成
           </Link>
         </div>

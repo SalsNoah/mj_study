@@ -41,7 +41,7 @@ export function DetailPage() {
     return (
       <div className="page">
         <p>問題が見つかりません。</p>
-        <Link to="/">一覧へ</Link>
+        <Link to="/library">一覧へ</Link>
       </div>
     );
   }
@@ -94,8 +94,8 @@ export function DetailPage() {
       : null);
   };
 
-  const onPng = () => {
-    const { dataUrl, blob, filename } = renderHandPng(problem);
+  const onPng = async () => {
+    const { dataUrl, blob, filename } = await renderHandPng(problem);
     setPngPreview(dataUrl);
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
@@ -228,7 +228,7 @@ export function DetailPage() {
           onClick={() => {
             if (!window.confirm('この問題を削除しますか？')) return;
             const r = deleteProblem(problem.id);
-            if (r.ok) navigate('/');
+            if (r.ok) navigate('/library');
             else setMsg(r.reason);
           }}
         >

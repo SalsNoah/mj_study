@@ -1,8 +1,8 @@
 import { NavLink } from 'react-router-dom';
 
 const items: Array<{ to: string; label: string; end?: boolean }> = [
-  { to: '/', label: '学習帳', end: true },
-  { to: '/new', label: '作成' },
+  { to: '/', label: '作成', end: true },
+  { to: '/library', label: '学習帳' },
   { to: '/review', label: '復習' },
   { to: '/settings', label: '設定' },
 ];
