@@ -60,6 +60,7 @@ export function TileFace({
   const cls = [
     onClick ? 'tile-btn' : 'tile-face',
     fluid ? 'is-fluid' : '',
+    rotated ? 'is-rotated' : '',
     selected ? 'is-selected' : '',
     back ? 'is-back' : '',
     className,

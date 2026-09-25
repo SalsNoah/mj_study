@@ -3,7 +3,8 @@ import { NavLink } from 'react-router-dom';
 const items: Array<{ to: string; label: string; end?: boolean }> = [
   { to: '/', label: '作成', end: true },
   { to: '/library', label: '学習帳' },
-  { to: '/review', label: '復習' },
+  { to: '/test', label: 'テスト' },
+  { to: '/records', label: '記録帳' },
   { to: '/settings', label: '設定' },
 ];
 

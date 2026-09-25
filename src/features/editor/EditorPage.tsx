@@ -5,6 +5,7 @@ import { HandView } from '@/components/HandView';
 import { TilePalette } from '@/components/TilePalette';
 import { TileFace } from '@/components/TileFace';
 import { WanpaiDora } from '@/components/WanpaiDora';
+import { contextSummary } from '@/domain/context';
 import { createId, nowIso } from '@/domain/ids';
 import { createMeld } from '@/domain/melds';
 import { maybeSortConcealed } from '@/domain/sort';
@@ -55,28 +56,6 @@ const SEAT_OPTS: Array<{ value: Wind; label: string }> = [
 /** 手牌の上限（副露1組=3枚相当）。ツモ枠は使わない。 */
 function handTileMax(meldCount: number): number {
   return Math.max(0, 14 - meldCount * 3);
-}
-
-function windLabel(w: Wind | null): string {
-  if (w === '1z') return '東';
-  if (w === '2z') return '南';
-  if (w === '3z') return '西';
-  if (w === '4z') return '北';
-  return '';
-}
-
-function contextSummary(ctx: Problem['context']): string {
-  const parts: string[] = [];
-  const rw = windLabel(ctx.roundWind);
-  if (rw && ctx.handNumber) parts.push(`${rw}${ctx.handNumber}局`);
-  else if (rw) parts.push(`${rw}場`);
-  else if (ctx.handNumber) parts.push(`${ctx.handNumber}局`);
-  if (ctx.honba !== null) parts.push(`${ctx.honba}本場`);
-  const sw = windLabel(ctx.seatWind);
-  if (sw) parts.push(`${sw}家`);
-  if (ctx.turn !== null) parts.push(`${ctx.turn}巡目`);
-  if (ctx.riichiSticks !== null) parts.push(`供託${ctx.riichiSticks}`);
-  return parts.join(' ') || '条件未設定';
 }
 
 function initialHand(existing?: Problem): TileCode[] {

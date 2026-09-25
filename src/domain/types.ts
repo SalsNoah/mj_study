@@ -79,6 +79,18 @@ export type StudyState = {
   lastConfirmedAt: string | null;
   understanding: Understanding;
   lastReviewedAt: string | null;
+  /** テストで最後に回答した日時（正誤問わず） */
+  lastSolvedAt?: string | null;
+  /** テストで最後に正解した日時 */
+  lastCorrectAt?: string | null;
+  /** false のときテストに出題しない（未設定は出題する） */
+  inTest?: boolean;
+};
+
+/** 日別の学習量。キーはローカル日付 YYYY-MM-DD */
+export type DailyLog = {
+  tested: number;
+  confirmed: number;
 };
 
 export type AttemptResult = 'correct' | 'incorrect' | 'selfReview';
@@ -106,6 +118,7 @@ export type Store = {
   study: StudyState[];
   attempts: Attempt[];
   settings: Settings;
+  daily?: Record<string, DailyLog>;
 };
 
 export const SCHEMA_VERSION = 1 as const;
@@ -157,5 +170,6 @@ export function emptyStore(): Store {
     study: [],
     attempts: [],
     settings: { autoSort: true },
+    daily: {},
   };
 }

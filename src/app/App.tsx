@@ -5,7 +5,8 @@ import { BottomNav } from '@/components/BottomNav';
 import { LibraryPage } from '@/features/library/LibraryPage';
 import { EditorPage } from '@/features/editor/EditorPage';
 import { DetailPage } from '@/features/detail/DetailPage';
-import { ReviewPage } from '@/features/review/ReviewPage';
+import { TestPage } from '@/features/test/TestPage';
+import { RecordsPage } from '@/features/records/RecordsPage';
 import { SettingsPage } from '@/features/settings/SettingsPage';
 import { ShareReceivePage } from '@/features/share/ShareReceivePage';
 import './styles.css';
@@ -98,7 +99,9 @@ function AppRoutes() {
           <Route path="/library" element={<LibraryPage />} />
           <Route path="/edit/:id" element={<EditorPage />} />
           <Route path="/problems/:id" element={<DetailPage />} />
-          <Route path="/review" element={<ReviewPage />} />
+          <Route path="/test" element={<TestPage />} />
+          <Route path="/review" element={<Navigate to="/test" replace />} />
+          <Route path="/records" element={<RecordsPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

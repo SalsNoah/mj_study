@@ -15,6 +15,7 @@ import { isContentRevisionChange, validateProblem, hasErrors } from '../domain/v
 import { normalizeTagKey, validateTagName, canAddTag } from '../domain/tags';
 import type { SharePayload } from '../domain/share';
 import { createMeld } from '../domain/melds';
+import { applyAttemptToStudy, bumpDaily, dayKey, dayKeyFromIso, normalizeStore } from '../domain/records';
 
 export type SaveResult =
   | { ok: true; store: Store }
@@ -136,7 +137,7 @@ export class LocalStorageRepository {
       };
     }
     this.memoryRevision = parsed.revision;
-    return { ok: true, store: parsed };
+    return { ok: true, store: normalizeStore(parsed) };
   }
 
   private persist(store: Store): SaveResult {
@@ -275,12 +276,14 @@ export class LocalStorageRepository {
         lastConfirmedAt: now,
       };
     });
-    return this.persist({ ...store, study });
+    const daily = bumpDaily(store.daily, dayKeyFromIso(now), 'confirmed', 1);
+    return this.persist({ ...store, study, daily });
   }
 
   undoConfirm(store: Store, problemId: string, previous: StudyState): SaveResult {
     const study = store.study.map((s) => (s.problemId === problemId ? { ...previous } : s));
-    return this.persist({ ...store, study });
+    const daily = bumpDaily(store.daily, dayKey(), 'confirmed', -1);
+    return this.persist({ ...store, study, daily });
   }
 
   recordAttempt(store: Store, attempt: Attempt, understanding?: StudyState['understanding']): SaveResult {
@@ -288,12 +291,17 @@ export class LocalStorageRepository {
     const study = store.study.map((s) => {
       if (s.problemId !== attempt.problemId) return s;
       return {
-        ...s,
+        ...applyAttemptToStudy(s, attempt),
         understanding: understanding ?? s.understanding,
-        lastReviewedAt: attempt.at,
       };
     });
-    return this.persist({ ...store, attempts, study });
+    const daily = bumpDaily(store.daily, dayKeyFromIso(attempt.at), 'tested', 1);
+    return this.persist({ ...store, attempts, study, daily });
+  }
+
+  setInTest(store: Store, problemId: string, inTest: boolean): SaveResult {
+    const study = store.study.map((s) => (s.problemId === problemId ? { ...s, inTest } : s));
+    return this.persist({ ...store, study });
   }
 
   updateUnderstanding(
@@ -375,7 +383,7 @@ export class LocalStorageRepository {
     }
 
     if (mode === 'replace') {
-      return this.persist({ ...parsed, revision: current.revision });
+      return this.persist(normalizeStore({ ...parsed, revision: current.revision }));
     }
 
     // merge: re-id problems/attempts, merge tags by name

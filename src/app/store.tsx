@@ -36,6 +36,7 @@ type AppState = {
   undoConfirm: (id: string, previous: StudyState) => SaveResult;
   recordAttempt: (attempt: Attempt, understanding?: StudyState['understanding']) => SaveResult;
   updateUnderstanding: (id: string, u: StudyState['understanding']) => SaveResult;
+  setInTest: (id: string, inTest: boolean) => SaveResult;
   updateSettings: (settings: Settings) => SaveResult;
   upsertTag: (name: string) => SaveResult | { ok: true; store: Store; tag: Tag };
   renameTag: (id: string, name: string) => SaveResult;
@@ -116,6 +117,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     undoConfirm: (id, prev) => applySave(repo.undoConfirm(store, id, prev)),
     recordAttempt: (a, u) => applySave(repo.recordAttempt(store, a, u)),
     updateUnderstanding: (id, u) => applySave(repo.updateUnderstanding(store, id, u)),
+    setInTest: (id, inTest) => applySave(repo.setInTest(store, id, inTest)),
     updateSettings: (s) => applySave(repo.updateSettings(store, s)),
     upsertTag: (name) => {
       const r = repo.upsertTag(store, name);

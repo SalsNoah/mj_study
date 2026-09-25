@@ -1,9 +1,10 @@
 import { useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useApp } from '@/app/store';
-import { HandView } from '@/components/HandView';
+import { HandBoard } from '@/components/HandBoard';
 import { TileFace } from '@/components/TileFace';
-import { accuracyForProblem } from '@/domain/quiz';
+import { accuracyForProblem, isInTest } from '@/domain/quiz';
+import { formatShortDate } from '@/domain/records';
 import {
   DEFAULT_SHARE_OPTIONS,
   buildShareUrl,
@@ -26,6 +27,7 @@ export function DetailPage() {
     undoConfirm,
     deleteProblem,
     duplicateProblem,
+    setInTest,
   } = useApp();
   const problem = store.problems.find((p) => p.id === id);
   const study = store.study.find((s) => s.problemId === id);
@@ -113,41 +115,62 @@ export function DetailPage() {
       </header>
 
       <section className="panel">
-        <HandView concealed={problem.concealed} drawn={problem.drawn} melds={problem.melds} size={42} />
-        {problem.doraIndicators.length > 0 && (
-          <div className="dora-row">
-            <span>ドラ表示牌</span>
-            <div className="tile-row">
-              {problem.doraIndicators.map((c, i) => (
-                <TileFace key={i} code={c} size={32} />
-              ))}
-            </div>
-          </div>
-        )}
+        <HandBoard
+          concealed={problem.concealed}
+          drawn={problem.drawn}
+          melds={problem.melds}
+          doraIndicators={problem.doraIndicators}
+          context={problem.context}
+        />
       </section>
 
       <section className="panel">
-        <div className="meta-grid">
-          <div>確認回数: {study?.confirmationCount ?? 0}</div>
+        <dl className="stat-list">
           <div>
-            理解:{' '}
-            {study?.understanding === 'understood'
-              ? '理解できた'
-              : study?.understanding === 'uncertain'
-                ? 'まだ不安'
-                : '未評価'}
+            <dt>最後に解いた日</dt>
+            <dd>{formatShortDate(study?.lastSolvedAt)}</dd>
           </div>
           <div>
-            正答率:{' '}
-            {acc.rate == null ? '—' : `${Math.round(acc.rate * 100)}% (${acc.correct}/${acc.total})`}
+            <dt>最後に正解した日</dt>
+            <dd>{problem.answerEnabled ? formatShortDate(study?.lastCorrectAt) : '正解なし'}</dd>
           </div>
           <div>
-            最終確認:{' '}
-            {study?.lastConfirmedAt
-              ? new Date(study.lastConfirmedAt).toLocaleString()
-              : '—'}
+            <dt>正答率</dt>
+            <dd>{acc.rate == null ? '—' : `${Math.round(acc.rate * 100)}%（${acc.correct}/${acc.total}）`}</dd>
           </div>
-        </div>
+          <div>
+            <dt>確認回数</dt>
+            <dd>
+              {study?.confirmationCount ?? 0}回（最終 {formatShortDate(study?.lastConfirmedAt)}）
+            </dd>
+          </div>
+          <div>
+            <dt>理解</dt>
+            <dd>
+              {study?.understanding === 'understood'
+                ? '理解できた'
+                : study?.understanding === 'uncertain'
+                  ? 'まだ不安'
+                  : '未評価'}
+            </dd>
+          </div>
+        </dl>
+        <label className="switch-row">
+          <span>
+            <strong>テストに出題する</strong>
+            <small>オフにするとテストの候補から外れます</small>
+          </span>
+          <input
+            type="checkbox"
+            role="switch"
+            className="switch"
+            checked={isInTest(study)}
+            onChange={(e) => {
+              const r = setInTest(problem.id, e.target.checked);
+              if (!r.ok) setMsg(r.reason);
+            }}
+          />
+        </label>
         <div className="btn-row">
           <button type="button" className="btn btn-primary" onClick={onConfirm} disabled={!!undoState}>
             確認した

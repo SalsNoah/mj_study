@@ -144,6 +144,107 @@ export function computeSessionStats(
   };
 }
 
+export type TestFilter = 'random' | 'lowAccuracy' | 'fewAnswers' | 'stale' | 'tags';
+
+export type TestOptions = {
+  count: number;
+  filters: TestFilter[];
+  tagIds: string[];
+  now?: Date;
+};
+
+export const TEST_RULES = {
+  recentWindow: 10,
+  lowAccuracyMax: 0.7,
+  fewAnswersBelow: 3,
+  staleDays: 14,
+} as const;
+
+/** 現在の内容（contentRevision）での直近N回の自動判定の正答率 */
+export function recentAccuracy(
+  attempts: readonly Attempt[],
+  problemId: string,
+  contentRevision: number,
+  window: number = TEST_RULES.recentWindow,
+): { rate: number | null; n: number } {
+  const recent = attempts
+    .filter(
+      (a) =>
+        a.problemId === problemId &&
+        a.contentRevision === contentRevision &&
+        (a.result === 'correct' || a.result === 'incorrect'),
+    )
+    .sort((a, b) => b.at.localeCompare(a.at))
+    .slice(0, window);
+  if (recent.length === 0) return { rate: null, n: 0 };
+  const correct = recent.filter((a) => a.result === 'correct').length;
+  return { rate: correct / recent.length, n: recent.length };
+}
+
+/** 現在の内容（contentRevision）でテストに回答した回数 */
+export function answerCount(
+  attempts: readonly Attempt[],
+  problemId: string,
+  contentRevision: number,
+): number {
+  return attempts.filter(
+    (a) => a.problemId === problemId && a.contentRevision === contentRevision,
+  ).length;
+}
+
+export function isInTest(study: StudyState | undefined): boolean {
+  return study?.inTest !== false;
+}
+
+/**
+ * テスト候補。「完全ランダム」以外の条件は、選んだものをすべて満たす問題に絞る。
+ * テスト対象外にした問題は常に除く。
+ */
+export function filterTestCandidates(
+  problems: readonly Problem[],
+  study: readonly StudyState[],
+  attempts: readonly Attempt[],
+  options: Omit<TestOptions, 'count'>,
+): Problem[] {
+  const now = (options.now ?? new Date()).getTime();
+  const staleMs = TEST_RULES.staleDays * 24 * 60 * 60 * 1000;
+  const studyMap = new Map(study.map((s) => [s.problemId, s]));
+  const filters = new Set(options.filters.filter((f) => f !== 'random'));
+  const tagSet = new Set(options.tagIds);
+
+  return problems.filter((p) => {
+    const s = studyMap.get(p.id);
+    if (!isInTest(s)) return false;
+    const rev = s?.contentRevision ?? 0;
+    if (filters.has('lowAccuracy')) {
+      const { rate } = recentAccuracy(attempts, p.id, rev);
+      if (rate === null || rate > TEST_RULES.lowAccuracyMax) return false;
+    }
+    if (filters.has('fewAnswers')) {
+      if (answerCount(attempts, p.id, rev) >= TEST_RULES.fewAnswersBelow) return false;
+    }
+    if (filters.has('stale')) {
+      const last = s?.lastSolvedAt;
+      if (last && now - new Date(last).getTime() < staleMs) return false;
+    }
+    if (filters.has('tags') && tagSet.size > 0) {
+      if (!p.tagIds.some((id) => tagSet.has(id))) return false;
+    }
+    return true;
+  });
+}
+
+export function selectTestProblems(
+  problems: readonly Problem[],
+  study: readonly StudyState[],
+  attempts: readonly Attempt[],
+  options: TestOptions,
+  random: () => number = Math.random,
+): Problem[] {
+  const candidates = filterTestCandidates(problems, study, attempts, options);
+  return shuffle(candidates, random).slice(0, Math.max(1, Math.min(10, options.count)));
+}
+
 /** 現在の contentRevision だけの正答率 */
 export function accuracyForProblem(
   attempts: readonly Attempt[],
