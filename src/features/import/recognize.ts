@@ -86,6 +86,17 @@ function readOne(tile: Img, bank: PreparedBank, rotated: boolean): TileCell {
   };
 }
 
+/** 新しく覚えた見本で、まだ確定していない牌を読み直す（同じ牌が並んでいれば1枚直すだけで残りも決まる） */
+export function rematch<T extends TileCell>(cell: T, bank: PreparedBank): T {
+  if (cell.sure) return cell;
+  const match = classify(bank, cell.feat);
+  return {
+    ...cell,
+    label: match.label ?? cell.label,
+    sure: !!match.label && match.score >= TILE_SURE && match.margin >= TILE_MARGIN,
+  };
+}
+
 export function readTiles(
   full: Img,
   rel: RelRect,

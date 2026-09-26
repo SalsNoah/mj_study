@@ -113,11 +113,77 @@ export function rotate(img: Img, dir: 'cw' | 'ccw'): Img {
 export const TILE_FEAT_W = 12;
 export const TILE_FEAT_H = 16;
 
-/** 牌の特徴量：縁を少し削って 12x16 のRGBへ（赤五の判別のため色を残す） */
+/**
+ * 牌の面の中で絵柄（文字・図柄）がある範囲。面より暗いか色の濃い画素を絵柄とみなし、
+ * 縁の線や雀魂のオレンジの帯のように行・列いっぱいに伸びるものは除く。
+ * 立体表示で牌の厚みが写るスクショと、平面の牌一覧とで位置をそろえるために使う。
+ */
+export function inkBox(tile: Img): Rect | null {
+  const { width: w, height: h } = tile;
+  const lum = luminance(tile);
+  const sorted = Float32Array.from(lum).sort();
+  const face = sorted[Math.floor(sorted.length * 0.85)]!;
+  const ink = new Uint8Array(w * h);
+  for (let i = 0; i < w * h; i++) {
+    const r = tile.data[i * 4]!;
+    const g = tile.data[i * 4 + 1]!;
+    const b = tile.data[i * 4 + 2]!;
+    const sat = (Math.max(r, g, b) - Math.min(r, g, b)) / 255;
+    ink[i] = lum[i]! < face * 0.62 || (sat > 0.35 && lum[i]! < face * 0.9) ? 1 : 0;
+  }
+  const mx = Math.round(w * 0.1);
+  const my = Math.round(h * 0.06);
+  const rowFull = (y: number) => {
+    let n = 0;
+    for (let x = 0; x < w; x++) n += ink[y * w + x]!;
+    return n > w * 0.6;
+  };
+  const colFull = (x: number) => {
+    let n = 0;
+    for (let y = 0; y < h; y++) n += ink[y * w + x]!;
+    return n > h * 0.6;
+  };
+  const skipRow = Array.from({ length: h }, (_, y) => y < my || y >= h - my || rowFull(y));
+  const skipCol = Array.from({ length: w }, (_, x) => x < mx || x >= w - mx || colFull(x));
+  // 縁の影など、ぽつぽつ散らばる画素は無視して、まとまって絵柄がある行・列だけを範囲にする
+  const colCount = new Array<number>(w).fill(0);
+  const rowCount = new Array<number>(h).fill(0);
+  let total = 0;
+  for (let y = 0; y < h; y++) {
+    if (skipRow[y]) continue;
+    for (let x = 0; x < w; x++) {
+      if (skipCol[x] || !ink[y * w + x]) continue;
+      colCount[x]!++;
+      rowCount[y]!++;
+      total++;
+    }
+  }
+  const colMin = Math.max(2, h * 0.08);
+  const rowMin = Math.max(2, w * 0.1);
+  const xs = colCount.flatMap((n, x) => (n >= colMin ? [x] : []));
+  const ys = rowCount.flatMap((n, y) => (n >= rowMin ? [y] : []));
+  if (total < w * h * 0.01 || xs.length === 0 || ys.length === 0) return null;
+  const x0 = xs[0]!;
+  const x1 = xs[xs.length - 1]!;
+  const y0 = ys[0]!;
+  const y1 = ys[ys.length - 1]!;
+  if (x1 - x0 < w * 0.15 || y1 - y0 < h * 0.15) return null;
+  return { x: x0, y: y0, w: x1 - x0 + 1, h: y1 - y0 + 1 };
+}
+
+/** 牌の特徴量：絵柄の範囲に合わせて 12x16 のRGBへ（赤五の判別のため色を残す）。白など絵柄のない牌は面全体 */
 export function tileFeature(tile: Img): Uint8Array {
-  const ix = Math.round(tile.width * 0.06);
-  const iy = Math.round(tile.height * 0.05);
-  const inner = crop(tile, { x: ix, y: iy, w: tile.width - ix * 2, h: tile.height - iy * 2 });
+  const box = inkBox(tile);
+  let inner: Img;
+  if (box) {
+    const px = Math.round(box.w * 0.06);
+    const py = Math.round(box.h * 0.04);
+    inner = crop(tile, { x: box.x - px, y: box.y - py, w: box.w + px * 2, h: box.h + py * 2 });
+  } else {
+    const ix = Math.round(tile.width * 0.12);
+    const iy = Math.round(tile.height * 0.12);
+    inner = crop(tile, { x: ix, y: iy, w: tile.width - ix * 2, h: tile.height - iy * 2 });
+  }
   const small = resample(inner, TILE_FEAT_W, TILE_FEAT_H);
   const out = new Uint8Array(TILE_FEAT_W * TILE_FEAT_H * 3);
   for (let i = 0; i < TILE_FEAT_W * TILE_FEAT_H; i++) {

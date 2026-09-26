@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type PointerEvent } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TileFace } from '@/components/TileFace';
 import { TilePalette } from '@/components/TilePalette';
@@ -37,10 +37,13 @@ import {
   readMelds,
   readRiver,
   readTiles,
+  rematch,
   type GlyphCell,
   type TileCell,
   type Turn,
 } from './recognize';
+import { RectPicker } from './RectPicker';
+import { SheetLearner } from './SheetLearner';
 import { labelCount, learn, prepareBank } from './templates';
 
 const REGIONS: Array<{ key: RegionKey; label: string; color: string }> = [
@@ -101,10 +104,6 @@ type Target =
 
 type Cell = TileCell & { corrected?: boolean };
 
-function clamp01(v: number) {
-  return Math.max(0, Math.min(1, v));
-}
-
 function firstUnsure(hand: Cell[], dora: Cell[], melds: Cell[][]): Target | null {
   const hi = hand.findIndex((c) => !c.sure);
   if (hi >= 0) return { kind: 'hand', i: hi };
@@ -155,7 +154,6 @@ export function ImportPage() {
   const [layout, setLayout] = useState<Layout | null>(null);
   const [bank, setBank] = useState<GameBank>(() => loadBank('jantama'));
   const [active, setActive] = useState<RegionKey | null>(null);
-  const [drag, setDrag] = useState<{ x0: number; y0: number; x1: number; y1: number } | null>(null);
   const [zoom, setZoom] = useState(1);
   const [hand, setHand] = useState<Cell[]>([]);
   const [dora, setDora] = useState<Cell[]>([]);
@@ -170,8 +168,7 @@ export function ImportPage() {
   const [msg, setMsg] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [doraFresh, setDoraFresh] = useState(false);
-  const shotRef = useRef<HTMLDivElement>(null);
-
+  const [sheetOpenAtStart] = useState(() => labelCount(loadBank('jantama').tiles) === 0);
   const recognize = useCallback(
     (img: Img, lay: Layout, gb: GameBank, forcedHand: number | null, includeDora: boolean) => {
       const r = lay.regions;
@@ -294,35 +291,8 @@ export function ImportPage() {
     }
   };
 
-  const relFrom = (e: PointerEvent<HTMLDivElement>) => {
-    const r = shotRef.current!.getBoundingClientRect();
-    return { x: clamp01((e.clientX - r.left) / r.width), y: clamp01((e.clientY - r.top) / r.height) };
-  };
-
-  const onDown = (e: PointerEvent<HTMLDivElement>) => {
-    if (!active) return;
-    e.currentTarget.setPointerCapture(e.pointerId);
-    const p = relFrom(e);
-    setDrag({ x0: p.x, y0: p.y, x1: p.x, y1: p.y });
-  };
-  const onMove = (e: PointerEvent<HTMLDivElement>) => {
-    if (!drag) return;
-    const p = relFrom(e);
-    setDrag({ ...drag, x1: p.x, y1: p.y });
-  };
-  const onUp = () => {
-    if (!drag || !active || !layout) {
-      setDrag(null);
-      return;
-    }
-    const rect: RelRect = {
-      x: Math.min(drag.x0, drag.x1),
-      y: Math.min(drag.y0, drag.y1),
-      w: Math.abs(drag.x1 - drag.x0),
-      h: Math.abs(drag.y1 - drag.y0),
-    };
-    setDrag(null);
-    if (rect.w < 0.005 || rect.h < 0.005) return;
+  const onRegionRect = (rect: RelRect) => {
+    if (!active || !layout) return;
     const next = { ...layout, regions: { ...layout.regions, [active]: rect } };
     setLayout(next);
     const err = saveLayout(next);
@@ -368,10 +338,35 @@ export function ImportPage() {
       const { g: tg, i: ti } = t;
       nm = melds.map((g, gi) => (gi === tg ? g.map((c, i) => (i === ti ? updated : c)) : g));
     }
+    const nb = { ...bank, tiles: learn(bank.tiles, label, cell.feat) };
+    const prepared = prepareBank(nb.tiles);
+    nh = nh.map((c) => rematch(c, prepared));
+    nd = nd.map((c) => rematch(c, prepared));
+    nm = nm.map((g) => g.map((c) => rematch(c, prepared)));
     setHand(nh);
     setDora(nd);
     setMelds(nm);
-    const nb = { ...bank, tiles: learn(bank.tiles, label, cell.feat) };
+    setBank(nb);
+    const err = saveBank(game, nb);
+    if (err) setError(err);
+    setTarget(firstUnsure(nh, nd, nm));
+  };
+
+  /** 推測が付いている「?」の牌をまとめて確定し、見本として覚える（推測のない牌は残す） */
+  const acceptGuesses = () => {
+    let tiles = bank.tiles;
+    const confirm = (c: Cell): Cell => {
+      if (c.sure || !c.label) return c;
+      tiles = learn(tiles, c.label, c.feat);
+      return { ...c, sure: true, corrected: true };
+    };
+    const nh = hand.map(confirm);
+    const nd = dora.map(confirm);
+    const nm = melds.map((g) => g.map(confirm));
+    setHand(nh);
+    setDora(nd);
+    setMelds(nm);
+    const nb = { ...bank, tiles };
     setBank(nb);
     const err = saveBank(game, nb);
     if (err) setError(err);
@@ -547,6 +542,22 @@ export function ImportPage() {
         {msg && <p className="ok">{msg}</p>}
       </section>
 
+      <details className="details panel" open={sheetOpenAtStart}>
+        <summary>牌一覧からまとめて覚える（{GAME_LABELS[game]}）</summary>
+        <SheetLearner
+          tiles={bank.tiles}
+          onLearn={(tiles) => {
+            const nb = { ...bank, tiles };
+            setBank(nb);
+            const err = saveBank(game, nb);
+            if (err) setError(err);
+            if (full && layout?.regions.hand) {
+              recognize(full, layout, nb, handCount, !layout.doraEachTime || doraFresh);
+            }
+          }}
+        />
+      </details>
+
       {url && layout && (
         <section className="panel">
           <div className="region-chips" role="group" aria-label="範囲を指定する項目">
@@ -576,49 +587,17 @@ export function ImportPage() {
               ))}
             </div>
           </div>
-          <div className="shot-scroll">
-            <div
-              ref={shotRef}
-              className={`shot${active ? ' is-drawing' : ''}`}
-              style={{ width: `${zoom * 100}%` }}
-              onPointerDown={onDown}
-              onPointerMove={onMove}
-              onPointerUp={onUp}
-              onPointerCancel={() => setDrag(null)}
-            >
-              <img src={url} alt="読み取るスクショ" draggable={false} />
-              {REGIONS.map((r) => {
-                const rect = layout.regions[r.key];
-                if (!rect) return null;
-                return (
-                  <div
-                    key={r.key}
-                    className={`shot-rect${active === r.key ? ' is-on' : ''}`}
-                    style={{
-                      left: `${rect.x * 100}%`,
-                      top: `${rect.y * 100}%`,
-                      width: `${rect.w * 100}%`,
-                      height: `${rect.h * 100}%`,
-                      borderColor: r.color,
-                    }}
-                  >
-                    <span style={{ background: r.color }}>{r.label}</span>
-                  </div>
-                );
-              })}
-              {drag && (
-                <div
-                  className="shot-rect is-drag"
-                  style={{
-                    left: `${Math.min(drag.x0, drag.x1) * 100}%`,
-                    top: `${Math.min(drag.y0, drag.y1) * 100}%`,
-                    width: `${Math.abs(drag.x1 - drag.x0) * 100}%`,
-                    height: `${Math.abs(drag.y1 - drag.y0) * 100}%`,
-                  }}
-                />
-              )}
-            </div>
-          </div>
+          <RectPicker
+            url={url}
+            alt="読み取るスクショ"
+            drawing={!!active}
+            zoom={zoom}
+            onRect={onRegionRect}
+            rects={REGIONS.flatMap((r) => {
+              const rect = layout.regions[r.key];
+              return rect ? [{ key: r.key, label: r.label, color: r.color, rect, active: active === r.key }] : [];
+            })}
+          />
           <div className="btn-row btn-row--compact">
             <button
               type="button"
@@ -737,7 +716,14 @@ export function ImportPage() {
               </>
             )}
             {unsureCount > 0 && (
-              <p className="hint">「?」の牌をタップして、下のパレットから正しい牌を選んでください（次回から自動で読めます）。</p>
+              <>
+                <p className="hint">
+                  「?」は自信のない推測です。違う牌だけタップして直し、残りが合っていれば「推測どおりで確定」を押してください（次回から自動で読めます）。
+                </p>
+                <button type="button" className="btn btn-sm" onClick={acceptGuesses}>
+                  推測どおりで確定
+                </button>
+              </>
             )}
           </section>
 

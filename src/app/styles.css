@@ -952,6 +952,27 @@ textarea { min-height: 96px; resize: vertical; }
 .read-meld { display: flex; align-items: center; gap: 8px; }
 .read-meld .read-row { margin: 0; flex: 1; }
 .read-meld__type { font-size: 0.78rem; color: var(--muted); white-space: nowrap; }
+.file-pick--small { padding: 8px; margin: 6px 0; }
+.sheet-learner { display: grid; gap: 6px; }
+.sheet-preview {
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+}
+.sheet-preview__row {
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  gap: 3px;
+}
+.sheet-preview__cell { display: grid; gap: 2px; }
+.sheet-preview__cell img {
+  width: 100%;
+  aspect-ratio: 66 / 90;
+  object-fit: contain;
+  background: #eee;
+  border-radius: 2px;
+}
 .picker-panel {
   border-color: var(--accent);
   box-shadow: 0 0 0 2px rgba(27, 77, 62, 0.15);
