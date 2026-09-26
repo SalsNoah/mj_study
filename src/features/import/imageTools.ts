@@ -133,16 +133,18 @@ export function inkBox(tile: Img): Rect | null {
   }
   const mx = Math.round(w * 0.1);
   const my = Math.round(h * 0.06);
-  const rowFull = (y: number) => {
-    let n = 0;
-    for (let x = 0; x < w; x++) n += ink[y * w + x]!;
-    return n > w * 0.6;
+  // 縁の線は途切れずに続くので、途切れのない長さで見る（七索の赤い棒と下の棒のように、同じ列に並ぶ図柄は残す）
+  const longestRun = (at: (i: number) => number, n: number) => {
+    let best = 0;
+    let run = 0;
+    for (let i = 0; i < n; i++) {
+      run = at(i) ? run + 1 : 0;
+      if (run > best) best = run;
+    }
+    return best;
   };
-  const colFull = (x: number) => {
-    let n = 0;
-    for (let y = 0; y < h; y++) n += ink[y * w + x]!;
-    return n > h * 0.6;
-  };
+  const rowFull = (y: number) => longestRun((x) => ink[y * w + x]!, w) > w * 0.6;
+  const colFull = (x: number) => longestRun((y) => ink[y * w + x]!, h) > h * 0.6;
   const skipRow = Array.from({ length: h }, (_, y) => y < my || y >= h - my || rowFull(y));
   const skipCol = Array.from({ length: w }, (_, x) => x < mx || x >= w - mx || colFull(x));
   // 縁の影など、ぽつぽつ散らばる画素は無視して、まとまって絵柄がある行・列だけを範囲にする
@@ -171,7 +173,10 @@ export function inkBox(tile: Img): Rect | null {
   return { x: x0, y: y0, w: x1 - x0 + 1, h: y1 - y0 + 1 };
 }
 
-/** 牌の特徴量：絵柄の範囲に合わせて 12x16 のRGBへ（赤五の判別のため色を残す）。白など絵柄のない牌は面全体 */
+/**
+ * 牌の特徴量：絵柄の範囲に合わせた 12x16 のRGBに、赤み・緑みの強さの地図を足したもの
+ * （赤五や七索の赤い棒のように、形が似て色だけ違う牌を見分けるため）。白など絵柄のない牌は面全体。
+ */
 export function tileFeature(tile: Img): Uint8Array {
   const box = inkBox(tile);
   let inner: Img;
@@ -185,11 +190,17 @@ export function tileFeature(tile: Img): Uint8Array {
     inner = crop(tile, { x: ix, y: iy, w: tile.width - ix * 2, h: tile.height - iy * 2 });
   }
   const small = resample(inner, TILE_FEAT_W, TILE_FEAT_H);
-  const out = new Uint8Array(TILE_FEAT_W * TILE_FEAT_H * 3);
-  for (let i = 0; i < TILE_FEAT_W * TILE_FEAT_H; i++) {
-    out[i * 3] = small.data[i * 4]!;
-    out[i * 3 + 1] = small.data[i * 4 + 1]!;
-    out[i * 3 + 2] = small.data[i * 4 + 2]!;
+  const n = TILE_FEAT_W * TILE_FEAT_H;
+  const out = new Uint8Array(n * 5);
+  for (let i = 0; i < n; i++) {
+    const r = small.data[i * 4]!;
+    const g = small.data[i * 4 + 1]!;
+    const b = small.data[i * 4 + 2]!;
+    out[i * 3] = r;
+    out[i * 3 + 1] = g;
+    out[i * 3 + 2] = b;
+    out[n * 3 + i] = Math.max(0, Math.min(255, (r - Math.max(g, b)) * 2));
+    out[n * 4 + i] = Math.max(0, Math.min(255, (g - Math.max(r, b)) * 2));
   }
   return out;
 }

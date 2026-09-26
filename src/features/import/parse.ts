@@ -63,20 +63,49 @@ export function parseScore(labels: string[], unit: number): number | null {
   return sign * Number(digits) * unit;
 }
 
-/** 自分から見た位置の点数を、東南西北の点数に置き換える */
+/** 自分から見た位置の点数を、東南西北の点数に置き換える（三人麻雀は対面がいない） */
 export function scoresBySeat(
   seatWind: Wind,
   bySeat: Partial<Record<Seat, number | null>>,
+  players: 3 | 4 = 4,
 ): ProblemContext['scores'] {
   const scores: ProblemContext['scores'] = { east: null, south: null, west: null, north: null };
   const base = WIND_ORDER.indexOf(seatWind);
-  const offsets: Record<Seat, number> = { self: 0, right: 1, across: 2, left: 3 };
+  const offsets: Record<Seat, number> =
+    players === 3 ? { self: 0, right: 1, across: -1, left: 2 } : { self: 0, right: 1, across: 2, left: 3 };
   for (const [seat, value] of Object.entries(bySeat) as Array<[Seat, number | null | undefined]>) {
-    if (value === null || value === undefined) continue;
-    const wind = WIND_ORDER[(base + offsets[seat]) % 4]!;
+    if (value === null || value === undefined || offsets[seat] < 0) continue;
+    const wind = WIND_ORDER[(base + offsets[seat]) % players]!;
     scores[SCORE_KEY[wind]] = value;
   }
   return scores;
+}
+
+/**
+ * 読めなかった点数を、全員の合計（4人なら10万点、三人麻雀なら10万5千点）から概算する。
+ * 供託のリーチ棒の分だけずれることがある。1人も読めていないときや、読み違いが疑われるときは推定しない。
+ */
+export function estimateScores(
+  scores: Record<Seat, number | null>,
+  players: 3 | 4,
+): { scores: Record<Seat, number | null>; estimated: Seat[] } {
+  const seats: Seat[] = players === 3 ? ['self', 'right', 'left'] : ['self', 'right', 'across', 'left'];
+  const missing = seats.filter((s) => scores[s] === null);
+  const known = seats.filter((s) => scores[s] !== null);
+  if (missing.length === 0 || known.length === 0) return { scores, estimated: [] };
+  const total = players === 3 ? 105000 : 100000;
+  const rest = total - known.reduce((n, s) => n + scores[s]!, 0);
+  const each = rest / missing.length;
+  // 雀魂・天鳳とも0点を下回ると終局なので、途中の画面でマイナスになる推定は読み違いとみなす
+  if (each < 0 || each > total) return { scores, estimated: [] };
+  const out = { ...scores };
+  let left = rest;
+  missing.forEach((s, i) => {
+    const v = i === missing.length - 1 ? left : Math.round(each / 100) * 100;
+    out[s] = v;
+    left -= v;
+  });
+  return { scores: out, estimated: missing };
 }
 
 /** 読み取り用の見本として表示する文字列（点数を単位で割る） */

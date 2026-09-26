@@ -856,6 +856,7 @@ textarea { min-height: 96px; resize: vertical; }
 .read-summary div { display: flex; gap: 6px; }
 .read-summary dt { color: var(--muted); }
 .read-summary dd { margin: 0; font-weight: 600; }
+.read-summary__est { margin-left: 3px; font-size: 0.68rem; font-weight: 400; color: var(--muted); }
 .read-row {
   display: grid;
   grid-template-columns: repeat(14, minmax(0, 1fr));

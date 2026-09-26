@@ -26,7 +26,7 @@ import {
   type Rect,
   type TextTone,
 } from './imageTools';
-import { parseRound, parseSeat, parseTurn, splitMelds, type Seat } from './parse';
+import { estimateScores, inferMeld, parseRound, parseSeat, parseTurn, splitMelds, type Seat } from './parse';
 import { toDataUrl, type TileCell, type Turn } from './recognize';
 import { classify, learn, prepareBank, type Bank, type PreparedBank } from './templates';
 
@@ -188,6 +188,19 @@ function insideCenter(r: Rect, img: Img, tileH: number): boolean {
   return Math.abs(cx) < tileH * 1.9 && cy > -tileH * 2.1 && cy < tileH * 0.35;
 }
 
+/**
+ * ドラ表示牌の候補を絞る。山の側面や裏向きの牌のような模様のない白い部分は白（5z）に似るので、
+ * 白は他に候補がなく、よく一致するときだけ採る。byScore は一致度の高い順に並べ直す（天鳳の山）。
+ */
+function plausibleDora<T extends TileCell & { score: number }>(cells: T[], byScore: boolean): T[] {
+  const found = cells.filter((c) => c.score >= DORA_OK);
+  if (byScore) found.sort((a, b) => b.score - a.score);
+  const others = found.filter((c) => c.label !== '5z');
+  if (others.length === 0) return found.filter((c) => c.score >= 0.9).slice(0, 1);
+  const top = Math.max(...others.map((c) => c.score));
+  return others.filter((c) => !byScore || c.score >= top - 0.15).slice(0, 5);
+}
+
 export type AutoResult = {
   game: Game;
   hand: TileCell[];
@@ -197,7 +210,10 @@ export type AutoResult = {
   handNumber: number | null;
   seatWind: Wind | null;
   turn: number | null;
+  players: 3 | 4;
   scores: Record<Seat, number | null>;
+  /** 読めずに合計点から推定した席 */
+  estimated: Seat[];
 };
 
 export function autoRead(img: Img, banks: Prepared): AutoResult | null {
@@ -223,28 +239,30 @@ export function autoRead(img: Img, banks: Prepared): AutoResult | null {
   let melds: TileCell[][] = [];
   if (located.melds) {
     const region = crop(img, located.melds);
-    melds = segmentMelds(region, TILE_ASPECT).flatMap((group) =>
-      splitMelds(
-        group.map((s) => toCell(cropBrightRows(region, s), bank.tiles, s.rotated ? [90, 270] : [0], s.rotated)),
-      ),
-    );
+    melds = segmentMelds(region, TILE_ASPECT)
+      .flatMap((group) =>
+        splitMelds(
+          group.map((s) => toCell(cropBrightRows(region, s), bank.tiles, s.rotated ? [90, 270] : [0], s.rotated)),
+        ),
+      )
+      // 副露として成り立たない組は、画面の端で欠けた牌などの読み違いがあるので確認してもらう
+      .map((m) => (inferMeld(m).ok ? m : m.map((c) => ({ ...c, sure: false }))));
   }
 
   let dora: TileCell[] = [];
   if (game === 'jantama') {
-    dora = locatePanelDora(img, tileH)
-      .map((r) => toCell(crop(img, r), bank.tiles, [0], false))
-      .filter((c) => c.score >= DORA_OK)
-      .slice(0, 5);
+    dora = plausibleDora(
+      locatePanelDora(img, tileH).map((r) => toCell(crop(img, r), bank.tiles, [0], false)),
+      false,
+    );
   } else {
-    // 山は四方にあり、表を向いた牌は横向き・逆さまにもなる。山の側面は白と似るので白だけは厳しく見る
-    const found = locateWallDora(img, tileH, located.hand.y)
-      .filter((r) => !insideCenter(r, img, tileH))
-      .map((r) => toCell(crop(img, r), bank.tiles, [0, 90, 180, 270], false))
-      .filter((c) => c.score >= (c.label === '5z' ? TILE_SURE : DORA_OK))
-      .sort((a, b) => b.score - a.score);
-    const top = found[0]?.score ?? 0;
-    dora = found.filter((c) => c.score >= top - 0.15).slice(0, 5);
+    // 山は四方にあり、表を向いた牌は横向き・逆さまにもなる
+    dora = plausibleDora(
+      locateWallDora(img, tileH, located.hand.y)
+        .filter((r) => !insideCenter(r, img, tileH))
+        .map((r) => toCell(crop(img, r), bank.tiles, [0, 90, 180, 270], false)),
+      true,
+    );
   }
 
   const regions = centerRegions(game, img, tileH);
@@ -262,13 +280,18 @@ export function autoRead(img: Img, banks: Prepared): AutoResult | null {
     game === 'jantama'
       ? typicalHeight(text('turnText', { turn: 0, mergeNarrow: false, splitWide: false, tone: 'dark', dropSmall: false }))
       : [];
-  const scores: Record<Seat, number | null> = { self: null, right: null, across: null, left: null };
+  const read: Record<Seat, number | null> = { self: null, right: null, across: null, left: null };
+  let acrossGlyphs = 0;
   for (const s of SCORE_SEATS) {
     const glyphs = text(s.key, { turn: s.turn, mergeNarrow: false, splitWide: true, tone, dropSmall: true });
+    if (s.seat === 'across') acrossGlyphs = glyphs.filter((g) => g.h >= (regions.scoreAcross?.h ?? 0) * 0.3).length;
     // 天鳳は点数の横に風の文字が付くことがあるので、先頭の風は除く
     const digits = glyphs.filter((g, i) => !(i === 0 && /^[東南西北]$/.test(g.label)));
-    scores[s.seat] = scoreOf(digits, game);
+    read[s.seat] = scoreOf(digits, game);
   }
+  // 対面の位置に文字が何もなければ三人麻雀
+  const players: 3 | 4 = read.across === null && acrossGlyphs < 2 ? 3 : 4;
+  const { scores, estimated } = estimateScores(read, players);
 
   return {
     game,
@@ -279,6 +302,8 @@ export function autoRead(img: Img, banks: Prepared): AutoResult | null {
     handNumber: round.handNumber,
     seatWind,
     turn: parseTurn(turnGlyphs.map((g) => g.label)),
+    players,
     scores,
+    estimated,
   };
 }

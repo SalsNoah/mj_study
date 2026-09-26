@@ -6,6 +6,8 @@ export type ImportDraft = {
   melds: Meld[];
   doraIndicators: TileCode[];
   context: ProblemContext;
+  /** 作成画面に出す補足（推定した点数など） */
+  notes?: string[];
 };
 
 const KEY = 'mahjong-study:import-draft';

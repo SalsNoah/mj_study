@@ -338,7 +338,12 @@ export function EditorPage() {
           {countLabel}
         </p>
       </header>
-      {imported && <p className="ok import-note">スクショから読み取りました。違うところがあれば直して保存してください。</p>}
+      {imported && (
+        <p className="ok import-note">
+          スクショから読み取りました。違うところがあれば直して保存してください。
+          {imported.notes?.map((n) => <span key={n}> {n}</span>)}
+        </p>
+      )}
 
       <section className="panel context-panel">
         <div className="ctx-toolbar" aria-label="対局条件">

@@ -9,7 +9,16 @@ import {
   type Img,
 } from './imageTools';
 import { classify, learn, prepareBank } from './templates';
-import { inferMeld, parseRound, parseScore, parseSeat, scoreChars, scoresBySeat, splitMelds } from './parse';
+import {
+  estimateScores,
+  inferMeld,
+  parseRound,
+  parseScore,
+  parseSeat,
+  scoreChars,
+  scoresBySeat,
+  splitMelds,
+} from './parse';
 
 function fill(img: Img, x: number, y: number, w: number, h: number, rgb: [number, number, number]) {
   for (let yy = y; yy < y + h; yy++) {
@@ -166,6 +175,25 @@ describe('parsing read text', () => {
       north: 3,
       east: 4,
     });
+    expect(scoresBySeat('1z', { self: 47000, right: 23000, left: 35000 }, 3)).toEqual({
+      east: 47000,
+      south: 23000,
+      west: 35000,
+      north: null,
+    });
+  });
+
+  it('estimates unread scores from the table total', () => {
+    const one = estimateScores({ self: 42200, right: 13700, across: 11200, left: null }, 4);
+    expect(one.scores.left).toBe(32900);
+    expect(one.estimated).toEqual(['left']);
+    const two = estimateScores({ self: 23900, right: null, across: 23500, left: null }, 4);
+    expect([two.scores.right, two.scores.left]).toEqual([26300, 26300]);
+    const three = estimateScores({ self: null, right: null, across: null, left: 51800 }, 3);
+    expect((three.scores.self ?? 0) + (three.scores.right ?? 0)).toBe(53200);
+    expect(three.scores.across).toBeNull();
+    expect(estimateScores({ self: null, right: null, across: null, left: null }, 4).estimated).toEqual([]);
+    expect(estimateScores({ self: 90000, right: 90000, across: null, left: null }, 4).estimated).toEqual([]);
   });
 });
 

@@ -61,6 +61,14 @@ function toDraft(r: AutoResult): { ok: true; send: () => void } | { ok: false; r
     return { ok: false, reason: `鳴きが${melds.length}組あるので手牌は${handMax}枚までです。余分な牌を除外してください` };
   }
   const hasScores = Object.values(r.scores).some((v) => v !== null);
+  const notes =
+    r.estimated.length > 0 && r.seatWind
+      ? [
+          `${r.estimated.map((s) => SEAT_NAME[s]).join('・')}の点数は読めなかったため、合計${
+            r.players === 3 ? '10万5千' : '10万'
+          }点から推定しています。`,
+        ]
+      : [];
   return {
     ok: true,
     send: () =>
@@ -77,8 +85,9 @@ function toDraft(r: AutoResult): { ok: true; send: () => void } | { ok: false; r
           handNumber: r.handNumber,
           seatWind: r.seatWind,
           turn: r.turn,
-          scores: r.seatWind && hasScores ? scoresBySeat(r.seatWind, r.scores) : emptyContext().scores,
+          scores: r.seatWind && hasScores ? scoresBySeat(r.seatWind, r.scores, r.players) : emptyContext().scores,
         },
+        notes,
       }),
   };
 }
@@ -340,14 +349,22 @@ export function ImportPage() {
                 <dt>巡目</dt>
                 <dd>{result.turn ?? '—'}</dd>
               </div>
-              {(Object.keys(SEAT_NAME) as Seat[]).map((s) => (
-                <div key={s}>
-                  <dt>{SEAT_NAME[s]}</dt>
-                  <dd>{result.scores[s]?.toLocaleString() ?? '—'}</dd>
-                </div>
-              ))}
+              {(Object.keys(SEAT_NAME) as Seat[])
+                .filter((s) => !(result.players === 3 && s === 'across'))
+                .map((s) => (
+                  <div key={s}>
+                    <dt>{SEAT_NAME[s]}</dt>
+                    <dd>
+                      {result.scores[s]?.toLocaleString() ?? '—'}
+                      {result.estimated.includes(s) && <small className="read-summary__est">推定</small>}
+                    </dd>
+                  </div>
+                ))}
             </dl>
-            <p className="hint">読めなかった項目は空欄のまま渡します。作成画面で直せます。</p>
+            <p className="hint">
+              読めなかった点数は合計{result.players === 3 ? '10万5千' : '10万'}
+              点から推定し、ほかの読めなかった項目は空欄のまま渡します。作成画面で直せます。
+            </p>
           </section>
 
           {target && current && (
