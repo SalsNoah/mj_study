@@ -2,7 +2,7 @@ import { useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useApp } from '@/app/store';
 import { HandBoard } from '@/components/HandBoard';
-import { TileFace } from '@/components/TileFace';
+import type { TileMark } from '@/components/HandView';
 import { createId, nowIso } from '@/domain/ids';
 import {
   computeSessionStats,
@@ -282,6 +282,14 @@ export function TestPage() {
       ? judgeDiscard(selected, current.acceptedDiscards)
       : null;
 
+  const answerMarks =
+    phase === 'answered' && current.answerEnabled
+      ? new Map<TileCode, TileMark>([
+          ...(verdict === 'incorrect' && selected ? [[selected, 'wrong'] as const] : []),
+          ...current.acceptedDiscards.map((c) => [c, 'correct'] as const),
+        ])
+      : undefined;
+
   return (
     <div className="page page--test">
       <header className="page-header page-header--compact">
@@ -306,9 +314,20 @@ export function TestPage() {
           doraIndicators={current.doraIndicators}
           context={current.context}
           selectable={phase === 'question' && current.answerEnabled}
-          selectedCodes={selected ? new Set([selected]) : undefined}
+          selectedCodes={phase === 'question' && selected ? new Set([selected]) : undefined}
+          marks={answerMarks}
           onSelectCode={(code) => setSelected(code)}
         />
+        {answerMarks && (
+          <p className="mark-legend">
+            <i className="mark-legend__correct" />正解
+            {verdict === 'incorrect' && (
+              <>
+                <i className="mark-legend__wrong" />あなたの選択
+              </>
+            )}
+          </p>
+        )}
         {phase === 'question' && (
           <>
             <p className="hint test-hint">
@@ -342,22 +361,6 @@ export function TestPage() {
         <section className="panel answer-panel">
           {verdict && (
             <p className={`verdict verdict--${verdict}`}>{verdict === 'correct' ? '正解' : '不正解'}</p>
-          )}
-          {current.answerEnabled && (
-            <div className="answer-tiles">
-              <span>正解</span>
-              <div className="tile-row">
-                {current.acceptedDiscards.map((c, i) => (
-                  <TileFace key={i} code={c} size={30} />
-                ))}
-              </div>
-              {selected && (
-                <>
-                  <span>あなた</span>
-                  <TileFace code={selected} size={30} />
-                </>
-              )}
-            </div>
           )}
           {current.explanation && <p className="prewrap">{current.explanation}</p>}
           {current.tagIds.length > 0 && (

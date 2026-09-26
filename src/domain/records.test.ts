@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { badgeStatus, bumpDaily, dailyTotals, dayKey, normalizeStore, studyStreak } from './records';
+import { BADGES, badgeStatus, bumpDaily, dailyTotals, dayKey, normalizeStore, studyStreak } from './records';
 import { filterTestCandidates, recentAccuracy, selectTestProblems } from './quiz';
 import { emptyContext, emptyStore, type Attempt, type Problem, type StudyState } from './types';
 
@@ -98,11 +98,18 @@ describe('normalizeStore', () => {
 
 describe('badges', () => {
   it('evolves with cumulative total', () => {
-    expect(badgeStatus(0).current.name).toBe('雀士見習い');
-    expect(badgeStatus(10).current.name).toBe('初心者');
+    expect(badgeStatus(0).current.name).toBe('卓のたまご');
+    expect(badgeStatus(10).current.name).toBe('はじめの一打');
     const s = badgeStatus(20);
-    expect(s.next?.name).toBe('初級者');
+    expect(s.next?.name).toBe('形の探究者');
     expect(s.remaining).toBe(10);
+  });
+
+  it('does not reuse Mahjong Soul or Tenhou rank names', () => {
+    const taken = ['初心', '雀士', '雀傑', '雀豪', '雀聖', '魂天', '新人', '級', '段', '天鳳'];
+    for (const b of BADGES) {
+      for (const word of taken) expect(b.name.includes(word)).toBe(false);
+    }
   });
 });
 

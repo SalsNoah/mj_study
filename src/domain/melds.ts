@@ -110,6 +110,42 @@ export function createMeld(
   };
 }
 
+/** 取得元から横向きにする位置を決める（左家=左端、対面=2枚目、右家=右端） */
+function calledIndexFor(type: MeldType, from: MeldFrom): number {
+  if (from === 'left') return 0;
+  if (from === 'opposite') return 1;
+  return type === 'openKan' ? 3 : 2;
+}
+
+/** パレットで押した1枚から副露を組み立てる。チーは押した牌から始まる順子。 */
+export function buildMeldFromTile(
+  type: MeldType,
+  code: TileCode,
+  from: MeldFrom,
+): { ok: true; meld: Meld } | { ok: false; reason: string } {
+  const suit = tileSuit(code);
+  const rank = tileRank(code);
+  const normal = (r: number) => `${r}${suit}` as TileCode;
+
+  if (type === 'chi') {
+    if (!isNumberTile(code)) return { ok: false, reason: 'チーは数牌のみです' };
+    if (rank > 7) return { ok: false, reason: 'チーは7以下の牌を押してください（押した牌から3枚）' };
+    return createMeld('chi', [code, normal(rank + 1), normal(rank + 2)], 'left', 0);
+  }
+
+  const copies = type === 'pon' ? 3 : 4;
+  const tiles: TileCode[] = [code];
+  const base = isRed(code) ? normal(5) : code;
+  while (tiles.length < copies) tiles.push(base);
+
+  if (type === 'closedKan') return createMeld('closedKan', tiles, null, null, null);
+  if (type === 'addedKan') {
+    const idx = calledIndexFor('pon', from);
+    return createMeld('addedKan', tiles, from, idx, idx);
+  }
+  return createMeld(type, tiles, from, calledIndexFor(type, from), null);
+}
+
 /** 副露1組を牌配列として展開（検索用） */
 export function flattenMeldTiles(meld: Meld): TileCode[] {
   return [...meld.tiles];

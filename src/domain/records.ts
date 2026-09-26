@@ -1,4 +1,4 @@
-import type { Attempt, DailyLog, Store, StudyState, TileCode } from './types';
+import type { Attempt, DailyLog, Store, StudyState } from './types';
 
 export function dayKey(d: Date = new Date()): string {
   const y = d.getFullYear();
@@ -101,23 +101,27 @@ export type Badge = {
   id: string;
   name: string;
   need: number;
-  tile: TileCode;
+  /** 0 始まりの段階。アイコンの形・色・線の本数に使う */
+  level: number;
 };
 
-/** 累計学習量（テストで解いた数＋確認した数）で進化する称号 */
+/**
+ * 累計学習量（テストで解いた数＋確認した数）で進化する称号。
+ * 雀魂（初心・雀士・雀傑・雀豪・雀聖・魂天）や天鳳（新人・級・段・天鳳位）の段位名と重ならない名前にする。
+ */
 export const BADGES: Badge[] = [
-  { id: 'novice', name: '雀士見習い', need: 0, tile: '1s' },
-  { id: 'beginner', name: '初心者', need: 10, tile: '1p' },
-  { id: 'elementary', name: '初級者', need: 30, tile: '1m' },
-  { id: 'intermediate', name: '中級者', need: 60, tile: '5p' },
-  { id: 'advanced', name: '上級者', need: 100, tile: '0p' },
-  { id: 'dan1', name: '初段', need: 200, tile: '1z' },
-  { id: 'dan2', name: '二段', need: 350, tile: '2z' },
-  { id: 'dan3', name: '三段', need: 500, tile: '3z' },
-  { id: 'dan4', name: '四段', need: 800, tile: '4z' },
-  { id: 'gou', name: '雀豪', need: 1200, tile: '5z' },
-  { id: 'sei', name: '雀聖', need: 2000, tile: '6z' },
-  { id: 'shin', name: '雀神', need: 3000, tile: '7z' },
+  { id: 'egg', name: '卓のたまご', need: 0, level: 0 },
+  { id: 'first', name: 'はじめの一打', need: 10, level: 1 },
+  { id: 'shape', name: '形の探究者', need: 30, level: 2 },
+  { id: 'ukeire', name: '受け入れ職人', need: 60, level: 3 },
+  { id: 'oshihiki', name: '押し引き上手', need: 100, level: 4 },
+  { id: 'efficiency', name: '牌効率の達人', need: 200, level: 5 },
+  { id: 'reader', name: '読みの名手', need: 350, level: 6 },
+  { id: 'tactician', name: '卓上の軍師', need: 500, level: 7 },
+  { id: 'sage', name: '牌の賢者', need: 800, level: 8 },
+  { id: 'ruler', name: '卓の覇者', need: 1200, level: 9 },
+  { id: 'legend', name: '伝説の打ち手', need: 2000, level: 10 },
+  { id: 'summit', name: '極みの打ち手', need: 3000, level: 11 },
 ];
 
 export type BadgeStatus = {

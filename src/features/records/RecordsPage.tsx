@@ -1,25 +1,10 @@
 import { useMemo } from 'react';
 import { useApp } from '@/app/store';
-import { tileImageUrl } from '@/components/tileImages';
-import {
-  BADGES,
-  badgeStatus,
-  dailyTotals,
-  dayKey,
-  studyStreak,
-  type Badge,
-} from '@/domain/records';
+import { BadgeIcon } from '@/components/BadgeIcon';
+import { BADGES, badgeStatus, dailyTotals, dayKey, studyStreak } from '@/domain/records';
 
 const WEEKDAYS = ['日', '月', '火', '水', '木', '金', '土'];
 const DAYS_SHOWN = 14;
-
-function BadgeMedal({ badge, locked = false, large = false }: { badge: Badge; locked?: boolean; large?: boolean }) {
-  return (
-    <span className={`medal${locked ? ' is-locked' : ''}${large ? ' medal--large' : ''}`} aria-hidden>
-      <img src={tileImageUrl(badge.tile)} alt="" draggable={false} />
-    </span>
-  );
-}
 
 export function RecordsPage() {
   const { store } = useApp();
@@ -58,7 +43,7 @@ export function RecordsPage() {
       </header>
 
       <section className="panel status-card">
-        <BadgeMedal badge={status.current} large />
+        <BadgeIcon level={status.current.level} size={76} />
         <div className="status-card__body">
           <p className="status-card__label">現在の称号</p>
           <p className="status-card__name">{status.current.name}</p>
@@ -131,7 +116,7 @@ export function RecordsPage() {
             const got = totals.total >= b.need;
             return (
               <li key={b.id} className={got ? 'is-got' : ''}>
-                <BadgeMedal badge={b} locked={!got} />
+                <BadgeIcon level={b.level} locked={!got} size={48} />
                 <span className="badge-grid__name">{b.name}</span>
                 <span className="badge-grid__need">{b.need === 0 ? 'はじめから' : `累計${b.need}`}</span>
               </li>

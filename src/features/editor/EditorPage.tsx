@@ -3,11 +3,10 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useApp } from '@/app/store';
 import { HandView } from '@/components/HandView';
 import { TilePalette } from '@/components/TilePalette';
-import { TileFace } from '@/components/TileFace';
 import { WanpaiDora } from '@/components/WanpaiDora';
 import { contextSummary } from '@/domain/context';
 import { createId, nowIso } from '@/domain/ids';
-import { createMeld } from '@/domain/melds';
+import { buildMeldFromTile } from '@/domain/melds';
 import { maybeSortConcealed } from '@/domain/sort';
 import {
   emptyContext,
@@ -24,12 +23,11 @@ import { compressImageFile } from '@/export/renderTiles';
 
 type Target = 'concealed' | 'dora' | 'meld';
 
-type MeldDraft = {
-  type: MeldType;
-  tiles: TileCode[];
-  from: MeldFrom | null;
-  calledIndex: number | null;
-};
+const MELD_FROM_OPTS: Array<{ value: MeldFrom; label: string }> = [
+  { value: 'left', label: '左家' },
+  { value: 'opposite', label: '対面' },
+  { value: 'right', label: '右家' },
+];
 
 const INPUT_TABS: Array<{ key: Target; label: string; meldType?: MeldType }> = [
   { key: 'concealed', label: '手牌' },
@@ -53,7 +51,7 @@ const SEAT_OPTS: Array<{ value: Wind; label: string }> = [
   { value: '4z', label: '北' },
 ];
 
-/** 手牌の上限（副露1組=3枚相当）。ツモ枠は使わない。 */
+/** 門前の手牌の上限。副露1組ごとに3枚減る（槓は4枚使うので合計は槓の数だけ14枚を超える）。 */
 function handTileMax(meldCount: number): number {
   return Math.max(0, 14 - meldCount * 3);
 }
@@ -91,13 +89,17 @@ export function EditorPage() {
   const [dirty, setDirty] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [warns, setWarns] = useState<string[]>([]);
-  const [meldDraft, setMeldDraft] = useState<MeldDraft | null>(null);
-  const [activeMeldType, setActiveMeldType] = useState<MeldType>('chi');
+  const [meldType, setMeldType] = useState<MeldType>('chi');
+  const [meldFrom, setMeldFrom] = useState<MeldFrom>('left');
   const [imageMsg, setImageMsg] = useState<string | null>(null);
 
   const autoSort = store.settings.autoSort;
   const handMax = handTileMax(melds.length);
   const handCount = concealed.length;
+  const kanCount = melds.filter((m) => m.tiles.length === 4).length;
+  const totalMax = 14 + kanCount;
+  const totalCount = concealed.length + melds.reduce((n, m) => n + m.tiles.length, 0);
+  const acceptedSet = useMemo(() => new Set(accepted), [accepted]);
 
   useEffect(() => {
     const onBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -132,11 +134,38 @@ export function EditorPage() {
       const prev = doraIndicators;
       setDora([...doraIndicators, code]);
       pushHistory(() => setDora(prev));
-    } else if (target === 'meld' && meldDraft) {
-      const need = meldDraft.type === 'chi' || meldDraft.type === 'pon' ? 3 : 4;
-      if (meldDraft.tiles.length >= need) return;
-      setMeldDraft({ ...meldDraft, tiles: [...meldDraft.tiles, code] });
+    } else if (target === 'meld') {
+      addMeld(code);
     }
+  };
+
+  const addMeld = (code: TileCode) => {
+    if (melds.length >= LIMITS.meldsMax) {
+      setError('副露は最大4組です');
+      return;
+    }
+    if (concealed.length > handTileMax(melds.length + 1)) {
+      setError(
+        `鳴きを追加すると14枚を超えます。先に手牌を${concealed.length - handTileMax(melds.length + 1)}枚減らしてください`,
+      );
+      return;
+    }
+    const built = buildMeldFromTile(meldType, code, meldFrom);
+    if (!built.ok) {
+      setError(built.reason);
+      return;
+    }
+    const prev = melds;
+    setMelds([...melds, built.meld]);
+    pushHistory(() => setMelds(prev));
+    setError(null);
+  };
+
+  const removeMeld = (meldId: string) => {
+    mark();
+    const prev = melds;
+    setMelds(melds.filter((m) => m.id !== meldId));
+    pushHistory(() => setMelds(prev));
   };
 
   const removeConcealedAt = (index: number) => {
@@ -180,13 +209,8 @@ export function EditorPage() {
 
   const startMeldTab = (type: MeldType) => {
     setTarget('meld');
-    setActiveMeldType(type);
-    setMeldDraft({
-      type,
-      tiles: [],
-      from: type === 'closedKan' ? null : 'left',
-      calledIndex: type === 'closedKan' ? null : 0,
-    });
+    setMeldType(type);
+    if (type === 'chi') setMeldFrom('left');
   };
 
   const draftProblem = useMemo((): Problem => {
@@ -242,36 +266,6 @@ export function EditorPage() {
     navigate(`/problems/${draftProblem.id}`);
   };
 
-  const confirmMeld = () => {
-    if (!meldDraft) return;
-    const created = createMeld(
-      meldDraft.type,
-      meldDraft.tiles,
-      meldDraft.from,
-      meldDraft.calledIndex,
-      meldDraft.type === 'addedKan' ? meldDraft.calledIndex : null,
-    );
-    if (!created.ok) {
-      setError(created.reason);
-      return;
-    }
-    if (melds.length >= LIMITS.meldsMax) {
-      setError('副露は最大4組です');
-      return;
-    }
-    const nextMelds = [...melds, created.meld];
-    setMelds(nextMelds);
-    setConcealed(maybeSortConcealed(concealed.slice(0, handTileMax(nextMelds.length)), autoSort));
-    setMeldDraft({
-      type: activeMeldType,
-      tiles: [],
-      from: activeMeldType === 'closedKan' ? null : 'left',
-      calledIndex: activeMeldType === 'closedKan' ? null : 0,
-    });
-    mark();
-    setError(null);
-  };
-
   const onImage = async (file: File | null) => {
     if (!file) return;
     if (attachments.length >= LIMITS.attachmentsMax) {
@@ -304,10 +298,9 @@ export function EditorPage() {
     }
   };
 
-  const countLabel =
-    standardTileCount({ concealed, drawn: null, melds }) === 14
-      ? `${handCount}/${handMax}（14枚形）`
-      : `${handCount}/${handMax}`;
+  const countLabel = `${totalCount}/${totalMax}枚${kanCount > 0 ? `（槓+${kanCount}）` : ''}${
+    standardTileCount({ concealed, drawn: null, melds }) === 14 ? ' ✓' : ''
+  }`;
 
   return (
     <div className="page page--editor">
@@ -472,9 +465,10 @@ export function EditorPage() {
             melds={melds}
             tight
             onSelectConcealed={removeConcealedAt}
+            onRemoveMeld={removeMeld}
           />
           {handCount === 0 && melds.length === 0 && (
-            <p className="hand-stage__empty">下の牌をタップして入力（最大{handMax}枚）</p>
+            <p className="hand-stage__empty">下の牌をタップして入力（鳴き込みで14枚、槓は1枚増）</p>
           )}
         </div>
 
@@ -495,7 +489,7 @@ export function EditorPage() {
           {INPUT_TABS.map((tab) => {
             const selected =
               tab.key === 'meld'
-                ? target === 'meld' && activeMeldType === tab.meldType
+                ? target === 'meld' && meldType === tab.meldType
                 : target === tab.key;
             return (
               <button
@@ -506,10 +500,7 @@ export function EditorPage() {
                 className={selected ? 'is-active' : ''}
                 onClick={() => {
                   if (tab.key === 'meld' && tab.meldType) startMeldTab(tab.meldType);
-                  else {
-                    setTarget(tab.key);
-                    setMeldDraft(null);
-                  }
+                  else setTarget(tab.key);
                 }}
               >
                 {tab.label}
@@ -518,77 +509,33 @@ export function EditorPage() {
           })}
         </div>
 
-        {target === 'meld' && meldDraft && (
-          <div className="meld-draft">
-            {meldDraft.type !== 'closedKan' && (
-              <div className="field-row">
-                <label className="field">
-                  <span>取得元</span>
-                  <select
-                    value={meldDraft.from ?? 'left'}
-                    onChange={(e) =>
-                      setMeldDraft({ ...meldDraft, from: e.target.value as MeldFrom })
-                    }
-                    disabled={meldDraft.type === 'chi'}
+        {target === 'meld' && (
+          <div className="meld-bar">
+            {meldType !== 'closedKan' && (
+              <div className="seg" role="group" aria-label="取得元">
+                {MELD_FROM_OPTS.map((o) => (
+                  <button
+                    key={o.value}
+                    type="button"
+                    className={meldFrom === o.value ? 'is-on' : ''}
+                    disabled={meldType === 'chi' && o.value !== 'left'}
+                    onClick={() => setMeldFrom(o.value)}
                   >
-                    <option value="left">左家</option>
-                    <option value="opposite">対面</option>
-                    <option value="right">右家</option>
-                  </select>
-                </label>
-                <label className="field">
-                  <span>鳴き位置</span>
-                  <input
-                    type="number"
-                    min={0}
-                    max={3}
-                    value={meldDraft.calledIndex ?? 0}
-                    onChange={(e) =>
-                      setMeldDraft({ ...meldDraft, calledIndex: Number(e.target.value) })
-                    }
-                  />
-                </label>
+                    {o.label}
+                  </button>
+                ))}
               </div>
             )}
-            <div className="tile-row">
-              {meldDraft.tiles.map((c, i) => (
-                <TileFace key={i} code={c} size={32} />
-              ))}
-            </div>
-            <div className="btn-row btn-row--compact">
-              <button type="button" className="btn btn-primary" onClick={confirmMeld}>
-                副露を確定
-              </button>
-              <button
-                type="button"
-                className="btn"
-                onClick={() => setMeldDraft({ ...meldDraft, tiles: [] })}
-              >
-                クリア
-              </button>
-            </div>
-            {melds.map((m) => (
-              <div key={m.id} className="btn-row btn-row--compact">
-                <span>{m.type}</span>
-                <button
-                  type="button"
-                  className="btn btn-danger"
-                  onClick={() => {
-                    const nextMelds = melds.filter((x) => x.id !== m.id);
-                    setMelds(nextMelds);
-                    setConcealed(
-                      maybeSortConcealed(
-                        concealed.slice(0, handTileMax(nextMelds.length)),
-                        autoSort,
-                      ),
-                    );
-                    mark();
-                  }}
-                >
-                  削除
-                </button>
-              </div>
-            ))}
+            <span className="meld-bar__hint">
+              {melds.length >= LIMITS.meldsMax
+                ? '副露は4組までです'
+                : concealed.length > handTileMax(melds.length + 1)
+                  ? `手牌をあと${concealed.length - handTileMax(melds.length + 1)}枚減らすと追加できます`
+                  : meldType === 'chi'
+                    ? '順子の一番小さい牌をタップ'
+                    : '鳴く牌をタップ'}
+              ・副露はタップで削除
+            </span>
           </div>
         )}
 
@@ -598,11 +545,11 @@ export function EditorPage() {
             (target === 'concealed' && handCount >= handMax) ||
             (target === 'dora' && doraIndicators.length >= LIMITS.doraMax) ||
             (target === 'meld' &&
-              !!meldDraft &&
-              meldDraft.tiles.length >=
-                (meldDraft.type === 'chi' || meldDraft.type === 'pon' ? 3 : 4))
+              (melds.length >= LIMITS.meldsMax ||
+                concealed.length > handTileMax(melds.length + 1)))
           }
         />
+        {error && target === 'meld' && <p className="error">{error}</p>}
       </section>
 
       <label className="field">
@@ -632,23 +579,22 @@ export function EditorPage() {
         </label>
         {answerEnabled && (
           <div>
-            <p className="hint">手牌から正解牌を選択（複数可）</p>
-            <div className="tile-row tile-row--wrap">
-              {concealed.map((c, i) => {
-                const on = accepted.includes(c);
-                return (
-                  <TileFace
-                    key={`${c}-${i}`}
-                    code={c}
-                    size={32}
-                    selected={on}
-                    onClick={() => {
-                      setAccepted((a) => (on ? a.filter((x) => x !== c) : [...a, c]));
-                      mark();
-                    }}
-                  />
-                );
-              })}
+            <p className="hint">切るのが正解の牌をタップ（複数可・もう一度で解除）</p>
+            <div className="hand-stage hand-stage--pick">
+              <HandView
+                concealed={concealed}
+                drawn={null}
+                melds={melds}
+                tight
+                selectablePool="concealedDrawn"
+                marks={new Map(accepted.map((c) => [c, 'correct' as const]))}
+                onSelectCode={(c) => {
+                  setAccepted((a) =>
+                    acceptedSet.has(c) ? a.filter((x) => x !== c) : [...a, c],
+                  );
+                  mark();
+                }}
+              />
             </div>
           </div>
         )}

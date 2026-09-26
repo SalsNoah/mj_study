@@ -313,21 +313,24 @@ textarea { min-height: 96px; resize: vertical; }
   border-radius: 2px;
 }
 
+/* 手牌一列＋右側に縮小した副露。選択した牌は少し持ち上げる */
 .hand-view--tight {
-  gap: 4px;
+  --meld-tile-w: calc(var(--hand-tile-w) * 0.7);
   width: 100%;
 }
-.hand-view--tight .hand-view__main {
-  display: block;
-  width: 100%;
+.hand-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  row-gap: 4px;
+  padding-top: calc(var(--hand-tile-w) * 0.3);
 }
 .hand-strip {
   display: flex;
+  flex: 0 0 auto;
   flex-wrap: nowrap;
   gap: 0;
-  width: 100%;
   align-items: flex-end;
-  justify-content: flex-start;
 }
 .hand-strip > .tile-btn,
 .hand-strip > .tile-face {
@@ -340,37 +343,90 @@ textarea { min-height: 96px; resize: vertical; }
   min-height: 0 !important;
   aspect-ratio: 66 / 90;
   border-radius: 0;
+  transition: transform 0.12s ease;
 }
-.hand-strip > .tile-btn.is-selected,
-.hand-strip > .tile-face.is-selected {
-  outline-offset: -1px;
+.hand-strip > .tile-btn.is-selected {
+  transform: translateY(calc(var(--hand-tile-w) * -0.3));
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
   z-index: 1;
 }
-.hand-view--tight .hand-view__melds {
-  gap: 6px;
+.hand-strip > .is-correct {
+  outline: 2px solid #1f8a4c;
+  outline-offset: -2px;
+  box-shadow: inset 0 0 0 99px rgba(31, 138, 76, 0.14);
+  z-index: 1;
 }
-.hand-view--tight .meld-view {
+.hand-strip > .is-wrong {
+  transform: translateY(calc(var(--hand-tile-w) * -0.3));
+  outline: 2px solid var(--danger);
+  outline-offset: -2px;
+  z-index: 1;
+}
+.hand-melds {
   display: flex;
+  align-items: flex-end;
+  gap: calc(var(--hand-tile-w) * 0.15);
+  margin-left: auto;
+  padding-left: calc(var(--hand-tile-w) * 0.25);
+}
+.hand-melds .meld-view {
+  display: flex;
+  align-items: flex-end;
   gap: 0;
 }
-.hand-view--tight .meld-view .tile-btn,
-.hand-view--tight .meld-view .tile-face {
-  flex: 0 0 var(--hand-tile-w);
-  width: var(--hand-tile-w) !important;
+.hand-melds .tile-btn,
+.hand-melds .tile-face {
+  flex: 0 0 var(--meld-tile-w);
+  width: var(--meld-tile-w) !important;
   height: auto !important;
   min-width: 0 !important;
   min-height: 0 !important;
   aspect-ratio: 66 / 90;
 }
-.hand-view--tight .meld-view .is-rotated {
-  flex-basis: calc(var(--hand-tile-w) * 90 / 66);
-  width: calc(var(--hand-tile-w) * 90 / 66) !important;
+.hand-melds .is-rotated {
+  flex-basis: calc(var(--meld-tile-w) * 90 / 66);
+  width: calc(var(--meld-tile-w) * 90 / 66) !important;
   aspect-ratio: 90 / 66;
 }
-.hand-view--tight .meld-view > span {
+.meld-btn {
+  appearance: none;
   display: inline-flex;
-  align-items: flex-end;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 3px;
 }
+.meld-btn:active { opacity: 0.6; }
+.mark-legend {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 6px 0 0;
+  font-size: 0.74rem;
+  color: var(--muted);
+}
+.mark-legend i {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  margin-left: 6px;
+}
+.mark-legend i:first-child { margin-left: 0; }
+.mark-legend__correct { border: 2px solid #1f8a4c; background: rgba(31, 138, 76, 0.14); }
+.mark-legend__wrong { border: 2px solid var(--danger); }
+.hand-stage--pick { margin-top: 4px; }
+.meld-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  margin: 0 0 6px;
+}
+.meld-bar__hint { font-size: 0.74rem; color: var(--muted); }
+.seg button:disabled { opacity: 0.35; }
 
 .btn-row--compact {
   gap: 6px;
@@ -568,27 +624,11 @@ textarea { min-height: 96px; resize: vertical; }
   color: var(--accent);
 }
 .status-card__total { margin: 0; font-size: 0.82rem; }
-.medal {
-  display: inline-grid;
-  place-items: center;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 30% 30%, #f7e7a8, #c9a13b 70%, #9c7a22);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18), inset 0 0 0 2px rgba(255, 255, 255, 0.5);
+.badge-icon {
   flex: 0 0 auto;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.22));
 }
-.medal img {
-  width: 44%;
-  height: auto;
-  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.25));
-}
-.medal--large { width: 76px; height: 76px; }
-.medal.is-locked {
-  background: #d9d6cf;
-  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.6);
-}
-.medal.is-locked img { filter: grayscale(1); opacity: 0.35; }
+.badge-icon.is-locked { filter: grayscale(0.55); opacity: 0.32; }
 .stat-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -871,12 +911,7 @@ textarea { min-height: 96px; resize: vertical; }
 }
 .hand-view__melds { display: flex; flex-wrap: wrap; gap: 8px; }
 .meld-view { display: flex; align-items: flex-end; gap: 2px; }
-.meld-view__stack { position: relative; display: inline-flex; }
-.meld-view__added {
-  position: absolute;
-  left: 4px;
-  top: -18px;
-}
+.meld-view__stack { display: inline-flex; flex-direction: column; }
 
 .problem-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
 .problem-card {

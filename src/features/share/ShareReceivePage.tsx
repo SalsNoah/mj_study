@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '@/app/store';
-import { HandView } from '@/components/HandView';
+import { HandBoard } from '@/components/HandBoard';
 import { decodeSharePayload, type SharePayload } from '@/domain/share';
 
 export function ShareReceivePage({ encoded }: { encoded: string }) {
@@ -37,14 +37,15 @@ export function ShareReceivePage({ encoded }: { encoded: string }) {
       </header>
       <section className="panel">
         <h2>{payload.title.trim() || '無題の問題'}</h2>
-        <HandView
+        <HandBoard
           concealed={payload.concealed}
           drawn={payload.drawn}
           melds={payload.melds.map((m, i) => ({
             id: `preview-${i}`,
             ...m,
           }))}
-          size={40}
+          doraIndicators={payload.doraIndicators}
+          context={payload.context}
         />
         {'explanation' in payload && payload.explanation && (
           <details>

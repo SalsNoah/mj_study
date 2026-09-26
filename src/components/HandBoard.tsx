@@ -1,6 +1,6 @@
 import type { Meld, ProblemContext, TileCode } from '@/domain/types';
 import { contextSummary, scoresSummary } from '@/domain/context';
-import { HandView } from './HandView';
+import { HandView, type TileMark } from './HandView';
 import { WanpaiDora } from './WanpaiDora';
 
 type Props = {
@@ -11,10 +11,11 @@ type Props = {
   context?: ProblemContext;
   selectable?: boolean;
   selectedCodes?: ReadonlySet<TileCode>;
+  marks?: ReadonlyMap<TileCode, TileMark>;
   onSelectCode?: (code: TileCode) => void;
 };
 
-/** 参考サイト風の盤面：左上に対局条件、右上に王牌とドラ、下に手牌一列 */
+/** 問題作成画面と同じ盤面：左上に対局条件、右上に王牌とドラ、下に手牌一列＋縮小した副露 */
 export function HandBoard({
   concealed,
   drawn = null,
@@ -23,6 +24,7 @@ export function HandBoard({
   context,
   selectable = false,
   selectedCodes,
+  marks,
   onSelectCode,
 }: Props) {
   const scores = context ? scoresSummary(context) : '';
@@ -42,6 +44,7 @@ export function HandBoard({
         tight
         selectablePool={selectable ? 'concealedDrawn' : 'none'}
         selectedCodes={selectedCodes}
+        marks={marks}
         onSelectCode={selectable ? onSelectCode : undefined}
       />
     </div>

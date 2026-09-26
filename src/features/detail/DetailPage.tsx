@@ -2,7 +2,6 @@ import { useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useApp } from '@/app/store';
 import { HandBoard } from '@/components/HandBoard';
-import { TileFace } from '@/components/TileFace';
 import { accuracyForProblem, isInTest } from '@/domain/quiz';
 import { formatShortDate } from '@/domain/records';
 import {
@@ -121,7 +120,17 @@ export function DetailPage() {
           melds={problem.melds}
           doraIndicators={problem.doraIndicators}
           context={problem.context}
+          marks={
+            problem.answerEnabled
+              ? new Map(problem.acceptedDiscards.map((c) => [c, 'correct' as const]))
+              : undefined
+          }
         />
+        {problem.answerEnabled && (
+          <p className="mark-legend">
+            <i className="mark-legend__correct" />正解（切る牌）
+          </p>
+        )}
       </section>
 
       <section className="panel">
@@ -201,16 +210,6 @@ export function DetailPage() {
         <section className="panel">
           <h2 className="section-title">自分のメモ</h2>
           <p className="prewrap">{problem.privateMemo}</p>
-        </section>
-      )}
-      {problem.answerEnabled && (
-        <section className="panel">
-          <h2 className="section-title">正解</h2>
-          <div className="tile-row">
-            {problem.acceptedDiscards.map((c, i) => (
-              <TileFace key={i} code={c} size={36} />
-            ))}
-          </div>
         </section>
       )}
       {problem.sourceUrl && (
