@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { clearImportDraft, peekImportDraft } from '@/features/import/draft';
 import { useApp } from '@/app/store';
 import { HandView } from '@/components/HandView';
 import { TilePalette } from '@/components/TilePalette';
@@ -72,9 +73,16 @@ export function EditorPage() {
   const existing = store.problems.find((p) => p.id === id);
 
   const [title, setTitle] = useState(existing?.title ?? '');
-  const [concealed, setConcealed] = useState<TileCode[]>(() => initialHand(existing));
-  const [melds, setMelds] = useState<Meld[]>(existing?.melds ?? []);
-  const [doraIndicators, setDora] = useState<TileCode[]>(existing?.doraIndicators ?? []);
+  const [imported] = useState(() => (isNew ? peekImportDraft() : null));
+  const [concealed, setConcealed] = useState<TileCode[]>(() =>
+    imported
+      ? maybeSortConcealed(imported.concealed.slice(0, handTileMax(imported.melds.length)), true)
+      : initialHand(existing),
+  );
+  const [melds, setMelds] = useState<Meld[]>(imported?.melds ?? existing?.melds ?? []);
+  const [doraIndicators, setDora] = useState<TileCode[]>(
+    imported?.doraIndicators ?? existing?.doraIndicators ?? [],
+  );
   const [target, setTarget] = useState<Target>('concealed');
   const [history, setHistory] = useState<Array<() => void>>([]);
   const [answerEnabled, setAnswerEnabled] = useState(existing?.answerEnabled ?? false);
@@ -83,10 +91,14 @@ export function EditorPage() {
   const [privateMemo, setPrivateMemo] = useState(existing?.privateMemo ?? '');
   const [tagIds, setTagIds] = useState<string[]>(existing?.tagIds ?? []);
   const [tagInput, setTagInput] = useState('');
-  const [context, setContext] = useState(existing?.context ?? emptyContext());
+  const [context, setContext] = useState(imported?.context ?? existing?.context ?? emptyContext());
   const [attachments, setAttachments] = useState(existing?.attachments ?? []);
   const [sourceUrl, setSourceUrl] = useState(existing?.sourceUrl ?? '');
-  const [dirty, setDirty] = useState(false);
+  const [dirty, setDirty] = useState(!!imported);
+
+  useEffect(() => {
+    if (imported) clearImportDraft();
+  }, [imported]);
   const [error, setError] = useState<string | null>(null);
   const [warns, setWarns] = useState<string[]>([]);
   const [meldType, setMeldType] = useState<MeldType>('chi');
@@ -306,6 +318,11 @@ export function EditorPage() {
     <div className="page page--editor">
       <header className="page-header page-header--compact">
         <h1>{isNew ? '問題を作成' : '問題を編集'}</h1>
+        {isNew && (
+          <Link className="btn btn-sm" to="/import">
+            スクショから
+          </Link>
+        )}
         <p className="count-pill" aria-live="polite">
           {countLabel}
         </p>

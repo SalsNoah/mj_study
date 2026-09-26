@@ -8,6 +8,7 @@ import { DetailPage } from '@/features/detail/DetailPage';
 import { TestPage } from '@/features/test/TestPage';
 import { RecordsPage } from '@/features/records/RecordsPage';
 import { SettingsPage } from '@/features/settings/SettingsPage';
+import { ImportPage } from '@/features/import/ImportPage';
 import { ShareReceivePage } from '@/features/share/ShareReceivePage';
 import './styles.css';
 
@@ -102,6 +103,7 @@ function AppRoutes() {
           <Route path="/test" element={<TestPage />} />
           <Route path="/review" element={<Navigate to="/test" replace />} />
           <Route path="/records" element={<RecordsPage />} />
+          <Route path="/import" element={<ImportPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
