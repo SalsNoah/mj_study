@@ -26,3 +26,16 @@ export function peekImportDraft(): ImportDraft | null {
 export function clearImportDraft(): void {
   sessionStorage.removeItem(KEY);
 }
+
+/** 作成画面で選んだスクショを読み取り画面へ渡す（画像は大きいので保存せずメモリで渡す） */
+let pendingShot: Blob | null = null;
+
+export function setPendingShot(file: Blob): void {
+  pendingShot = file;
+}
+
+export function takePendingShot(): Blob | null {
+  const file = pendingShot;
+  pendingShot = null;
+  return file;
+}

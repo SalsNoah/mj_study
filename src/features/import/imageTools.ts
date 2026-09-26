@@ -431,13 +431,17 @@ export function segmentMelds(img: Img, aspect: number): MeldSpan[][] {
 
 export type GlyphBox = Rect;
 
+export type TextTone = 'bright' | 'dark' | 'auto';
+
 /**
- * 点数や「東1局」などの文字を1文字ずつに分ける。背景と文字のうち少ない方を文字とみなす。
+ * 点数や「東1局」などの文字を1文字ずつに分ける。tone で文字の明暗を指定する（auto は面積の少ない方）。
  * mergeNarrow は漢字（北など左右に分かれる字）を1文字にまとめるときだけ使う。
  */
 export function segmentGlyphs(
   img: Img,
   mergeNarrow: boolean,
+  splitWide = true,
+  tone: TextTone = 'auto',
 ): { boxes: GlyphBox[]; mask: Uint8Array; ink: Float32Array } {
   const lum = luminance(img);
   const thr = otsu(lum);
@@ -451,104 +455,144 @@ export function segmentGlyphs(
       sumB += v;
     } else sumD += v;
   }
-  const textIsBright = bright < lum.length / 2;
-  const mask = new Uint8Array(lum.length);
-  for (let i = 0; i < lum.length; i++) mask[i] = (lum[i]! > thr) === textIsBright ? 1 : 0;
-  // 文字らしさ（0〜1）。二値化で潰れる細部（3と8の違いなど）を特徴量に残すため濃淡のまま持つ
   const meanB = bright ? sumB / bright : 255;
   const meanD = lum.length - bright ? sumD / (lum.length - bright) : 0;
-  const fg = textIsBright ? meanB : meanD;
-  const bg = textIsBright ? meanD : meanB;
-  const span = fg - bg || 1;
-  const ink = new Float32Array(lum.length);
-  for (let i = 0; i < lum.length; i++) ink[i] = Math.max(0, Math.min(1, (lum[i]! - bg) / span));
-  // 下線や枠のように横いっぱいに伸びる行は文字ではないので消す（雀魂の手番表示の線など）
-  for (let y = 0; y < h; y++) {
-    let n = 0;
-    for (let x = 0; x < w; x++) n += mask[y * w + x]!;
-    if (n > w * 0.7) for (let x = 0; x < w; x++) mask[y * w + x] = 0;
-  }
 
-  const counts: number[] = [];
-  for (let x = 0; x < w; x++) {
-    let n = 0;
-    for (let y = 0; y < h; y++) n += mask[y * w + x]!;
-    counts.push(n);
+  const build = (textIsBright: boolean) => {
+    const mask = new Uint8Array(lum.length);
+    for (let i = 0; i < lum.length; i++) mask[i] = (lum[i]! > thr) === textIsBright ? 1 : 0;
+    // 下線や枠の線は文字ではないので消す。横は文字1〜2個分より長い線、縦は上端から下端まで届く線
+    const maxRun = Math.max(w * 0.35, h * 1.5);
+    for (let y = 0; y < h; y++) {
+      let start = -1;
+      for (let x = 0; x <= w; x++) {
+        const on = x < w && mask[y * w + x] === 1;
+        if (on && start < 0) start = x;
+        if (!on && start >= 0) {
+          if (x - start > maxRun) for (let i = start; i < x; i++) mask[y * w + i] = 0;
+          start = -1;
+        }
+      }
+    }
+    for (let x = 0; x < w; x++) {
+      let n = 0;
+      for (let y = 0; y < h; y++) n += mask[y * w + x]!;
+      if (n >= h - 1) for (let y = 0; y < h; y++) mask[y * w + x] = 0;
+    }
+    // 文字らしさ（0〜1）。二値化で潰れる細部（3と8の違いなど）を特徴量に残すため濃淡のまま持つ
+    const fg = textIsBright ? meanB : meanD;
+    const bg = textIsBright ? meanD : meanB;
+    const span = fg - bg || 1;
+    const ink = new Float32Array(lum.length);
+    for (let i = 0; i < lum.length; i++) ink[i] = mask[i] ? Math.max(0, Math.min(1, (lum[i]! - bg) / span)) : 0;
+    return { boxes: glyphBoxes(mask, w, h, mergeNarrow, splitWide), mask, ink };
+  };
+
+  return build(tone === 'auto' ? bright < lum.length / 2 : tone === 'bright');
+}
+
+/** つながった画素のかたまりを文字の部品として取り出す（上下に重なる部品は1文字にまとめる） */
+function glyphBoxes(
+  mask: Uint8Array,
+  w: number,
+  h: number,
+  mergeNarrow: boolean,
+  splitWide: boolean,
+): GlyphBox[] {
+  const seen = new Uint8Array(w * h);
+  const parts: Array<{ x0: number; y0: number; x1: number; y1: number; area: number }> = [];
+  const stack: number[] = [];
+  for (let s = 0; s < w * h; s++) {
+    if (!mask[s] || seen[s]) continue;
+    seen[s] = 1;
+    stack.push(s);
+    const p = { x0: w, y0: h, x1: 0, y1: 0, area: 0 };
+    while (stack.length) {
+      const i = stack.pop()!;
+      const x = i % w;
+      const y = (i - x) / w;
+      p.area++;
+      if (x < p.x0) p.x0 = x;
+      if (y < p.y0) p.y0 = y;
+      if (x + 1 > p.x1) p.x1 = x + 1;
+      if (y + 1 > p.y1) p.y1 = y + 1;
+      for (let dy = -1; dy <= 1; dy++) {
+        for (let dx = -1; dx <= 1; dx++) {
+          const nx = x + dx;
+          const ny = y + dy;
+          if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue;
+          const j = ny * w + nx;
+          if (seen[j] || !mask[j]) continue;
+          seen[j] = 1;
+          stack.push(j);
+        }
+      }
+    }
+    if (p.area >= Math.max(3, h * h * 0.004)) parts.push(p);
   }
-  // 文字の縁取りやにじみで隙間が完全に空かないことがあるので、濃い列の1割未満は隙間とみなす
-  const minCol = Math.max(1, Math.round(h * 0.04), Math.round(Math.max(...counts, 0) * 0.1));
-  let runs = runsOf(
-    counts.map((n) => n >= minCol),
-    0,
-  );
+  parts.sort((a, b) => a.x0 - b.x0);
+
+  // 横に大きく重なる部品（「局」の上下や「5」の頭など）は同じ文字
+  const merged: typeof parts = [];
+  for (const p of parts) {
+    const hit = merged.find(
+      (q) => Math.min(q.x1, p.x1) - Math.max(q.x0, p.x0) >= Math.min(q.x1 - q.x0, p.x1 - p.x0) * 0.5,
+    );
+    if (hit) {
+      hit.x0 = Math.min(hit.x0, p.x0);
+      hit.y0 = Math.min(hit.y0, p.y0);
+      hit.x1 = Math.max(hit.x1, p.x1);
+      hit.y1 = Math.max(hit.y1, p.y1);
+      hit.area += p.area;
+    } else merged.push({ ...p });
+  }
+  merged.sort((a, b) => a.x0 - b.x0);
+
+  let boxes: GlyphBox[] = merged
+    .map((p) => ({ x: p.x0, y: p.y0, w: p.x1 - p.x0, h: p.y1 - p.y0 }))
+    .filter((b) => b.h >= h * 0.12);
+
   if (mergeNarrow) {
-    const joined: Span[] = [];
-    for (const r of runs) {
+    const joined: GlyphBox[] = [];
+    for (const b of boxes) {
       const last = joined[joined.length - 1];
       if (
         last &&
-        r.x0 - last.x1 < h * 0.2 &&
-        last.x1 - last.x0 < h * 0.5 &&
-        r.x1 - r.x0 < h * 0.5 &&
-        r.x1 - last.x0 < h * 1.05
+        b.x - (last.x + last.w) < h * 0.2 &&
+        last.w < h * 0.5 &&
+        b.w < h * 0.5 &&
+        b.x + b.w - last.x < h * 1.05
       ) {
-        last.x1 = r.x1;
-      } else joined.push({ ...r });
+        const x1 = Math.max(last.x + last.w, b.x + b.w);
+        const y1 = Math.max(last.y + last.h, b.y + b.h);
+        last.y = Math.min(last.y, b.y);
+        last.w = x1 - last.x;
+        last.h = y1 - last.y;
+      } else joined.push({ ...b });
     }
-    runs = joined;
+    boxes = joined;
   }
+  if (mergeNarrow || !splitWide || boxes.length === 0) return boxes;
 
-  const boxes: GlyphBox[] = [];
-  for (const r of runs) {
-    let top = -1;
-    let bottom = -1;
-    for (let y = 0; y < h; y++) {
-      let n = 0;
-      for (let x = r.x0; x < r.x1; x++) n += mask[y * w + x]!;
-      if (n > 0) {
-        if (top < 0) top = y;
-        bottom = y;
-      }
-    }
-    if (top < 0) continue;
-    const gh = bottom - top + 1;
-    if (gh < h * 0.12) continue;
-    const gw = r.x1 - r.x0;
-    // 数字がくっついて1つの塊になったときは、数字1文字の幅（高さの約0.7倍）で割った数に分ける。
-    // 区切りは等分位置の近くで一番薄い列に寄せる
-    const k =
-      !mergeNarrow && gh >= h * 0.5 && gw > gh * 1.1 ? Math.max(1, Math.round(gw / (gh * 0.7))) : 1;
-    const cuts = [r.x0];
-    for (let i = 1; i < k; i++) {
-      const ideal = r.x0 + (gw * i) / k;
-      const reach = Math.max(1, Math.round((gw / k) * 0.3));
-      let at = Math.round(ideal);
-      for (let x = Math.round(ideal - reach); x <= Math.round(ideal + reach); x++) {
-        if (x > cuts[cuts.length - 1]! && x < r.x1 && counts[x]! < counts[at]!) at = x;
-      }
-      cuts.push(at);
-    }
-    cuts.push(r.x1);
-    for (let i = 0; i < k; i++) {
-      boxes.push({ x: cuts[i]!, y: top, w: Math.max(1, cuts[i + 1]! - cuts[i]!), h: gh });
-    }
-  }
-  if (mergeNarrow) return { boxes, mask, ink };
-
-  // 字体が細いとき（天鳳など）に2文字がくっついた塊は、同じ範囲の1文字分の幅を基準に分ける（「1」は細いので基準にしない）
-  const tall = boxes.filter((b) => b.h >= h * 0.5);
-  const unit = Math.min(...tall.filter((b) => b.w >= b.h * 0.35).map((b) => b.w), Infinity);
-  if (!Number.isFinite(unit)) return { boxes, mask, ink };
-  const split: GlyphBox[] = [];
+  // 数字どうしが接して1つになったものは、同じ範囲の1文字分の幅で分ける（「1」は細いので基準にしない）
+  const tall = boxes.filter((b) => b.h >= h * 0.4 && b.w >= b.h * 0.35);
+  const widths = tall.map((b) => b.w).sort((a, b) => a - b);
+  const unit = widths.length >= 2 ? widths[Math.floor(widths.length / 2)]! : null;
+  const out: GlyphBox[] = [];
   for (const b of boxes) {
-    const k = b.h >= h * 0.5 && b.w > unit * 1.6 ? Math.round(b.w / unit) : 1;
-    for (let i = 0; i < k; i++) {
+    const k =
+      unit && b.w > unit * 1.6
+        ? Math.round(b.w / unit)
+        : !unit && b.w > b.h * 1.3
+          ? Math.round(b.w / (b.h * 0.7))
+          : 1;
+    for (let i = 0; i < Math.max(1, k); i++) {
       const x0 = Math.round(b.x + (b.w * i) / k);
       const x1 = Math.round(b.x + (b.w * (i + 1)) / k);
-      split.push({ x: x0, y: b.y, w: x1 - x0, h: b.h });
+      out.push({ x: x0, y: b.y, w: Math.max(1, x1 - x0), h: b.h });
     }
   }
-  return { boxes: split, mask, ink };
+  return out;
 }
 
 /** 天鳳の点数の末尾の小さい「00」やカンマなど、背の低い文字を除く（先頭のマイナスは残す） */
@@ -589,20 +633,4 @@ export function glyphFeature(ink: Float32Array | Uint8Array, width: number, box:
     }
   }
   return out;
-}
-
-/** 河の明るい面積の割合。1枚あたりの割合で割ると捨て牌の枚数になる */
-export function brightFraction(img: Img): number {
-  const lum = luminance(img);
-  const thr = otsu(lum);
-  let n = 0;
-  for (const v of lum) if (v > thr) n++;
-  return n / lum.length;
-}
-
-/** 河を6枚×数段と仮定したときの1枚あたりの面積の割合（学習前の初期値） */
-export function defaultRiverTileFraction(img: Img): number {
-  const tileW = img.width / 6;
-  const tileArea = tileW * tileW * 1.3 * 0.8;
-  return Math.min(0.5, tileArea / (img.width * img.height));
 }

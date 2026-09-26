@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
-import { clearImportDraft, peekImportDraft } from '@/features/import/draft';
+import { useNavigate, useParams } from 'react-router-dom';
+import { clearImportDraft, peekImportDraft, setPendingShot } from '@/features/import/draft';
 import { useApp } from '@/app/store';
 import { HandView } from '@/components/HandView';
 import { TilePalette } from '@/components/TilePalette';
@@ -319,14 +319,26 @@ export function EditorPage() {
       <header className="page-header page-header--compact">
         <h1>{isNew ? '問題を作成' : '問題を編集'}</h1>
         {isNew && (
-          <Link className="btn btn-sm" to="/import">
+          <label className="btn btn-sm shot-button">
             スクショから
-          </Link>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                e.target.value = '';
+                if (!f) return;
+                setPendingShot(f);
+                navigate('/import');
+              }}
+            />
+          </label>
         )}
         <p className="count-pill" aria-live="polite">
           {countLabel}
         </p>
       </header>
+      {imported && <p className="ok import-note">スクショから読み取りました。違うところがあれば直して保存してください。</p>}
 
       <section className="panel context-panel">
         <div className="ctx-toolbar" aria-label="対局条件">

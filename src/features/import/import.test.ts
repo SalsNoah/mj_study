@@ -9,7 +9,7 @@ import {
   type Img,
 } from './imageTools';
 import { classify, learn, prepareBank } from './templates';
-import { inferMeld, parseRound, parseScore, parseSeat, scoreChars, scoresBySeat } from './parse';
+import { inferMeld, parseRound, parseScore, parseSeat, scoreChars, scoresBySeat, splitMelds } from './parse';
 
 function fill(img: Img, x: number, y: number, w: number, h: number, rgb: [number, number, number]) {
   for (let yy = y; yy < y + h; yy++) {
@@ -191,5 +191,22 @@ describe('inferMeld', () => {
     ]);
     expect(closed.ok && closed.meld.type).toBe('closedKan');
     expect(inferMeld([{ label: '1m', rotated: false }, { label: null, rotated: false }]).ok).toBe(false);
+  });
+
+  it('splits melds that are lined up without gaps', () => {
+    const cell = (label: string, rotated = false) => ({ label, rotated });
+    const parts = splitMelds([
+      cell('2s', true),
+      cell('1s'),
+      cell('3s'),
+      cell('8p', true),
+      cell('7p'),
+      cell('9p'),
+      cell('5z', true),
+      cell('5z'),
+      cell('5z'),
+      cell('5z'),
+    ]);
+    expect(parts.map((p) => p.map((c) => c.label).join(' '))).toEqual(['2s 1s 3s', '8p 7p 9p', '5z 5z 5z 5z']);
   });
 });

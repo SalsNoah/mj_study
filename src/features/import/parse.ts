@@ -132,3 +132,31 @@ export function inferMeld(cells: MeldCell[]): { ok: true; meld: Meld } | { ok: f
   }
   return { ok: false, reason: `${codes.length}枚の組は副露として読めません` };
 }
+
+/**
+ * 隙間なく並んだ鳴き牌を1組ずつに分ける。1組は3枚か4枚で、横向きの牌を1枚含む
+ * （暗槓は両端が裏向き）。副露として成り立つ分け方を優先する。
+ */
+export function splitMelds<T extends MeldCell>(cells: T[]): T[][] {
+  const chunkScore = (chunk: T[]): number | null => {
+    const rotated = chunk.filter((c) => c.rotated).length;
+    const closedKan = chunk.length === 4 && chunk[0]!.label === 'back' && chunk[3]!.label === 'back';
+    if (!closedKan && rotated > (chunk.length === 4 ? 2 : 1)) return null;
+    let score = rotated === 1 || closedKan ? 1 : 0;
+    if (inferMeld(chunk).ok) score += 2;
+    return score;
+  };
+  const best: Array<{ score: number; parts: T[][] } | null> = [{ score: 0, parts: [] }];
+  for (let i = 1; i <= cells.length; i++) {
+    best[i] = null;
+    for (const size of [3, 4]) {
+      const prev = best[i - size];
+      if (i < size || !prev) continue;
+      const chunk = cells.slice(i - size, i);
+      const s = chunkScore(chunk);
+      if (s === null) continue;
+      if (!best[i] || prev.score + s > best[i]!.score) best[i] = { score: prev.score + s, parts: [...prev.parts, chunk] };
+    }
+  }
+  return best[cells.length]?.parts ?? [cells];
+}
