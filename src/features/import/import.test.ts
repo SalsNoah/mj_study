@@ -17,6 +17,7 @@ import {
   parseSeat,
   scoreChars,
   scoresBySeat,
+  sortedLabels,
   splitMelds,
 } from './parse';
 
@@ -181,6 +182,29 @@ describe('parsing read text', () => {
       west: 35000,
       north: null,
     });
+  });
+
+  it('keeps a sorted hand in order when choosing labels', () => {
+    const c = (entries: Array<[string, number]>) => new Map(entries);
+    // 3番目の牌は 9s が僅差で1位だが、右隣が 7s なので理牌の順に合う 7s を選ぶ
+    expect(
+      sortedLabels([
+        c([['3s', 0.9]]),
+        c([['3s', 0.9]]),
+        c([
+          ['9s', 0.88],
+          ['7s', 0.86],
+        ]),
+        c([['7s', 0.9]]),
+      ]),
+    ).toEqual(['3s', '3s', '7s', '7s']);
+    // 赤五は五と同じ位置に並ぶ
+    expect(sortedLabels([c([['4p', 0.9]]), c([['0p', 0.9]]), c([['5p', 0.9]]), c([['1z', 0.9]])])).toEqual([
+      '4p',
+      '0p',
+      '5p',
+      '1z',
+    ]);
   });
 
   it('estimates unread scores from the table total', () => {

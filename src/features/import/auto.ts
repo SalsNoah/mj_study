@@ -82,19 +82,19 @@ function tileRuns(m: Mask, y0: number, y1: number, reach: number): Run[] {
   });
   return blocks(flags, 1).map(({ a, b }) => {
     const width = b - a;
-    let top = -1;
-    let bottom = -1;
     const yy0 = Math.max(0, y0 - reach);
     const yy1 = Math.min(m.h, y1 + reach);
+    // 面が続く一番長い範囲を牌の高さとする。牌の中の細い線での途切れはつなぎ、
+    // 大きく離れたもの（画面の縁の白い線など）は含めない
+    const rows: boolean[] = [];
     for (let y = yy0; y < yy1; y++) {
       let n = 0;
       for (let x = a; x < b; x++) n += m.on[y * m.w + x]!;
-      if (n >= width * 0.3) {
-        if (top < 0) top = y;
-        bottom = y + 1;
-      }
+      rows.push(n >= width * 0.3);
     }
-    return { x0: a, x1: b, top: top < 0 ? y0 : top, bottom: bottom < 0 ? y1 : bottom };
+    const segs = blocks(rows, Math.max(1, Math.round(bandH * 0.08)));
+    const best = segs.reduce<{ a: number; b: number } | null>((p, c) => (!p || c.b - c.a > p.b - p.a ? c : p), null);
+    return { x0: a, x1: b, top: best ? yy0 + best.a : y0, bottom: best ? yy0 + best.b : y1 };
   });
 }
 

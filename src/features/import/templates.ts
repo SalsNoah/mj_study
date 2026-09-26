@@ -58,17 +58,22 @@ export function prepareBank(bank: Bank): PreparedBank {
 
 export type Match = { label: string | null; score: number; margin: number };
 
-/** 模様のパターンの相関と、濃淡の差の小ささの、よい方を一致度にする */
-export function classify(bank: PreparedBank, feat: Uint8Array): Match {
-  if (bank.length === 0) return { label: null, score: 0, margin: 0 };
+/** ラベルごとの一致度（見本のうち一番近いもの）。模様のパターンの相関と、濃淡の差の小ささの、よい方を使う */
+export function labelScores(bank: PreparedBank, feat: Uint8Array): Map<string, number> {
+  const best = new Map<string, number>();
+  if (bank.length === 0) return best;
   const v = normalize(feat);
   const c = centered(feat);
-  const best = new Map<string, number>();
   for (const t of bank) {
     if (t.vec.length !== v.length) continue;
     const s = Math.max(similarity(v, t.vec), closeness(c, t.centered));
     if (s > (best.get(t.label) ?? -2)) best.set(t.label, s);
   }
+  return best;
+}
+
+export function classify(bank: PreparedBank, feat: Uint8Array): Match {
+  const best = labelScores(bank, feat);
   if (best.size === 0) return { label: null, score: 0, margin: 0 };
   const ranked = [...best.entries()].sort((a, b) => b[1] - a[1]);
   const [top, second] = ranked;

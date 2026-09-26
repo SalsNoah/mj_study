@@ -26,9 +26,18 @@ import {
   type Rect,
   type TextTone,
 } from './imageTools';
-import { estimateScores, inferMeld, parseRound, parseSeat, parseTurn, splitMelds, type Seat } from './parse';
+import {
+  estimateScores,
+  inferMeld,
+  parseRound,
+  parseSeat,
+  parseTurn,
+  sortedLabels,
+  splitMelds,
+  type Seat,
+} from './parse';
 import { toDataUrl, type TileCell, type Turn } from './recognize';
-import { classify, learn, prepareBank, type Bank, type PreparedBank } from './templates';
+import { classify, labelScores, learn, prepareBank, type Bank, type PreparedBank } from './templates';
 
 export type { Game } from './auto';
 
@@ -128,6 +137,31 @@ function toCell(tile: Img, bank: PreparedBank, turns: Turn[], rotated: boolean):
   };
 }
 
+/**
+ * 手牌はツモ牌（14枚目にあたる右端の1枚）以外は理牌されているので、並び順が崩れない読み方を選ぶ。
+ * 並び順のために1位以外のラベルにした牌は、そのラベルとの一致度が十分なときだけ確定扱いにする。
+ */
+function sortedHand(tiles: Img[], feats: Uint8Array[], bank: PreparedBank): TileCell[] {
+  const scores = feats.map((f) => labelScores(bank, f));
+  const drawn = tiles.length % 3 === 2 ? 1 : 0;
+  const ordered = sortedLabels(scores.slice(0, tiles.length - drawn));
+  return tiles.map((tile, i) => {
+    const [top, second] = [...scores[i]!.entries()].sort((a, b) => b[1] - a[1]);
+    const label = ordered[i] ?? top?.[0] ?? null;
+    const score = label ? (scores[i]!.get(label) ?? 0) : 0;
+    const topScore = top?.[1] ?? 0;
+    const clear =
+      label === top?.[0] ? topScore - (second?.[1] ?? -1) >= TILE_MARGIN : topScore - score < TILE_MARGIN * 2;
+    return {
+      label,
+      sure: !!label && score >= TILE_SURE && clear,
+      feat: feats[i]!,
+      preview: toDataUrl(tile),
+      rotated: false,
+    };
+  });
+}
+
 export function rematchCell(cell: TileCell, bank: PreparedBank): TileCell {
   if (cell.sure) return cell;
   const match = classify(bank, cell.feat);
@@ -223,7 +257,8 @@ export function autoRead(img: Img, banks: Prepared): AutoResult | null {
 
   const handRegion = crop(img, located.hand);
   const tiles = segmentTiles(handRegion, TILE_ASPECT).spans.map((s) => cropBrightRows(handRegion, s));
-  if (tiles.length === 0) return null;
+  // 手牌は最大14枚。それより多いのは演出や結果画面の帯を手牌と取り違えたとき
+  if (tiles.length === 0 || tiles.length > 14) return null;
 
   // どちらのゲームの見本によく合うかでゲームを決める
   const feats = tiles.map((t) => tileFeature(t));
@@ -234,7 +269,7 @@ export function autoRead(img: Img, banks: Prepared): AutoResult | null {
   if (tiles.length < 4 || fits[game] < HAND_OK) return null;
   const bank = banks[game];
 
-  const hand = tiles.map((t) => toCell(t, bank.tiles, [0], false));
+  const hand = sortedHand(tiles, feats, bank.tiles);
 
   let melds: TileCell[][] = [];
   if (located.melds) {

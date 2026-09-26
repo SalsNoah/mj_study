@@ -114,6 +114,64 @@ export function scoreChars(value: number, unit: number): string[] {
   return [...(value < 0 ? ['-'] : []), ...String(shown).split('')];
 }
 
+const SUIT_RANK: Record<string, number> = { m: 0, p: 1, s: 2, z: 3 };
+
+/** 理牌の並び順（萬子→筒子→索子→字牌、数字の小さい順。赤五は五と同じ位置） */
+export function tileSortKey(label: string): number | null {
+  if (!isTileCode(label)) return null;
+  const rank = label[0] === '0' ? 5 : Number(label[0]);
+  return SUIT_RANK[label[1]!]! * 10 + rank;
+}
+
+/**
+ * 理牌された牌の並びとして、一致度の合計が一番高いラベルの組み合わせを選ぶ。
+ * candidates は左の牌から順に、ラベルごとの一致度。
+ */
+export function sortedLabels(candidates: Array<Map<string, number>>): string[] {
+  const labels = [...new Set(candidates.flatMap((c) => [...c.keys()]))]
+    .filter((l) => tileSortKey(l) !== null)
+    .sort((a, b) => tileSortKey(a)! - tileSortKey(b)!);
+  if (labels.length === 0 || candidates.length === 0) return [];
+  const keys = labels.map((l) => tileSortKey(l)!);
+  // best[i][j]: i枚目までをラベル j 以下の並びで読んだときの一致度の合計の最大
+  const best: number[][] = [];
+  const from: number[][] = [];
+  for (let i = 0; i < candidates.length; i++) {
+    best.push([]);
+    from.push([]);
+    let runBest = -Infinity;
+    let runArg = -1;
+    let j = 0;
+    while (j < labels.length) {
+      // 同じ並び位置（五と赤五）はどちらの後にも置けるので、まとめて前の最大値を取る
+      let end = j;
+      while (end < labels.length && keys[end] === keys[j]) end++;
+      if (i > 0) {
+        for (let k = j; k < end; k++) {
+          if (best[i - 1]![k]! > runBest) {
+            runBest = best[i - 1]![k]!;
+            runArg = k;
+          }
+        }
+      }
+      for (let k = j; k < end; k++) {
+        const s = candidates[i]!.get(labels[k]!) ?? -2;
+        best[i]![k] = i === 0 ? s : runBest + s;
+        from[i]![k] = runArg;
+      }
+      j = end;
+    }
+  }
+  const last = best[candidates.length - 1]!;
+  let k = last.indexOf(Math.max(...last));
+  const out: string[] = [];
+  for (let i = candidates.length - 1; i >= 0; i--) {
+    out.unshift(labels[k]!);
+    k = from[i]![k]!;
+  }
+  return out;
+}
+
 export type MeldCell = { label: string | null; rotated: boolean };
 
 function canonical(code: TileCode): string {
