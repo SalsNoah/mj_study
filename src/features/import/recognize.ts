@@ -3,6 +3,7 @@ import {
   crop,
   cropBrightRows,
   defaultRiverTileFraction,
+  dropSmallGlyphs,
   glyphFeature,
   rotate,
   segmentGlyphs,
@@ -105,24 +106,48 @@ export function readMelds(full: Img, rel: RelRect, bank: PreparedBank, aspect: n
   );
 }
 
+/** 画像を時計回りに回す角度。自分以外の点数は、その人の向きに合わせて横向き・逆さまで表示される */
+export type Turn = 0 | 90 | 180 | 270;
+
+function turnImage(img: Img, t: Turn): Img {
+  if (t === 90) return rotate(img, 'cw');
+  if (t === 270) return rotate(img, 'ccw');
+  if (t === 180) return rotate(rotate(img, 'cw'), 'cw');
+  return img;
+}
+
+/**
+ * 文字を読む。turns に複数の向きを渡すと、見本との一致度の平均が一番高い向きを使う
+ * （見本がまだないときは先頭の向き）。
+ */
 export function readGlyphs(
   full: Img,
   rel: RelRect,
   bank: PreparedBank,
-  mergeNarrow: boolean,
-): GlyphCell[] {
-  const region = crop(full, relToPx(rel, full));
-  const { boxes, mask } = segmentGlyphs(region, mergeNarrow);
-  return boxes.map((b) => {
-    const feat = glyphFeature(mask, region.width, b);
-    const match = classify(bank, feat);
-    return {
-      label: match.label,
-      sure: !!match.label && match.score >= GLYPH_SURE,
-      feat,
-      width: b.w,
-    };
-  });
+  opts: { mergeNarrow: boolean; turns?: Turn[]; dropSmall?: boolean },
+): { cells: GlyphCell[]; turn: Turn; score: number } {
+  const base = crop(full, relToPx(rel, full));
+  let best: { cells: GlyphCell[]; turn: Turn; score: number } | null = null;
+  for (const t of opts.turns ?? [0]) {
+    const region = turnImage(base, t);
+    const seg = segmentGlyphs(region, opts.mergeNarrow);
+    const boxes = opts.dropSmall ? dropSmallGlyphs(seg.boxes) : seg.boxes;
+    let total = 0;
+    const cells = boxes.map((b) => {
+      const feat = glyphFeature(seg.ink, region.width, b);
+      const match = classify(bank, feat);
+      total += match.label ? match.score : 0;
+      return {
+        label: match.label,
+        sure: !!match.label && match.score >= GLYPH_SURE,
+        feat,
+        width: b.w,
+      };
+    });
+    const score = cells.length ? total / cells.length : 0;
+    if (!best || score > best.score) best = { cells, turn: t, score };
+  }
+  return best!;
 }
 
 export function readRiver(

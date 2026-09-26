@@ -11,6 +11,7 @@ import {
   parseRound,
   parseScore,
   parseSeat,
+  parseTurn,
   scoreChars,
   scoresBySeat,
   WIND_CHARS,
@@ -38,6 +39,7 @@ import {
   readTiles,
   type GlyphCell,
   type TileCell,
+  type Turn,
 } from './recognize';
 import { labelCount, learn, prepareBank } from './templates';
 
@@ -48,22 +50,31 @@ const REGIONS: Array<{ key: RegionKey; label: string; color: string }> = [
   { key: 'round', label: '場・局', color: '#6d45a8' },
   { key: 'seat', label: '自風', color: '#9b59b6' },
   { key: 'river', label: '自分の河', color: '#8b4a1f' },
+  { key: 'turnText', label: '巡目の文字', color: '#8b4a1f' },
   { key: 'scoreSelf', label: '点:自分', color: '#c0392b' },
   { key: 'scoreRight', label: '点:下家', color: '#d35400' },
   { key: 'scoreAcross', label: '点:対面', color: '#16a085' },
   { key: 'scoreLeft', label: '点:上家', color: '#2c7fb8' },
 ];
 
-const SCORE_REGIONS: Array<{ key: RegionKey; seat: Seat; label: string }> = [
-  { key: 'scoreSelf', seat: 'self', label: '自分' },
-  { key: 'scoreRight', seat: 'right', label: '下家' },
-  { key: 'scoreAcross', seat: 'across', label: '対面' },
-  { key: 'scoreLeft', seat: 'left', label: '上家' },
+/** 自分以外の点数は、その人の向きに合わせて回転して表示される。先頭が見本のないときの向き */
+const SCORE_REGIONS: Array<{ key: GlyphKey; seat: Seat; label: string; turns: Turn[] }> = [
+  { key: 'scoreSelf', seat: 'self', label: '自分', turns: [0] },
+  { key: 'scoreRight', seat: 'right', label: '下家', turns: [90, 270] },
+  { key: 'scoreAcross', seat: 'across', label: '対面', turns: [180, 0] },
+  { key: 'scoreLeft', seat: 'left', label: '上家', turns: [270, 90] },
 ];
 
 const WIND_BY_CODE: Record<Wind, string> = { '1z': '東', '2z': '南', '3z': '西', '4z': '北' };
 
-type GlyphKey = 'round' | 'seat' | 'scoreSelf' | 'scoreRight' | 'scoreAcross' | 'scoreLeft';
+type GlyphKey =
+  | 'round'
+  | 'seat'
+  | 'turnText'
+  | 'scoreSelf'
+  | 'scoreRight'
+  | 'scoreAcross'
+  | 'scoreLeft';
 
 type Fields = {
   roundWind: Wind | null;
@@ -158,10 +169,11 @@ export function ImportPage() {
   const [read, setRead] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [doraFresh, setDoraFresh] = useState(false);
   const shotRef = useRef<HTMLDivElement>(null);
 
   const recognize = useCallback(
-    (img: Img, lay: Layout, gb: GameBank, forcedHand: number | null) => {
+    (img: Img, lay: Layout, gb: GameBank, forcedHand: number | null, includeDora: boolean) => {
       const r = lay.regions;
       const tilesBank = prepareBank(gb.tiles);
       const glyphBank = prepareBank(gb.glyphs);
@@ -172,15 +184,23 @@ export function ImportPage() {
         nextHand = res.cells;
         setHandGeom({ tileW: res.tileW, boxH: res.boxH });
       }
-      const nextDora: Cell[] = r.dora ? readTiles(img, r.dora, tilesBank, lay.tileAspect).cells : [];
+      const nextDora: Cell[] =
+        r.dora && includeDora ? readTiles(img, r.dora, tilesBank, lay.tileAspect).cells : [];
       const nextMelds: Cell[][] = r.melds ? readMelds(img, r.melds, tilesBank, lay.tileAspect) : [];
 
       const g: Partial<Record<GlyphKey, GlyphCell[]>> = {};
-      if (r.round) g.round = readGlyphs(img, r.round, glyphBank, true);
-      if (r.seat) g.seat = readGlyphs(img, r.seat, glyphBank, true);
+      if (r.round) g.round = readGlyphs(img, r.round, glyphBank, { mergeNarrow: true }).cells;
+      if (r.seat) g.seat = readGlyphs(img, r.seat, glyphBank, { mergeNarrow: true }).cells;
+      if (r.turnText) g.turnText = readGlyphs(img, r.turnText, glyphBank, { mergeNarrow: false }).cells;
       for (const s of SCORE_REGIONS) {
         const rect = r[s.key];
-        if (rect) g[s.key as GlyphKey] = readGlyphs(img, rect, glyphBank, false);
+        if (rect) {
+          g[s.key] = readGlyphs(img, rect, glyphBank, {
+            mergeNarrow: false,
+            turns: s.turns,
+            dropSmall: true,
+          }).cells;
+        }
       }
       const labelsOf = (cells?: GlyphCell[]) => (cells ?? []).map((c) => c.label ?? '');
 
@@ -194,16 +214,18 @@ export function ImportPage() {
         scores: { self: null, right: null, across: null, left: null },
       };
       for (const s of SCORE_REGIONS) {
-        next.scores[s.seat] = parseScore(labelsOf(g[s.key as GlyphKey]), lay.scoreUnit);
+        next.scores[s.seat] = parseScore(labelsOf(g[s.key]), lay.scoreUnit);
       }
       if (r.river) {
         const river = readRiver(img, r.river, lay.riverTileFraction);
         setRiverFrac(river.brightFrac);
         next.turn = Math.min(18, river.count + 1);
       } else setRiverFrac(null);
+      const turnFromText = parseTurn(labelsOf(g.turnText));
+      if (turnFromText !== null) next.turn = turnFromText;
 
       setHand(nextHand);
-      setDora(nextDora);
+      if (includeDora || !lay.doraEachTime) setDora(nextDora);
       setMelds(nextMelds);
       setGlyphs(g);
       setFields(next);
@@ -232,10 +254,16 @@ export function ImportPage() {
         setDora([]);
         setMelds([]);
         setFields(EMPTY_FIELDS);
+        setDoraFresh(false);
         if (lay.regions.hand) {
-          recognize(img, lay, gb, null);
-          setActive(null);
-          setMsg('この画面サイズの範囲設定を使って読み取りました。');
+          recognize(img, lay, gb, null, !lay.doraEachTime);
+          if (lay.doraEachTime) {
+            setActive('dora');
+            setMsg('読み取りました。ドラ表示牌の位置は毎回変わるので、画像の上でドラ表示牌を囲んでください。');
+          } else {
+            setActive(null);
+            setMsg('この画面サイズの範囲設定を使って読み取りました。');
+          }
         } else {
           setActive('hand');
           setMsg('初回だけ、各項目の範囲を画像の上で指でなぞってください。');
@@ -262,7 +290,7 @@ export function ImportPage() {
     if (full) {
       const lay = loadLayout(g, aspectKey(full.width, full.height));
       setLayout(lay);
-      if (lay.regions.hand) recognize(full, lay, loadBank(g), null);
+      if (lay.regions.hand) recognize(full, lay, loadBank(g), null, !lay.doraEachTime);
     }
   };
 
@@ -299,6 +327,15 @@ export function ImportPage() {
     setLayout(next);
     const err = saveLayout(next);
     if (err) setError(err);
+    if (active === 'dora' && full && read) {
+      const cells = readTiles(full, rect, prepareBank(bank.tiles), next.tileAspect).cells;
+      setDora(cells);
+      setDoraFresh(true);
+      setTarget(firstUnsure(hand, cells, melds));
+      setActive(null);
+      setMsg(null);
+      return;
+    }
     const idx = REGIONS.findIndex((r) => r.key === active);
     const nextEmpty = REGIONS.slice(idx + 1).find((r) => !next.regions[r.key]);
     setActive(nextEmpty?.key ?? null);
@@ -415,9 +452,24 @@ export function ImportPage() {
       const widest = [...glyphs.seat].sort((a, b) => b.width - a.width)[0]!;
       gl = learn(gl, WIND_BY_CODE[fields.seatWind], widest.feat);
     }
-    for (const s of SCORE_REGIONS) {
+    if (fields.turn && glyphs.turnText?.length) {
+      const chars = String(fields.turn).split('');
+      if (glyphs.turnText.length >= chars.length) teach(glyphs.turnText.slice(0, chars.length), chars);
+    }
+    // 自分の点数（正位置）で数字を覚えてから、回転して表示される他家の点数を読み直して向きを決め、そこからも覚える
+    const self = SCORE_REGIONS[0]!;
+    const selfValue = fields.scores[self.seat];
+    if (selfValue !== null) teach(glyphs[self.key], scoreChars(selfValue, layout.scoreUnit));
+    for (const s of SCORE_REGIONS.slice(1)) {
       const v = fields.scores[s.seat];
-      if (v !== null) teach(glyphs[s.key as GlyphKey], scoreChars(v, layout.scoreUnit));
+      const rect = layout.regions[s.key];
+      if (v === null || !rect || !full) continue;
+      const reread = readGlyphs(full, rect, prepareBank(gl), {
+        mergeNarrow: false,
+        turns: s.turns,
+        dropSmall: true,
+      });
+      teach(reread.cells, scoreChars(v, layout.scoreUnit));
     }
     const nextBank = { tiles, glyphs: gl };
     let nextLayout = layout;
@@ -433,7 +485,10 @@ export function ImportPage() {
     putImportDraft({
       concealed,
       melds: builtMelds,
-      doraIndicators: dora.map((c) => c.label as TileCode).slice(0, 5),
+      doraIndicators: dora
+        .filter((c) => c.label !== 'back')
+        .map((c) => c.label as TileCode)
+        .slice(0, 5),
       context: {
         ...emptyContext(),
         roundWind: fields.roundWind,
@@ -569,7 +624,9 @@ export function ImportPage() {
               type="button"
               className="btn btn-primary"
               disabled={!layout.regions.hand}
-              onClick={() => full && recognize(full, layout, bank, handCount)}
+              onClick={() =>
+                full && recognize(full, layout, bank, handCount, !layout.doraEachTime || doraFresh)
+              }
             >
               {read ? '読み取り直す' : '読み取る'}
             </button>
@@ -589,6 +646,18 @@ export function ImportPage() {
                 }}
               />
               点数は百点単位で表示
+            </label>
+            <label className="inline-check">
+              <input
+                type="checkbox"
+                checked={!!layout.doraEachTime}
+                onChange={(e) => {
+                  const next = { ...layout, doraEachTime: e.target.checked };
+                  setLayout(next);
+                  saveLayout(next);
+                }}
+              />
+              ドラの位置が毎回変わる
             </label>
           </div>
         </section>
@@ -680,7 +749,7 @@ export function ImportPage() {
                 <button type="button" className="btn btn-sm" onClick={removeTarget}>
                   牌ではない（除外）
                 </button>
-                {target.kind === 'meld' && (
+                {target.kind !== 'hand' && (
                   <button type="button" className="btn btn-sm" onClick={() => pick('back')}>
                     裏向き
                   </button>

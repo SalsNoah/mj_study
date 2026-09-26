@@ -44,6 +44,17 @@ export function parseSeat(labels: string[]): Wind | null {
   return w ? WIND_CHARS[w]! : null;
 }
 
+/** 「12巡目」の先頭の数字を読む */
+export function parseTurn(labels: string[]): number | null {
+  let digits = '';
+  for (const l of labels) {
+    if (isDigit(l)) digits += l;
+    else if (digits) break;
+  }
+  if (!digits) return null;
+  return Math.min(18, Math.max(1, Number(digits)));
+}
+
 /** 数字だけを読み、単位（天鳳は百点単位）を掛ける。カンマは無視 */
 export function parseScore(labels: string[], unit: number): number | null {
   const digits = labels.filter(isDigit).join('');

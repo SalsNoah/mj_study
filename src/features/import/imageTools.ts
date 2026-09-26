@@ -177,6 +177,48 @@ function splitRun(run: Span, k: number): Span[] {
   }));
 }
 
+/**
+ * 牌の境目は一定間隔で暗い線になるので、列ごとの明るさの自己相関が最大になる間隔を牌幅とみなす。
+ * 周期がはっきりしないときは null。
+ */
+export function estimateTileWidth(img: Img, run: Span, minW: number, maxW: number): number | null {
+  const lum = luminance(img);
+  const { width: w, height: h } = img;
+  const y0 = Math.floor(h * 0.15);
+  const y1 = Math.max(y0 + 1, Math.ceil(h * 0.85));
+  const len = run.x1 - run.x0;
+  if (len < minW * 2.5) return null;
+  const prof = new Float32Array(len);
+  for (let x = 0; x < len; x++) {
+    let s = 0;
+    for (let y = y0; y < y1; y++) s += lum[y * w + run.x0 + x]!;
+    prof[x] = s / (y1 - y0);
+  }
+  let mean = 0;
+  for (const v of prof) mean += v;
+  mean /= len;
+  let variance = 0;
+  for (let i = 0; i < len; i++) {
+    prof[i]! -= mean;
+    variance += prof[i]! * prof[i]!;
+  }
+  if (variance === 0) return null;
+  let bestLag = -1;
+  let best = -Infinity;
+  const lo = Math.max(2, Math.floor(minW));
+  const hi = Math.min(len - 1, Math.ceil(maxW));
+  for (let lag = lo; lag <= hi; lag++) {
+    let s = 0;
+    for (let i = 0; i + lag < len; i++) s += prof[i]! * prof[i + lag]!;
+    const r = s / variance;
+    if (r > best) {
+      best = r;
+      bestLag = lag;
+    }
+  }
+  return best > 0.25 ? bestLag : null;
+}
+
 /** 指定枚数になる牌幅を、想定幅に一番近いものから探す */
 function fitTileWidth(runs: Span[], count: number, expected: number): number | null {
   let best: number | null = null;
@@ -234,8 +276,11 @@ export function segmentTiles(
   if (runs.length === 0) return { spans: [], tileW: expected };
 
   let tileW = expected;
+  const longest = runs.reduce((a, b) => (b.x1 - b.x0 > a.x1 - a.x0 ? b : a));
+  const measured = estimateTileWidth(img, longest, expected * 0.55, expected * 1.4);
+  if (measured) tileW = measured;
   if (forcedCount && forcedCount > 0) {
-    const fitted = fitTileWidth(runs, forcedCount, expected);
+    const fitted = fitTileWidth(runs, forcedCount, tileW);
     if (fitted === null) {
       const whole = { x0: runs[0]!.x0, x1: runs[runs.length - 1]!.x1 };
       return { spans: splitRun(whole, forcedCount), tileW: (whole.x1 - whole.x0) / forcedCount };
@@ -327,24 +372,49 @@ export type GlyphBox = Rect;
 export function segmentGlyphs(
   img: Img,
   mergeNarrow: boolean,
-): { boxes: GlyphBox[]; mask: Uint8Array } {
+): { boxes: GlyphBox[]; mask: Uint8Array; ink: Float32Array } {
   const lum = luminance(img);
   const thr = otsu(lum);
   const { width: w, height: h } = img;
   let bright = 0;
-  for (const v of lum) if (v > thr) bright++;
+  let sumB = 0;
+  let sumD = 0;
+  for (const v of lum) {
+    if (v > thr) {
+      bright++;
+      sumB += v;
+    } else sumD += v;
+  }
   const textIsBright = bright < lum.length / 2;
   const mask = new Uint8Array(lum.length);
   for (let i = 0; i < lum.length; i++) mask[i] = (lum[i]! > thr) === textIsBright ? 1 : 0;
+  // 文字らしさ（0〜1）。二値化で潰れる細部（3と8の違いなど）を特徴量に残すため濃淡のまま持つ
+  const meanB = bright ? sumB / bright : 255;
+  const meanD = lum.length - bright ? sumD / (lum.length - bright) : 0;
+  const fg = textIsBright ? meanB : meanD;
+  const bg = textIsBright ? meanD : meanB;
+  const span = fg - bg || 1;
+  const ink = new Float32Array(lum.length);
+  for (let i = 0; i < lum.length; i++) ink[i] = Math.max(0, Math.min(1, (lum[i]! - bg) / span));
+  // 下線や枠のように横いっぱいに伸びる行は文字ではないので消す（雀魂の手番表示の線など）
+  for (let y = 0; y < h; y++) {
+    let n = 0;
+    for (let x = 0; x < w; x++) n += mask[y * w + x]!;
+    if (n > w * 0.7) for (let x = 0; x < w; x++) mask[y * w + x] = 0;
+  }
 
-  const minCol = Math.max(1, Math.round(h * 0.04));
-  const flags: boolean[] = [];
+  const counts: number[] = [];
   for (let x = 0; x < w; x++) {
     let n = 0;
     for (let y = 0; y < h; y++) n += mask[y * w + x]!;
-    flags.push(n >= minCol);
+    counts.push(n);
   }
-  let runs = runsOf(flags, 0);
+  // 文字の縁取りやにじみで隙間が完全に空かないことがあるので、濃い列の1割未満は隙間とみなす
+  const minCol = Math.max(1, Math.round(h * 0.04), Math.round(Math.max(...counts, 0) * 0.1));
+  let runs = runsOf(
+    counts.map((n) => n >= minCol),
+    0,
+  );
   if (mergeNarrow) {
     const joined: Span[] = [];
     for (const r of runs) {
@@ -377,22 +447,64 @@ export function segmentGlyphs(
     if (top < 0) continue;
     const gh = bottom - top + 1;
     if (gh < h * 0.12) continue;
-    boxes.push({ x: r.x0, y: top, w: r.x1 - r.x0, h: gh });
+    const gw = r.x1 - r.x0;
+    // 数字がくっついて1つの塊になったときは、数字1文字の幅（高さの約0.7倍）で割った数に分ける。
+    // 区切りは等分位置の近くで一番薄い列に寄せる
+    const k =
+      !mergeNarrow && gh >= h * 0.5 && gw > gh * 1.1 ? Math.max(1, Math.round(gw / (gh * 0.7))) : 1;
+    const cuts = [r.x0];
+    for (let i = 1; i < k; i++) {
+      const ideal = r.x0 + (gw * i) / k;
+      const reach = Math.max(1, Math.round((gw / k) * 0.3));
+      let at = Math.round(ideal);
+      for (let x = Math.round(ideal - reach); x <= Math.round(ideal + reach); x++) {
+        if (x > cuts[cuts.length - 1]! && x < r.x1 && counts[x]! < counts[at]!) at = x;
+      }
+      cuts.push(at);
+    }
+    cuts.push(r.x1);
+    for (let i = 0; i < k; i++) {
+      boxes.push({ x: cuts[i]!, y: top, w: Math.max(1, cuts[i + 1]! - cuts[i]!), h: gh });
+    }
   }
-  return { boxes, mask };
+  if (mergeNarrow) return { boxes, mask, ink };
+
+  // 字体が細いとき（天鳳など）に2文字がくっついた塊は、同じ範囲の1文字分の幅を基準に分ける（「1」は細いので基準にしない）
+  const tall = boxes.filter((b) => b.h >= h * 0.5);
+  const unit = Math.min(...tall.filter((b) => b.w >= b.h * 0.35).map((b) => b.w), Infinity);
+  if (!Number.isFinite(unit)) return { boxes, mask, ink };
+  const split: GlyphBox[] = [];
+  for (const b of boxes) {
+    const k = b.h >= h * 0.5 && b.w > unit * 1.6 ? Math.round(b.w / unit) : 1;
+    for (let i = 0; i < k; i++) {
+      const x0 = Math.round(b.x + (b.w * i) / k);
+      const x1 = Math.round(b.x + (b.w * (i + 1)) / k);
+      split.push({ x: x0, y: b.y, w: x1 - x0, h: b.h });
+    }
+  }
+  return { boxes: split, mask, ink };
 }
 
-export const GLYPH_W = 12;
-export const GLYPH_H = 16;
+/** 天鳳の点数の末尾の小さい「00」やカンマなど、背の低い文字を除く（先頭のマイナスは残す） */
+export function dropSmallGlyphs(boxes: GlyphBox[]): GlyphBox[] {
+  if (boxes.length === 0) return boxes;
+  const tallest = Math.max(...boxes.map((b) => b.h));
+  return boxes.filter((b, i) => b.h >= tallest * 0.72 || (i === 0 && b.w >= b.h * 1.8));
+}
 
-/** 文字の特徴量：縦横比を保って 12x16 の枠の中央に置いた二値画像 */
-export function glyphFeature(mask: Uint8Array, width: number, box: GlyphBox): Uint8Array {
+export const GLYPH_W = 16;
+export const GLYPH_H = 24;
+
+/**
+ * 文字の特徴量：文字らしさの濃淡（ink は 0〜1）を 16x24 の枠いっぱいに引き伸ばす。
+ * 雀魂では左右の人の点数が縦長に詰まった字体になるので、縦横比は捨てて形だけを比べる。
+ */
+export function glyphFeature(ink: Float32Array | Uint8Array, width: number, box: GlyphBox): Uint8Array {
   const out = new Uint8Array(GLYPH_W * GLYPH_H);
-  const s = Math.min(GLYPH_W / box.w, GLYPH_H / box.h);
-  const dw = Math.max(1, Math.round(box.w * s));
-  const dh = Math.max(1, Math.round(box.h * s));
-  const ox = Math.floor((GLYPH_W - dw) / 2);
-  const oy = Math.floor((GLYPH_H - dh) / 2);
+  const dw = GLYPH_W;
+  const dh = GLYPH_H;
+  const ox = 0;
+  const oy = 0;
   for (let y = 0; y < dh; y++) {
     const sy0 = box.y + Math.floor((y * box.h) / dh);
     const sy1 = Math.max(sy0 + 1, box.y + Math.floor(((y + 1) * box.h) / dh));
@@ -403,7 +515,7 @@ export function glyphFeature(mask: Uint8Array, width: number, box: GlyphBox): Ui
       let n = 0;
       for (let sy = sy0; sy < sy1; sy++) {
         for (let sx = sx0; sx < sx1; sx++) {
-          on += mask[sy * width + sx]!;
+          on += ink[sy * width + sx]!;
           n++;
         }
       }

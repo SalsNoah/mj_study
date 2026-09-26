@@ -6,3 +6,5 @@ playwright-report
 *.local
 .env
 .env.*
+
+samples-local/

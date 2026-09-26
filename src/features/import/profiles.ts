@@ -15,6 +15,7 @@ export type RegionKey =
   | 'round'
   | 'seat'
   | 'river'
+  | 'turnText'
   | 'scoreSelf'
   | 'scoreRight'
   | 'scoreAcross'
@@ -35,6 +36,8 @@ export type Layout = {
   riverTileFraction: number | null;
   /** 画面の点数表示の単位（天鳳は百点単位） */
   scoreUnit: number;
+  /** ドラ表示牌の位置が毎回変わる（天鳳）。スクショごとにドラを囲んでもらう */
+  doraEachTime?: boolean;
 };
 
 /** ゲームごとの見本。牌の絵柄・文字はゲームで決まるので端末をまたいで使える */
@@ -67,8 +70,9 @@ function write(saved: Saved): string | null {
   }
 }
 
+/** 画面比率を0.05刻みにまとめる（同じ端末でも数ピクセル違うスクショを同じ設定で読むため） */
 export function aspectKey(width: number, height: number): string {
-  return (width / height).toFixed(2);
+  return (Math.round((width / height) * 20) / 20).toFixed(2);
 }
 
 export function loadLayout(game: Game, aspect: string): Layout {
@@ -82,6 +86,7 @@ export function loadLayout(game: Game, aspect: string): Layout {
       tileAspect: 0.74,
       riverTileFraction: null,
       scoreUnit: game === 'tenhou' ? 100 : 1,
+      doraEachTime: game === 'tenhou',
     }
   );
 }

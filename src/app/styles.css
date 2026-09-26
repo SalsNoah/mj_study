@@ -953,10 +953,8 @@ textarea { min-height: 96px; resize: vertical; }
 .read-meld .read-row { margin: 0; flex: 1; }
 .read-meld__type { font-size: 0.78rem; color: var(--muted); white-space: nowrap; }
 .picker-panel {
-  position: sticky;
-  bottom: calc(var(--nav-h) + var(--safe-bottom) + 64px);
-  z-index: 6;
-  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.12);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(27, 77, 62, 0.15);
 }
 .picker-head {
   display: flex;
