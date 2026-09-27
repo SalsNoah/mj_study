@@ -206,6 +206,65 @@ export function centerRegions(game: Game, img: Img, tileH: number): Partial<Reco
   return out;
 }
 
+/**
+ * 雀魂：卓の真ん中の点数パネル（濃い灰色の枠）の範囲。四隅の風の札は含まない。
+ * 卓を斜めから見た絵なので、真上から見れば正方形のパネルが横長（縦が約0.7倍）に写る。
+ * 見つからないときは、手牌の大きさから決めた標準の位置を返す。
+ */
+export function locateJantamaPanel(img: Img, tileH: number): Rect {
+  const t = tileH;
+  const fallback: Rect = { x: img.width / 2 - 1.075 * t, y: img.height / 2 - 1.525 * t, w: 2.15 * t, h: 1.49 * t };
+  const x0 = Math.max(0, Math.round(img.width / 2 - 3 * t));
+  const y0 = Math.max(0, Math.round(img.height / 2 - 3 * t));
+  const W = Math.min(img.width, Math.round(img.width / 2 + 3 * t)) - x0;
+  const H = Math.min(img.height, Math.round(img.height / 2 + 1.4 * t)) - y0;
+  if (W < 10 || H < 10) return fallback;
+  const on = new Uint8Array(W * H);
+  for (let y = 0; y < H; y++) {
+    for (let x = 0; x < W; x++) {
+      const p = ((y0 + y) * img.width + x0 + x) * 4;
+      const r = img.data[p]!;
+      const g = img.data[p + 1]!;
+      const b = img.data[p + 2]!;
+      const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+      on[y * W + x] = Math.max(r, g, b) - Math.min(r, g, b) < 22 && lum > 30 && lum < 110 ? 1 : 0;
+    }
+  }
+  const blob = faceBlobs({ w: W, h: H, on, scale: 1 }, H).reduce<Blob | null>(
+    (p, c) => (!p || c.area > p.area ? c : p),
+    null,
+  );
+  if (!blob) return fallback;
+  // 枠の外に付いた札や線を除くため、灰色が縦・横に半分以上並ぶ範囲をパネルとする
+  const core = (len: number, along: (i: number) => number) => {
+    const counts = Array.from({ length: len }, (_, i) => along(i));
+    const max = Math.max(...counts);
+    const idx = counts.map((v, i) => (v > max * 0.5 ? i : -1)).filter((i) => i >= 0);
+    return { a: idx[0]!, b: idx[idx.length - 1]! + 1 };
+  };
+  const cols = core(blob.x1 - blob.x0, (i) => {
+    let n = 0;
+    for (let y = blob.y0; y < blob.y1; y++) n += on[y * W + blob.x0 + i]!;
+    return n;
+  });
+  const rows = core(blob.y1 - blob.y0, (i) => {
+    let n = 0;
+    for (let x = blob.x0; x < blob.x1; x++) n += on[(blob.y0 + i) * W + x]!;
+    return n;
+  });
+  const found: Rect = {
+    x: x0 + blob.x0 + cols.a,
+    y: y0 + blob.y0 + rows.a,
+    w: cols.b - cols.a,
+    h: rows.b - rows.a,
+  };
+  const near =
+    Math.abs(found.x + found.w / 2 - (fallback.x + fallback.w / 2)) < t &&
+    Math.abs(found.y + found.h / 2 - (fallback.y + fallback.h / 2)) < t;
+  const sized = found.w > 1.7 * t && found.w < 2.6 * t && found.h > 1.1 * t && found.h < 1.9 * t;
+  return near && sized ? found : fallback;
+}
+
 type Blob = { x0: number; y0: number; x1: number; y1: number; area: number };
 
 /** 面らしい画素のつながり（牌の面の候補）を探す */

@@ -442,7 +442,8 @@ export function segmentMelds(img: Img, aspect: number): MeldSpan[][] {
 
 export type GlyphBox = Rect;
 
-export type TextTone = 'bright' | 'dark' | 'auto';
+/** light は暗い地に明るい文字で、地との間に中間の明るさの枠がある場合（雀魂の点数パネルの縁） */
+export type TextTone = 'bright' | 'dark' | 'auto' | 'light';
 
 /**
  * 点数や「東1局」などの文字を1文字ずつに分ける。tone で文字の明暗を指定する（auto は面積の少ない方）。
@@ -455,7 +456,13 @@ export function segmentGlyphs(
   tone: TextTone = 'auto',
 ): { boxes: GlyphBox[]; mask: Uint8Array; ink: Float32Array } {
   const lum = luminance(img);
-  const thr = otsu(lum);
+  let thr = otsu(lum);
+  if (tone === 'light') {
+    const sorted = Float32Array.from(lum).sort();
+    const mid = sorted[Math.floor(sorted.length * 0.5)]!;
+    const top = sorted[Math.floor(sorted.length * 0.98)]!;
+    thr = Math.max(thr, (mid + top) / 2);
+  }
   const { width: w, height: h } = img;
   let bright = 0;
   let sumB = 0;
@@ -472,6 +479,16 @@ export function segmentGlyphs(
   const build = (textIsBright: boolean) => {
     const mask = new Uint8Array(lum.length);
     for (let i = 0; i < lum.length; i++) mask[i] = (lum[i]! > thr) === textIsBright ? 1 : 0;
+    if (tone === 'light') {
+      // 手番を示す黄色の帯は点数の文字（薄い黄色）より色が濃いので、文字に含めない
+      for (let i = 0; i < lum.length; i++) {
+        const r = img.data[i * 4]!;
+        const g = img.data[i * 4 + 1]!;
+        const b = img.data[i * 4 + 2]!;
+        const max = Math.max(r, g, b);
+        if (max > 0 && (max - b) / max > 0.55 && b < Math.min(r, g) * 0.6) mask[i] = 0;
+      }
+    }
     // 下線や枠の線は文字ではないので消す。横は文字1〜2個分より長い線、縦は上端から下端まで届く線
     const maxRun = Math.max(w * 0.35, h * 1.5);
     for (let y = 0; y < h; y++) {
@@ -499,7 +516,7 @@ export function segmentGlyphs(
     return { boxes: glyphBoxes(mask, w, h, mergeNarrow, splitWide), mask, ink };
   };
 
-  return build(tone === 'auto' ? bright < lum.length / 2 : tone === 'bright');
+  return build(tone === 'auto' ? bright < lum.length / 2 : tone !== 'dark');
 }
 
 /** つながった画素のかたまりを文字の部品として取り出す（上下に重なる部品は1文字にまとめる） */

@@ -9,6 +9,7 @@ import {
   type Img,
 } from './imageTools';
 import { classify, learn, prepareBank } from './templates';
+import { decodeSeatWind } from './autoRead';
 import {
   estimateScores,
   inferMeld,
@@ -260,5 +261,23 @@ describe('inferMeld', () => {
       cell('5z'),
     ]);
     expect(parts.map((p) => p.map((c) => c.label).join(' '))).toEqual(['2s 1s 3s', '8p 7p 9p', '5z 5z 5z 5z']);
+  });
+
+  it('decides the seat wind from the red east tile and the counterclockwise order', () => {
+    // 自分・下家・対面・上家の順。sims は東南西北との一致度
+    const plain = { red: 0, sims: [0, 0, 0, 0] };
+    const east = { red: 0.15, sims: [0, 0, 0, 0] };
+    // 対面が東なら自分は西（文字が読めなくても赤い札の位置だけで決まる）
+    expect(decodeSeatWind([plain, plain, east, plain], 4)).toBe('3z');
+    expect(decodeSeatWind([plain, east, plain, plain], 4)).toBe('4z');
+    expect(decodeSeatWind([east, plain, plain, plain], 4)).toBe('1z');
+    // 三麻は対面が空くので、下家が東なら自分は西
+    expect(decodeSeatWind([plain, east, plain, plain], 3)).toBe('3z');
+    expect(decodeSeatWind([plain, plain, plain, east], 3)).toBe('2z');
+    // 赤が見えなくても、四隅の文字が並び順に合えば読める（自分が南）
+    const like = (i: number) => ({ red: 0, sims: [0.3, 0.3, 0.3, 0.3].map((v, j) => (j === i ? 0.9 : v)) });
+    expect(decodeSeatWind([like(1), like(2), like(3), like(0)], 4)).toBe('2z');
+    // どの並びにも合わなければ決めない
+    expect(decodeSeatWind([plain, plain, plain, plain], 4)).toBeNull();
   });
 });
