@@ -243,7 +243,10 @@ export function ImportPage() {
         }}
       />
       <strong>{result ? '別のスクショを選ぶ' : 'スクショを選ぶ'}</strong>
-      <span>雀魂・天鳳の対局画面。PCでは Ctrl+V で貼り付けもできます</span>
+      <span>
+        雀魂・天鳳の対局画面
+        <span className="pc-only">（PCでは Ctrl+V で貼り付けもできます）</span>
+      </span>
     </label>
   );
 

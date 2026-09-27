@@ -54,9 +54,11 @@ const Ctx = createContext<AppState | null>(null);
 const repo = new LocalStorageRepository();
 
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [store, setStore] = useState<Store>(emptyStore());
-  const [loadError, setLoadError] = useState<AppState['loadError']>(null);
-  const [corruptRaw, setCorruptRaw] = useState<string | null>(null);
+  // 編集画面などは最初の描画で保存データを使うので、読み込みは描画前に済ませる
+  const [initial] = useState(() => repo.load());
+  const [store, setStore] = useState<Store>(() => (initial.ok ? initial.store : emptyStore()));
+  const [loadError, setLoadError] = useState<AppState['loadError']>(initial.ok ? null : initial);
+  const [corruptRaw, setCorruptRaw] = useState<string | null>(initial.ok ? null : (initial.raw ?? null));
   const [externalConflict, setExternalConflict] = useState(false);
   const [lastError, setLastError] = useState<string | null>(null);
   const [busy] = useState(false);
@@ -87,13 +89,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    reload();
     repo.setExternalChangeHandler(() => setExternalConflict(true));
     return () => {
       repo.setExternalChangeHandler(null);
       repo.dispose();
     };
-  }, [reload]);
+  }, []);
 
   const sizeBytes = useMemo(() => estimateStoreSize(store), [store]);
   const sizeLevel = sizeStatus(sizeBytes);

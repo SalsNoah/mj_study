@@ -420,13 +420,12 @@ export function EditorPage() {
             </select>
           </label>
           <label className="ctx-mini">
-            <span className="sr-only">本場</span>
             <input
               aria-label="本場"
               type="number"
               min={0}
               max={99}
-              placeholder="本場"
+              placeholder="—"
               value={context.honba ?? ''}
               onChange={(e) => {
                 setContext({
@@ -436,15 +435,15 @@ export function EditorPage() {
                 mark();
               }}
             />
+            <span className="ctx-mini__unit">本場</span>
           </label>
           <label className="ctx-mini">
-            <span className="sr-only">供託</span>
             <input
               aria-label="供託"
               type="number"
               min={0}
               max={99}
-              placeholder="供託"
+              placeholder="—"
               value={context.riichiSticks ?? ''}
               onChange={(e) => {
                 setContext({
@@ -454,6 +453,7 @@ export function EditorPage() {
                 mark();
               }}
             />
+            <span className="ctx-mini__unit">供託</span>
           </label>
         </div>
         <div className="ctx-scores" aria-label="点数状況">

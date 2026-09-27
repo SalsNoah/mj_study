@@ -106,7 +106,7 @@ export function DetailPage() {
 
   return (
     <div className="page">
-      <header className="page-header">
+      <header className="page-header page-header--problem">
         <h1>{problem.title.trim() || '無題の問題'}</h1>
         <span className={`badge ${problem.answerEnabled ? 'badge-answer' : 'badge-memo'}`}>
           {problem.answerEnabled ? '正解あり' : '正解なし'}
