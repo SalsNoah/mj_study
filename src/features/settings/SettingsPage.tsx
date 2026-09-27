@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { useApp } from '@/app/store';
 import { LIMITS } from '@/domain/types';
 import { createSampleProblems, samplesAlreadyPresent } from '@/data/samples';
+import { THEMES, loadTheme, saveTheme, type ThemeId } from '@/app/theme';
 
 export function SettingsPage() {
   const {
@@ -18,6 +19,7 @@ export function SettingsPage() {
     lastError,
   } = useApp();
   const [msg, setMsg] = useState<string | null>(null);
+  const [theme, setTheme] = useState<ThemeId>(loadTheme);
   const [importPreview, setImportPreview] = useState<{
     text: string;
     problems: number;
@@ -72,6 +74,35 @@ export function SettingsPage() {
       <header className="page-header">
         <h1>設定</h1>
       </header>
+
+      <section className="panel">
+        <h2 className="section-title">テーマ</h2>
+        <div className="theme-picker" role="radiogroup" aria-label="テーマ">
+          {THEMES.map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              role="radio"
+              aria-checked={theme === t.id}
+              className={`theme-option${theme === t.id ? ' is-on' : ''}`}
+              onClick={() => {
+                saveTheme(t.id);
+                setTheme(t.id);
+              }}
+            >
+              <span className="theme-swatch" data-theme={t.id} aria-hidden>
+                <span className="theme-swatch__panel">
+                  <span className="theme-swatch__line" />
+                  <span className="theme-swatch__line theme-swatch__line--short" />
+                  <span className="theme-swatch__btn" />
+                </span>
+              </span>
+              <strong>{t.name}</strong>
+              <small>{t.desc}</small>
+            </button>
+          ))}
+        </div>
+      </section>
 
       <section className="panel">
         <h2 className="section-title">保存量の目安</h2>
