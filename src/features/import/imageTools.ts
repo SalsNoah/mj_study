@@ -93,6 +93,52 @@ export function resample(img: Img, w: number, h: number): Img {
   return out;
 }
 
+/** 縦横それぞれ、縮めるときは面積平均、広げるときは直線補間（小さな文字を拡大してもガタつかない） */
+export function resampleSmooth(img: Img, w: number, h: number): Img {
+  const pass = (src: Img, ow: number, oh: number, horizontal: boolean): Img => {
+    const out = makeImg(ow, oh);
+    const inLen = horizontal ? src.width : src.height;
+    const outLen = horizontal ? ow : oh;
+    const scale = inLen / outLen;
+    for (let o = 0; o < outLen; o++) {
+      // この出力画素に入る元の画素と重み
+      const taps: Array<[number, number]> = [];
+      if (scale > 1) {
+        const a = o * scale;
+        const b = a + scale;
+        for (let i = Math.floor(a); i < Math.min(inLen, Math.ceil(b)); i++) {
+          taps.push([i, Math.min(b, i + 1) - Math.max(a, i)]);
+        }
+      } else {
+        const c = Math.max(0, Math.min(inLen - 1, (o + 0.5) * scale - 0.5));
+        const i0 = Math.floor(c);
+        const i1 = Math.min(inLen - 1, i0 + 1);
+        taps.push([i0, 1 - (c - i0)], [i1, c - i0]);
+      }
+      const sum = taps.reduce((n, t) => n + t[1], 0) || 1;
+      const other = horizontal ? oh : ow;
+      for (let q = 0; q < other; q++) {
+        let r = 0;
+        let g = 0;
+        let b = 0;
+        for (const [i, wt] of taps) {
+          const s = ((horizontal ? q * src.width + i : i * src.width + q) * 4) as number;
+          r += src.data[s]! * wt;
+          g += src.data[s + 1]! * wt;
+          b += src.data[s + 2]! * wt;
+        }
+        const d = (horizontal ? q * ow + o : o * ow + q) * 4;
+        out.data[d] = r / sum;
+        out.data[d + 1] = g / sum;
+        out.data[d + 2] = b / sum;
+        out.data[d + 3] = 255;
+      }
+    }
+    return out;
+  };
+  return pass(pass(img, w, img.height, true), w, h, false);
+}
+
 export function rotate(img: Img, dir: 'cw' | 'ccw'): Img {
   const out = makeImg(img.height, img.width);
   for (let y = 0; y < img.height; y++) {
@@ -513,7 +559,7 @@ export function segmentGlyphs(
     const span = fg - bg || 1;
     const ink = new Float32Array(lum.length);
     for (let i = 0; i < lum.length; i++) ink[i] = mask[i] ? Math.max(0, Math.min(1, (lum[i]! - bg) / span)) : 0;
-    return { boxes: glyphBoxes(mask, w, h, mergeNarrow, splitWide), mask, ink };
+    return { boxes: glyphBoxes(mask, w, h, mergeNarrow, splitWide, tone === 'light'), mask, ink };
   };
 
   return build(tone === 'auto' ? bright < lum.length / 2 : tone !== 'dark');
@@ -526,6 +572,7 @@ function glyphBoxes(
   h: number,
   mergeNarrow: boolean,
   splitWide: boolean,
+  dropSpecks = false,
 ): GlyphBox[] {
   const seen = new Uint8Array(w * h);
   const parts: Array<{ x0: number; y0: number; x1: number; y1: number; area: number }> = [];
@@ -557,6 +604,17 @@ function glyphBoxes(
       }
     }
     if (p.area >= Math.max(3, h * h * 0.004)) parts.push(p);
+  }
+  if (dropSpecks && parts.length > 0) {
+    // 枠の角などの小さな光の点や、切り抜きの縁にかかった枠の線は、上下に重なる文字にくっついて
+    // 背を高く見せるので先に除く（文字は切り抜きの縁に届かない）
+    const largest = Math.max(...parts.map((p) => p.area));
+    const edge = (p: (typeof parts)[number]) => p.x0 === 0 || p.y0 === 0 || p.x1 === w || p.y1 === h;
+    parts.splice(
+      0,
+      parts.length,
+      ...parts.filter((p) => p.area >= largest * 0.06 && !(edge(p) && p.y1 - p.y0 < h * 0.3)),
+    );
   }
   parts.sort((a, b) => a.x0 - b.x0);
 
@@ -621,6 +679,42 @@ function glyphBoxes(
     }
   }
   return out;
+}
+
+function splitEven(b: GlyphBox, k: number): GlyphBox[] {
+  return Array.from({ length: k }, (_, i) => {
+    const x0 = Math.round(b.x + (b.w * i) / k);
+    const x1 = Math.round(b.x + (b.w * (i + 1)) / k);
+    return { x: x0, y: b.y, w: Math.max(1, x1 - x0), h: b.h };
+  });
+}
+
+/**
+ * 雀魂の点数（暗い地に明るい数字、ほぼ等間隔）。小さい画面では隣の数字どうしが接して1つの塊になり、
+ * 塊の幅だけでは何文字分か決めきれないので、分け方の候補をいくつか返す（ありそうな順）。
+ * どれを採るかは、見本との一致度で読み取り側が決める。
+ */
+export function digitSplits(img: Img): { options: GlyphBox[][]; ink: Float32Array } {
+  const seg = segmentGlyphs(img, false, false, 'light');
+  const boxes = seg.boxes;
+  if (boxes.length === 0) return { options: [], ink: seg.ink };
+  const hs = boxes.map((b) => b.h).sort((a, b) => a - b);
+  const medH = hs[Math.floor(hs.length / 2)]!;
+  // 離れて写った数字どうしの間隔（なければ文字の高さから見積もった間隔）
+  const single = (b: GlyphBox) => b.w < medH * 0.8;
+  const gaps: number[] = [];
+  for (let i = 1; i < boxes.length; i++) {
+    if (single(boxes[i - 1]!) && single(boxes[i]!)) gaps.push(boxes[i]!.x - boxes[i - 1]!.x);
+  }
+  gaps.sort((a, b) => a - b);
+  const pitch = gaps.length ? gaps[Math.floor(gaps.length / 2)]! : medH * 0.6;
+  const choices = boxes.map((b) => {
+    const ks = [pitch, pitch * 1.18, pitch * 0.85].map((p) => Math.max(1, Math.round(b.w / p)));
+    return [...new Set(ks)];
+  });
+  let combos: number[][] = [[]];
+  for (const ks of choices) combos = combos.flatMap((c) => ks.map((k) => [...c, k])).slice(0, 12);
+  return { options: combos.map((c) => boxes.flatMap((b, i) => splitEven(b, c[i]!))), ink: seg.ink };
 }
 
 /** 天鳳の点数の末尾の小さい「00」やカンマなど、背の低い文字を除く（先頭のマイナスは残す） */

@@ -219,6 +219,9 @@ describe('parsing read text', () => {
     expect(three.scores.across).toBeNull();
     expect(estimateScores({ self: null, right: null, across: null, left: null }, 4).estimated).toEqual([]);
     expect(estimateScores({ self: 90000, right: 90000, across: null, left: null }, 4).estimated).toEqual([]);
+    // 供託が1本あれば、その千点は誰の持ち点にも入っていない
+    const stick = estimateScores({ self: 21800, right: 32100, across: null, left: 20100 }, 4, 1);
+    expect(stick.scores.across).toBe(25000);
   });
 });
 

@@ -83,17 +83,19 @@ export function scoresBySeat(
 
 /**
  * 読めなかった点数を、全員の合計（4人なら10万点、三人麻雀なら10万5千点）から概算する。
- * 供託のリーチ棒の分だけずれることがある。1人も読めていないときや、読み違いが疑われるときは推定しない。
+ * 供託のリーチ棒の数がわからなければ、その分だけずれることがある。1人も読めていないときや、
+ * 読み違いが疑われるときは推定しない。
  */
 export function estimateScores(
   scores: Record<Seat, number | null>,
   players: 3 | 4,
+  sticks = 0,
 ): { scores: Record<Seat, number | null>; estimated: Seat[] } {
   const seats: Seat[] = players === 3 ? ['self', 'right', 'left'] : ['self', 'right', 'across', 'left'];
   const missing = seats.filter((s) => scores[s] === null);
   const known = seats.filter((s) => scores[s] !== null);
   if (missing.length === 0 || known.length === 0) return { scores, estimated: [] };
-  const total = players === 3 ? 105000 : 100000;
+  const total = (players === 3 ? 105000 : 100000) - sticks * 1000;
   const rest = total - known.reduce((n, s) => n + scores[s]!, 0);
   const each = rest / missing.length;
   // 雀魂・天鳳とも0点を下回ると終局なので、途中の画面でマイナスになる推定は読み違いとみなす

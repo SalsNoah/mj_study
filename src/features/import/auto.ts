@@ -382,6 +382,16 @@ export function locateWallDora(img: Img, tileH: number, handTop: number): Rect[]
   return out;
 }
 
+/**
+ * 雀魂：左上のドラ表示欄の下の「（千点棒）×供託　（百点棒）×本場」の段。
+ * 一番左のドラ表示牌（1枚目は必ず表を向いている）の位置と大きさから決める
+ */
+export function locateCounterRow(img: Img, tileH: number): Rect | null {
+  const first = locatePanelDora(img, tileH)[0];
+  if (!first) return null;
+  return { x: first.x - first.w * 0.2, y: first.y + first.h, w: first.w * 5.6, h: first.h * 0.8 };
+}
+
 /** 雀魂：左上のドラ表示欄で表を向いている牌（裏面は色付きなので面らしさで除ける） */
 export function locatePanelDora(img: Img, tileH: number): Rect[] {
   const m = faceMask(img);

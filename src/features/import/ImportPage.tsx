@@ -64,9 +64,9 @@ function toDraft(r: AutoResult): { ok: true; send: () => void } | { ok: false; r
   const notes =
     r.estimated.length > 0 && r.seatWind
       ? [
-          `${r.estimated.map((s) => SEAT_NAME[s]).join('・')}の点数は読めなかったため、合計${
+          `${r.estimated.map((s) => SEAT_NAME[s]).join('・')}の点数ははっきり読めなかったため、合計${
             r.players === 3 ? '10万5千' : '10万'
-          }点から推定しています。`,
+          }点（供託の分を除く）に合うように推定しています。`,
         ]
       : [];
   return {
@@ -83,6 +83,8 @@ function toDraft(r: AutoResult): { ok: true; send: () => void } | { ok: false; r
           ...emptyContext(),
           roundWind: r.roundWind,
           handNumber: r.handNumber,
+          honba: r.honba,
+          riichiSticks: r.riichiSticks,
           seatWind: r.seatWind,
           turn: r.turn,
           scores: r.seatWind && hasScores ? scoresBySeat(r.seatWind, r.scores, r.players) : emptyContext().scores,
@@ -352,6 +354,14 @@ export function ImportPage() {
                 <dt>巡目</dt>
                 <dd>{result.turn ?? '—'}</dd>
               </div>
+              <div>
+                <dt>本場</dt>
+                <dd>{result.honba ?? '—'}</dd>
+              </div>
+              <div>
+                <dt>供託</dt>
+                <dd>{result.riichiSticks ?? '—'}</dd>
+              </div>
               {(Object.keys(SEAT_NAME) as Seat[])
                 .filter((s) => !(result.players === 3 && s === 'across'))
                 .map((s) => (
@@ -365,8 +375,8 @@ export function ImportPage() {
                 ))}
             </dl>
             <p className="hint">
-              読めなかった点数は合計{result.players === 3 ? '10万5千' : '10万'}
-              点から推定し、ほかの読めなかった項目は空欄のまま渡します。作成画面で直せます。
+              はっきり読めなかった点数は合計{result.players === 3 ? '10万5千' : '10万'}
+              点（供託の分を除く）に合うように推定し、ほかの読めなかった項目は空欄のまま渡します。作成画面で直せます。
             </p>
           </section>
 
