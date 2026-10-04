@@ -4,7 +4,8 @@ import { clearImportDraft, peekImportDraft, setPendingShot } from '@/features/im
 import { useApp } from '@/app/store';
 import { HandView } from '@/components/HandView';
 import { TilePalette } from '@/components/TilePalette';
-import { UkeirePanel } from '@/components/UkeirePanel';
+import { RemainingButton, RemainingSettings, UkeireResults } from '@/components/UkeirePanel';
+import { useUkeireSession } from '@/components/useUkeireSession';
 import { WanpaiDora } from '@/components/WanpaiDora';
 import { contextSummary } from '@/domain/context';
 import { createId, nowIso } from '@/domain/ids';
@@ -86,6 +87,7 @@ export function EditorPage() {
   const [doraIndicators, setDora] = useState<TileCode[]>(
     imported?.doraIndicators ?? existing?.doraIndicators ?? [],
   );
+  const ukeire = useUkeireSession({ concealed, drawn: null, melds, doraIndicators }, existing?.id ?? 'new');
   const [target, setTarget] = useState<Target>('concealed');
   const [history, setHistory] = useState<Array<() => void>>([]);
   const [answerEnabled, setAnswerEnabled] = useState(existing?.answerEnabled ?? false);
@@ -539,7 +541,7 @@ export function EditorPage() {
           )}
         </div>
 
-        <div className="btn-row btn-row--compact">
+        <div className="btn-row btn-row--compact tile-actions">
           <button type="button" className="btn" onClick={doSort}>
             理牌
           </button>
@@ -549,8 +551,11 @@ export function EditorPage() {
           <button type="button" className="btn btn-danger" onClick={clearAll}>
             全消去
           </button>
+          <RemainingButton session={ukeire} />
           <span className="count-inline">{countLabel}</span>
         </div>
+
+        <RemainingSettings session={ukeire} />
 
         <div className="target-tabs target-tabs--scroll" role="tablist" aria-label="入力先">
           {INPUT_TABS.map((tab) => {
@@ -624,7 +629,7 @@ export function EditorPage() {
         />
       </label>
 
-      <UkeirePanel sessionKey={existing?.id ?? 'new'} concealed={concealed} drawn={null} melds={melds} doraIndicators={doraIndicators} />
+      <UkeireResults session={ukeire} />
 
       <section className="panel">
         <label className="check">
