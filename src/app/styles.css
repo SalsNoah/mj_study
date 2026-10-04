@@ -1502,6 +1502,7 @@ html { scroll-padding-top: 74px; scroll-padding-bottom: calc(var(--nav-h) + var(
   .page--library .search-panel > .field { grid-column: 1; grid-row: 1; margin: 0; }
   .page--library .search-panel > .inline-select { grid-column: 2; grid-row: 1; margin: 0; }
   .page--library .library-filters, .page--library .search-panel > .error { grid-column: 1 / -1; }
+  .page--library .library-filters > summary { justify-content: flex-start; gap: 8px; }
   .page--library .search-panel > .btn { justify-self: start; }
   .page--library .tile-palette { max-width: 560px; }
   .page--library .problem-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
