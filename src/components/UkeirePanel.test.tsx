@@ -320,6 +320,8 @@ describe('ukeire UI and existing study flows (jsdom; not a layout/browser test)'
     await click(expand);
     await act(async () => root.render(<UkeirePanel {...input} sessionKey="another" />));
     expect(visibleRows()).toHaveLength(3);
+    await act(async () => root.render(<UkeirePanel {...input} />));
+    expect(visibleRows()).toHaveLength(3);
   });
 
   it('keeps only compact ukeire data and plain tenpai labels', async () => {

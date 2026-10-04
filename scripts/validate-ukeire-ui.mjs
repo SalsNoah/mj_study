@@ -109,6 +109,11 @@ try {
   await toolbar.getByRole('button', { name: '残枚数', exact: true }).click();
   await page.locator('.ukeire-panel summary').click();
   await expect(page.locator('.ukeire-list')).toBeVisible();
+  await page.locator('.ukeire-expand').click();
+  await expect(page.locator('.ukeire-list > li:visible')).toHaveCount(13);
+  await toolbar.getByRole('button', { name: '戻す', exact: true }).click();
+  await pick('中');
+  await expect(page.locator('.ukeire-list > li:visible')).toHaveCount(3);
   await page.getByRole('button', { name: '保存', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'スマホ検証用の問題' })).toBeVisible();
   await expect(page.locator('#detail-view-panel-notes')).toBeVisible();

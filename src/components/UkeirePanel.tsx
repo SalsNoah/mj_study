@@ -43,8 +43,9 @@ export function UkeirePanel({ sessionKey, ...input }: AnalysisHand & { sessionKe
 
 export function UkeireResults({ session, showSettings = false, defaultOpen = true }: { session: UkeireSession; showSettings?: boolean; defaultOpen?: boolean }) {
   const { analysis } = session;
-  const [expandedKey, setExpandedKey] = useState<string | null>(null);
-  const expanded = expandedKey === session.key;
+  const [expansion, setExpansion] = useState({ key: session.key, open: false });
+  const expanded = expansion.key === session.key && expansion.open;
+  if (expansion.key !== session.key) setExpansion({ key: session.key, open: false });
   const ranked = analysis.status === 'ready'
     ? [...analysis.discards].sort((a, b) => b.total - a.total || tileSortKey(a.discard) - tileSortKey(b.discard)) : [];
   return (
@@ -76,7 +77,7 @@ export function UkeireResults({ session, showSettings = false, defaultOpen = tru
               ))}
             </ol>
             {ranked.length > 3 && <button type="button" className="btn ukeire-expand" aria-expanded={expanded}
-              onClick={() => setExpandedKey(expanded ? null : session.key)}>
+              onClick={() => setExpansion({ key: session.key, open: !expanded })}>
               {expanded ? '3候補に戻す' : `すべて表示（${ranked.length}候補）`}
             </button>}
             </>
