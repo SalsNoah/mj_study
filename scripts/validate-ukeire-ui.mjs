@@ -45,7 +45,16 @@ async function capture(name, selector) {
   }));
   expect(geometry.document).toBeLessThanOrEqual(geometry.viewport);
   expect(geometry.overflow).toEqual([]);
-  results.push({ name, geometry });
+  const cta = await page.evaluate(() => {
+    const button = [...document.querySelectorAll('.sticky-actions .btn-save')].find(el => el.getBoundingClientRect().width > 0);
+    if (!button) return null;
+    const rect = button.getBoundingClientRect();
+    const nav = document.querySelector('.bottom-nav').getBoundingClientRect();
+    const hit = document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2);
+    return { top: rect.top, bottom: rect.bottom, navTop: nav.top, hit: !!hit && button.contains(hit) };
+  });
+  if (cta) { expect(cta.top).toBeGreaterThanOrEqual(0); expect(cta.bottom).toBeLessThanOrEqual(cta.navTop); expect(cta.hit).toBe(true); }
+  results.push({ name, geometry, ...(cta ? { cta } : {}) });
 }
 async function allSizes(name, selector) {
   for (const width of widths) {
@@ -142,6 +151,8 @@ try {
   await allSizes('test-answered');
   await tab('answer-view', 'ukeire');
   await expect(page.locator('.ukeire-list')).toHaveText(editorRows);
+  await page.locator('.ukeire-expand').click();
+  await capture('test-ukeire-expanded-390', '.ukeire-panel');
   await page.getByRole('button', { name: '残枚数', exact: true }).click();
   await fillRemaining('三索', '0');
   await tab('answer-view', 'notes'); await tab('answer-view', 'ukeire');
