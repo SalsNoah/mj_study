@@ -61,6 +61,12 @@ function handTileMax(meldCount: number): number {
   return Math.max(0, 14 - meldCount * 3);
 }
 
+/** New manual entries only. A north indicator makes east the actual dora. */
+function initialContext() {
+  return { ...emptyContext(), roundWind: '1z' as Wind, handNumber: 1, seatWind: '1z' as Wind,
+    turn: 6, scores: { east: 25000, south: 25000, west: 25000, north: 25000 } };
+}
+
 function initialHand(existing?: Problem): TileCode[] {
   if (!existing) return [];
   const merged = existing.drawn
@@ -85,7 +91,7 @@ export function EditorPage() {
   );
   const [melds, setMelds] = useState<Meld[]>(imported?.melds ?? existing?.melds ?? []);
   const [doraIndicators, setDora] = useState<TileCode[]>(
-    imported?.doraIndicators ?? existing?.doraIndicators ?? [],
+    imported?.doraIndicators ?? existing?.doraIndicators ?? (isNew ? ['4z'] : []),
   );
   const ukeire = useUkeireSession({ concealed, drawn: null, melds, doraIndicators }, existing?.id ?? 'new');
   const [notesOpen, setNotesOpen] = useState(false);
@@ -97,7 +103,7 @@ export function EditorPage() {
   const [privateMemo, setPrivateMemo] = useState(existing?.privateMemo ?? '');
   const [tagIds, setTagIds] = useState<string[]>(existing?.tagIds ?? []);
   const [tagInput, setTagInput] = useState('');
-  const [context, setContext] = useState(imported?.context ?? existing?.context ?? emptyContext());
+  const [context, setContext] = useState(imported?.context ?? existing?.context ?? (isNew ? initialContext() : emptyContext()));
   const [attachments, setAttachments] = useState(existing?.attachments ?? []);
   const [sourceUrl, setSourceUrl] = useState(existing?.sourceUrl ?? '');
   const [dirty, setDirty] = useState(!!imported);

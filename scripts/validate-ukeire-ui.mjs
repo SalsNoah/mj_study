@@ -75,6 +75,10 @@ try {
   await expect(page.locator('#editor-view-tab-context')).toHaveCount(0);
   await expect(page.locator('.tile-palette__suits')).toHaveCount(0);
   await expect(page.locator('.tile-palette button:visible')).toHaveCount(37);
+  await expect(page.getByLabel('局', { exact: true })).toHaveValue('1');
+  await expect(page.getByLabel('巡目', { exact: true })).toHaveValue('6');
+  await expect(page.locator('.wanpai').getByRole('button', { name: '北', exact: true })).toHaveCount(1);
+  expect(await page.locator('.ctx-score input').evaluateAll(inputs => inputs.map(input => input.value))).toEqual(['25000','25000','25000','25000']);
   const order = await page.evaluate(() => ({
     contextBottom: document.querySelector('.context-panel').getBoundingClientRect().bottom,
     handTop: document.querySelector('.hand-stage').getBoundingClientRect().top,
