@@ -19,6 +19,15 @@ const page = await context.newPage();
 const errors = [];
 page.on('pageerror', (e) => errors.push(e.message));
 const results = [];
+async function selectRemaining(label) {
+  const suit = label.endsWith('萬') ? '萬子' : label.endsWith('筒') ? '筒子' : label.endsWith('索') ? '索子' : '字牌';
+  await page.locator('.remaining-suits button').filter({ hasText: suit }).click();
+  await page.locator('.remaining-tile').filter({ has: page.getByRole('img', { name: label, exact: true }) }).click();
+}
+async function fillRemaining(label, value) {
+  await selectRemaining(label);
+  await page.getByRole('textbox', { name: `${label}の残枚数`, exact: true }).fill(value);
+}
 async function capture(name, selector = '.ukeire-panel') {
   await page.locator(selector).scrollIntoViewIfNeeded();
   await page.screenshot({ path: `${evidence}${name}.png`, fullPage: false });
@@ -48,7 +57,7 @@ try {
   const toolbar = page.locator('.tile-actions');
   await expect(toolbar.getByRole('button', { name: '残枚数', exact: true })).toBeEnabled();
   expect(await toolbar.locator('button').allTextContents()).toEqual(['理牌', '戻す', '全消去', '残枚数']);
-  for (const width of [320, 390]) {
+  for (const width of [320, 375, 390]) {
     await page.setViewportSize({ width, height: 844 });
     const rects = await toolbar.locator('button').evaluateAll(buttons => buttons.map(button => button.getBoundingClientRect().toJSON()));
     expect(rects[3].y).toBe(rects[2].y);
@@ -58,8 +67,27 @@ try {
   }
   await page.setViewportSize({ width: 320, height: 720 });
   await toolbar.getByRole('button', { name: '残枚数', exact: true }).click();
-  await expect(page.locator('.remaining-grid input')).toHaveCount(34);
-  await page.getByRole('textbox', { name: '三索の残枚数', exact: true }).fill('0');
+  await expect(page.locator('.remaining-tile')).toHaveCount(9);
+  await expect(page.locator('.remaining-panel input')).toHaveCount(1);
+  await fillRemaining('三索', '0');
+  for (const width of [320, 375, 390]) {
+    await page.setViewportSize({ width, height: 844 });
+    await capture(`remaining-compact-${width}`, '.remaining-panel');
+    await page.locator('.remaining-panel').screenshot({ path: `${evidence}remaining-panel-${width}.png` });
+    const geometry = await page.locator('.remaining-panel').evaluate(panel => ({
+      width: panel.getBoundingClientRect().width,
+      height: panel.getBoundingClientRect().height,
+      overflow: panel.scrollWidth > panel.clientWidth + 1,
+      targets: [...panel.querySelectorAll('button,input')].map(el => {
+        const rect = el.getBoundingClientRect();
+        return { width: rect.width, height: rect.height };
+      }),
+    }));
+    expect(geometry.height).toBeLessThan(380);
+    expect(geometry.overflow).toBe(false);
+    expect(geometry.targets.every(rect => rect.width >= 44 && rect.height >= 44)).toBe(true);
+    results.push({ name: `remaining-geometry-${width}`, geometry });
+  }
   for (let i = 0; i < 3; i++) {
     await toolbar.getByRole('button', { name: '残枚数', exact: true }).click();
     await expect(page.locator('.remaining-panel')).not.toBeVisible();
@@ -75,11 +103,12 @@ try {
   await capture('detail-320');
   const saved = await page.evaluate(() => localStorage.getItem('mahjong-study:v1'));
   await page.getByRole('button', { name: '残枚数', exact: true }).click();
+  await selectRemaining('三索');
   await expect(page.getByRole('textbox', { name: '三索の残枚数', exact: true })).toHaveValue('3');
-  await page.getByRole('textbox', { name: '三索の残枚数', exact: true }).fill('0');
-  await page.getByRole('textbox', { name: '六索の残枚数', exact: true }).fill('1');
+  await fillRemaining('三索', '0');
+  await fillRemaining('六索', '1');
   await expect(page.locator('.ukeire-row').filter({ has: page.getByLabel('赤五索を切る', { exact: true }) })).toContainText('1種・1枚');
-  await expect(page.locator('.remaining-status').filter({ hasText: '手動' })).toHaveCount(2);
+  await expect(page.locator('.remaining-tile.is-manual')).toHaveCount(2);
   await page.getByRole('textbox', { name: '六索の残枚数', exact: true }).fill('5');
   await expect(page.locator('.remaining-error')).toContainText('集計は1枚');
   await page.getByRole('button', { name: '六索の残枚数を1枚減らす', exact: true }).click();

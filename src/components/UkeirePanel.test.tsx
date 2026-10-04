@@ -28,9 +28,15 @@ function byText(text: string, selector = 'button'): HTMLElement {
   return element;
 }
 async function click(element: HTMLElement) { await act(async () => element.click()); }
+async function selectRemaining(label: string) {
+  const suit = label.endsWith('萬') ? '萬子' : label.endsWith('筒') ? '筒子' : label.endsWith('索') ? '索子' : '字牌';
+  await click([...host.querySelectorAll<HTMLElement>('.remaining-suits button')].find(el => el.textContent!.startsWith(suit))!);
+  await click(host.querySelector<HTMLElement>(`.remaining-tile[aria-label^="${label}、"]`)!);
+}
 async function editRemaining(label: string, value: string) {
   const toggle = host.querySelector<HTMLElement>('.remaining-toggle');
   if (toggle?.getAttribute('aria-expanded') === 'false') await click(toggle);
+  await selectRemaining(label);
   const field = host.querySelector<HTMLInputElement>(`input[aria-label="${label}の残枚数"]`)!;
   await act(async () => {
     Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(field, value);
@@ -135,7 +141,8 @@ describe('ukeire UI and existing study flows (jsdom; not a layout/browser test)'
     const parsed = parseHandNotation('123m456m789p23s55z');
     if (!parsed.ok) throw new Error('fixture');
     await act(async () => root.render(<UkeirePanel concealed={parsed.tiles} drawn={null} melds={[]} doraIndicators={[]} />));
-    expect(host.querySelectorAll('.remaining-grid input')).toHaveLength(34);
+    expect(host.querySelectorAll('.remaining-tile')).toHaveLength(9);
+    expect(host.querySelectorAll('.remaining-panel input')).toHaveLength(1);
     expect(host.textContent).toContain('2種・8枚');
     await editRemaining('一索', '0');
     expect(host.textContent).toContain('1種・4枚');
@@ -153,6 +160,7 @@ describe('ukeire UI and existing study flows (jsdom; not a layout/browser test)'
     expect(host.querySelector('.remaining-error')).toBeNull();
     await click(host.querySelector<HTMLElement>('button[aria-label="四索の残枚数を1枚増やす"]')!);
     expect(host.textContent).toContain('1種・2枚');
+    await selectRemaining('一索');
     await click(host.querySelector<HTMLElement>('button[aria-label="一索の残枚数を自動に戻す"]')!);
     expect(host.textContent).toContain('2種・6枚');
     await editRemaining('四索','');
@@ -161,6 +169,37 @@ describe('ukeire UI and existing study flows (jsdom; not a layout/browser test)'
     expect(host.querySelector('.remaining-error')).toBeNull();
     expect(host.querySelector<HTMLInputElement>('input[aria-label="四索の残枚数"]')!.value).toBe('4');
     expect([...host.querySelectorAll('.remaining-status')].every(el => el.textContent === '自動')).toBe(true);
+  });
+
+  it('uses one editor for all 34 tiles, retains values across suits and discards invalid drafts on selection', async () => {
+    const parsed = parseHandNotation('123m456m789p23s55z');
+    if (!parsed.ok) throw new Error('fixture');
+    await act(async () => root.render(<UkeirePanel concealed={parsed.tiles} drawn={null} melds={[]} doraIndicators={[]} />));
+    const seen = new Set<string>();
+    for (const name of ['萬子', '筒子', '索子', '字牌']) {
+      await click([...host.querySelectorAll<HTMLElement>('.remaining-suits button')].find(el => el.textContent === name)!);
+      for (const tile of host.querySelectorAll('.remaining-tile')) seen.add(tile.getAttribute('aria-label')!.split('、')[0]!);
+      expect(host.querySelectorAll('.remaining-panel input')).toHaveLength(1);
+      expect(host.querySelectorAll('.remaining-tile[aria-pressed="true"]')).toHaveLength(1);
+    }
+    expect(seen.size).toBe(34);
+    await editRemaining('一索', '0');
+    expect(host.querySelector('.remaining-tile.is-manual')!.getAttribute('aria-label')).toBe('一索、残り0枚、手動');
+    await editRemaining('四索', '2');
+    await editRemaining('四索', 'x');
+    expect(host.querySelector('.remaining-error')).not.toBeNull();
+    await selectRemaining('一萬');
+    expect(host.querySelector('.remaining-error')).toBeNull();
+    const souzu = [...host.querySelectorAll('.remaining-suits button')].find(el => el.textContent!.startsWith('索子'))!;
+    expect(souzu.getAttribute('aria-label')).toBe('索子、2種を調整中');
+    await selectRemaining('四索');
+    expect(host.querySelector<HTMLInputElement>('input[aria-label="四索の残枚数"]')!.value).toBe('2');
+    await click(souzu as HTMLElement);
+    expect(host.querySelector<HTMLInputElement>('input[aria-label="四索の残枚数"]')!.value).toBe('2');
+    expect(host.textContent).toContain('1種・2枚');
+    await click(byText('すべて自動に戻す'));
+    expect(host.querySelector('.remaining-tile.is-manual')).toBeNull();
+    expect(host.querySelector('.remaining-suit-count')).toBeNull();
   });
 
   it('shares one adjustment between red and normal discard rows and retains structural shanten', async () => {
@@ -187,6 +226,7 @@ describe('ukeire UI and existing study flows (jsdom; not a layout/browser test)'
     expect(host.querySelector<HTMLInputElement>('input[aria-label="一索の残枚数"]')!.value).toBe('0');
     await act(async () => root.render(<UkeirePanel {...props} doraIndicators={['1s']} sessionKey="one" />));
     expect(host.textContent).toContain('2種・7枚');
+    await selectRemaining('一索');
     expect(host.querySelector<HTMLInputElement>('input[aria-label="一索の残枚数"]')!.value).toBe('3');
     expect([...host.querySelectorAll('.remaining-status')].every(el => el.textContent === '自動')).toBe(true);
     await editRemaining('一索','0');
@@ -239,6 +279,7 @@ describe('ukeire UI and existing study flows (jsdom; not a layout/browser test)'
     await click(host.querySelector<HTMLElement>('.tile-palette button[aria-label="東"]')!);
     expect(settings().hidden).toBe(true);
     await click(toggle());
+    await selectRemaining('一索');
     expect(host.querySelector<HTMLInputElement>('input[aria-label="一索の残枚数"]')!.value).toBe('4');
     await click(byText('戻す'));
     expect(host.querySelector('.ukeire-total')!.textContent).toBe('2種・8枚');
