@@ -40,10 +40,10 @@ export function UkeirePanel({ sessionKey, ...input }: AnalysisHand & { sessionKe
   return <UkeireResults session={session} showSettings />;
 }
 
-export function UkeireResults({ session, showSettings = false }: { session: UkeireSession; showSettings?: boolean }) {
+export function UkeireResults({ session, showSettings = false, defaultOpen = true }: { session: UkeireSession; showSettings?: boolean; defaultOpen?: boolean }) {
   const { analysis } = session;
   return (
-    <details className="panel ukeire-panel" open>
+    <details className="panel ukeire-panel" open={defaultOpen}>
       <summary className="section-title">受入れ</summary>
       {showSettings && <><RemainingButton session={session} /><RemainingSettings session={session} /></>}
       {analysis.status !== 'ready' ? (

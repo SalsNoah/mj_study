@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { TileCode } from '@/domain/types';
 import { TileFace } from './TileFace';
 
@@ -16,12 +17,18 @@ type Props = {
 };
 
 export function TilePalette({ onPick, disabled, blockedReasons = {} }: Props) {
+  const [suit, setSuit] = useState(0);
   return (
     <div className="tile-palette" aria-label="牌パレット">
+      <div className="tile-palette__suits" role="group" aria-label="牌の種類">
+        {['萬子', '筒子', '索子', '字牌'].map((label, index) => <button type="button" key={label}
+          aria-pressed={suit === index} onClick={() => setSuit(index)}>{label}</button>)}
+      </div>
       <div className="tile-palette__grid">
         {ROWS.map((row, ri) => (
           <div
             key={ri}
+            hidden={suit !== ri}
             className={`tile-palette__row${row.length === 7 ? ' tile-palette__row--honors' : ''}`}
           >
             {row.map((code) => (

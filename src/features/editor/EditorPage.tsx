@@ -6,6 +6,7 @@ import { HandView } from '@/components/HandView';
 import { TilePalette } from '@/components/TilePalette';
 import { RemainingButton, RemainingSettings, UkeireResults } from '@/components/UkeirePanel';
 import { useUkeireSession } from '@/components/useUkeireSession';
+import { ViewTabs, viewPanelProps } from '@/components/ViewTabs';
 import { WanpaiDora } from '@/components/WanpaiDora';
 import { contextSummary } from '@/domain/context';
 import { createId, nowIso } from '@/domain/ids';
@@ -88,6 +89,7 @@ export function EditorPage() {
     imported?.doraIndicators ?? existing?.doraIndicators ?? [],
   );
   const ukeire = useUkeireSession({ concealed, drawn: null, melds, doraIndicators }, existing?.id ?? 'new');
+  const [view, setView] = useState<'hand' | 'notes' | 'context'>('hand');
   const [target, setTarget] = useState<Target>('concealed');
   const [history, setHistory] = useState<Array<() => void>>([]);
   const [answerEnabled, setAnswerEnabled] = useState(existing?.answerEnabled ?? false);
@@ -299,6 +301,9 @@ export function EditorPage() {
     const issues = validateProblem(draftProblem);
     setWarns(issues.filter((i) => i.level === 'warn').map((i) => i.message));
     if (hasErrors(issues)) {
+      const first = issues.find((issue) => issue.level === 'error')!.code;
+      setView(['title_len', 'explanation_len', 'memo_len', 'tags_per', 'attach_max', 'answer_empty', 'answer_missing', 'bad_url'].includes(first)
+        ? 'notes' : ['hand_number', 'turn', 'honba', 'riichi', 'rank', 'score'].includes(first) ? 'context' : 'hand');
       setError(issues.filter((i) => i.level === 'error').map((i) => i.message).join(' / '));
       return;
     }
@@ -368,9 +373,7 @@ export function EditorPage() {
             />
           </label>
         )}
-        <p className="count-pill" aria-live="polite">
-          {countLabel}
-        </p>
+        <button type="button" className="btn btn-primary editor-save" onClick={save}>保存</button>
       </header>
       {imported && (
         <p className="ok import-note">
@@ -379,6 +382,253 @@ export function EditorPage() {
         </p>
       )}
 
+      {warns.map((w) => (
+        <p key={w} className="warn">
+          {w}
+        </p>
+      ))}
+      {error && <p className="error" role="alert">{error}</p>}
+
+      <ViewTabs id="editor-view" label="作成する内容" value={view} onChange={setView}
+        tabs={[{ value: 'hand', label: '牌姿' }, { value: 'notes', label: '解説・メモ' }, { value: 'context', label: '対局条件' }]} />
+      <div {...viewPanelProps('editor-view', 'hand', view)}>
+      <section className="panel tile-input">
+        <div className="hand-stage" aria-label="牌姿プレビュー">
+          <div className="hand-stage__top">
+            <p className="hand-stage__meta">{contextSummary(context)}</p>
+            <WanpaiDora doras={doraIndicators} onRemove={removeDoraAt} />
+            {doraIndicators.length > LIMITS.doraMax && <div className="btn-row" role="alert">ドラ表示牌が5枚を超えています。余分な牌も保持しています：{doraIndicators.slice(LIMITS.doraMax).map((code, i) => <button key={i} type="button" className="btn" onClick={() => removeDoraAt(i + LIMITS.doraMax)}>表示牌{i + LIMITS.doraMax + 1}枚目（{code}）を削除</button>)}</div>}
+          </div>
+          <HandView
+            concealed={concealed}
+            drawn={null}
+            melds={melds}
+            tight
+            onSelectConcealed={removeConcealedAt}
+            onRemoveMeld={removeMeld}
+          />
+          {handCount === 0 && melds.length === 0 && (
+            <p className="hand-stage__empty">下の牌をタップして入力（鳴き込みで14枚、槓は1枚増）</p>
+          )}
+        </div>
+
+        <div className="btn-row btn-row--compact tile-actions">
+          <button type="button" className="btn" onClick={doSort}>
+            理牌
+          </button>
+          <button type="button" className="btn" onClick={undo} disabled={!history.length}>
+            戻す
+          </button>
+          <button type="button" className="btn btn-danger" onClick={clearAll}>
+            全消去
+          </button>
+          <RemainingButton session={ukeire} />
+          <span className="count-inline">{countLabel}</span>
+        </div>
+
+        <RemainingSettings session={ukeire} />
+
+        <div className="input-targets" role="group" aria-label="入力先">
+          {([{ key: 'concealed', label: '手牌' }, { key: 'dora', label: 'ドラ表示牌' }, { key: 'meld', label: '鳴き' }] as const).map((tab) =>
+            <button type="button" key={tab.key} aria-pressed={target === tab.key} onClick={() => setTarget(tab.key)}>{tab.label}</button>)}
+        </div>
+        <div className="meld-types" role="group" aria-label="鳴きの種類" hidden={target !== 'meld'}>
+          {INPUT_TABS.filter(tab => tab.meldType).map(tab => <button type="button" key={tab.meldType}
+            aria-pressed={meldType === tab.meldType} onClick={() => startMeldTab(tab.meldType!)}>{tab.label}</button>)}
+        </div>
+
+        {target === 'meld' && (
+          <div className="meld-bar">
+            {meldType !== 'closedKan' && (
+              <div className="seg" role="group" aria-label="取得元">
+                {MELD_FROM_OPTS.map((o) => (
+                  <button
+                    key={o.value}
+                    type="button"
+                    className={meldFrom === o.value ? 'is-on' : ''}
+                    disabled={meldType === 'chi' && o.value !== 'left'}
+                    onClick={() => setMeldFrom(o.value)}
+                  >
+                    {o.label}
+                  </button>
+                ))}
+              </div>
+            )}
+            <span className="meld-bar__hint">
+              {melds.length >= LIMITS.meldsMax
+                ? '副露は4組までです'
+                : concealed.length > handTileMax(melds.length + 1)
+                  ? `手牌をあと${concealed.length - handTileMax(melds.length + 1)}枚減らすと追加できます`
+                  : meldType === 'chi'
+                    ? '順子の一番小さい牌をタップ'
+                    : '鳴く牌をタップ'}
+              ・副露はタップで削除
+            </span>
+          </div>
+        )}
+
+        <p className="tile-input-tip">牌をタップして追加・削除</p>
+        {supplyIssues.length > 0 && <div role="alert" className="error">入力済みの牌が上限を超えています。牌は自動で削除していません。手牌・鳴き・ドラ表示牌をタップして修正してください。{supplyIssues.map((issue) => <p key={issue}>{issue.replace('追加後', '現在')}</p>)}</div>}
+        <TilePalette onPick={addTile} blockedReasons={blockedReasons} />
+        {error && target === 'meld' && <p className="error">{error}</p>}
+      </section>
+
+        <UkeireResults session={ukeire} defaultOpen={false} />
+      </div>
+      <div {...viewPanelProps('editor-view', 'notes', view)}>
+      <label className="field">
+        <span>タイトル（任意）</span>
+        <input
+          value={title}
+          onChange={(e) => {
+            setTitle(e.target.value);
+            mark();
+          }}
+          maxLength={LIMITS.title}
+        />
+      </label>
+
+      <section className="panel">
+        <label className="check">
+          <input
+            type="checkbox"
+            checked={answerEnabled}
+            onChange={(e) => {
+              setAnswerEnabled(e.target.checked);
+              if (!e.target.checked) setAccepted([]);
+              mark();
+            }}
+          />
+          正解を設定する
+        </label>
+        {answerEnabled && (
+          <div>
+            <p className="hint">切るのが正解の牌をタップ（複数可・もう一度で解除）</p>
+            <div className="hand-stage hand-stage--pick">
+              <HandView
+                concealed={concealed}
+                drawn={null}
+                melds={melds}
+                tight
+                selectablePool="concealedDrawn"
+                marks={new Map(accepted.map((c) => [c, 'correct' as const]))}
+                onSelectCode={(c) => {
+                  setAccepted((a) =>
+                    acceptedSet.has(c) ? a.filter((x) => x !== c) : [...a, c],
+                  );
+                  mark();
+                }}
+              />
+            </div>
+          </div>
+        )}
+        <label className="field">
+          <span>解説</span>
+          <textarea
+            value={explanation}
+            onChange={(e) => {
+              setExplanation(e.target.value);
+              mark();
+            }}
+            rows={3}
+            maxLength={LIMITS.explanation}
+          />
+        </label>
+        <label className="field">
+          <span>自分のメモ（共有されません）</span>
+          <textarea
+            value={privateMemo}
+            onChange={(e) => {
+              setPrivateMemo(e.target.value);
+              mark();
+            }}
+            rows={2}
+            maxLength={LIMITS.privateMemo}
+          />
+        </label>
+        <div className="field">
+          <span>タグ</span>
+          <div className="tag-cloud">
+            {store.tags.map((t) => {
+              const on = tagIds.includes(t.id);
+              return (
+                <button
+                  key={t.id}
+                  type="button"
+                  className={`tag-chip${on ? ' is-on' : ''}`}
+                  onClick={() => {
+                    setTagIds((ids) =>
+                      on
+                        ? ids.filter((x) => x !== t.id)
+                        : ids.length < LIMITS.tagsPerProblem
+                          ? [...ids, t.id]
+                          : ids,
+                    );
+                    mark();
+                  }}
+                >
+                  {t.name}
+                </button>
+              );
+            })}
+          </div>
+          <div className="btn-row btn-row--compact">
+            <input
+              value={tagInput}
+              onChange={(e) => setTagInput(e.target.value)}
+              placeholder="新しいタグ"
+              maxLength={LIMITS.tagName}
+            />
+            <button type="button" className="btn" onClick={addTag}>
+              追加
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <details className="details panel" open={error?.includes("出典URL") || undefined}>
+        <summary>参考資料</summary>
+        <label className="field">
+          <span>出典URL</span>
+          <input
+            value={sourceUrl}
+            onChange={(e) => {
+              setSourceUrl(e.target.value);
+              mark();
+            }}
+            placeholder="https://"
+          />
+        </label>
+        <label className="field">
+          <span>参考画像（最大3枚）</span>
+          <input
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            onChange={(e) => onImage(e.target.files?.[0] ?? null)}
+          />
+        </label>
+        {imageMsg && <p className="error">{imageMsg}</p>}
+        <div className="attach-grid">
+          {attachments.map((a) => (
+            <div key={a.id} className="attach-item">
+              <img src={a.dataUrl} alt="参考画像" />
+              <button
+                type="button"
+                className="btn btn-danger"
+                onClick={() => {
+                  setAttachments(attachments.filter((x) => x.id !== a.id));
+                  mark();
+                }}
+              >
+                削除
+              </button>
+            </div>
+          ))}
+        </div>
+      </details>
+
+      </div>
+      <div {...viewPanelProps('editor-view', 'context', view)}>
       <section className="panel context-panel">
         <div className="ctx-toolbar" aria-label="対局条件">
           <div className="seg" role="group" aria-label="場風">
@@ -521,267 +771,9 @@ export function EditorPage() {
         </div>
       </section>
 
-      <section className="panel tile-input">
-        <div className="hand-stage" aria-label="牌姿プレビュー">
-          <div className="hand-stage__top">
-            <p className="hand-stage__meta">{contextSummary(context)}</p>
-            <WanpaiDora doras={doraIndicators} onRemove={removeDoraAt} />
-            {doraIndicators.length > LIMITS.doraMax && <div className="btn-row" role="alert">ドラ表示牌が5枚を超えています。余分な牌も保持しています：{doraIndicators.slice(LIMITS.doraMax).map((code, i) => <button key={i} type="button" className="btn" onClick={() => removeDoraAt(i + LIMITS.doraMax)}>表示牌{i + LIMITS.doraMax + 1}枚目（{code}）を削除</button>)}</div>}
-          </div>
-          <HandView
-            concealed={concealed}
-            drawn={null}
-            melds={melds}
-            tight
-            onSelectConcealed={removeConcealedAt}
-            onRemoveMeld={removeMeld}
-          />
-          {handCount === 0 && melds.length === 0 && (
-            <p className="hand-stage__empty">下の牌をタップして入力（鳴き込みで14枚、槓は1枚増）</p>
-          )}
-        </div>
-
-        <div className="btn-row btn-row--compact tile-actions">
-          <button type="button" className="btn" onClick={doSort}>
-            理牌
-          </button>
-          <button type="button" className="btn" onClick={undo} disabled={!history.length}>
-            戻す
-          </button>
-          <button type="button" className="btn btn-danger" onClick={clearAll}>
-            全消去
-          </button>
-          <RemainingButton session={ukeire} />
-          <span className="count-inline">{countLabel}</span>
-        </div>
-
-        <RemainingSettings session={ukeire} />
-
-        <div className="target-tabs target-tabs--scroll" role="tablist" aria-label="入力先">
-          {INPUT_TABS.map((tab) => {
-            const selected =
-              tab.key === 'meld'
-                ? target === 'meld' && meldType === tab.meldType
-                : target === tab.key;
-            return (
-              <button
-                key={`${tab.label}-${tab.meldType ?? tab.key}`}
-                type="button"
-                role="tab"
-                aria-selected={selected}
-                className={selected ? 'is-active' : ''}
-                onClick={() => {
-                  if (tab.key === 'meld' && tab.meldType) startMeldTab(tab.meldType);
-                  else setTarget(tab.key);
-                }}
-              >
-                {tab.label}
-              </button>
-            );
-          })}
-        </div>
-
-        {target === 'meld' && (
-          <div className="meld-bar">
-            {meldType !== 'closedKan' && (
-              <div className="seg" role="group" aria-label="取得元">
-                {MELD_FROM_OPTS.map((o) => (
-                  <button
-                    key={o.value}
-                    type="button"
-                    className={meldFrom === o.value ? 'is-on' : ''}
-                    disabled={meldType === 'chi' && o.value !== 'left'}
-                    onClick={() => setMeldFrom(o.value)}
-                  >
-                    {o.label}
-                  </button>
-                ))}
-              </div>
-            )}
-            <span className="meld-bar__hint">
-              {melds.length >= LIMITS.meldsMax
-                ? '副露は4組までです'
-                : concealed.length > handTileMax(melds.length + 1)
-                  ? `手牌をあと${concealed.length - handTileMax(melds.length + 1)}枚減らすと追加できます`
-                  : meldType === 'chi'
-                    ? '順子の一番小さい牌をタップ'
-                    : '鳴く牌をタップ'}
-              ・副露はタップで削除
-            </span>
-          </div>
-        )}
-
-        <p className="hint">手牌・鳴き・ドラ表示牌を合わせて同じ牌は4枚まで（赤五を含む）。薄い牌は追加できません。牌姿の牌をタップすると減らせます。</p>
-        {supplyIssues.length > 0 && <div role="alert" className="error">入力済みの牌が上限を超えています。牌は自動で削除していません。手牌・鳴き・ドラ表示牌をタップして修正してください。{supplyIssues.map((issue) => <p key={issue}>{issue.replace('追加後', '現在')}</p>)}</div>}
-        <TilePalette onPick={addTile} blockedReasons={blockedReasons} />
-        {error && target === 'meld' && <p className="error">{error}</p>}
-      </section>
-
-      <label className="field">
-        <span>タイトル（任意）</span>
-        <input
-          value={title}
-          onChange={(e) => {
-            setTitle(e.target.value);
-            mark();
-          }}
-          maxLength={LIMITS.title}
-        />
-      </label>
-
-      <UkeireResults session={ukeire} />
-
-      <section className="panel">
-        <label className="check">
-          <input
-            type="checkbox"
-            checked={answerEnabled}
-            onChange={(e) => {
-              setAnswerEnabled(e.target.checked);
-              if (!e.target.checked) setAccepted([]);
-              mark();
-            }}
-          />
-          正解を設定する
-        </label>
-        {answerEnabled && (
-          <div>
-            <p className="hint">切るのが正解の牌をタップ（複数可・もう一度で解除）</p>
-            <div className="hand-stage hand-stage--pick">
-              <HandView
-                concealed={concealed}
-                drawn={null}
-                melds={melds}
-                tight
-                selectablePool="concealedDrawn"
-                marks={new Map(accepted.map((c) => [c, 'correct' as const]))}
-                onSelectCode={(c) => {
-                  setAccepted((a) =>
-                    acceptedSet.has(c) ? a.filter((x) => x !== c) : [...a, c],
-                  );
-                  mark();
-                }}
-              />
-            </div>
-          </div>
-        )}
-        <label className="field">
-          <span>解説</span>
-          <textarea
-            value={explanation}
-            onChange={(e) => {
-              setExplanation(e.target.value);
-              mark();
-            }}
-            rows={3}
-            maxLength={LIMITS.explanation}
-          />
-        </label>
-        <label className="field">
-          <span>自分のメモ（共有されません）</span>
-          <textarea
-            value={privateMemo}
-            onChange={(e) => {
-              setPrivateMemo(e.target.value);
-              mark();
-            }}
-            rows={2}
-            maxLength={LIMITS.privateMemo}
-          />
-        </label>
-        <div className="field">
-          <span>タグ</span>
-          <div className="tag-cloud">
-            {store.tags.map((t) => {
-              const on = tagIds.includes(t.id);
-              return (
-                <button
-                  key={t.id}
-                  type="button"
-                  className={`tag-chip${on ? ' is-on' : ''}`}
-                  onClick={() => {
-                    setTagIds((ids) =>
-                      on
-                        ? ids.filter((x) => x !== t.id)
-                        : ids.length < LIMITS.tagsPerProblem
-                          ? [...ids, t.id]
-                          : ids,
-                    );
-                    mark();
-                  }}
-                >
-                  {t.name}
-                </button>
-              );
-            })}
-          </div>
-          <div className="btn-row btn-row--compact">
-            <input
-              value={tagInput}
-              onChange={(e) => setTagInput(e.target.value)}
-              placeholder="新しいタグ"
-              maxLength={LIMITS.tagName}
-            />
-            <button type="button" className="btn" onClick={addTag}>
-              追加
-            </button>
-          </div>
-        </div>
-      </section>
-
-      <details className="details panel">
-        <summary>参考資料</summary>
-        <label className="field">
-          <span>出典URL</span>
-          <input
-            value={sourceUrl}
-            onChange={(e) => {
-              setSourceUrl(e.target.value);
-              mark();
-            }}
-            placeholder="https://"
-          />
-        </label>
-        <label className="field">
-          <span>参考画像（最大3枚）</span>
-          <input
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            onChange={(e) => onImage(e.target.files?.[0] ?? null)}
-          />
-        </label>
-        {imageMsg && <p className="error">{imageMsg}</p>}
-        <div className="attach-grid">
-          {attachments.map((a) => (
-            <div key={a.id} className="attach-item">
-              <img src={a.dataUrl} alt="参考画像" />
-              <button
-                type="button"
-                className="btn btn-danger"
-                onClick={() => {
-                  setAttachments(attachments.filter((x) => x.id !== a.id));
-                  mark();
-                }}
-              >
-                削除
-              </button>
-            </div>
-          ))}
-        </div>
-      </details>
-
-      {warns.map((w) => (
-        <p key={w} className="warn">
-          {w}
-        </p>
-      ))}
-      {error && <p className="error">{error}</p>}
-
-      <div className="sticky-actions">
-        <button type="button" className="btn btn-primary btn-save" onClick={save}>
-          保存
-        </button>
       </div>
+
+
     </div>
   );
 }

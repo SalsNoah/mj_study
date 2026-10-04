@@ -18,71 +18,13 @@ import { LIMITS } from '@/domain/types';
 
 type SortKey = 'updated' | 'confirmAsc' | 'lastConfirmOld' | 'lastSolvedOld';
 
-function ExampleTiles({ notation }: { notation: string }) {
-  const parsed = parseHandNotation(notation);
-  if (!parsed.ok) return <span>{notation}</span>;
-  return (
-    <span className="example-tiles">
-      {parsed.tiles.map((c, i) => (
-        <TileFace key={i} code={c} size={17} />
-      ))}
-    </span>
-  );
-}
-
-function Example({ from, to, note }: { from: string; to: string; note?: string }) {
-  return (
-    <span className="example">
-      <ExampleTiles notation={from} />
-      <span className="example__arrow">→</span>
-      <ExampleTiles notation={to} />
-      {note && <span className="example__note">{note}</span>}
-    </span>
-  );
-}
-
-const OPTION_ROWS: Array<{
-  key: keyof SearchOptions;
-  label: string;
-  desc: string;
-  example: { from: string; to: string; note?: string } | null;
-}> = [
-  {
-    key: 'contains',
-    label: '含む',
-    desc: 'ONなら指定した牌を含む手牌も見つかる（OFFは完全一致）',
-    example: { from: '234m', to: '234m567p99s', note: 'も一致' },
-  },
-  {
-    key: 'colorSwap',
-    label: '色替え',
-    desc: '萬子・筒子・索子を入れ替えた形も一致',
-    example: { from: '234m', to: '234p', note: 'も一致' },
-  },
-  {
-    key: 'reverse',
-    label: '反転',
-    desc: '数字を 1⇔9、2⇔8… と裏返した形も一致',
-    example: { from: '234m', to: '678m', note: 'も一致' },
-  },
-  {
-    key: 'shift',
-    label: '数字のずれ',
-    desc: '同じ形で数字だけずれたものも一致',
-    example: { from: '234m', to: '345m', note: 'も一致' },
-  },
-  {
-    key: 'distinguishRed',
-    label: '赤牌を区別',
-    desc: 'ONなら赤五と通常の五を別の牌として扱う',
-    example: { from: '0m', to: '5m', note: 'ONだと不一致' },
-  },
-  {
-    key: 'includeMelds',
-    label: '副露を含む',
-    desc: '鳴いた牌（副露）も検索対象にする',
-    example: null,
-  },
+const OPTION_ROWS: Array<{ key: keyof SearchOptions; label: string; desc: string }> = [
+  { key: 'contains', label: '含む', desc: 'OFFで完全一致' },
+  { key: 'colorSwap', label: '色替え', desc: '萬・筒・索を入れ替えて検索' },
+  { key: 'reverse', label: '反転', desc: '1⇔9、2⇔8…も一致' },
+  { key: 'shift', label: '数字のずれ', desc: '同じ形の連番も一致' },
+  { key: 'distinguishRed', label: '赤牌を区別', desc: '赤五と通常五を分ける' },
+  { key: 'includeMelds', label: '副露を含む', desc: '鳴いた牌も検索' },
 ];
 
 export function LibraryPage() {
@@ -186,64 +128,63 @@ export function LibraryPage() {
     setTiles([...tileCodes, code]);
   };
 
+  const hasSearch = !!textQuery.trim() || !!tileQuery.trim() || selectedTags.length > 0;
+  const filterSummary = [
+    tileQuery.trim() ? (parseError ? '牌姿の入力を確認' : `牌姿 ${tileCodes.length}枚`) : '',
+    selectedTags.length > 0 ? `タグ ${selectedTags.length}件` : '',
+  ].filter(Boolean).join('・');
+  const clearSearch = () => {
+    setTextQuery('');
+    setTiles([]);
+    setSelectedTags([]);
+    setSearchOpts(DEFAULT_SEARCH_OPTIONS);
+  };
+
   return (
     <div className="page page--library">
       <header className="page-header page-header--compact">
         <h1>学習帳</h1>
-        <p className="count-pill">{filtered.length} 問</p>
+        <p className="count-pill" role="status">{filtered.length} 問</p>
       </header>
 
-      <section className="panel search-panel">
-        <div className="search-query">
-          <div className="search-query__tiles" aria-label="検索する牌">
-            {tileCodes.length === 0 ? (
-              <span className="hint">下の牌をタップして牌姿で検索</span>
-            ) : (
-              tileCodes.map((c, i) => (
-                <TileFace
-                  key={`${c}-${i}`}
-                  code={c}
-                  size={24}
-                  onClick={() => setTiles(tileCodes.filter((_, j) => j !== i))}
-                />
-              ))
+      <section className="panel search-panel" aria-label="問題を探す">
+        <label className="field">
+          <span className="sr-only">文字検索</span>
+          <input
+            type="search"
+            value={textQuery}
+            onChange={(e) => setTextQuery(e.target.value)}
+            placeholder="タイトル・解説・メモ・タグを検索"
+          />
+        </label>
+
+        <details className="details library-filters">
+          <summary>
+            <strong>牌姿・タグで絞り込む</strong>
+            {filterSummary && <span className="filter-summary">{filterSummary}</span>}
+          </summary>
+          <div className="search-query">
+            <div className="search-query__tiles" aria-label="検索する牌">
+              {tileCodes.length === 0 ? (
+                <span className="hint">牌をタップして検索</span>
+              ) : (
+                tileCodes.map((c, i) => (
+                  <TileFace
+                    key={`${c}-${i}`}
+                    code={c}
+                    size={24}
+                    onClick={() => setTiles(tileCodes.filter((_, j) => j !== i))}
+                  />
+                ))
+              )}
+            </div>
+            {tileQuery.trim() && (
+              <button type="button" className="btn btn-sm" onClick={() => setTiles([])}>
+                クリア
+              </button>
             )}
           </div>
-          {tileCodes.length > 0 && (
-            <button type="button" className="btn btn-sm" onClick={() => setTiles([])}>
-              クリア
-            </button>
-          )}
-        </div>
-        <TilePalette onPick={addTile} disabled={tileCodes.length >= 14} />
-        {parseError && <p className="error">{parseError}</p>}
-
-        <details className="details">
-          <summary>牌姿検索オプション</summary>
-          <ul className="option-list">
-            {OPTION_ROWS.map((row) => (
-              <li key={row.key}>
-                <label className="option-row">
-                  <input
-                    type="checkbox"
-                    checked={searchOpts[row.key]}
-                    onChange={(e) =>
-                      setSearchOpts((o) => ({ ...o, [row.key]: e.target.checked }))
-                    }
-                  />
-                  <span className="option-row__body">
-                    <strong>{row.label}</strong>
-                    <span className="option-row__desc">{row.desc}</span>
-                    {row.example && <Example {...row.example} />}
-                  </span>
-                </label>
-              </li>
-            ))}
-          </ul>
-        </details>
-
-        <details className="details">
-          <summary>文字・タグで絞り込む</summary>
+          <TilePalette onPick={addTile} disabled={tileCodes.length >= 14} />
           <label className="field">
             <span>牌姿を文字で入力</span>
             <input
@@ -251,18 +192,32 @@ export function LibraryPage() {
               onChange={(e) => setTileQuery(e.target.value)}
               placeholder="例: 234m567p"
               aria-invalid={!!parseError}
+              aria-describedby={parseError ? 'library-tile-error' : undefined}
             />
           </label>
-          <label className="field">
-            <span>文字検索</span>
-            <input
-              value={textQuery}
-              onChange={(e) => setTextQuery(e.target.value)}
-              placeholder="タイトル・解説・メモ・タグ"
-            />
-          </label>
-          {store.tags.length > 0 && (
+          <details className="details">
+            <summary>牌姿の一致条件</summary>
+            <ul className="option-list">
+              {OPTION_ROWS.map((row) => (
+                <li key={row.key}>
+                  <label className="option-row">
+                    <input
+                      type="checkbox"
+                      checked={searchOpts[row.key]}
+                      onChange={(e) => setSearchOpts((o) => ({ ...o, [row.key]: e.target.checked }))}
+                    />
+                    <span className="option-row__body">
+                      <strong>{row.label}</strong>
+                      <span className="option-row__desc">{row.desc}</span>
+                    </span>
+                  </label>
+                </li>
+              ))}
+            </ul>
+          </details>
+          {store.tags.length > 0 ? (
             <>
+              <h2 className="mini-title">タグ</h2>
               <div className="tag-cloud">
                 {store.tags.map((t) => {
                   const on = selectedTags.includes(t.id);
@@ -272,11 +227,7 @@ export function LibraryPage() {
                       type="button"
                       className={`tag-chip${on ? ' is-on' : ''}`}
                       aria-pressed={on}
-                      onClick={() =>
-                        setSelectedTags((ids) =>
-                          on ? ids.filter((x) => x !== t.id) : [...ids, t.id],
-                        )
-                      }
+                      onClick={() => setSelectedTags((ids) => on ? ids.filter((x) => x !== t.id) : [...ids, t.id])}
                     >
                       {t.name}
                     </button>
@@ -291,9 +242,12 @@ export function LibraryPage() {
                 </select>
               </label>
             </>
-          )}
+          ) : <p className="hint">タグはまだありません</p>}
         </details>
-
+        {parseError && <p id="library-tile-error" className="error" role="alert">{parseError}</p>}
+        {hasSearch && (
+          <button type="button" className="btn btn-sm" onClick={clearSearch}>検索をクリア</button>
+        )}
         <label className="inline-select">
           <span>並べ替え</span>
           <select value={sortKey} onChange={(e) => setSortKey(e.target.value as SortKey)}>
@@ -307,10 +261,12 @@ export function LibraryPage() {
 
       {filtered.length === 0 ? (
         <div className="empty">
-          <p>問題がありません。</p>
-          <Link className="btn btn-primary" to="/">
-            新規作成
-          </Link>
+          <p>{store.problems.length === 0 ? 'まだ問題がありません。' : '条件に合う問題がありません。'}</p>
+          {store.problems.length === 0 ? (
+            <Link className="btn btn-primary" to="/">問題を作成</Link>
+          ) : (
+            <button type="button" className="btn btn-primary" onClick={clearSearch}>すべての問題を見る</button>
+          )}
         </div>
       ) : (
         <ul className="problem-list">

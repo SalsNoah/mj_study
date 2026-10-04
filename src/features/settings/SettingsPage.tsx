@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import { useApp } from '@/app/store';
+import { ViewTabs, viewPanelProps } from '@/components/ViewTabs';
 import { LIMITS } from '@/domain/types';
 import { createSampleProblems, samplesAlreadyPresent } from '@/data/samples';
 import { THEMES, loadTheme, saveTheme, type ThemeId } from '@/app/theme';
@@ -18,6 +19,7 @@ export function SettingsPage() {
     deleteTag,
     lastError,
   } = useApp();
+  const [view, setView] = useState('display');
   const [msg, setMsg] = useState<string | null>(null);
   const [theme, setTheme] = useState<ThemeId>(loadTheme);
   const [importPreview, setImportPreview] = useState<{
@@ -70,11 +72,23 @@ export function SettingsPage() {
   };
 
   return (
-    <div className="page">
-      <header className="page-header">
+    <div className="page page--settings">
+      <header className="page-header page-header--compact">
         <h1>設定</h1>
       </header>
 
+      {(msg || lastError) && <p className={lastError ? 'error' : 'ok'} role={lastError ? 'alert' : 'status'}>{lastError ?? msg}</p>}
+      {sizeLevel !== 'ok' && (
+        <p className="warn" role="alert">{sizeLevel === 'over' ? '保存量が4MiBを超えています。' : '保存量が3MiBを超えています。'}「データ管理」でバックアップを保存してください。</p>
+      )}
+      <ViewTabs
+        id="settings-view"
+        label="設定の分類"
+        value={view}
+        onChange={setView}
+        tabs={[{ value: 'display', label: '表示・編集' }, { value: 'data', label: 'データ管理' }]}
+      />
+      <div {...viewPanelProps('settings-view', 'display', view)}>
       <section className="panel">
         <h2 className="section-title">テーマ</h2>
         <div className="theme-picker" role="radiogroup" aria-label="テーマ">
@@ -105,18 +119,6 @@ export function SettingsPage() {
       </section>
 
       <section className="panel">
-        <h2 className="section-title">保存量の目安</h2>
-        <p>
-          約 {(sizeBytes / (1024 * 1024)).toFixed(2)} MiB
-          {sizeLevel === 'warn' && '（3MiB超過：注意）'}
-          {sizeLevel === 'over' && '（4MiB上限超過）'}
-        </p>
-        <p className="hint">
-          データはこのブラウザの localStorage にのみ保存されます。ブラウザのデータ削除で消え、別端末には自動同期されません。
-        </p>
-      </section>
-
-      <section className="panel">
         <h2 className="section-title">編集設定</h2>
         <label className="check">
           <input
@@ -128,35 +130,13 @@ export function SettingsPage() {
         </label>
       </section>
 
+      </div>
+      <div {...viewPanelProps('settings-view', 'data', view)}>
       <section className="panel">
-        <h2 className="section-title">タグ管理</h2>
-        <ul className="tag-admin">
-          {store.tags.map((t) => (
-            <li key={t.id}>
-              <input
-                defaultValue={t.name}
-                onBlur={(e) => {
-                  if (e.target.value !== t.name) {
-                    const r = renameTag(t.id, e.target.value);
-                    if (!r.ok) setMsg(r.reason);
-                  }
-                }}
-              />
-              <button
-                type="button"
-                className="btn btn-danger"
-                onClick={() => {
-                  if (!window.confirm(`タグ「${t.name}」を削除しますか？（問題は残ります）`)) return;
-                  deleteTag(t.id);
-                }}
-              >
-                削除
-              </button>
-            </li>
-          ))}
-        </ul>
+        <h2 className="section-title">このブラウザのデータ</h2>
+        <p>{store.problems.length} 問・約 {(sizeBytes / (1024 * 1024)).toFixed(2)} MiB</p>
+        <p className="hint">自動同期はありません。ブラウザのデータ削除で消えます。</p>
       </section>
-
       <section className="panel">
         <h2 className="section-title">バックアップ</h2>
         <div className="btn-row wrap">
@@ -217,15 +197,46 @@ export function SettingsPage() {
         )}
       </section>
 
-      <section className="panel">
-        <h2 className="section-title">サンプル</h2>
+      <details className="details panel">
+        <summary>タグ管理（{store.tags.length}件）</summary>
+        {store.tags.length === 0 && <p className="hint">問題の作成画面でタグを追加できます。</p>}
+        <ul className="tag-admin">
+          {store.tags.map((t) => (
+            <li key={t.id}>
+              <input
+                defaultValue={t.name}
+                onBlur={(e) => {
+                  if (e.target.value !== t.name) {
+                    const r = renameTag(t.id, e.target.value);
+                    if (!r.ok) setMsg(r.reason);
+                  }
+                }}
+              />
+              <button
+                type="button"
+                className="btn btn-danger"
+                onClick={() => {
+                  if (!window.confirm(`タグ「${t.name}」を削除しますか？（問題は残ります）`)) return;
+                  deleteTag(t.id);
+                }}
+              >
+                削除
+              </button>
+            </li>
+          ))}
+        </ul>
+      </details>
+
+      <details className="details panel">
+        <summary>サンプル問題</summary>
         <button type="button" className="btn" onClick={addSamples}>
           サンプルを追加
         </button>
-      </section>
+      </details>
 
-      <section className="panel">
-        <h2 className="section-title">全件削除</h2>
+      <details className="details panel settings-danger">
+        <summary>すべてのデータを削除</summary>
+        <p className="hint">問題・履歴・画像が消えます。先にバックアップを保存してください。</p>
         <button
           type="button"
           className="btn btn-danger"
@@ -243,9 +254,9 @@ export function SettingsPage() {
         >
           全件削除
         </button>
-      </section>
+      </details>
 
-      {(msg || lastError) && <p className={lastError ? 'error' : 'ok'}>{lastError ?? msg}</p>}
+      </div>
     </div>
   );
 }
