@@ -49,11 +49,8 @@ export function RemainingControls({ limits, overrides, onChange }: {
   limits: readonly number[]; overrides: RemainingOverrides; onChange: (next: RemainingOverrides) => void;
 }) {
   const [resetCount, setResetCount] = useState(0);
-  const manualCount = Object.keys(overrides).length;
   return (
-    <details className="remaining-panel">
-      <summary>残枚数を調整 <span>（{manualCount ? `${manualCount}種を手動設定中` : 'すべて自動'}）</span></summary>
-      <p className="hint">各牌の残数を0〜自動上限で設定できます。すべての打牌候補に共通です。五は赤五を含む合計です。</p>
+    <section className="remaining-panel" aria-label="残枚数の調整">
       <button type="button" className="btn" onClick={() => { onChange({}); setResetCount((n) => n + 1); }}>すべて自動に戻す</button>
       <ul className="remaining-grid" aria-label="牌ごとの残枚数調整">
         {NORMAL_TILES.map((tile, index) => (
@@ -65,6 +62,6 @@ export function RemainingControls({ limits, overrides, onChange }: {
           />
         ))}
       </ul>
-    </details>
+    </section>
   );
 }
