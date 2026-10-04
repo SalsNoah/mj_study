@@ -88,7 +88,8 @@ try {
   await expect(page.getByLabel('局', { exact: true })).toHaveValue('1');
   await expect(page.getByLabel('巡目', { exact: true })).toHaveValue('6');
   await expect(page.locator('.wanpai').getByRole('button', { name: '北', exact: true })).toHaveCount(1);
-  expect(await page.locator('.ctx-score input').evaluateAll(inputs => inputs.map(input => input.value))).toEqual(['25000','25000','25000','25000']);
+  expect(await page.locator('.ctx-score input').evaluateAll(inputs => inputs.map(input => input.value))).toEqual(['250','250','250','250']);
+  expect(await page.locator('.score-suffix').allTextContents()).toEqual(['00','00','00','00']);
   const order = await page.evaluate(() => ({
     contextBottom: document.querySelector('.context-panel').getBoundingClientRect().bottom,
     handTop: document.querySelector('.hand-stage').getBoundingClientRect().top,
@@ -98,6 +99,34 @@ try {
   expect(order.inputTargets).toEqual(['手牌','ドラ表示牌','明順子','明刻子','明槓子','暗槓子','加槓子']);
   results.push({ name: 'continuous-editor-flow', order, mixedInputClicks: 14, suitSwitchClicks: 0 });
   await allSizes('editor-empty');
+  await page.setViewportSize({ width: 320, height: 844 });
+  await page.getByLabel('東の点数（百点単位）', { exact: true }).fill('0');
+  await page.getByLabel('南の点数（百点単位）', { exact: true }).fill('999');
+  await page.getByLabel('西の点数（百点単位）', { exact: true }).fill('');
+  await page.getByLabel('北の点数（百点単位）', { exact: true }).fill('-25');
+  await capture('scores-edited-320', '.ctx-scores');
+  await page.getByLabel('東の点数（百点単位）', { exact: true }).fill('1000');
+  await expect(page.getByLabel('東の点数（百点単位）', { exact: true })).toHaveValue('1000');
+  await expect(page.getByLabel('東の点数（百点単位）', { exact: true })).toHaveAttribute('aria-invalid', 'true');
+  await page.getByRole('button', { name: '保存', exact: true }).click();
+  expect(await page.evaluate(() => localStorage.getItem('mahjong-study:v1'))).toBeNull();
+  await capture('scores-invalid-320', '.score-input-error');
+  await page.getByRole('button', { name: '東の点数を1,000点として反映', exact: true }).click();
+  await expect(page.getByLabel('東の点数（百点単位）', { exact: true })).toHaveValue('10');
+  await page.getByLabel('東の点数（百点単位）', { exact: true }).fill('25000');
+  await page.getByRole('button', { name: '東の点数を25,000点として反映', exact: true }).click();
+  await expect(page.getByLabel('東の点数（百点単位）', { exact: true })).toHaveValue('250');
+  await expect(page.getByLabel('東の点数（百点単位）', { exact: true })).toBeFocused();
+  await page.getByRole('button', { name: '詳細入力', exact: true }).click();
+  for (const [label, value] of [['東','12345'],['南','100000'],['西','-100000'],['北','-25000']]) await page.getByLabel(`${label}の点数（そのまま）`, { exact: true }).fill(value);
+  await capture('scores-exact-320', '.ctx-scores');
+  await page.getByRole('button', { name: '3桁＋00に戻す', exact: true }).click();
+  expect(await page.locator('.ctx-score input').evaluateAll(inputs => inputs.map(input => input.value))).toEqual(['12345','100000','-100000','-250']);
+  await capture('scores-fallback-320', '.ctx-scores');
+  await page.getByRole('button', { name: '詳細入力', exact: true }).click();
+  for (const label of ['東','南','西','北']) await page.getByLabel(`${label}の点数（そのまま）`, { exact: true }).fill('25000');
+  await page.getByRole('button', { name: '3桁＋00に戻す', exact: true }).click();
+
   for (const width of widths) {
     await page.setViewportSize({ width, height: 844 });
     await targets('.tile-actions button,.editor-save');
@@ -250,6 +279,7 @@ try {
   await capture('test-answer-only-correct-390');
   await page.getByRole('button', { name: '結果を見る', exact: true }).click();
   const filteredData = await page.evaluate(() => JSON.parse(localStorage.getItem('mahjong-study:v1')));
+  await writeFile(`${evidence}synthetic-fixture.json`, JSON.stringify(filteredData));
   expect(filteredData.attempts).toHaveLength(2);
   const answeredId = filteredData.problems.find(problem => problem.title === '正解あり検証用の問題').id;
   expect(filteredData.attempts[1].problemId).toBe(answeredId);
@@ -268,6 +298,23 @@ try {
   await page.setViewportSize({ width: 320, height: 480 });
   await page.getByRole('textbox', { name: '一萬の残枚数', exact: true }).scrollIntoViewIfNeeded();
   await capture('remaining-320-shortviewport', '.remaining-control');
+  await page.evaluate(() => document.documentElement.style.fontSize = '');
+  await page.getByRole('link', { name: '学習帳', exact: true }).click();
+  await page.getByRole('link', { name: '作成', exact: true }).click();
+  for (const name of ['一萬','一萬','一萬','二萬','三萬','四萬','五萬','六萬','七萬','一筒','二筒','三筒','一索','二索']) await pick(name);
+  await page.locator('.ukeire-panel summary').click();
+  expect(await page.locator('.ukeire-list > li:visible .ukeire-discard').evaluateAll(elements => elements.map(el => el.getAttribute('aria-label')))).toEqual(['一萬を切る','四萬を切る','七萬を切る']);
+  expect(await page.locator('.ukeire-list > li:visible .ukeire-row__heading > strong').allTextContents()).toEqual(['テンパイ','テンパイ','テンパイ']);
+  const retreat = page.locator('.ukeire-row').filter({ has: page.getByLabel('二萬を切る', { exact: true }) });
+  await expect(retreat).not.toBeVisible(); await expect(retreat).toContainText('32枚');
+  await allSizes('ukeire-minimum-shanten', '.ukeire-panel');
+  await page.locator('.ukeire-expand').click(); await expect(retreat).toBeVisible();
+  await capture('ukeire-all-shanten-390', '.ukeire-list');
+  await page.locator('.ukeire-expand').click();
+  await page.getByRole('button', { name: '残枚数', exact: true }).click();
+  await fillRemaining('三索', '0');
+  expect(await page.locator('.ukeire-list > li:visible .ukeire-row__heading > strong').allTextContents()).toEqual(['テンパイ','テンパイ','テンパイ']);
+  await capture('ukeire-minimum-adjusted-390', '.ukeire-panel');
   expect(errors).toEqual([]);
   await writeFile(`${evidence}ui-results.json`, JSON.stringify({ status: 'pass', results, errors }, null, 2));
   console.log(JSON.stringify({ status: 'pass', captures: results.length, errors }));

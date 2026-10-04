@@ -1,4 +1,4 @@
-name: Mobile UI checks
+name: Responsive UI checks
 
 on:
   pull_request:
@@ -6,13 +6,14 @@ on:
       - 'src/**'
       - 'public/**'
       - 'scripts/validate-ukeire-ui.mjs'
+      - 'scripts/validate-desktop-ui.mjs'
       - '.github/workflows/mobile-ui.yml'
 
 permissions:
   contents: read
 
 jobs:
-  mobile-ui:
+  responsive-ui:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -24,14 +25,17 @@ jobs:
       - run: npm ci
       - run: npm run build
       - run: npx playwright install --with-deps chromium
-      - name: Render and test synthetic hands at mobile sizes
+      - name: Render and test synthetic hands at mobile and desktop sizes
         run: |
           npm run dev -- --host 127.0.0.1 --port 5176 > /tmp/mahjong-vite.log 2>&1 &
           for i in {1..30}; do curl --silent --fail http://127.0.0.1:5176/ > /dev/null && break; sleep 1; done
           node scripts/validate-ukeire-ui.mjs
+          node scripts/validate-desktop-ui.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: mobile-ui-screenshots
-          path: evidence/ukeire/
+          path: |
+            evidence/ukeire/
+            evidence/desktop/
           retention-days: 7

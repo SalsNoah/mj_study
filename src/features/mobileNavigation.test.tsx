@@ -268,7 +268,7 @@ it('opens detail notes first and retains remaining adjustments and all-candidate
   expect(button('確認した').closest('[role="tabpanel"]')).toBeNull();
   await click(button('受入れ'));
   expect(host.querySelectorAll('.ukeire-list > li:not([hidden])')).toHaveLength(3);
-  expect(host.querySelector('.ukeire-order')!.textContent).toBe('枚数順');
+  expect(host.querySelector('.ukeire-order')!.textContent).toBe('最小シャンテン内・枚数順');
   const remaining = await adjustFirstRemaining();
   const expand = host.querySelector<HTMLButtonElement>('.ukeire-expand')!;
   await click(expand);

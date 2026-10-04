@@ -22,7 +22,7 @@ it('starts only a new manual problem with east 1/east seat/turn 6/25000 and a no
   expect(host.querySelector<HTMLSelectElement>('[aria-label="局"]')!.value).toBe('1');
   expect(host.querySelector<HTMLSelectElement>('[aria-label="巡目"]')!.value).toBe('6');
   expect([...host.querySelectorAll('.ctx-toolbar .seg')].map(group => group.querySelector('.is-on')!.textContent)).toEqual(['東', '東']);
-  expect(values()).toEqual(['25000','25000','25000','25000']);
+  expect(values()).toEqual(['250','250','250','250']);
   expect(host.querySelectorAll('.wanpai .tile-btn[aria-label="北"]')).toHaveLength(1);
   const north = host.querySelector<HTMLButtonElement>('.tile-palette button[aria-label="北"]')!;
   for (let count = 0; count < 3; count++) await click(north);
@@ -54,6 +54,6 @@ it('preserves imported or OCR conditions and an explicitly empty indicator list'
   await mount();
   expect(host.querySelector<HTMLSelectElement>('[aria-label="局"]')!.value).toBe('');
   expect(host.querySelector<HTMLSelectElement>('[aria-label="巡目"]')!.value).toBe('3');
-  expect(values()).toEqual(['31000','18000','25000','26000']);
+  expect(values()).toEqual(['310','180','250','260']);
   expect(host.querySelector('.wanpai .tile-btn[aria-label="北"]')).toBeNull();
 });
