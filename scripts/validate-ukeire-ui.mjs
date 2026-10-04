@@ -53,7 +53,17 @@ async function capture(name, selector) {
     return { top: rect.top, bottom: rect.bottom, navTop: nav.top, hit: !!hit && button.contains(hit) };
   });
   if (cta) { expect(cta.top).toBeGreaterThanOrEqual(0); expect(cta.bottom).toBeLessThanOrEqual(cta.navTop); expect(cta.hit).toBe(true); }
-  results.push({ name, geometry, ...(cta ? { cta } : {}) });
+  const scoreWidths = await page.locator('.ctx-score input').evaluateAll(inputs => inputs.map(input => {
+    const style = getComputedStyle(input);
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    context.font = style.font;
+    return { text: input.value, textWidth: context.measureText(input.value).width,
+      available: input.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight) };
+  }));
+  for (const score of scoreWidths) expect(score.textWidth).toBeLessThanOrEqual(score.available + 1);
+
+  results.push({ name, geometry, ...(cta ? { cta } : {}), ...(scoreWidths.length ? { scoreWidths } : {}) });
 }
 async function allSizes(name, selector) {
   for (const width of widths) {

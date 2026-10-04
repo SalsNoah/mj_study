@@ -1477,3 +1477,7 @@ html { scroll-padding-top: 74px; scroll-padding-bottom: calc(var(--nav-h) + var(
 
 .library-answer-toggle { min-height: 44px; margin: 0 0 8px; }
 .detail-answer-toggle { min-height: 44px; margin-top: 8px; }
+@media (max-width: 360px) {
+  .ctx-scores { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .ctx-scores__label { grid-column: 1 / -1; }
+}
