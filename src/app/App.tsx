@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { HashRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AppProvider, useApp } from './store';
+import { RouteScroll } from '@/components/RouteScroll';
 import { BottomNav } from '@/components/BottomNav';
 import { LibraryPage } from '@/features/library/LibraryPage';
 import { EditorPage } from '@/features/editor/EditorPage';
@@ -93,6 +94,7 @@ function AppRoutes() {
 
   return (
     <HashRouter>
+      <RouteScroll />
       <CorruptGate>
         <Routes>
           <Route path="/" element={<EditorPage />} />

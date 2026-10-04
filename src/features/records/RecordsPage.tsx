@@ -1,6 +1,7 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useApp } from '@/app/store';
 import { BadgeIcon } from '@/components/BadgeIcon';
+import { ViewTabs, viewPanelProps } from '@/components/ViewTabs';
 import { BADGES, badgeStatus, dailyTotals, dayKey, studyStreak } from '@/domain/records';
 
 const WEEKDAYS = ['日', '月', '火', '水', '木', '金', '土'];
@@ -8,6 +9,7 @@ const DAYS_SHOWN = 14;
 
 export function RecordsPage() {
   const { store } = useApp();
+  const [view, setView] = useState('daily');
   const daily = store.daily ?? {};
   const totals = dailyTotals(daily);
   const status = badgeStatus(totals.total);
@@ -42,6 +44,25 @@ export function RecordsPage() {
         <p className="count-pill">連続 {streak} 日</p>
       </header>
 
+      <section className="stat-grid">
+        <div className="stat">
+          <span>今日のテスト</span>
+          <strong>{today.tested}</strong>
+        </div>
+        <div className="stat">
+          <span>今日の確認</span>
+          <strong>{today.confirmed}</strong>
+        </div>
+        <div className="stat">
+          <span>累計テスト</span>
+          <strong>{totals.tested}</strong>
+        </div>
+        <div className="stat">
+          <span>累計確認</span>
+          <strong>{totals.confirmed}</strong>
+        </div>
+      </section>
+
       <section className="panel status-card">
         <BadgeIcon level={status.current.level} size={76} />
         <div className="status-card__body">
@@ -63,25 +84,14 @@ export function RecordsPage() {
         </div>
       </section>
 
-      <section className="stat-grid">
-        <div className="stat">
-          <span>今日のテスト</span>
-          <strong>{today.tested}</strong>
-        </div>
-        <div className="stat">
-          <span>今日の確認</span>
-          <strong>{today.confirmed}</strong>
-        </div>
-        <div className="stat">
-          <span>累計テスト</span>
-          <strong>{totals.tested}</strong>
-        </div>
-        <div className="stat">
-          <span>累計確認</span>
-          <strong>{totals.confirmed}</strong>
-        </div>
-      </section>
-
+      <ViewTabs
+        id="records-view"
+        label="記録の表示"
+        value={view}
+        onChange={setView}
+        tabs={[{ value: 'daily', label: '日別' }, { value: 'badges', label: '称号' }]}
+      />
+      <div {...viewPanelProps('records-view', 'daily', view)}>
       <section className="panel">
         <div className="daily-head">
           <h2 className="mini-title">日別（直近{DAYS_SHOWN}日）</h2>
@@ -109,6 +119,8 @@ export function RecordsPage() {
         <p className="hint">学習した日：累計 {activeDays} 日</p>
       </section>
 
+      </div>
+      <div {...viewPanelProps('records-view', 'badges', view)}>
       <section className="panel">
         <h2 className="mini-title">称号バッジ</h2>
         <ul className="badge-grid">
@@ -123,8 +135,9 @@ export function RecordsPage() {
             );
           })}
         </ul>
-        <p className="hint">累計学習量 = テストで解いた問題数 + 学習帳で「確認した」を押した数</p>
+        <p className="hint">累計学習量：テスト＋確認の回数</p>
       </section>
+      </div>
     </div>
   );
 }

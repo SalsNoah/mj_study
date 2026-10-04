@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useApp } from '@/app/store';
 import { HandBoard } from '@/components/HandBoard';
+import { ViewTabs, viewPanelProps } from '@/components/ViewTabs';
 import { UkeirePanel } from '@/components/UkeirePanel';
 import { accuracyForProblem, isInTest } from '@/domain/quiz';
 import { formatShortDate } from '@/domain/records';
@@ -31,6 +32,7 @@ export function DetailPage() {
   } = useApp();
   const problem = store.problems.find((p) => p.id === id);
   const study = store.study.find((s) => s.problemId === id);
+  const [view, setView] = useState<'notes' | 'ukeire' | 'record'>('notes');
   const [undoState, setUndoState] = useState<StudyState | null>(null);
   const confirmLock = useRef(false);
   const [shareOpts, setShareOpts] = useState<ShareOptions>(DEFAULT_SHARE_OPTIONS);
@@ -134,8 +136,62 @@ export function DetailPage() {
         )}
       </section>
 
-      <UkeirePanel {...problem} sessionKey={problem.id} />
+        <div className="detail-primary-actions">
+          <button type="button" className="btn btn-primary" onClick={onConfirm} disabled={!!undoState}>
+            確認した
+          </button>
+          {undoState && (
+            <button type="button" className="btn" onClick={onUndo}>
+              取り消す
+            </button>
+          )}
+          <Link className="btn" to={`/edit/${problem.id}`}>編集</Link>
+        </div>
+      <ViewTabs id="detail-view" label="問題の表示" value={view} onChange={setView}
+        tabs={[{ value: 'notes', label: '解説・メモ' }, { value: 'ukeire', label: '受入れ' }, { value: 'record', label: '記録' }]} />
+      <div {...viewPanelProps('detail-view', 'notes', view)}>
+      {problem.tagIds.length > 0 && (
+        <div className="tag-cloud">
+          {problem.tagIds.map((tid) => (
+            <span key={tid} className="tag-chip">{getTagName(tid)}</span>
+          ))}
+        </div>
+      )}
 
+      {problem.explanation && (
+        <section className="panel">
+          <h2 className="section-title">解説</h2>
+          <p className="prewrap">{problem.explanation}</p>
+        </section>
+      )}
+      {problem.privateMemo && (
+        <section className="panel">
+          <h2 className="section-title">自分のメモ</h2>
+          <p className="prewrap">{problem.privateMemo}</p>
+        </section>
+      )}
+      {problem.sourceUrl && (
+        <p>
+          出典:{' '}
+          <a href={problem.sourceUrl} target="_blank" rel="noopener noreferrer">
+            {problem.sourceUrl}
+          </a>
+        </p>
+      )}
+      {problem.attachments.length > 0 && (
+        <div className="attach-grid">
+          {problem.attachments.map((a) => (
+            <img key={a.id} src={a.dataUrl} alt="参考画像" />
+          ))}
+        </div>
+      )}
+
+      {!problem.explanation && !problem.privateMemo && <p className="hint">解説・メモはまだありません。</p>}
+      </div>
+      <div {...viewPanelProps('detail-view', 'ukeire', view)}>
+        <UkeirePanel {...problem} sessionKey={problem.id} />
+      </div>
+      <div {...viewPanelProps('detail-view', 'record', view)}>
       <section className="panel">
         <dl className="stat-list">
           <div>
@@ -183,56 +239,13 @@ export function DetailPage() {
             }}
           />
         </label>
-        <div className="btn-row">
-          <button type="button" className="btn btn-primary" onClick={onConfirm} disabled={!!undoState}>
-            確認した
-          </button>
-          {undoState && (
-            <button type="button" className="btn" onClick={onUndo}>
-              取り消す
-            </button>
-          )}
-        </div>
+
       </section>
 
-      {problem.tagIds.length > 0 && (
-        <div className="tag-cloud">
-          {problem.tagIds.map((tid) => (
-            <span key={tid} className="tag-chip">{getTagName(tid)}</span>
-          ))}
-        </div>
-      )}
-
-      {problem.explanation && (
-        <section className="panel">
-          <h2 className="section-title">解説</h2>
-          <p className="prewrap">{problem.explanation}</p>
-        </section>
-      )}
-      {problem.privateMemo && (
-        <section className="panel">
-          <h2 className="section-title">自分のメモ</h2>
-          <p className="prewrap">{problem.privateMemo}</p>
-        </section>
-      )}
-      {problem.sourceUrl && (
-        <p>
-          出典:{' '}
-          <a href={problem.sourceUrl} target="_blank" rel="noopener noreferrer">
-            {problem.sourceUrl}
-          </a>
-        </p>
-      )}
-      {problem.attachments.length > 0 && (
-        <div className="attach-grid">
-          {problem.attachments.map((a) => (
-            <img key={a.id} src={a.dataUrl} alt="参考画像" />
-          ))}
-        </div>
-      )}
-
+      </div>
+      <details className="details panel detail-tools">
+        <summary>共有・その他</summary>
       <div className="btn-row wrap">
-        <Link className="btn" to={`/edit/${problem.id}`}>編集</Link>
         <button
           type="button"
           className="btn"
@@ -312,6 +325,8 @@ export function DetailPage() {
           </div>
         )}
       </section>
+
+      </details>
 
       {pngPreview && (
         <section className="panel">

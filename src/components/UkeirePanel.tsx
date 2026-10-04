@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { type AnalysisHand, type Ukeire } from '@/domain/ukeire';
-import { tileLabel } from '@/domain/tiles';
+import { tileLabel, tileSortKey } from '@/domain/tiles';
 import { TileFace } from './TileFace';
 import { RemainingControls } from './RemainingControls';
 import { useUkeireSession, type UkeireSession } from './useUkeireSession';
@@ -40,10 +41,15 @@ export function UkeirePanel({ sessionKey, ...input }: AnalysisHand & { sessionKe
   return <UkeireResults session={session} showSettings />;
 }
 
-export function UkeireResults({ session, showSettings = false }: { session: UkeireSession; showSettings?: boolean }) {
+export function UkeireResults({ session, showSettings = false, defaultOpen = true }: { session: UkeireSession; showSettings?: boolean; defaultOpen?: boolean }) {
   const { analysis } = session;
+  const [expansion, setExpansion] = useState({ key: session.key, open: false });
+  const expanded = expansion.key === session.key && expansion.open;
+  if (expansion.key !== session.key) setExpansion({ key: session.key, open: false });
+  const ranked = analysis.status === 'ready'
+    ? [...analysis.discards].sort((a, b) => b.total - a.total || tileSortKey(a.discard) - tileSortKey(b.discard)) : [];
   return (
-    <details className="panel ukeire-panel" open>
+    <details className="panel ukeire-panel" open={defaultOpen}>
       <summary className="section-title">受入れ</summary>
       {showSettings && <><RemainingButton session={session} /><RemainingSettings session={session} /></>}
       {analysis.status !== 'ready' ? (
@@ -55,18 +61,26 @@ export function UkeireResults({ session, showSettings = false }: { session: Ukei
         <>
           <p className="ukeire-current"><strong>{shantenLabel(analysis.currentShanten)}</strong></p>
           {analysis.mode === 'discard' ? (
+            <>
+            <p className="ukeire-order">枚数順</p>
             <ol className="ukeire-list" aria-label="打牌別の受入れ">
-              {analysis.discards.map((row) => (
-                <li className="ukeire-row" key={row.discard}>
+              {ranked.map((row, index) => (
+                <li className="ukeire-row" key={row.discard} hidden={!expanded && index >= 3}>
                   <div className="ukeire-row__heading">
                     <span className="ukeire-discard" aria-label={`${tileLabel(row.discard)}を切る`}><span>打</span><TileFace code={row.discard} size={30} /></span>
                     <strong>{shantenLabel(row.shanten)}</strong>
+                    {row.shanten > analysis.currentShanten && <span className="ukeire-retreat">後退</span>}
                     <span className="ukeire-total">{row.kinds}種・{row.total}枚</span>
                   </div>
                   <EffectiveTiles value={row} />
                 </li>
               ))}
             </ol>
+            {ranked.length > 3 && <button type="button" className="btn ukeire-expand" aria-expanded={expanded}
+              onClick={() => setExpansion({ key: session.key, open: !expanded })}>
+              {expanded ? '3候補に戻す' : `すべて表示（${ranked.length}候補）`}
+            </button>}
+            </>
           ) : analysis.current && (
             <div className="ukeire-row">
               <p className="ukeire-total">{analysis.current.kinds}種・{analysis.current.total}枚</p>

@@ -2,6 +2,7 @@ import { useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useApp } from '@/app/store';
 import { HandBoard } from '@/components/HandBoard';
+import { ViewTabs, viewPanelProps } from '@/components/ViewTabs';
 import { UkeirePanel } from '@/components/UkeirePanel';
 import type { TileMark } from '@/components/HandView';
 import { createId, nowIso } from '@/domain/ids';
@@ -37,6 +38,7 @@ export function TestPage() {
   const [count, setCount] = useState(5);
   const [filters, setFilters] = useState<TestFilter[]>(['random']);
   const [tagIds, setTagIds] = useState<string[]>([]);
+  const [answerView, setAnswerView] = useState<'notes' | 'ukeire'>('notes');
   const [phase, setPhase] = useState<Phase>('setup');
   const [queue, setQueue] = useState<Problem[]>([]);
   const [index, setIndex] = useState(0);
@@ -112,6 +114,7 @@ export function TestPage() {
       return;
     }
     setSessionAttempts((a) => [...a, attempt]);
+    setAnswerView('notes');
     setPhase('answered');
   };
 
@@ -165,8 +168,8 @@ export function TestPage() {
           </div>
         </section>
 
-        <section className="panel">
-          <h2 className="mini-title">出題条件</h2>
+        <details className="details panel">
+          <summary>出題条件：{filters.map(id => FILTERS.find(f => f.id === id)!.label).join('・')}</summary>
           <p className="hint">「完全ランダム」以外は組み合わせできます（すべて満たす問題から出題）。</p>
           <div className="filter-list">
             {FILTERS.map((f) => {
@@ -212,7 +215,7 @@ export function TestPage() {
           {candidates.length > 0 && candidates.length < count && (
             <p className="warn">条件に合う問題が {candidates.length} 問なので、{candidates.length} 問で出題します。</p>
           )}
-        </section>
+        </details>
 
         {error && <p className="error">{error}</p>}
         <div className="sticky-actions">
@@ -363,16 +366,6 @@ export function TestPage() {
           {verdict && (
             <p className={`verdict verdict--${verdict}`}>{verdict === 'correct' ? '正解' : '不正解'}</p>
           )}
-          {current.explanation && <p className="prewrap">{current.explanation}</p>}
-          {current.tagIds.length > 0 && (
-            <div className="tag-cloud">
-              {current.tagIds.map((id) => (
-                <span key={id} className="tag-chip">
-                  {getTagName(id)}
-                </span>
-              ))}
-            </div>
-          )}
           <div className="seg seg--wide" role="group" aria-label="理解度">
             <button
               type="button"
@@ -389,14 +382,35 @@ export function TestPage() {
               まだ不安
             </button>
           </div>
-          <div className="sticky-actions">
+
+        </section>
+      )}
+      {phase === 'answered' && <>
+        <ViewTabs id="answer-view" label="回答後の表示" value={answerView} onChange={setAnswerView}
+          tabs={[{ value: 'notes', label: '解説' }, { value: 'ukeire', label: '受入れ' }]} />
+        <div {...viewPanelProps('answer-view', 'notes', answerView)} className="panel">
+          {current.explanation && <p className="prewrap">{current.explanation}</p>}
+          {current.tagIds.length > 0 && (
+            <div className="tag-cloud">
+              {current.tagIds.map((id) => (
+                <span key={id} className="tag-chip">
+                  {getTagName(id)}
+                </span>
+              ))}
+            </div>
+          )}
+          {!current.explanation && <p className="hint">解説はまだありません。</p>}
+        </div>
+        <div {...viewPanelProps('answer-view', 'ukeire', answerView)}>
+          <UkeirePanel {...current} sessionKey={current.id} />
+        </div>
+      </>}
+
+      {phase === 'answered' && (          <div className="sticky-actions">
             <button type="button" className="btn btn-primary btn-save" onClick={next}>
               {index + 1 >= queue.length ? '結果を見る' : '次の問題へ'}
             </button>
-          </div>
-        </section>
-      )}
-      {phase === 'answered' && <UkeirePanel {...current} sessionKey={current.id} />}
+          </div>)}
       {error && <p className="error">{error}</p>}
     </div>
   );
