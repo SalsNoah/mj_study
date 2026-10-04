@@ -13,22 +13,24 @@ const ROWS: TileCode[][] = [
 type Props = {
   onPick: (code: TileCode) => void;
   disabled?: boolean;
+  /** Continuous editor input keeps all suits visible; other screens retain their current picker. */
+  layout?: 'all' | 'suits';
   blockedReasons?: Partial<Record<TileCode, string>>;
 };
 
-export function TilePalette({ onPick, disabled, blockedReasons = {} }: Props) {
+export function TilePalette({ onPick, disabled, blockedReasons = {}, layout = 'suits' }: Props) {
   const [suit, setSuit] = useState(0);
   return (
-    <div className="tile-palette" aria-label="牌パレット">
-      <div className="tile-palette__suits" role="group" aria-label="牌の種類">
+    <div className={`tile-palette${layout === 'all' ? ' tile-palette--all' : ''}`} aria-label="牌パレット">
+      {layout === 'suits' && <div className="tile-palette__suits" role="group" aria-label="牌の種類">
         {['萬子', '筒子', '索子', '字牌'].map((label, index) => <button type="button" key={label}
           aria-pressed={suit === index} onClick={() => setSuit(index)}>{label}</button>)}
-      </div>
+      </div>}
       <div className="tile-palette__grid">
         {ROWS.map((row, ri) => (
           <div
             key={ri}
-            hidden={suit !== ri}
+            hidden={layout === 'suits' && suit !== ri}
             className={`tile-palette__row${row.length === 7 ? ' tile-palette__row--honors' : ''}`}
           >
             {row.map((code) => (

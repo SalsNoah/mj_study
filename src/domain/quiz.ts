@@ -150,6 +150,7 @@ export type TestOptions = {
   count: number;
   filters: TestFilter[];
   tagIds: string[];
+  answerOnly?: boolean;
   now?: Date;
 };
 
@@ -213,6 +214,7 @@ export function filterTestCandidates(
   const tagSet = new Set(options.tagIds);
 
   return problems.filter((p) => {
+    if (options.answerOnly && !p.answerEnabled) return false;
     const s = studyMap.get(p.id);
     if (!isInTest(s)) return false;
     const rev = s?.contentRevision ?? 0;

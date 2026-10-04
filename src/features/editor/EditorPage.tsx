@@ -6,7 +6,6 @@ import { HandView } from '@/components/HandView';
 import { TilePalette } from '@/components/TilePalette';
 import { RemainingButton, RemainingSettings, UkeireResults } from '@/components/UkeirePanel';
 import { useUkeireSession } from '@/components/useUkeireSession';
-import { ViewTabs, viewPanelProps } from '@/components/ViewTabs';
 import { WanpaiDora } from '@/components/WanpaiDora';
 import { contextSummary } from '@/domain/context';
 import { createId, nowIso } from '@/domain/ids';
@@ -62,6 +61,12 @@ function handTileMax(meldCount: number): number {
   return Math.max(0, 14 - meldCount * 3);
 }
 
+/** New manual entries only. A north indicator makes east the actual dora. */
+function initialContext() {
+  return { ...emptyContext(), roundWind: '1z' as Wind, handNumber: 1, seatWind: '1z' as Wind,
+    turn: 6, scores: { east: 25000, south: 25000, west: 25000, north: 25000 } };
+}
+
 function initialHand(existing?: Problem): TileCode[] {
   if (!existing) return [];
   const merged = existing.drawn
@@ -86,10 +91,10 @@ export function EditorPage() {
   );
   const [melds, setMelds] = useState<Meld[]>(imported?.melds ?? existing?.melds ?? []);
   const [doraIndicators, setDora] = useState<TileCode[]>(
-    imported?.doraIndicators ?? existing?.doraIndicators ?? [],
+    imported?.doraIndicators ?? existing?.doraIndicators ?? (isNew ? ['4z'] : []),
   );
   const ukeire = useUkeireSession({ concealed, drawn: null, melds, doraIndicators }, existing?.id ?? 'new');
-  const [view, setView] = useState<'hand' | 'notes' | 'context'>('hand');
+  const [notesOpen, setNotesOpen] = useState(false);
   const [target, setTarget] = useState<Target>('concealed');
   const [history, setHistory] = useState<Array<() => void>>([]);
   const [answerEnabled, setAnswerEnabled] = useState(existing?.answerEnabled ?? false);
@@ -98,7 +103,7 @@ export function EditorPage() {
   const [privateMemo, setPrivateMemo] = useState(existing?.privateMemo ?? '');
   const [tagIds, setTagIds] = useState<string[]>(existing?.tagIds ?? []);
   const [tagInput, setTagInput] = useState('');
-  const [context, setContext] = useState(imported?.context ?? existing?.context ?? emptyContext());
+  const [context, setContext] = useState(imported?.context ?? existing?.context ?? (isNew ? initialContext() : emptyContext()));
   const [attachments, setAttachments] = useState(existing?.attachments ?? []);
   const [sourceUrl, setSourceUrl] = useState(existing?.sourceUrl ?? '');
   const [dirty, setDirty] = useState(!!imported);
@@ -302,8 +307,7 @@ export function EditorPage() {
     setWarns(issues.filter((i) => i.level === 'warn').map((i) => i.message));
     if (hasErrors(issues)) {
       const first = issues.find((issue) => issue.level === 'error')!.code;
-      setView(['title_len', 'explanation_len', 'memo_len', 'tags_per', 'attach_max', 'answer_empty', 'answer_missing', 'bad_url'].includes(first)
-        ? 'notes' : ['hand_number', 'turn', 'honba', 'riichi', 'rank', 'score'].includes(first) ? 'context' : 'hand');
+      if (['title_len', 'explanation_len', 'memo_len', 'tags_per', 'attach_max', 'answer_empty', 'answer_missing', 'bad_url'].includes(first)) setNotesOpen(true);
       setError(issues.filter((i) => i.level === 'error').map((i) => i.message).join(' / '));
       return;
     }
@@ -389,9 +393,148 @@ export function EditorPage() {
       ))}
       {error && <p className="error" role="alert">{error}</p>}
 
-      <ViewTabs id="editor-view" label="作成する内容" value={view} onChange={setView}
-        tabs={[{ value: 'hand', label: '牌姿' }, { value: 'notes', label: '解説・メモ' }, { value: 'context', label: '対局条件' }]} />
-      <div {...viewPanelProps('editor-view', 'hand', view)}>
+      <section className="panel context-panel">
+        <div className="ctx-toolbar" aria-label="対局条件">
+          <div className="seg" role="group" aria-label="場風">
+            {ROUND_OPTS.map((o) => (
+              <button
+                key={o.value}
+                type="button"
+                className={context.roundWind === o.value ? 'is-on' : ''}
+                onClick={() => {
+                  setContext({ ...context, roundWind: o.value });
+                  mark();
+                }}
+              >
+                {o.label}
+              </button>
+            ))}
+          </div>
+          <label className="ctx-mini">
+            <span className="sr-only">局</span>
+            <select
+              aria-label="局"
+              value={context.handNumber ?? ''}
+              onChange={(e) => {
+                setContext({
+                  ...context,
+                  handNumber: e.target.value === '' ? null : Number(e.target.value),
+                });
+                mark();
+              }}
+            >
+              <option value="">局</option>
+              {[1, 2, 3, 4].map((n) => (
+                <option key={n} value={n}>
+                  {n}局
+                </option>
+              ))}
+            </select>
+          </label>
+          <div className="seg" role="group" aria-label="自風">
+            {SEAT_OPTS.map((o) => (
+              <button
+                key={o.value}
+                type="button"
+                className={context.seatWind === o.value ? 'is-on' : ''}
+                onClick={() => {
+                  setContext({ ...context, seatWind: o.value });
+                  mark();
+                }}
+              >
+                {o.label}
+              </button>
+            ))}
+          </div>
+          <label className="ctx-mini">
+            <span className="sr-only">巡目</span>
+            <select
+              aria-label="巡目"
+              value={context.turn ?? ''}
+              onChange={(e) => {
+                setContext({
+                  ...context,
+                  turn: e.target.value === '' ? null : Number(e.target.value),
+                });
+                mark();
+              }}
+            >
+              <option value="">巡目</option>
+              {Array.from({ length: 18 }, (_, i) => i + 1).map((n) => (
+                <option key={n} value={n}>
+                  {n}巡
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="ctx-mini">
+            <input
+              aria-label="本場"
+              type="number"
+              min={0}
+              max={99}
+              placeholder="—"
+              value={context.honba ?? ''}
+              onChange={(e) => {
+                setContext({
+                  ...context,
+                  honba: e.target.value === '' ? null : Number(e.target.value),
+                });
+                mark();
+              }}
+            />
+            <span className="ctx-mini__unit">本場</span>
+          </label>
+          <label className="ctx-mini">
+            <input
+              aria-label="供託"
+              type="number"
+              min={0}
+              max={99}
+              placeholder="—"
+              value={context.riichiSticks ?? ''}
+              onChange={(e) => {
+                setContext({
+                  ...context,
+                  riichiSticks: e.target.value === '' ? null : Number(e.target.value),
+                });
+                mark();
+              }}
+            />
+            <span className="ctx-mini__unit">供託</span>
+          </label>
+        </div>
+        <div className="ctx-scores" aria-label="点数状況">
+          <span className="ctx-scores__label">点数</span>
+          {([
+            ['east', '東'],
+            ['south', '南'],
+            ['west', '西'],
+            ['north', '北'],
+          ] as const).map(([k, label]) => (
+            <label key={k} className="ctx-score">
+              <span>{label}</span>
+              <input
+                type="number"
+                inputMode="numeric"
+                placeholder="—"
+                value={context.scores[k] ?? ''}
+                onChange={(e) => {
+                  setContext({
+                    ...context,
+                    scores: {
+                      ...context.scores,
+                      [k]: e.target.value === '' ? null : Number(e.target.value),
+                    },
+                  });
+                  mark();
+                }}
+              />
+            </label>
+          ))}
+        </div>
+      </section>
+
       <section className="panel tile-input">
         <div className="hand-stage" aria-label="牌姿プレビュー">
           <div className="hand-stage__top">
@@ -428,13 +571,28 @@ export function EditorPage() {
 
         <RemainingSettings session={ukeire} />
 
-        <div className="input-targets" role="group" aria-label="入力先">
-          {([{ key: 'concealed', label: '手牌' }, { key: 'dora', label: 'ドラ表示牌' }, { key: 'meld', label: '鳴き' }] as const).map((tab) =>
-            <button type="button" key={tab.key} aria-pressed={target === tab.key} onClick={() => setTarget(tab.key)}>{tab.label}</button>)}
-        </div>
-        <div className="meld-types" role="group" aria-label="鳴きの種類" hidden={target !== 'meld'}>
-          {INPUT_TABS.filter(tab => tab.meldType).map(tab => <button type="button" key={tab.meldType}
-            aria-pressed={meldType === tab.meldType} onClick={() => startMeldTab(tab.meldType!)}>{tab.label}</button>)}
+        <div className="target-tabs target-tabs--scroll" role="tablist" aria-label="入力先">
+          {INPUT_TABS.map((tab) => {
+            const selected =
+              tab.key === 'meld'
+                ? target === 'meld' && meldType === tab.meldType
+                : target === tab.key;
+            return (
+              <button
+                key={`${tab.label}-${tab.meldType ?? tab.key}`}
+                type="button"
+                role="tab"
+                aria-selected={selected}
+                className={selected ? 'is-active' : ''}
+                onClick={() => {
+                  if (tab.key === 'meld' && tab.meldType) startMeldTab(tab.meldType);
+                  else setTarget(tab.key);
+                }}
+              >
+                {tab.label}
+              </button>
+            );
+          })}
         </div>
 
         {target === 'meld' && (
@@ -469,13 +627,13 @@ export function EditorPage() {
 
         <p className="tile-input-tip">牌をタップして追加・削除</p>
         {supplyIssues.length > 0 && <div role="alert" className="error">入力済みの牌が上限を超えています。牌は自動で削除していません。手牌・鳴き・ドラ表示牌をタップして修正してください。{supplyIssues.map((issue) => <p key={issue}>{issue.replace('追加後', '現在')}</p>)}</div>}
-        <TilePalette onPick={addTile} blockedReasons={blockedReasons} />
+        <TilePalette onPick={addTile} blockedReasons={blockedReasons} layout="all" />
         {error && target === 'meld' && <p className="error">{error}</p>}
       </section>
 
         <UkeireResults session={ukeire} defaultOpen={false} />
-      </div>
-      <div {...viewPanelProps('editor-view', 'notes', view)}>
+      <details className="details panel editor-notes" open={notesOpen}>
+        <summary onClick={(event) => { event.preventDefault(); setNotesOpen((open) => !open); }}>解説・メモなど</summary>
       <label className="field">
         <span>タイトル（任意）</span>
         <input
@@ -627,153 +785,7 @@ export function EditorPage() {
         </div>
       </details>
 
-      </div>
-      <div {...viewPanelProps('editor-view', 'context', view)}>
-      <section className="panel context-panel">
-        <div className="ctx-toolbar" aria-label="対局条件">
-          <div className="seg" role="group" aria-label="場風">
-            {ROUND_OPTS.map((o) => (
-              <button
-                key={o.value}
-                type="button"
-                className={context.roundWind === o.value ? 'is-on' : ''}
-                onClick={() => {
-                  setContext({ ...context, roundWind: o.value });
-                  mark();
-                }}
-              >
-                {o.label}
-              </button>
-            ))}
-          </div>
-          <label className="ctx-mini">
-            <span className="sr-only">局</span>
-            <select
-              aria-label="局"
-              value={context.handNumber ?? ''}
-              onChange={(e) => {
-                setContext({
-                  ...context,
-                  handNumber: e.target.value === '' ? null : Number(e.target.value),
-                });
-                mark();
-              }}
-            >
-              <option value="">局</option>
-              {[1, 2, 3, 4].map((n) => (
-                <option key={n} value={n}>
-                  {n}局
-                </option>
-              ))}
-            </select>
-          </label>
-          <div className="seg" role="group" aria-label="自風">
-            {SEAT_OPTS.map((o) => (
-              <button
-                key={o.value}
-                type="button"
-                className={context.seatWind === o.value ? 'is-on' : ''}
-                onClick={() => {
-                  setContext({ ...context, seatWind: o.value });
-                  mark();
-                }}
-              >
-                {o.label}
-              </button>
-            ))}
-          </div>
-          <label className="ctx-mini">
-            <span className="sr-only">巡目</span>
-            <select
-              aria-label="巡目"
-              value={context.turn ?? ''}
-              onChange={(e) => {
-                setContext({
-                  ...context,
-                  turn: e.target.value === '' ? null : Number(e.target.value),
-                });
-                mark();
-              }}
-            >
-              <option value="">巡目</option>
-              {Array.from({ length: 18 }, (_, i) => i + 1).map((n) => (
-                <option key={n} value={n}>
-                  {n}巡
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="ctx-mini">
-            <input
-              aria-label="本場"
-              type="number"
-              min={0}
-              max={99}
-              placeholder="—"
-              value={context.honba ?? ''}
-              onChange={(e) => {
-                setContext({
-                  ...context,
-                  honba: e.target.value === '' ? null : Number(e.target.value),
-                });
-                mark();
-              }}
-            />
-            <span className="ctx-mini__unit">本場</span>
-          </label>
-          <label className="ctx-mini">
-            <input
-              aria-label="供託"
-              type="number"
-              min={0}
-              max={99}
-              placeholder="—"
-              value={context.riichiSticks ?? ''}
-              onChange={(e) => {
-                setContext({
-                  ...context,
-                  riichiSticks: e.target.value === '' ? null : Number(e.target.value),
-                });
-                mark();
-              }}
-            />
-            <span className="ctx-mini__unit">供託</span>
-          </label>
-        </div>
-        <div className="ctx-scores" aria-label="点数状況">
-          <span className="ctx-scores__label">点数</span>
-          {([
-            ['east', '東'],
-            ['south', '南'],
-            ['west', '西'],
-            ['north', '北'],
-          ] as const).map(([k, label]) => (
-            <label key={k} className="ctx-score">
-              <span>{label}</span>
-              <input
-                type="number"
-                inputMode="numeric"
-                placeholder="—"
-                value={context.scores[k] ?? ''}
-                onChange={(e) => {
-                  setContext({
-                    ...context,
-                    scores: {
-                      ...context.scores,
-                      [k]: e.target.value === '' ? null : Number(e.target.value),
-                    },
-                  });
-                  mark();
-                }}
-              />
-            </label>
-          ))}
-        </div>
-      </section>
-
-      </div>
-
-
+      </details>
     </div>
   );
 }

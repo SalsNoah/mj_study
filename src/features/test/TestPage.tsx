@@ -38,6 +38,7 @@ export function TestPage() {
   const [count, setCount] = useState(5);
   const [filters, setFilters] = useState<TestFilter[]>(['random']);
   const [tagIds, setTagIds] = useState<string[]>([]);
+  const [answerOnly, setAnswerOnly] = useState(false);
   const [answerView, setAnswerView] = useState<'notes' | 'ukeire'>('notes');
   const [phase, setPhase] = useState<Phase>('setup');
   const [queue, setQueue] = useState<Problem[]>([]);
@@ -54,8 +55,8 @@ export function TestPage() {
   const study = current ? store.study.find((s) => s.problemId === current.id) : undefined;
 
   const candidates = useMemo(
-    () => filterTestCandidates(store.problems, store.study, store.attempts, { filters, tagIds }),
-    [store.problems, store.study, store.attempts, filters, tagIds],
+    () => filterTestCandidates(store.problems, store.study, store.attempts, { filters, tagIds, answerOnly }),
+    [store.problems, store.study, store.attempts, filters, tagIds, answerOnly],
   );
   const excludedCount = useMemo(() => {
     const studyMap = new Map(store.study.map((s) => [s.problemId, s]));
@@ -76,6 +77,7 @@ export function TestPage() {
       count,
       filters,
       tagIds,
+      answerOnly,
     });
     if (picked.length === 0) {
       setError('条件に合う問題がありません');
@@ -152,6 +154,14 @@ export function TestPage() {
         </header>
 
         <section className="panel">
+          <label className="check">
+            <input
+              type="checkbox"
+              checked={answerOnly}
+              onChange={(e) => { setAnswerOnly(e.target.checked); setError(null); }}
+            />
+            正解ありのみ
+          </label>
           <h2 className="mini-title">問題数</h2>
           <div className="count-grid" role="group" aria-label="問題数">
             {COUNTS.map((n) => (
@@ -217,6 +227,9 @@ export function TestPage() {
           )}
         </details>
 
+        {candidates.length === 0 && (
+          <p className="hint" role="status">{answerOnly ? '条件に合う正解ありの問題がありません。' : '条件に合う問題がありません。'}</p>
+        )}
         {error && <p className="error">{error}</p>}
         <div className="sticky-actions">
           <button

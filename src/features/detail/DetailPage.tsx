@@ -33,6 +33,10 @@ export function DetailPage() {
   const problem = store.problems.find((p) => p.id === id);
   const study = store.study.find((s) => s.problemId === id);
   const [view, setView] = useState<'notes' | 'ukeire' | 'record'>('notes');
+  const answerKey = `${problem?.id ?? ''}:${problem?.updatedAt ?? ''}`;
+  const [answerState, setAnswerState] = useState({ key: answerKey, visible: false });
+  const answerVisible = answerState.key === answerKey && answerState.visible;
+  if (answerState.key !== answerKey) setAnswerState({ key: answerKey, visible: false });
   const [undoState, setUndoState] = useState<StudyState | null>(null);
   const confirmLock = useRef(false);
   const [shareOpts, setShareOpts] = useState<ShareOptions>(DEFAULT_SHARE_OPTIONS);
@@ -124,12 +128,22 @@ export function DetailPage() {
           doraIndicators={problem.doraIndicators}
           context={problem.context}
           marks={
-            problem.answerEnabled
+            problem.answerEnabled && answerVisible
               ? new Map(problem.acceptedDiscards.map((c) => [c, 'correct' as const]))
               : undefined
           }
         />
         {problem.answerEnabled && (
+          <button
+            type="button"
+            className="btn detail-answer-toggle"
+            aria-pressed={answerVisible}
+            onClick={() => setAnswerState({ key: answerKey, visible: !answerVisible })}
+          >
+            {answerVisible ? '正解・解説を隠す' : '正解・解説を表示'}
+          </button>
+        )}
+        {problem.answerEnabled && answerVisible && (
           <p className="mark-legend">
             <i className="mark-legend__correct" />正解（切る牌）
           </p>
@@ -158,6 +172,7 @@ export function DetailPage() {
         </div>
       )}
 
+      {(!problem.answerEnabled || answerVisible) ? <>
       {problem.explanation && (
         <section className="panel">
           <h2 className="section-title">解説</h2>
@@ -187,6 +202,7 @@ export function DetailPage() {
       )}
 
       {!problem.explanation && !problem.privateMemo && <p className="hint">解説・メモはまだありません。</p>}
+      </> : <p className="hint">正解・解説は非表示です。</p>}
       </div>
       <div {...viewPanelProps('detail-view', 'ukeire', view)}>
         <UkeirePanel {...problem} sessionKey={problem.id} />

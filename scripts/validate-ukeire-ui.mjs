@@ -21,7 +21,6 @@ const results = [];
 const widths = [320, 375, 390];
 const suitOf = label => label.endsWith('萬') ? '萬子' : label.endsWith('筒') ? '筒子' : label.endsWith('索') ? '索子' : '字牌';
 async function pick(label) {
-  await page.locator('.tile-palette__suits').getByRole('button', { name: suitOf(label), exact: true }).click();
   await page.locator('.tile-palette').getByRole('button', { name: label, exact: true }).click();
 }
 async function selectRemaining(label) {
@@ -54,7 +53,17 @@ async function capture(name, selector) {
     return { top: rect.top, bottom: rect.bottom, navTop: nav.top, hit: !!hit && button.contains(hit) };
   });
   if (cta) { expect(cta.top).toBeGreaterThanOrEqual(0); expect(cta.bottom).toBeLessThanOrEqual(cta.navTop); expect(cta.hit).toBe(true); }
-  results.push({ name, geometry, ...(cta ? { cta } : {}) });
+  const scoreWidths = await page.locator('.ctx-score input').evaluateAll(inputs => inputs.map(input => {
+    const style = getComputedStyle(input);
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    context.font = style.font;
+    return { text: input.value, textWidth: context.measureText(input.value).width,
+      available: input.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight) };
+  }));
+  for (const score of scoreWidths) expect(score.textWidth).toBeLessThanOrEqual(score.available + 1);
+
+  results.push({ name, geometry, ...(cta ? { cta } : {}), ...(scoreWidths.length ? { scoreWidths } : {}) });
 }
 async function allSizes(name, selector) {
   for (const width of widths) {
@@ -72,11 +81,26 @@ async function targets(selector) {
 try {
   await page.goto(origin);
   await expect(page.getByRole('heading', { name: '問題を作成' })).toBeVisible();
-  await expect(page.locator('#editor-view-panel-context')).not.toBeVisible();
+  await expect(page.locator('.context-panel')).toBeVisible();
+  await expect(page.locator('#editor-view-tab-context')).toHaveCount(0);
+  await expect(page.locator('.tile-palette__suits')).toHaveCount(0);
+  await expect(page.locator('.tile-palette button:visible')).toHaveCount(37);
+  await expect(page.getByLabel('局', { exact: true })).toHaveValue('1');
+  await expect(page.getByLabel('巡目', { exact: true })).toHaveValue('6');
+  await expect(page.locator('.wanpai').getByRole('button', { name: '北', exact: true })).toHaveCount(1);
+  expect(await page.locator('.ctx-score input').evaluateAll(inputs => inputs.map(input => input.value))).toEqual(['25000','25000','25000','25000']);
+  const order = await page.evaluate(() => ({
+    contextBottom: document.querySelector('.context-panel').getBoundingClientRect().bottom,
+    handTop: document.querySelector('.hand-stage').getBoundingClientRect().top,
+    inputTargets: [...document.querySelectorAll('.target-tabs button')].map(el => el.textContent.trim()),
+  }));
+  expect(order.contextBottom).toBeLessThanOrEqual(order.handTop);
+  expect(order.inputTargets).toEqual(['手牌','ドラ表示牌','明順子','明刻子','明槓子','暗槓子','加槓子']);
+  results.push({ name: 'continuous-editor-flow', order, mixedInputClicks: 14, suitSwitchClicks: 0 });
   await allSizes('editor-empty');
   for (const width of widths) {
     await page.setViewportSize({ width, height: 844 });
-    await targets('.tile-actions button,.tile-palette button,.input-targets button,.editor-save');
+    await targets('.tile-actions button,.editor-save');
   }
   for (const name of ['一萬','二萬','三萬','一筒','二筒','三筒','一索','二索','三索','四索','赤五索','五索','中','中']) await pick(name);
   await expect(page.locator('.ukeire-list > li')).toHaveCount(13);
@@ -96,14 +120,13 @@ try {
     await targets('.remaining-panel button,.remaining-panel input');
     results.push({ name: `remaining-geometry-${width}`, geometry });
   }
-  await tab('editor-view', 'notes');
+  await page.locator('.editor-notes > summary').click();
   await page.getByLabel('タイトル（任意）').fill('スマホ検証用の問題');
   await page.getByLabel('解説', { exact: true }).fill('検証用の短い解説です。');
-  await allSizes('editor-notes');
-  await tab('editor-view', 'context');
+  await allSizes('editor-notes', '.editor-notes');
+  await page.locator('.editor-notes > summary').click();
   await page.getByLabel('本場', { exact: true }).fill('2');
   await allSizes('editor-context');
-  await tab('editor-view', 'hand');
   await expect(page.getByRole('textbox', { name: '三索の残枚数', exact: true })).toHaveValue('0');
   await page.getByRole('button', { name: 'すべて自動に戻す', exact: true }).click();
   await toolbar.getByRole('button', { name: '残枚数', exact: true }).click();
@@ -146,6 +169,11 @@ try {
   await page.getByRole('link', { name: 'テスト', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'テスト', exact: true })).toBeVisible();
   expect(await page.evaluate(() => window.scrollY)).toBe(0);
+  await page.getByLabel('正解ありのみ', { exact: true }).check();
+  await expect(page.locator('.count-pill')).toContainText('0 問');
+  await expect(page.getByRole('button', { name: '条件に合う問題がありません', exact: true })).toBeDisabled();
+  await capture('test-answer-only-empty-390');
+  await page.getByLabel('正解ありのみ', { exact: true }).uncheck();
   await allSizes('test-setup');
   await page.getByRole('button', { name: '1 問でテスト開始', exact: true }).click();
   await expect(page.locator('.ukeire-panel')).toHaveCount(0);
@@ -177,12 +205,61 @@ try {
   await page.getByRole('tab', { name: 'データ管理', exact: true }).click();
   await allSizes('settings-data');
   await page.getByRole('link', { name: '作成', exact: true }).click();
+  for (const name of ['一萬','二萬','三萬','一筒','二筒','三筒','一索','二索','三索','四索','赤五索','五索','中','中']) await pick(name);
+  await page.locator('.editor-notes > summary').click();
+  await page.getByLabel('タイトル（任意）').fill('正解あり検証用の問題');
+  await page.getByLabel('正解を設定する', { exact: true }).check();
+  await page.locator('.hand-stage--pick').getByRole('button', { name: '中', exact: true }).first().click();
+  await page.getByLabel('解説', { exact: true }).fill('正解表示を開いた後の検証用解説');
+  await page.getByLabel('自分のメモ（共有されません）').fill('正解表示を開いた後の私用メモ');
+  await page.getByRole('button', { name: '保存', exact: true }).click();
+  await expect(page.getByRole('heading', { name: '正解あり検証用の問題' })).toBeVisible();
+  await expect(page.locator('.hand-stage .is-correct')).toHaveCount(0);
+  await expect(page.getByText('正解表示を開いた後の検証用解説', { exact: true })).toHaveCount(0);
+  await expect(page.getByText('正解表示を開いた後の私用メモ', { exact: true })).toHaveCount(0);
+  await allSizes('answer-hidden');
+  const beforeReveal = await page.evaluate(() => localStorage.getItem('mahjong-study:v1'));
+  await page.getByRole('button', { name: '正解・解説を表示', exact: true }).click();
+  await expect(page.locator('.hand-stage .is-correct')).toHaveCount(2);
+  await expect(page.getByText('正解表示を開いた後の検証用解説', { exact: true })).toBeVisible();
+  await allSizes('answer-visible');
+  await page.getByRole('button', { name: '正解・解説を隠す', exact: true }).click();
+  await expect(page.locator('.hand-stage .is-correct')).toHaveCount(0);
+  expect(await page.evaluate(() => localStorage.getItem('mahjong-study:v1'))).toBe(beforeReveal);
+  await page.getByRole('link', { name: '学習帳', exact: true }).click();
+  await expect(page.getByLabel('正解を表示', { exact: true })).not.toBeChecked();
+  await expect(page.locator('.problem-card .is-correct')).toHaveCount(0);
+  await page.getByLabel('正解を表示', { exact: true }).check();
+  await expect(page.locator('.problem-card .is-correct')).toHaveCount(2);
+  await allSizes('library-answer-visible');
+  await page.getByLabel('正解を表示', { exact: true }).uncheck();
+  await expect(page.locator('.problem-card .is-correct')).toHaveCount(0);
+  await page.getByRole('link', { name: 'テスト', exact: true }).click();
+  await expect(page.locator('.count-pill')).toContainText('2 問');
+  await page.getByLabel('正解ありのみ', { exact: true }).check();
+  await expect(page.locator('.count-pill')).toContainText('1 問');
+  await allSizes('test-answer-only');
+  await page.getByRole('button', { name: '1 問でテスト開始', exact: true }).click();
+  await expect(page.locator('.test-title')).toHaveText('正解あり検証用の問題');
+  await expect(page.locator('.hand-stage .is-correct')).toHaveCount(0);
+  await expect(page.getByText('正解表示を開いた後の検証用解説', { exact: true })).toHaveCount(0);
+  await page.locator('.hand-stage').getByRole('button', { name: '中', exact: true }).first().click();
+  await page.getByRole('button', { name: '回答する', exact: true }).click();
+  await expect(page.locator('.verdict')).toHaveText('正解');
+  await expect(page.getByText('正解表示を開いた後の検証用解説', { exact: true })).toBeVisible();
+  await capture('test-answer-only-correct-390');
+  await page.getByRole('button', { name: '結果を見る', exact: true }).click();
+  const filteredData = await page.evaluate(() => JSON.parse(localStorage.getItem('mahjong-study:v1')));
+  expect(filteredData.attempts).toHaveLength(2);
+  const answeredId = filteredData.problems.find(problem => problem.title === '正解あり検証用の問題').id;
+  expect(filteredData.attempts[1].problemId).toBe(answeredId);
+  await page.getByRole('link', { name: '作成', exact: true }).click();
   await page.evaluate(() => document.documentElement.style.fontSize = '150%');
   await page.setViewportSize({ width: 320, height: 720 });
   await capture('editor-320-text150');
-  await targets('.tile-palette button,.view-tabs button,.editor-save');
-  await tab('editor-view', 'notes'); await capture('notes-320-text150');
-  await tab('editor-view', 'hand');
+  await targets('.tile-actions button,.editor-save');
+  await page.locator('.editor-notes > summary').click(); await capture('notes-320-text150', '.editor-notes');
+  await page.locator('.editor-notes > summary').click();
   for (const name of ['一萬','二萬','三萬','一筒','二筒','三筒','一索','二索','三索','四索','五索','中','中']) await pick(name);
   await page.getByRole('button', { name: '残枚数', exact: true }).click();
   await capture('remaining-320-text150', '.remaining-panel');

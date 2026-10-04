@@ -1465,3 +1465,19 @@ html { scroll-padding-top: 74px; scroll-padding-bottom: calc(var(--nav-h) + var(
 .ukeire-expand { width: 100%; min-height: 44px; margin-top: 8px; font-size: 0.85rem; }
 
 .tile-actions__remaining-group { display: inline-flex; flex-wrap: nowrap; gap: 6px; }
+
+/* Continuous editor input: restore the original four-row, all-suit palette. */
+.tile-palette--all .tile-palette__row { grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 1px; }
+.tile-palette--all .tile-palette__row--honors { grid-template-columns: repeat(7, minmax(0, 1fr)); max-width: 70%; }
+.tile-palette--all .tile-btn.is-fluid { min-width: 0 !important; min-height: 0 !important; }
+.editor-notes > summary { font-weight: 600; }
+.editor-notes > .field { margin-top: 8px; }
+
+.editor-notes > section.panel { border: 0; padding: 0; box-shadow: none; }
+
+.library-answer-toggle { min-height: 44px; margin: 0 0 8px; }
+.detail-answer-toggle { min-height: 44px; margin-top: 8px; }
+@media (max-width: 360px) {
+  .ctx-scores { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .ctx-scores__label { grid-column: 1 / -1; }
+}
