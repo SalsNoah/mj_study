@@ -207,51 +207,56 @@ async function adjustFirstRemaining() {
   return remaining;
 }
 
-it('preserves the editor hand, unsaved notes, conditions and remaining counts across tabs', async () => {
+it('keeps conditions above the full palette and preserves drafts while opening optional notes', async () => {
   const data = seed();
   const before = localStorage.getItem(STORAGE_KEY);
   await mountProblem(<EditorPage />, '/edit/:id', data.problems[0]!.id);
-  const handPanel = host.querySelector<HTMLDivElement>('#editor-view-panel-hand')!;
-  expect(handPanel.hidden).toBe(false);
+  const handPanel = host.querySelector<HTMLElement>('.tile-input')!;
+  const context = host.querySelector<HTMLElement>('.context-panel')!;
+  expect(context.compareDocumentPosition(handPanel) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  expect(context.closest('[hidden]')).toBeNull();
+  expect(host.querySelector('#editor-view-tab-context')).toBeNull();
+  expect(host.querySelector('.tile-palette__suits')).toBeNull();
+  expect(host.querySelectorAll('.tile-palette__row:not([hidden])')).toHaveLength(4);
+  expect(host.querySelectorAll('.tile-palette button')).toHaveLength(37);
   expect(handPanel.querySelectorAll('.hand-strip .tile-btn')).toHaveLength(14);
   const remaining = await adjustFirstRemaining();
-  await click(button('解説・メモ'));
-  const notes = host.querySelector<HTMLTextAreaElement>('#editor-view-panel-notes textarea')!;
+  const disclosure = host.querySelector<HTMLDetailsElement>('.editor-notes')!;
+  expect(disclosure.open).toBe(false);
+  await click(disclosure.querySelector('summary')!);
+  const notes = disclosure.querySelector<HTMLTextAreaElement>('textarea')!;
   await input(notes, '保存前の解説を保持');
-  await click(button('対局条件'));
+  await click(disclosure.querySelector('summary')!);
   const honba = host.querySelector<HTMLInputElement>('input[aria-label="本場"]')!;
   await input(honba, '2');
-  await click(button('牌姿'));
-  expect(handPanel.hidden).toBe(false);
   expect(handPanel.querySelectorAll('.hand-strip .tile-btn')).toHaveLength(14);
   expect(host.querySelector('input[aria-label="一萬の残枚数"]')).toBe(remaining);
   expect(remaining.value).toBe('0');
-  await click(button('解説・メモ'));
+  await click(disclosure.querySelector('summary')!);
   expect(notes.value).toBe('保存前の解説を保持');
-  await click(button('対局条件'));
   expect(honba.value).toBe('2');
   expect(localStorage.getItem(STORAGE_KEY)).toBe(before);
 });
 
-it('opens the correct editor tab for answer and condition validation errors', async () => {
+it('opens optional notes for answer errors while conditions always stay directly available', async () => {
   const data = seed();
   data.problems[0]!.answerEnabled = false;
   data.problems[0]!.acceptedDiscards = [];
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   await mountProblem(<EditorPage />, '/edit/:id', data.problems[0]!.id);
-  await click(button('解説・メモ'));
-  const answer = host.querySelector<HTMLInputElement>('#editor-view-panel-notes input[type="checkbox"]')!;
+  const disclosure = host.querySelector<HTMLDetailsElement>('.editor-notes')!;
+  await click(disclosure.querySelector('summary')!);
+  const answer = disclosure.querySelector<HTMLInputElement>('input[type="checkbox"]')!;
   await click(answer);
-  await click(button('牌姿'));
+  await click(disclosure.querySelector('summary')!);
   await click(button('保存'));
-  expect(host.querySelector<HTMLDivElement>('#editor-view-panel-notes')!.hidden).toBe(false);
+  expect(disclosure.open).toBe(true);
   expect(host.querySelector('[role="alert"]')!.textContent).toContain('正解');
   await click(answer);
-  await click(button('対局条件'));
   await input(host.querySelector<HTMLInputElement>('input[aria-label="本場"]')!, '100');
-  await click(button('牌姿'));
+  await click(disclosure.querySelector('summary')!);
   await click(button('保存'));
-  expect(host.querySelector<HTMLDivElement>('#editor-view-panel-context')!.hidden).toBe(false);
+  expect(host.querySelector('.context-panel')!.closest('[hidden]')).toBeNull();
   expect(host.querySelector('[role="alert"]')!.textContent).toContain('本場は0〜99');
 });
 
