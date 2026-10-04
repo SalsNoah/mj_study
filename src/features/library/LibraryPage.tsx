@@ -36,6 +36,7 @@ export function LibraryPage() {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [tagMode, setTagMode] = useState<'or' | 'and'>('or');
   const [sortKey, setSortKey] = useState<SortKey>('updated');
+  const [showAnswers, setShowAnswers] = useState(false);
   const [searchOpts, setSearchOpts] = useState<SearchOptions>(DEFAULT_SEARCH_OPTIONS);
 
   useEffect(() => {
@@ -257,6 +258,10 @@ export function LibraryPage() {
             <option value="lastConfirmOld">最終確認が古い順</option>
           </select>
         </label>
+        <label className="check library-answer-toggle">
+          <input type="checkbox" checked={showAnswers} onChange={(e) => setShowAnswers(e.target.checked)} />
+          正解を表示
+        </label>
       </section>
 
       {filtered.length === 0 ? (
@@ -286,7 +291,15 @@ export function LibraryPage() {
                     </span>
                   </div>
                   <div className="hand-mini">
-                    <HandView concealed={p.concealed} drawn={p.drawn} melds={p.melds} tight />
+                    <HandView
+                      concealed={p.concealed}
+                      drawn={p.drawn}
+                      melds={p.melds}
+                      tight
+                      marks={showAnswers && p.answerEnabled
+                        ? new Map(p.acceptedDiscards.map((code) => [code, 'correct' as const]))
+                        : undefined}
+                    />
                   </div>
                   <div className="problem-card__meta">
                     <span>解いた {formatShortDate(study?.lastSolvedAt)}</span>

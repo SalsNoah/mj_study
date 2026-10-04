@@ -1474,3 +1474,6 @@ html { scroll-padding-top: 74px; scroll-padding-bottom: calc(var(--nav-h) + var(
 .editor-notes > .field { margin-top: 8px; }
 
 .editor-notes > section.panel { border: 0; padding: 0; box-shadow: none; }
+
+.library-answer-toggle { min-height: 44px; margin: 0 0 8px; }
+.detail-answer-toggle { min-height: 44px; margin-top: 8px; }
