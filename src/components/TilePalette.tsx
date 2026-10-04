@@ -12,9 +12,10 @@ const ROWS: TileCode[][] = [
 type Props = {
   onPick: (code: TileCode) => void;
   disabled?: boolean;
+  blockedReasons?: Partial<Record<TileCode, string>>;
 };
 
-export function TilePalette({ onPick, disabled }: Props) {
+export function TilePalette({ onPick, disabled, blockedReasons = {} }: Props) {
   return (
     <div className="tile-palette" aria-label="牌パレット">
       <div className="tile-palette__grid">
@@ -28,13 +29,21 @@ export function TilePalette({ onPick, disabled }: Props) {
                 key={code}
                 code={code}
                 fluid
-                dimmed={disabled}
-                onClick={disabled ? undefined : () => onPick(code)}
+                dimmed={disabled || !!blockedReasons[code]}
+                disabled={disabled || !!blockedReasons[code]}
+                disabledReason={blockedReasons[code]}
+                onClick={() => onPick(code)}
               />
             ))}
           </div>
         ))}
       </div>
+      {Object.keys(blockedReasons).length > 0 && (
+        <details className="palette-limits">
+          <summary>追加できない牌と理由</summary>
+          <ul>{[...new Set(Object.values(blockedReasons))].map((reason) => <li key={reason}>{reason}</li>)}</ul>
+        </details>
+      )}
     </div>
   );
 }

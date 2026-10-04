@@ -1,0 +1,569 @@
+[
+  {
+    "id": "U01",
+    "hand": "123m456m789p23s55z",
+    "melds": [],
+    "note": "両面。1s/4s各4、合計8",
+    "expectedShanten": 0,
+    "expectedUkeire": {
+      "1s": 4,
+      "4s": 4
+    },
+    "expectedTypeCount": 2,
+    "expectedRemaining": 8
+  },
+  {
+    "id": "U02",
+    "hand": "123m456m789p12s55z",
+    "melds": [],
+    "note": "辺張。3s4枚",
+    "expectedShanten": 0,
+    "expectedUkeire": {
+      "3s": 4
+    },
+    "expectedTypeCount": 1,
+    "expectedRemaining": 4
+  },
+  {
+    "id": "U03",
+    "hand": "123m456m789p13s55z",
+    "melds": [],
+    "note": "嵌張。2s4枚",
+    "expectedShanten": 0,
+    "expectedUkeire": {
+      "2s": 4
+    },
+    "expectedTypeCount": 1,
+    "expectedRemaining": 4
+  },
+  {
+    "id": "U04",
+    "hand": "123m456m789p22s55z",
+    "melds": [],
+    "note": "双碰。2s/5z各2、合計4",
+    "expectedShanten": 0,
+    "expectedUkeire": {
+      "2s": 2,
+      "5z": 2
+    },
+    "expectedTypeCount": 2,
+    "expectedRemaining": 4
+  },
+  {
+    "id": "U05",
+    "hand": "123m123p123s45s77z",
+    "melds": [],
+    "note": "3sは手中に1枚、3+4=7枚",
+    "expectedShanten": 0,
+    "expectedUkeire": {
+      "3s": 3,
+      "6s": 4
+    },
+    "expectedTypeCount": 2,
+    "expectedRemaining": 7
+  },
+  {
+    "id": "U06",
+    "hand": "1112345678999m",
+    "melds": [],
+    "note": "九面待ち、9種23枚",
+    "expectedShanten": 0,
+    "expectedUkeire": {
+      "1m": 1,
+      "2m": 3,
+      "3m": 3,
+      "4m": 3,
+      "5m": 3,
+      "6m": 3,
+      "7m": 3,
+      "8m": 3,
+      "9m": 1
+    },
+    "expectedTypeCount": 9,
+    "expectedRemaining": 23
+  },
+  {
+    "id": "U07",
+    "hand": "1122m3344p5566s7z",
+    "melds": [],
+    "note": "七対子6対子。7z3枚",
+    "expectedShanten": 0,
+    "expectedUkeire": {
+      "7z": 3
+    },
+    "expectedTypeCount": 1,
+    "expectedRemaining": 3
+  },
+  {
+    "id": "U08",
+    "hand": "19m19p19s1234567z",
+    "melds": [],
+    "note": "国士13面、13種39枚",
+    "expectedShanten": 0,
+    "expectedUkeire": {
+      "1m": 3,
+      "9m": 3,
+      "1p": 3,
+      "9p": 3,
+      "1s": 3,
+      "9s": 3,
+      "1z": 3,
+      "2z": 3,
+      "3z": 3,
+      "4z": 3,
+      "5z": 3,
+      "6z": 3,
+      "7z": 3
+    },
+    "expectedTypeCount": 13,
+    "expectedRemaining": 39
+  },
+  {
+    "id": "U09",
+    "hand": "119m19p19s123456z",
+    "melds": [],
+    "note": "国士7z単騎、4枚",
+    "expectedShanten": 0,
+    "expectedUkeire": {
+      "7z": 4
+    },
+    "expectedTypeCount": 1,
+    "expectedRemaining": 4
+  },
+  {
+    "id": "U10",
+    "hand": "1111m2233p4455s6z",
+    "melds": [],
+    "note": "4枚を七対子2組と数えない。七対子2シャンテン",
+    "expectedShanten": 2,
+    "expectedUkeire": {
+      "2m": 4,
+      "3m": 4,
+      "4m": 4,
+      "5m": 4,
+      "6m": 4,
+      "7m": 4,
+      "8m": 4,
+      "9m": 4,
+      "1p": 4,
+      "2p": 2,
+      "3p": 2,
+      "4p": 4,
+      "5p": 4,
+      "6p": 4,
+      "7p": 4,
+      "8p": 4,
+      "9p": 4,
+      "1s": 4,
+      "2s": 4,
+      "3s": 4,
+      "4s": 2,
+      "5s": 2,
+      "6s": 4,
+      "7s": 4,
+      "8s": 4,
+      "9s": 4,
+      "1z": 4,
+      "2z": 4,
+      "3z": 4,
+      "4z": 4,
+      "5z": 4,
+      "6z": 3,
+      "7z": 4
+    },
+    "expectedTypeCount": 33,
+    "expectedRemaining": 123
+  },
+  {
+    "id": "U11",
+    "hand": "1111m234p567p789s",
+    "melds": [],
+    "note": "5枚目1m待ち禁止。1シャンテン",
+    "expectedShanten": 1,
+    "expectedUkeire": {
+      "2m": 4,
+      "3m": 4,
+      "4m": 4,
+      "5m": 4,
+      "6m": 4,
+      "7m": 4,
+      "8m": 4,
+      "9m": 4,
+      "1p": 4,
+      "2p": 3,
+      "3p": 3,
+      "4p": 3,
+      "5p": 3,
+      "6p": 3,
+      "7p": 3,
+      "8p": 4,
+      "9p": 4,
+      "1s": 4,
+      "2s": 4,
+      "3s": 4,
+      "4s": 4,
+      "5s": 4,
+      "6s": 4,
+      "7s": 3,
+      "8s": 3,
+      "9s": 3,
+      "1z": 4,
+      "2z": 4,
+      "3z": 4,
+      "4z": 4,
+      "5z": 4,
+      "6z": 4,
+      "7z": 4
+    },
+    "expectedTypeCount": 33,
+    "expectedRemaining": 123
+  },
+  {
+    "id": "U12",
+    "hand": "1m234p567p789s",
+    "melds": [
+      "111m"
+    ],
+    "note": "自分副露込5枚目を完成形から除外。形として1シャンテン",
+    "expectedShanten": 1,
+    "expectedUkeire": {
+      "2m": 4,
+      "3m": 4,
+      "4m": 4,
+      "5m": 4,
+      "6m": 4,
+      "7m": 4,
+      "8m": 4,
+      "9m": 4,
+      "1p": 4,
+      "2p": 3,
+      "3p": 3,
+      "4p": 3,
+      "5p": 3,
+      "6p": 3,
+      "7p": 3,
+      "8p": 4,
+      "9p": 4,
+      "1s": 4,
+      "2s": 4,
+      "3s": 4,
+      "4s": 4,
+      "5s": 4,
+      "6s": 4,
+      "7s": 3,
+      "8s": 3,
+      "9s": 3,
+      "1z": 4,
+      "2z": 4,
+      "3z": 4,
+      "4z": 4,
+      "5z": 4,
+      "6z": 4,
+      "7z": 4
+    },
+    "expectedTypeCount": 33,
+    "expectedRemaining": 123
+  },
+  {
+    "id": "U13",
+    "hand": "23m456p789s55z",
+    "melds": [
+      "1111m"
+    ],
+    "note": "暗槓を固定面子。1m不可、4m4枚",
+    "expectedShanten": 0,
+    "expectedUkeire": {
+      "4m": 4
+    },
+    "expectedTypeCount": 1,
+    "expectedRemaining": 4
+  },
+  {
+    "id": "U14",
+    "hand": "1z",
+    "melds": [
+      "123m",
+      "456m",
+      "789p",
+      "111s"
+    ],
+    "note": "4副露単騎。1z3枚",
+    "expectedShanten": 0,
+    "expectedUkeire": {
+      "1z": 3
+    },
+    "expectedTypeCount": 1,
+    "expectedRemaining": 3
+  },
+  {
+    "id": "U15",
+    "hand": "1z",
+    "melds": [
+      "1111m",
+      "2222p",
+      "3333s",
+      "4444z"
+    ],
+    "note": "4槓は実17枚・13枚相当。1z3枚",
+    "expectedShanten": 0,
+    "expectedUkeire": {
+      "1z": 3
+    },
+    "expectedTypeCount": 1,
+    "expectedRemaining": 3
+  },
+  {
+    "id": "U16",
+    "hand": "1122m3344p55s",
+    "melds": [
+      "7777z"
+    ],
+    "note": "暗槓あり七対子を除外",
+    "expectedShanten": 2,
+    "expectedUkeire": {
+      "1m": 2,
+      "2m": 2,
+      "3m": 4,
+      "2p": 4,
+      "3p": 2,
+      "4p": 2,
+      "5p": 4,
+      "5s": 2
+    },
+    "expectedTypeCount": 8,
+    "expectedRemaining": 22
+  },
+  {
+    "id": "U17",
+    "hand": "123m123p123s45s77z",
+    "melds": [],
+    "dora": "3s",
+    "note": "表示牌3sを差し引く。受け入れ6枚",
+    "expectedShanten": 0,
+    "expectedUkeire": {
+      "3s": 2,
+      "6s": 4
+    },
+    "expectedTypeCount": 2,
+    "expectedRemaining": 6
+  },
+  {
+    "id": "U18",
+    "hand": "123m123p123s45s77z",
+    "melds": [],
+    "dora": "2s",
+    "note": "表示牌2sを引く。実ドラ3sを余分に引かない。7枚",
+    "expectedShanten": 0,
+    "expectedUkeire": {
+      "3s": 3,
+      "6s": 4
+    },
+    "expectedTypeCount": 2,
+    "expectedRemaining": 7
+  },
+  {
+    "id": "U19",
+    "hand": "123m123p123s456s11z",
+    "melds": [],
+    "discard": "1z",
+    "note": "切った牌も既知。打1z後1z残2枚",
+    "expectedShanten": 0,
+    "expectedUkeire": {
+      "1z": 2
+    },
+    "expectedTypeCount": 1,
+    "expectedRemaining": 2
+  },
+  {
+    "id": "U20",
+    "hand": "123m123p123s405s77z",
+    "melds": [],
+    "discard": "0s",
+    "note": "赤5sと通常5sは同一牌種。打0sと打5sの形結果は同じ",
+    "expectedShanten": 0,
+    "expectedUkeire": {
+      "3s": 3,
+      "6s": 4
+    },
+    "expectedTypeCount": 2,
+    "expectedRemaining": 7
+  },
+  {
+    "id": "U21",
+    "hand": "123m123p123s405s77z",
+    "melds": [],
+    "discard": "5s",
+    "note": "U20の通常5sを切る別候補",
+    "expectedShanten": 0,
+    "expectedUkeire": {
+      "3s": 3,
+      "6s": 4
+    },
+    "expectedTypeCount": 2,
+    "expectedRemaining": 7
+  },
+  {
+    "id": "U22",
+    "hand": "123m123p123s46s50s",
+    "melds": [],
+    "note": "赤と通常5を2枚既知と集約。5s残2枚",
+    "expectedShanten": 0,
+    "expectedUkeire": {
+      "5s": 2
+    },
+    "expectedTypeCount": 1,
+    "expectedRemaining": 2
+  },
+  {
+    "id": "U23",
+    "hand": "1111m234p567p789s1z",
+    "melds": [],
+    "discard": "1z",
+    "note": "戻る打牌。33種122枚。テンパイ3枚より良いとは言えない",
+    "expectedShanten": 1,
+    "expectedUkeire": {
+      "2m": 4,
+      "3m": 4,
+      "4m": 4,
+      "5m": 4,
+      "6m": 4,
+      "7m": 4,
+      "8m": 4,
+      "9m": 4,
+      "1p": 4,
+      "2p": 3,
+      "3p": 3,
+      "4p": 3,
+      "5p": 3,
+      "6p": 3,
+      "7p": 3,
+      "8p": 4,
+      "9p": 4,
+      "1s": 4,
+      "2s": 4,
+      "3s": 4,
+      "4s": 4,
+      "5s": 4,
+      "6s": 4,
+      "7s": 3,
+      "8s": 3,
+      "9s": 3,
+      "1z": 3,
+      "2z": 4,
+      "3z": 4,
+      "4z": 4,
+      "5z": 4,
+      "6z": 4,
+      "7z": 4
+    },
+    "expectedTypeCount": 33,
+    "expectedRemaining": 122
+  },
+  {
+    "id": "U24",
+    "hand": "1111m234p567p789s1z",
+    "melds": [],
+    "discard": "1m",
+    "note": "テンパイ維持。1z3枚",
+    "expectedShanten": 0,
+    "expectedUkeire": {
+      "1z": 3
+    },
+    "expectedTypeCount": 1,
+    "expectedRemaining": 3
+  },
+  {
+    "id": "U25",
+    "hand": "123m456m789p22s55z",
+    "melds": [],
+    "dora": "22s55z",
+    "note": "空テン。構造0、受け入れ0種0枚",
+    "expectedShanten": 0,
+    "expectedUkeire": {},
+    "expectedTypeCount": 0,
+    "expectedRemaining": 0
+  },
+  {
+    "id": "U26",
+    "hand": "1111m2233p4455s66z",
+    "melds": [],
+    "discard": "1m",
+    "note": "七対子との全体最小。公式天鳳28種112枚と照合",
+    "expectedShanten": 1,
+    "expectedUkeire": {
+      "2m": 4,
+      "3m": 4,
+      "4m": 4,
+      "5m": 4,
+      "6m": 4,
+      "7m": 4,
+      "8m": 4,
+      "9m": 4,
+      "1p": 4,
+      "4p": 4,
+      "5p": 4,
+      "6p": 4,
+      "7p": 4,
+      "8p": 4,
+      "9p": 4,
+      "1s": 4,
+      "2s": 4,
+      "3s": 4,
+      "6s": 4,
+      "7s": 4,
+      "8s": 4,
+      "9s": 4,
+      "1z": 4,
+      "2z": 4,
+      "3z": 4,
+      "4z": 4,
+      "5z": 4,
+      "7z": 4
+    },
+    "expectedTypeCount": 28,
+    "expectedRemaining": 112
+  },
+  {
+    "id": "U27",
+    "hand": "11112222333344z",
+    "melds": [],
+    "discard": "1z",
+    "note": "4枚使い3組。公式天鳳31種122枚と照合",
+    "expectedShanten": 2,
+    "expectedUkeire": {
+      "1m": 4,
+      "2m": 4,
+      "3m": 4,
+      "4m": 4,
+      "5m": 4,
+      "6m": 4,
+      "7m": 4,
+      "8m": 4,
+      "9m": 4,
+      "1p": 4,
+      "2p": 4,
+      "3p": 4,
+      "4p": 4,
+      "5p": 4,
+      "6p": 4,
+      "7p": 4,
+      "8p": 4,
+      "9p": 4,
+      "1s": 4,
+      "2s": 4,
+      "3s": 4,
+      "4s": 4,
+      "5s": 4,
+      "6s": 4,
+      "7s": 4,
+      "8s": 4,
+      "9s": 4,
+      "4z": 2,
+      "5z": 4,
+      "6z": 4,
+      "7z": 4
+    },
+    "expectedTypeCount": 31,
+    "expectedRemaining": 122
+  }
+]

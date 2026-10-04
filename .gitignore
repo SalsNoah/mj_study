@@ -8,3 +8,6 @@ playwright-report
 .env.*
 
 samples-local/
+
+# Local validation output is not application source.
+evidence/

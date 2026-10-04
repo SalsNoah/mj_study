@@ -4,10 +4,13 @@ import { clearImportDraft, peekImportDraft, setPendingShot } from '@/features/im
 import { useApp } from '@/app/store';
 import { HandView } from '@/components/HandView';
 import { TilePalette } from '@/components/TilePalette';
+import { UkeirePanel } from '@/components/UkeirePanel';
 import { WanpaiDora } from '@/components/WanpaiDora';
 import { contextSummary } from '@/domain/context';
 import { createId, nowIso } from '@/domain/ids';
 import { buildMeldFromTile } from '@/domain/melds';
+import { allTiles } from '@/domain/tiles';
+import { tileAdditionIssue, tileSupplyIssues } from '@/domain/tileSupply';
 import { maybeSortConcealed } from '@/domain/sort';
 import {
   emptyContext,
@@ -62,7 +65,7 @@ function initialHand(existing?: Problem): TileCode[] {
   const merged = existing.drawn
     ? [...existing.concealed, existing.drawn]
     : [...existing.concealed];
-  return maybeSortConcealed(merged.slice(0, handTileMax(existing.melds.length)), true);
+  return maybeSortConcealed(merged, true);
 }
 
 export function EditorPage() {
@@ -76,7 +79,7 @@ export function EditorPage() {
   const [imported] = useState(() => (isNew ? peekImportDraft() : null));
   const [concealed, setConcealed] = useState<TileCode[]>(() =>
     imported
-      ? maybeSortConcealed(imported.concealed.slice(0, handTileMax(imported.melds.length)), true)
+      ? maybeSortConcealed([...imported.concealed], true)
       : initialHand(existing),
   );
   const [melds, setMelds] = useState<Meld[]>(imported?.melds ?? existing?.melds ?? []);
@@ -112,6 +115,27 @@ export function EditorPage() {
   const totalMax = 14 + kanCount;
   const totalCount = concealed.length + melds.reduce((n, m) => n + m.tiles.length, 0);
   const acceptedSet = useMemo(() => new Set(accepted), [accepted]);
+  const knownTiles = useMemo(() => [...concealed, ...melds.flatMap((m) => m.tiles), ...doraIndicators], [concealed, melds, doraIndicators]);
+  const supplyIssues = useMemo(() => tileSupplyIssues(knownTiles), [knownTiles]);
+  const blockedReasons = useMemo(() => {
+    const reasons: Partial<Record<TileCode, string>> = {};
+    for (const code of allTiles()) {
+      let reason: string | null = null;
+      if (target === 'concealed' && concealed.length >= handMax) reason = `手牌はこの副露構成では最大${handMax}枚です。先に手牌を減らしてください。`;
+      else if (target === 'dora' && doraIndicators.length >= LIMITS.doraMax) reason = 'ドラ表示牌は最大5枚です。先に表示牌を減らしてください。';
+      else if (target === 'meld') {
+        if (melds.length >= LIMITS.meldsMax) reason = '副露は最大4組です。';
+        else if (concealed.length > handTileMax(melds.length + 1)) reason = `先に手牌を${concealed.length - handTileMax(melds.length + 1)}枚減らしてください。`;
+        else {
+          const candidate = buildMeldFromTile(meldType, code, meldFrom);
+          reason = candidate.ok ? tileAdditionIssue(knownTiles, candidate.meld.tiles) : candidate.reason;
+        }
+      } else reason = tileAdditionIssue(knownTiles, [code]);
+      if (reason) reasons[code] = reason;
+    }
+    return reasons;
+  }, [knownTiles, concealed.length, handMax, doraIndicators.length, melds.length, target, meldType, meldFrom]);
+
 
   useEffect(() => {
     const onBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -131,12 +155,15 @@ export function EditorPage() {
   };
 
   const setHand = (tiles: TileCode[], prev: TileCode[]) => {
-    const next = maybeSortConcealed(tiles.slice(0, handTileMax(melds.length)), autoSort);
+    setError(null);
+    const next = maybeSortConcealed(tiles, autoSort);
     setConcealed(next);
     pushHistory(() => setConcealed(prev));
   };
 
   const addTile = (code: TileCode) => {
+    if (blockedReasons[code]) { setError(blockedReasons[code]!); return; }
+    setError(null);
     mark();
     if (target === 'concealed') {
       if (concealed.length >= handMax) return;
@@ -167,6 +194,8 @@ export function EditorPage() {
       setError(built.reason);
       return;
     }
+    const supplyError = tileAdditionIssue(knownTiles, built.meld.tiles);
+    if (supplyError) { setError(supplyError); return; }
     const prev = melds;
     setMelds([...melds, built.meld]);
     pushHistory(() => setMelds(prev));
@@ -174,6 +203,7 @@ export function EditorPage() {
   };
 
   const removeMeld = (meldId: string) => {
+    setError(null);
     mark();
     const prev = melds;
     setMelds(melds.filter((m) => m.id !== meldId));
@@ -189,6 +219,7 @@ export function EditorPage() {
   };
 
   const removeDoraAt = (index: number) => {
+    setError(null);
     mark();
     const prev = doraIndicators;
     setDora(doraIndicators.filter((_, i) => i !== index));
@@ -199,6 +230,7 @@ export function EditorPage() {
     const last = history[history.length - 1];
     if (!last) return;
     last();
+    setError(null);
     setHistory((h) => h.slice(0, -1));
     mark();
   };
@@ -492,6 +524,7 @@ export function EditorPage() {
           <div className="hand-stage__top">
             <p className="hand-stage__meta">{contextSummary(context)}</p>
             <WanpaiDora doras={doraIndicators} onRemove={removeDoraAt} />
+            {doraIndicators.length > LIMITS.doraMax && <div className="btn-row" role="alert">ドラ表示牌が5枚を超えています。余分な牌も保持しています：{doraIndicators.slice(LIMITS.doraMax).map((code, i) => <button key={i} type="button" className="btn" onClick={() => removeDoraAt(i + LIMITS.doraMax)}>表示牌{i + LIMITS.doraMax + 1}枚目（{code}）を削除</button>)}</div>}
           </div>
           <HandView
             concealed={concealed}
@@ -573,16 +606,9 @@ export function EditorPage() {
           </div>
         )}
 
-        <TilePalette
-          onPick={addTile}
-          disabled={
-            (target === 'concealed' && handCount >= handMax) ||
-            (target === 'dora' && doraIndicators.length >= LIMITS.doraMax) ||
-            (target === 'meld' &&
-              (melds.length >= LIMITS.meldsMax ||
-                concealed.length > handTileMax(melds.length + 1)))
-          }
-        />
+        <p className="hint">手牌・鳴き・ドラ表示牌を合わせて同じ牌は4枚まで（赤五を含む）。薄い牌は追加できません。牌姿の牌をタップすると減らせます。</p>
+        {supplyIssues.length > 0 && <div role="alert" className="error">入力済みの牌が上限を超えています。牌は自動で削除していません。手牌・鳴き・ドラ表示牌をタップして修正してください。{supplyIssues.map((issue) => <p key={issue}>{issue.replace('追加後', '現在')}</p>)}</div>}
+        <TilePalette onPick={addTile} blockedReasons={blockedReasons} />
         {error && target === 'meld' && <p className="error">{error}</p>}
       </section>
 
@@ -597,6 +623,8 @@ export function EditorPage() {
           maxLength={LIMITS.title}
         />
       </label>
+
+      <UkeirePanel sessionKey={existing?.id ?? 'new'} concealed={concealed} drawn={null} melds={melds} doraIndicators={doraIndicators} />
 
       <section className="panel">
         <label className="check">

@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useApp } from '@/app/store';
 import { HandBoard } from '@/components/HandBoard';
+import { UkeirePanel } from '@/components/UkeirePanel';
 import { accuracyForProblem, isInTest } from '@/domain/quiz';
 import { formatShortDate } from '@/domain/records';
 import {
@@ -132,6 +133,8 @@ export function DetailPage() {
           </p>
         )}
       </section>
+
+      <UkeirePanel {...problem} sessionKey={problem.id} />
 
       <section className="panel">
         <dl className="stat-list">

@@ -13,6 +13,8 @@ type Props = {
   rotated?: boolean;
   back?: boolean;
   onClick?: () => void;
+  disabled?: boolean;
+  disabledReason?: string;
   tabIndex?: number;
   className?: string;
 };
@@ -29,6 +31,8 @@ export function TileFace({
   rotated = false,
   back = false,
   onClick,
+  disabled,
+  disabledReason,
   tabIndex,
   className = '',
 }: Props) {
@@ -79,6 +83,9 @@ export function TileFace({
         className={cls}
         aria-label={label}
         aria-pressed={selected}
+        disabled={disabled}
+        title={disabledReason}
+        aria-description={disabledReason}
         onClick={onClick}
         tabIndex={tabIndex}
         style={style}

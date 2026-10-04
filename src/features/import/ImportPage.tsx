@@ -2,7 +2,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TileFace } from '@/components/TileFace';
 import { TilePalette } from '@/components/TilePalette';
-import { isTileCode } from '@/domain/tiles';
+import { allTiles, isTileCode } from '@/domain/tiles';
+import { tileAdditionIssue, tileSupplyIssues } from '@/domain/tileSupply';
 import { emptyContext, type Meld, type TileCode, type Wind } from '@/domain/types';
 import {
   autoRead,
@@ -49,6 +50,9 @@ function firstUnsure(r: AutoResult): Target | null {
 /** 作成画面に渡せる形にする。組み立てられないときは理由を返す */
 function toDraft(r: AutoResult): { ok: true; send: () => void } | { ok: false; reason: string } {
   if (allCells(r).some((c) => !c.label)) return { ok: false, reason: '「?」の牌を選んでください' };
+  const supplyErrors = tileSupplyIssues(allCells(r).flatMap((c) => c.label && isTileCode(c.label) ? [c.label] : []));
+  if (supplyErrors.length) return { ok: false, reason: supplyErrors.join(' ') + ' 読み取り結果の牌を選び、修正または除外してください。' };
+  if (r.dora.length > 5) return { ok: false, reason: 'ドラ表示牌は最大5枚です。余分な読み取り結果を除外してください。' };
   const melds: Meld[] = [];
   for (const [gi, g] of r.melds.entries()) {
     const m = inferMeld(g);
@@ -77,8 +81,7 @@ function toDraft(r: AutoResult): { ok: true; send: () => void } | { ok: false; r
         melds,
         doraIndicators: r.dora
           .map((c) => c.label)
-          .filter((l): l is TileCode => !!l && isTileCode(l))
-          .slice(0, 5),
+          .filter((l): l is TileCode => !!l && isTileCode(l)),
         context: {
           ...emptyContext(),
           roundWind: r.roundWind,
@@ -142,6 +145,7 @@ export function ImportPage() {
           return;
         }
         setPhase({ kind: 'review', result });
+        if (!draft.ok) setError(draft.reason);
         setTarget(firstUnsure(result));
       } catch (e) {
         setPhase({ kind: 'failed', message: e instanceof Error ? e.message : '読み取りに失敗しました' });
@@ -186,17 +190,24 @@ export function ImportPage() {
     if (!result || !target) return;
     const cell = cellAt(result, target);
     if (!cell) return;
+    const known = allCells(update(result, target, () => null)).flatMap((c) => c.label && isTileCode(c.label) ? [c.label] : []);
+    const issue = tileAdditionIssue(known, [label]);
+    if (issue) { setError(issue); return; }
+    setError(null);
     rememberTile(result.game, label, cell.feat);
     let next = update(result, target, (c) => ({ ...c, label, sure: true }));
     // 同じ牌が他にもあれば、覚えた見本で読み直す
     if (modelRef.current) {
       const bank = prepareModel(modelRef.current, loadLocalBanks())[result.game].tiles;
-      next = {
+      const rematched = {
         ...next,
         hand: next.hand.map((c) => rematchCell(c, bank)),
         dora: next.dora.map((c) => rematchCell(c, bank)),
         melds: next.melds.map((m) => m.map((c) => rematchCell(c, bank))),
       };
+      // An automatic reread must not turn this valid manual correction into a fifth copy.
+      const rematchedTiles = allCells(rematched).flatMap((c) => c.label && isTileCode(c.label) ? [c.label] : []);
+      if (tileSupplyIssues(rematchedTiles).length === 0) next = rematched;
     }
     setPhase({ kind: 'review', result: next });
     setTarget(firstUnsure(next));
@@ -204,6 +215,7 @@ export function ImportPage() {
 
   const remove = () => {
     if (!result || !target) return;
+    setError(null);
     const next = update(result, target, () => null);
     setPhase({ kind: 'review', result: next });
     setTarget(firstUnsure(next));
@@ -253,6 +265,14 @@ export function ImportPage() {
   );
 
   const current = result && target ? cellAt(result, target) : undefined;
+  const blockedReasons: Partial<Record<TileCode, string>> = {};
+  if (result && target) {
+    const known = allCells(update(result, target, () => null)).flatMap((c) => c.label && isTileCode(c.label) ? [c.label] : []);
+    for (const code of allTiles()) {
+      const reason = tileAdditionIssue(known, [code]);
+      if (reason) blockedReasons[code] = reason;
+    }
+  }
   const unsure = result ? allCells(result).filter((c) => !c.sure).length : 0;
 
   return (
@@ -394,7 +414,7 @@ export function ImportPage() {
                   牌ではない（除外）
                 </button>
               </div>
-              <TilePalette onPick={(code) => pick(code)} />
+              <TilePalette onPick={(code) => pick(code)} blockedReasons={blockedReasons} />
             </section>
           )}
 
