@@ -36,7 +36,7 @@ async function tab(id, name) { await page.locator(`#${id}-tab-${name}`).click();
 async function capture(name, selector) {
   if (selector) await page.locator(selector).scrollIntoViewIfNeeded();
   else await page.evaluate(() => window.scrollTo(0, 0));
-  await page.screenshot({ path: `${evidence}${name}.png`, fullPage: false });
+  await page.screenshot({ path: `${evidence}${name}.png`, fullPage: false, animations: 'disabled' });
   const geometry = await page.evaluate(() => ({
     viewport: innerWidth, document: document.documentElement.scrollWidth,
     overflow: [...document.querySelectorAll('.remaining-panel,.view-tabs,.tile-palette__row,.ukeire-row,.ukeire-tiles')]
@@ -71,6 +71,7 @@ try {
   }
   for (const name of ['一萬','二萬','三萬','一筒','二筒','三筒','一索','二索','三索','四索','赤五索','五索','中','中']) await pick(name);
   await expect(page.locator('.ukeire-list > li')).toHaveCount(13);
+  await expect(page.locator('.ukeire-list > li:not([hidden])')).toHaveCount(3);
   const editorRows = await page.locator('.ukeire-list').textContent();
   const toolbar = page.locator('.tile-actions');
   expect(await toolbar.locator('button').allTextContents()).toEqual(['理牌', '戻す', '全消去', '残枚数']);
@@ -80,7 +81,7 @@ try {
   for (const width of widths) {
     await page.setViewportSize({ width, height: 844 });
     await capture(`remaining-compact-${width}`, '.remaining-panel');
-    await page.locator('.remaining-panel').screenshot({ path: `${evidence}remaining-panel-${width}.png` });
+    await page.locator('.remaining-panel').screenshot({ path: `${evidence}remaining-panel-${width}.png`, animations: 'disabled' });
     const geometry = await page.locator('.remaining-panel').evaluate(panel => ({ width: panel.clientWidth, height: panel.getBoundingClientRect().height }));
     expect(geometry.height).toBeLessThan(380);
     await targets('.remaining-panel button,.remaining-panel input');
@@ -106,7 +107,12 @@ try {
   const saved = await page.evaluate(() => localStorage.getItem('mahjong-study:v1'));
   await tab('detail-view', 'ukeire');
   await expect(page.locator('.ukeire-list')).toHaveText(editorRows);
+  await expect(page.locator('.ukeire-list > li:visible')).toHaveCount(3);
+  await allSizes('detail-ukeire-top3', '.ukeire-panel');
   await page.getByRole('button', { name: '残枚数', exact: true }).click();
+  await page.locator('.ukeire-expand').click();
+  await expect(page.locator('.ukeire-list > li:not([hidden])')).toHaveCount(13);
+  await capture('detail-ukeire-expanded-390', '.ukeire-list');
   await fillRemaining('三索', '0'); await fillRemaining('六索', '1');
   await expect(page.locator('.ukeire-row').filter({ has: page.getByLabel('赤五索を切る', { exact: true }) })).toContainText('1種・1枚');
   await page.getByRole('textbox', { name: '六索の残枚数', exact: true }).fill('5');
@@ -160,11 +166,20 @@ try {
   await capture('editor-320-text150');
   await targets('.tile-palette button,.view-tabs button,.editor-save');
   await tab('editor-view', 'notes'); await capture('notes-320-text150');
+  await tab('editor-view', 'hand');
+  for (const name of ['一萬','二萬','三萬','一筒','二筒','三筒','一索','二索','三索','四索','五索','中','中']) await pick(name);
+  await page.getByRole('button', { name: '残枚数', exact: true }).click();
+  await capture('remaining-320-text150', '.remaining-panel');
+  await targets('.remaining-panel button,.remaining-panel input');
+  await page.getByRole('textbox', { name: '一萬の残枚数', exact: true }).focus();
+  await page.setViewportSize({ width: 320, height: 480 });
+  await page.getByRole('textbox', { name: '一萬の残枚数', exact: true }).scrollIntoViewIfNeeded();
+  await capture('remaining-320-shortviewport', '.remaining-control');
   expect(errors).toEqual([]);
   await writeFile(`${evidence}ui-results.json`, JSON.stringify({ status: 'pass', results, errors }, null, 2));
   console.log(JSON.stringify({ status: 'pass', captures: results.length, errors }));
 } catch (error) {
-  await page.screenshot({ path: `${evidence}failure.png`, fullPage: false });
+  await page.screenshot({ path: `${evidence}failure.png`, fullPage: false, animations: 'disabled' });
   await writeFile(`${evidence}ui-results.json`, JSON.stringify({ status: 'fail', message: String(error), results, errors }, null, 2));
   throw error;
 } finally { await browser.close(); }

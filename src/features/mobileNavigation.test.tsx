@@ -1,11 +1,14 @@
 import { act, type ReactElement } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { AppProvider } from '@/app/store';
 import { LibraryPage } from '@/features/library/LibraryPage';
 import { RecordsPage } from '@/features/records/RecordsPage';
 import { SettingsPage } from '@/features/settings/SettingsPage';
+import { EditorPage } from '@/features/editor/EditorPage';
+import { DetailPage } from '@/features/detail/DetailPage';
+import { TestPage } from '@/features/test/TestPage';
 import { createSampleProblems } from '@/data/samples';
 import { emptyStore, LIMITS, STORAGE_KEY } from '@/domain/types';
 
@@ -52,9 +55,10 @@ function button(text: string) {
   return found;
 }
 
-async function input(element: HTMLInputElement, value: string) {
+async function input(element: HTMLInputElement | HTMLTextAreaElement, value: string) {
   await act(async () => {
-    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(element, value);
+    const prototype = element instanceof HTMLTextAreaElement ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
+    Object.getOwnPropertyDescriptor(prototype, 'value')!.set!.call(element, value);
     element.dispatchEvent(new Event('input', { bubbles: true }));
   });
 }
@@ -185,4 +189,120 @@ it('keeps a pending backup import through settings-tab changes and cancels witho
   await click(button('キャンセル'));
   expect(host.querySelector('.import-preview')).toBeNull();
   expect(localStorage.getItem(STORAGE_KEY)).toBe(before);
+});
+
+
+async function mountProblem(page: ReactElement, path: string, id: string) {
+  await act(async () => root.render(
+    <AppProvider><MemoryRouter initialEntries={[path.replace(':id', id)]}>
+      <Routes><Route path={path} element={page} /></Routes>
+    </MemoryRouter></AppProvider>,
+  ));
+}
+
+async function adjustFirstRemaining() {
+  await click(button('残枚数'));
+  const remaining = host.querySelector<HTMLInputElement>('input[aria-label="一萬の残枚数"]')!;
+  await input(remaining, '0');
+  return remaining;
+}
+
+it('preserves the editor hand, unsaved notes, conditions and remaining counts across tabs', async () => {
+  const data = seed();
+  const before = localStorage.getItem(STORAGE_KEY);
+  await mountProblem(<EditorPage />, '/edit/:id', data.problems[0]!.id);
+  const handPanel = host.querySelector<HTMLDivElement>('#editor-view-panel-hand')!;
+  expect(handPanel.hidden).toBe(false);
+  expect(handPanel.querySelectorAll('.hand-strip .tile-btn')).toHaveLength(14);
+  const remaining = await adjustFirstRemaining();
+  await click(button('解説・メモ'));
+  const notes = host.querySelector<HTMLTextAreaElement>('#editor-view-panel-notes textarea')!;
+  await input(notes, '保存前の解説を保持');
+  await click(button('対局条件'));
+  const honba = host.querySelector<HTMLInputElement>('input[aria-label="本場"]')!;
+  await input(honba, '2');
+  await click(button('牌姿'));
+  expect(handPanel.hidden).toBe(false);
+  expect(handPanel.querySelectorAll('.hand-strip .tile-btn')).toHaveLength(14);
+  expect(host.querySelector('input[aria-label="一萬の残枚数"]')).toBe(remaining);
+  expect(remaining.value).toBe('0');
+  await click(button('解説・メモ'));
+  expect(notes.value).toBe('保存前の解説を保持');
+  await click(button('対局条件'));
+  expect(honba.value).toBe('2');
+  expect(localStorage.getItem(STORAGE_KEY)).toBe(before);
+});
+
+it('opens the correct editor tab for answer and condition validation errors', async () => {
+  const data = seed();
+  data.problems[0]!.answerEnabled = false;
+  data.problems[0]!.acceptedDiscards = [];
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  await mountProblem(<EditorPage />, '/edit/:id', data.problems[0]!.id);
+  await click(button('解説・メモ'));
+  const answer = host.querySelector<HTMLInputElement>('#editor-view-panel-notes input[type="checkbox"]')!;
+  await click(answer);
+  await click(button('牌姿'));
+  await click(button('保存'));
+  expect(host.querySelector<HTMLDivElement>('#editor-view-panel-notes')!.hidden).toBe(false);
+  expect(host.querySelector('[role="alert"]')!.textContent).toContain('正解');
+  await click(answer);
+  await click(button('対局条件'));
+  await input(host.querySelector<HTMLInputElement>('input[aria-label="本場"]')!, '100');
+  await click(button('牌姿'));
+  await click(button('保存'));
+  expect(host.querySelector<HTMLDivElement>('#editor-view-panel-context')!.hidden).toBe(false);
+  expect(host.querySelector('[role="alert"]')!.textContent).toContain('本場は0〜99');
+});
+
+it('opens detail notes first and retains remaining adjustments and all-candidate expansion across tabs', async () => {
+  const data = seed();
+  const before = localStorage.getItem(STORAGE_KEY);
+  await mountProblem(<DetailPage />, '/problems/:id', data.problems[0]!.id);
+  expect(host.querySelector<HTMLDivElement>('#detail-view-panel-notes')!.hidden).toBe(false);
+  expect(button('確認した').closest('[role="tabpanel"]')).toBeNull();
+  await click(button('受入れ'));
+  expect(host.querySelectorAll('.ukeire-list > li:not([hidden])')).toHaveLength(3);
+  expect(host.querySelector('.ukeire-order')!.textContent).toBe('枚数順');
+  const remaining = await adjustFirstRemaining();
+  const expand = host.querySelector<HTMLButtonElement>('.ukeire-expand')!;
+  await click(expand);
+  expect(expand.getAttribute('aria-expanded')).toBe('true');
+  expect(host.querySelectorAll('.ukeire-list > li:not([hidden])').length).toBeGreaterThan(3);
+  await click(button('記録'));
+  await click(button('解説・メモ'));
+  await click(button('受入れ'));
+  expect(remaining.value).toBe('0');
+  expect(host.querySelector('input[aria-label="一萬の残枚数"]')).toBe(remaining);
+  expect(expand.getAttribute('aria-expanded')).toBe('true');
+  await click(expand);
+  expect(host.querySelectorAll('.ukeire-list > li:not([hidden])')).toHaveLength(3);
+  expect(localStorage.getItem(STORAGE_KEY)).toBe(before);
+});
+
+it('hides answer information before answering and retains answer-tab adjustments without duplicate attempts', async () => {
+  const data = seed();
+  data.problems = [data.problems[0]!];
+  data.problems[0]!.answerEnabled = false;
+  data.problems[0]!.acceptedDiscards = [];
+  data.problems[0]!.explanation = '回答後だけの解説';
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  await mount(<TestPage />);
+  await click(button('1 問でテスト開始'));
+  expect(host.querySelector('.ukeire-panel')).toBeNull();
+  expect(host.querySelector('#answer-view-panel-notes')).toBeNull();
+  expect(host.textContent).not.toContain('回答後だけの解説');
+  await click(button('解説を見る'));
+  expect(host.querySelector<HTMLDivElement>('#answer-view-panel-notes')!.hidden).toBe(false);
+  expect(host.textContent).toContain('回答後だけの解説');
+  await click(button('受入れ'));
+  const remaining = await adjustFirstRemaining();
+  await click(button('解説'));
+  await click(button('受入れ'));
+  expect(remaining.value).toBe('0');
+  expect(button('結果を見る').closest('[role="tabpanel"]')).toBeNull();
+  expect(JSON.parse(localStorage.getItem(STORAGE_KEY)!).attempts).toHaveLength(1);
+  await click(button('結果を見る'));
+  expect(host.querySelector('.ukeire-panel')).toBeNull();
+  expect(JSON.parse(localStorage.getItem(STORAGE_KEY)!).attempts).toHaveLength(1);
 });

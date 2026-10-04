@@ -9,6 +9,8 @@ import { TestPage } from '@/features/test/TestPage';
 import { decodeSharePayload } from '@/domain/share';
 import { STORAGE_KEY, type Store } from '@/domain/types';
 import { UkeirePanel } from './UkeirePanel';
+import { analyzeHand } from '@/domain/ukeire';
+import { tileLabel, tileSortKey } from '@/domain/tiles';
 import { parseHandNotation } from '@/domain/parse';
 
 let host: HTMLDivElement;
@@ -207,12 +209,13 @@ describe('ukeire UI and existing study flows (jsdom; not a layout/browser test)'
     if (!parsed.ok) throw new Error('fixture');
     await act(async () => root.render(<UkeirePanel concealed={parsed.tiles} drawn={null} melds={[]} doraIndicators={[]} />));
     const row = (name: string) => [...host.querySelectorAll('.ukeire-list > li')].find((el) => el.querySelector('.ukeire-discard')!.getAttribute('aria-label') === `${name}を切る`)!;
-    const initialShanten = [...host.querySelectorAll('.ukeire-row__heading > strong')].map(el=>el.textContent);
+    const shantens = () => Object.fromEntries([...host.querySelectorAll('.ukeire-list > li')].map(el => [el.querySelector('.ukeire-discard')!.getAttribute('aria-label'), el.querySelector('strong')!.textContent]));
+    const initialShanten = shantens();
     await editRemaining('三索','0'); await editRemaining('六索','1');
     expect(row('赤五索').textContent).toContain('1種・1枚');
     expect(row('五索').textContent).toContain('1種・1枚');
     expect(host.querySelector('input[aria-label="赤五索の残枚数"]')).toBeNull();
-    expect([...host.querySelectorAll('.ukeire-row__heading > strong')].map(el=>el.textContent)).toEqual(initialShanten);
+    expect(shantens()).toEqual(initialShanten);
   });
 
   it('keeps the same session on reordering/re-render and resets on indicators, drawn and problem changes', async () => {
@@ -287,6 +290,36 @@ describe('ukeire UI and existing study flows (jsdom; not a layout/browser test)'
     await click(byText('全消去'));
     expect(toggle().disabled).toBe(true);
     expect(host.querySelector('.remaining-panel')).toBeNull();
+  });
+
+  it('shows the three largest remaining totals first, breaks ties by tile order and expands all candidates', async () => {
+    const parsed = parseHandNotation('123m123p123s405s77z');
+    if (!parsed.ok) throw new Error('fixture');
+    const input = { concealed: parsed.tiles, drawn: null, melds: [], doraIndicators: [] };
+    const expected = analyzeHand(input);
+    if (expected.status !== 'ready') throw new Error('fixture');
+    const ranked = [...expected.discards].sort((a, b) => b.total - a.total || tileSortKey(a.discard) - tileSortKey(b.discard));
+    await act(async () => root.render(<UkeirePanel {...input} />));
+    const visibleRows = () => [...host.querySelectorAll<HTMLElement>('.ukeire-list > li')].filter(row => !row.hidden);
+    expect(visibleRows().map(row => row.querySelector('.ukeire-discard')!.getAttribute('aria-label'))).toEqual(ranked.slice(0, 3).map(row => `${tileLabel(row.discard)}を切る`));
+    expect(host.querySelector('.ukeire-order')!.textContent).toBe('枚数順');
+    const expand = host.querySelector<HTMLElement>('.ukeire-expand')!;
+    await click(expand);
+    expect(visibleRows()).toHaveLength(ranked.length);
+    expect(expand.getAttribute('aria-expanded')).toBe('true');
+    for (const row of visibleRows()) {
+      const name = row.querySelector('.ukeire-discard')!.getAttribute('aria-label');
+      const value = ranked.find(item => `${tileLabel(item.discard)}を切る` === name)!;
+      expect(!!row.querySelector('.ukeire-retreat')).toBe(value.shanten > expected.currentShanten);
+    }
+    await click(expand);
+    expect(visibleRows()).toHaveLength(3);
+    await editRemaining('三索', '0');
+    const totals = visibleRows().map(row => Number(row.querySelector('.ukeire-total')!.textContent!.match(/・(\d+)枚/)![1]));
+    expect(totals).toEqual([...totals].sort((a, b) => b - a));
+    await click(expand);
+    await act(async () => root.render(<UkeirePanel {...input} sessionKey="another" />));
+    expect(visibleRows()).toHaveLength(3);
   });
 
   it('keeps only compact ukeire data and plain tenpai labels', async () => {

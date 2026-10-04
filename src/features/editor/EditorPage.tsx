@@ -419,10 +419,10 @@ export function EditorPage() {
           <button type="button" className="btn" onClick={undo} disabled={!history.length}>
             戻す
           </button>
-          <button type="button" className="btn btn-danger" onClick={clearAll}>
-            全消去
-          </button>
-          <RemainingButton session={ukeire} />
+          <span className="tile-actions__remaining-group">
+            <button type="button" className="btn btn-danger" onClick={clearAll}>全消去</button>
+            <RemainingButton session={ukeire} />
+          </span>
           <span className="count-inline">{countLabel}</span>
         </div>
 

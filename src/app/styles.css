@@ -1460,3 +1460,8 @@ html { scroll-padding-top: 74px; scroll-padding-bottom: calc(var(--nav-h) + var(
   .tile-palette__row { grid-template-columns: repeat(10, minmax(44px, 1fr)); }
   .tile-palette__row--honors { grid-template-columns: repeat(7, minmax(44px, 1fr)); max-width: 70%; }
 }
+.ukeire-order { margin: 4px 0 0; color: var(--muted); font-size: 0.75rem; }
+.ukeire-retreat { padding: 1px 5px; border-radius: var(--r-sm); color: var(--warn); background: var(--banner-bg); font-size: 0.7rem; }
+.ukeire-expand { width: 100%; min-height: 44px; margin-top: 8px; font-size: 0.85rem; }
+
+.tile-actions__remaining-group { display: inline-flex; flex-wrap: nowrap; gap: 6px; }
