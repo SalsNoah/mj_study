@@ -1,10 +1,12 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { clearImportDraft, peekImportDraft, setPendingShot } from '@/features/import/draft';
 import { useApp } from '@/app/store';
 import { HandView } from '@/components/HandView';
 import { TilePalette } from '@/components/TilePalette';
 import { RemainingButton, RemainingSettings, UkeireResults } from '@/components/UkeirePanel';
+import { useWideLayout } from '@/components/useWideLayout';
+import { parseScoreInput, scoreEntryFromValue } from '@/domain/scoreInput';
 import { useUkeireSession } from '@/components/useUkeireSession';
 import { WanpaiDora } from '@/components/WanpaiDora';
 import { contextSummary } from '@/domain/context';
@@ -44,6 +46,9 @@ const INPUT_TABS: Array<{ key: Target; label: string; meldType?: MeldType }> = [
   { key: 'meld', label: '加槓子', meldType: 'addedKan' },
 ];
 
+const SCORE_FIELDS = [['east', '東'], ['south', '南'], ['west', '西'], ['north', '北']] as const;
+type ScoreKey = typeof SCORE_FIELDS[number][0];
+
 const ROUND_OPTS: Array<{ value: Wind; label: string }> = [
   { value: '1z', label: '東' },
   { value: '2z', label: '南' },
@@ -77,6 +82,7 @@ function initialHand(existing?: Problem): TileCode[] {
 
 export function EditorPage() {
   const { id } = useParams();
+  const wideLayout = useWideLayout();
   const isNew = !id || id === 'new';
   const navigate = useNavigate();
   const { store, saveProblem, upsertTag } = useApp();
@@ -104,6 +110,12 @@ export function EditorPage() {
   const [tagIds, setTagIds] = useState<string[]>(existing?.tagIds ?? []);
   const [tagInput, setTagInput] = useState('');
   const [context, setContext] = useState(imported?.context ?? existing?.context ?? (isNew ? initialContext() : emptyContext()));
+  const [exactScores, setExactScores] = useState(false);
+  const scoreFields = useRef<Partial<Record<ScoreKey, HTMLInputElement | null>>>({});
+  const [scoreInputs, setScoreInputs] = useState(() => ({
+    east: scoreEntryFromValue(context.scores.east), south: scoreEntryFromValue(context.scores.south),
+    west: scoreEntryFromValue(context.scores.west), north: scoreEntryFromValue(context.scores.north),
+  }));
   const [attachments, setAttachments] = useState(existing?.attachments ?? []);
   const [sourceUrl, setSourceUrl] = useState(existing?.sourceUrl ?? '');
   const [dirty, setDirty] = useState(!!imported);
@@ -303,6 +315,10 @@ export function EditorPage() {
   ]);
 
   const save = () => {
+    if (SCORE_FIELDS.some(([key]) => scoreInputs[key].error)) {
+      setError('点数に未反映の入力があります。修正してから保存してください。');
+      return;
+    }
     const issues = validateProblem(draftProblem);
     setWarns(issues.filter((i) => i.level === 'warn').map((i) => i.message));
     if (hasErrors(issues)) {
@@ -353,46 +369,48 @@ export function EditorPage() {
     }
   };
 
+  const changeScore = (key: ScoreKey, draft: string) => {
+    const mode = scoreInputs[key].mode;
+    const parsed = parseScoreInput(draft, mode);
+    setScoreInputs((previous) => ({ ...previous, [key]: { draft, mode, error: parsed.ok ? null : parsed.error } }));
+    if (parsed.ok) setContext((previous) => ({ ...previous, scores: { ...previous.scores, [key]: parsed.value } }));
+    setError(null);
+    mark();
+  };
+  const normalizeScore = (key: ScoreKey) => {
+    const parsed = parseScoreInput(scoreInputs[key].draft, scoreInputs[key].mode);
+    if (parsed.ok) setScoreInputs((previous) => ({ ...previous, [key]: scoreEntryFromValue(parsed.value, exactScores) }));
+  };
+  const resetScoreDraft = (key: ScoreKey) => {
+    setScoreInputs((previous) => ({ ...previous, [key]: scoreEntryFromValue(context.scores[key], exactScores) }));
+    setError(null);
+    scoreFields.current[key]?.focus();
+  };
+  const adoptExactScore = (key: ScoreKey) => {
+    const parsed = parseScoreInput(scoreInputs[key].draft, 'exact');
+    if (!parsed.ok || parsed.value === null) return;
+    setContext((previous) => ({ ...previous, scores: { ...previous.scores, [key]: parsed.value } }));
+    setScoreInputs((previous) => ({ ...previous, [key]: scoreEntryFromValue(parsed.value, exactScores) }));
+    setError(null);
+    mark();
+    scoreFields.current[key]?.focus();
+  };
+  const toggleScoreMode = () => {
+    if (SCORE_FIELDS.some(([key]) => scoreInputs[key].error)) return;
+    const next = !exactScores;
+    setExactScores(next);
+    setScoreInputs({
+      east: scoreEntryFromValue(context.scores.east, next), south: scoreEntryFromValue(context.scores.south, next),
+      west: scoreEntryFromValue(context.scores.west, next), north: scoreEntryFromValue(context.scores.north, next),
+    });
+  };
+
   const countLabel = `${totalCount}/${totalMax}枚${kanCount > 0 ? `（槓+${kanCount}）` : ''}${
     standardTileCount({ concealed, drawn: null, melds }) === 14 ? ' ✓' : ''
   }`;
 
-  return (
-    <div className="page page--editor">
-      <header className="page-header page-header--compact">
-        <h1>{isNew ? '問題を作成' : '問題を編集'}</h1>
-        {isNew && (
-          <label className="btn btn-sm shot-button">
-            スクショから
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                e.target.value = '';
-                if (!f) return;
-                setPendingShot(f);
-                navigate('/import');
-              }}
-            />
-          </label>
-        )}
-        <button type="button" className="btn btn-primary editor-save" onClick={save}>保存</button>
-      </header>
-      {imported && (
-        <p className="ok import-note">
-          スクショから読み取りました。違うところがあれば直して保存してください。
-          {imported.notes?.map((n) => <span key={n}> {n}</span>)}
-        </p>
-      )}
-
-      {warns.map((w) => (
-        <p key={w} className="warn">
-          {w}
-        </p>
-      ))}
-      {error && <p className="error" role="alert">{error}</p>}
-
+  const mainPane = (
+      <div key="main" className="editor-main">
       <section className="panel context-panel">
         <div className="ctx-toolbar" aria-label="対局条件">
           <div className="seg" role="group" aria-label="場風">
@@ -504,35 +522,38 @@ export function EditorPage() {
             <span className="ctx-mini__unit">供託</span>
           </label>
         </div>
-        <div className="ctx-scores" aria-label="点数状況">
-          <span className="ctx-scores__label">点数</span>
-          {([
-            ['east', '東'],
-            ['south', '南'],
-            ['west', '西'],
-            ['north', '北'],
-          ] as const).map(([k, label]) => (
-            <label key={k} className="ctx-score">
+        <div className={`ctx-scores${SCORE_FIELDS.some(([key]) => scoreInputs[key].mode === 'exact' || scoreInputs[key].draft.startsWith('-') || scoreInputs[key].error) ? ' ctx-scores--wide' : ''}`} aria-label="点数状況">
+          <div className="ctx-scores__heading">
+            <span className="ctx-scores__label">点数</span>
+            <button type="button" className="btn btn-sm" onClick={toggleScoreMode} aria-pressed={exactScores} title={SCORE_FIELDS.some(([key]) => !!scoreInputs[key].error) ? '未反映の入力を修正してください' : '端数や大きい点数をそのまま入力'} disabled={SCORE_FIELDS.some(([key]) => !!scoreInputs[key].error)}>{exactScores ? '3桁＋00に戻す' : '詳細入力'}</button>
+          </div>
+          {SCORE_FIELDS.map(([key, label]) => (
+            <label key={key} className="ctx-score">
               <span>{label}</span>
-              <input
-                type="number"
-                inputMode="numeric"
-                placeholder="—"
-                value={context.scores[k] ?? ''}
-                onChange={(e) => {
-                  setContext({
-                    ...context,
-                    scores: {
-                      ...context.scores,
-                      [k]: e.target.value === '' ? null : Number(e.target.value),
-                    },
-                  });
-                  mark();
-                }}
-              />
+              <span className="score-number">
+                <input ref={(node) => { scoreFields.current[key] = node; }} type="text" inputMode={scoreInputs[key].mode === 'hundreds' ? 'numeric' : 'text'} placeholder="—"
+                  aria-label={scoreInputs[key].mode === 'hundreds' ? `${label}の点数（百点単位）` : `${label}の点数（そのまま）`}
+                  aria-invalid={!!scoreInputs[key].error}
+                  aria-describedby={scoreInputs[key].error ? `score-${key}-error` : undefined}
+                  value={scoreInputs[key].draft} onChange={(event) => changeScore(key, event.target.value)} onBlur={() => normalizeScore(key)} />
+                <span className="score-suffix" aria-hidden="true" data-empty={scoreInputs[key].draft === '' || undefined}>{scoreInputs[key].mode === 'hundreds' ? '00' : '点'}</span>
+              </span>
             </label>
           ))}
         </div>
+        {SCORE_FIELDS.map(([key, label]) => {
+          const entry = scoreInputs[key];
+          if (!entry.error) return null;
+          const parsed = parseScoreInput(entry.draft, 'exact');
+          const exactValue = parsed.ok ? parsed.value : null;
+          return <div key={key} className="error score-input-error" id={`score-${key}-error`} role="alert">
+            <p>{label}：{entry.error} 入力は未反映です。</p>
+            <div className="score-error-actions">
+              {entry.mode === 'hundreds' && exactValue !== null && <button type="button" className="btn" aria-label={`${label}の点数を${exactValue.toLocaleString()}点として反映`} onClick={() => adoptExactScore(key)}>{exactValue.toLocaleString()}点として反映</button>}
+              <button type="button" className="btn" aria-label={`${label}の未反映入力を戻す`} onClick={() => resetScoreDraft(key)}>{context.scores[key] === null ? '未設定に戻す' : `${context.scores[key]!.toLocaleString()}点に戻す`}</button>
+            </div>
+          </div>;
+        })}
       </section>
 
       <section className="panel tile-input">
@@ -631,6 +652,10 @@ export function EditorPage() {
         {error && target === 'meld' && <p className="error">{error}</p>}
       </section>
 
+      </div>
+  );
+  const toolsPane = (
+      <aside key="tools" className="editor-tools" aria-label="受入れと補足情報">
         <UkeireResults session={ukeire} defaultOpen={false} />
       <details className="details panel editor-notes" open={notesOpen}>
         <summary onClick={(event) => { event.preventDefault(); setNotesOpen((open) => !open); }}>解説・メモなど</summary>
@@ -786,6 +811,48 @@ export function EditorPage() {
       </details>
 
       </details>
+      </aside>
+  );
+
+  return (
+    <div className="page page--editor">
+      <header className="page-header page-header--compact">
+        <h1>{isNew ? '問題を作成' : '問題を編集'}</h1>
+        {isNew && (
+          <label className="btn btn-sm shot-button">
+            スクショから
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                e.target.value = '';
+                if (!f) return;
+                setPendingShot(f);
+                navigate('/import');
+              }}
+            />
+          </label>
+        )}
+        <button type="button" className="btn btn-primary editor-save" onClick={save}>保存</button>
+      </header>
+      {imported && (
+        <p className="ok import-note">
+          スクショから読み取りました。違うところがあれば直して保存してください。
+          {imported.notes?.map((n) => <span key={n}> {n}</span>)}
+        </p>
+      )}
+
+      {warns.map((w) => (
+        <p key={w} className="warn">
+          {w}
+        </p>
+      ))}
+      {error && <p className="error" role="alert">{error}</p>}
+
+      <div className="editor-workspace">
+        {wideLayout ? [toolsPane, mainPane] : [mainPane, toolsPane]}
+      </div>
     </div>
   );
 }

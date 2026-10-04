@@ -292,17 +292,17 @@ describe('ukeire UI and existing study flows (jsdom; not a layout/browser test)'
     expect(host.querySelector('.remaining-panel')).toBeNull();
   });
 
-  it('shows the three largest remaining totals first, breaks ties by tile order and expands all candidates', async () => {
+  it('shows the largest remaining totals within minimal shanten first, breaks ties by tile order and expands all candidates', async () => {
     const parsed = parseHandNotation('123m123p123s405s77z');
     if (!parsed.ok) throw new Error('fixture');
     const input = { concealed: parsed.tiles, drawn: null, melds: [], doraIndicators: [] };
     const expected = analyzeHand(input);
     if (expected.status !== 'ready') throw new Error('fixture');
-    const ranked = [...expected.discards].sort((a, b) => b.total - a.total || tileSortKey(a.discard) - tileSortKey(b.discard));
+    const ranked = [...expected.discards].sort((a, b) => a.shanten - b.shanten || b.total - a.total || tileSortKey(a.discard) - tileSortKey(b.discard));
     await act(async () => root.render(<UkeirePanel {...input} />));
     const visibleRows = () => [...host.querySelectorAll<HTMLElement>('.ukeire-list > li')].filter(row => !row.hidden);
     expect(visibleRows().map(row => row.querySelector('.ukeire-discard')!.getAttribute('aria-label'))).toEqual(ranked.slice(0, 3).map(row => `${tileLabel(row.discard)}を切る`));
-    expect(host.querySelector('.ukeire-order')!.textContent).toBe('枚数順');
+    expect(host.querySelector('.ukeire-order')!.textContent).toBe('最小シャンテン内・枚数順');
     const expand = host.querySelector<HTMLElement>('.ukeire-expand')!;
     await click(expand);
     expect(visibleRows()).toHaveLength(ranked.length);
@@ -334,6 +334,31 @@ describe('ukeire UI and existing study flows (jsdom; not a layout/browser test)'
     expect(host.textContent).not.toMatch(/（0）|理論残枚数|四麻|通常形|七対子|国士|画面内|山残枚数|手動設定中|最善打牌|13枚相当/);
     await click(byText('残枚数'));
     expect(host.querySelector('.remaining-panel .hint')).toBeNull();
+  });
+
+  it('prefers tenpai even when a retreat has 32 effective tiles, and keeps that group after adjustment', async () => {
+    const parsed = parseHandNotation('111234567m123p12s');
+    if (!parsed.ok) throw new Error('fixture');
+    await act(async () => root.render(<UkeirePanel concealed={parsed.tiles} drawn={null} melds={[]} doraIndicators={[]} />));
+    const visible = () => [...host.querySelectorAll<HTMLElement>('.ukeire-list > li')].filter(row => !row.hidden);
+    const names = () => visible().map(row => row.querySelector('.ukeire-discard')!.getAttribute('aria-label'));
+    expect(names()).toEqual(['一萬を切る','四萬を切る','七萬を切る']);
+    const retreat = [...host.querySelectorAll<HTMLElement>('.ukeire-list > li')].find(row => row.querySelector('.ukeire-discard')!.getAttribute('aria-label') === '二萬を切る')!;
+    expect(retreat.hidden).toBe(true); expect(retreat.textContent).toContain('32枚');
+    await editRemaining('三索','0');
+    expect(names()).toEqual(['一索を切る','二索を切る','一萬を切る']);
+    expect(visible().every(row => row.querySelector('strong')!.textContent === 'テンパイ')).toBe(true);
+    await click(host.querySelector<HTMLElement>('.ukeire-expand')!);
+    expect(retreat.hidden).toBe(false); expect(host.querySelector('.ukeire-order')!.textContent).toBe('シャンテン順・枚数順');
+  });
+  it('never fills a short minimum-shanten group with worse candidates', async () => {
+    const parsed = parseHandNotation('123m456m789p23s155z');
+    if (!parsed.ok) throw new Error('fixture');
+    await act(async () => root.render(<UkeirePanel concealed={parsed.tiles} drawn={null} melds={[]} doraIndicators={[]} />));
+    const visible = () => [...host.querySelectorAll<HTMLElement>('.ukeire-list > li')].filter(row => !row.hidden);
+    expect(visible()).toHaveLength(1); expect(visible()[0]!.querySelector('.ukeire-discard')!.getAttribute('aria-label')).toBe('東を切る');
+    await click(host.querySelector<HTMLElement>('.ukeire-expand')!); expect(visible()).toHaveLength(13);
+    await click(host.querySelector<HTMLElement>('.ukeire-expand')!); expect(visible()).toHaveLength(1);
   });
 
 });

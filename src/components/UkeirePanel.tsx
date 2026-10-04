@@ -47,7 +47,9 @@ export function UkeireResults({ session, showSettings = false, defaultOpen = tru
   const expanded = expansion.key === session.key && expansion.open;
   if (expansion.key !== session.key) setExpansion({ key: session.key, open: false });
   const ranked = analysis.status === 'ready'
-    ? [...analysis.discards].sort((a, b) => b.total - a.total || tileSortKey(a.discard) - tileSortKey(b.discard)) : [];
+    ? [...analysis.discards].sort((a, b) => a.shanten - b.shanten || b.total - a.total || tileSortKey(a.discard) - tileSortKey(b.discard)) : [];
+  const minimumShanten = ranked[0]?.shanten;
+  const previewCount = Math.min(3, ranked.filter((row) => row.shanten === minimumShanten).length);
   return (
     <details className="panel ukeire-panel" open={defaultOpen}>
       <summary className="section-title">受入れ</summary>
@@ -62,10 +64,10 @@ export function UkeireResults({ session, showSettings = false, defaultOpen = tru
           <p className="ukeire-current"><strong>{shantenLabel(analysis.currentShanten)}</strong></p>
           {analysis.mode === 'discard' ? (
             <>
-            <p className="ukeire-order">枚数順</p>
+            <p className="ukeire-order">{expanded ? 'シャンテン順・枚数順' : '最小シャンテン内・枚数順'}</p>
             <ol className="ukeire-list" aria-label="打牌別の受入れ">
               {ranked.map((row, index) => (
-                <li className="ukeire-row" key={row.discard} hidden={!expanded && index >= 3}>
+                <li className="ukeire-row" key={row.discard} hidden={!expanded && index >= previewCount}>
                   <div className="ukeire-row__heading">
                     <span className="ukeire-discard" aria-label={`${tileLabel(row.discard)}を切る`}><span>打</span><TileFace code={row.discard} size={30} /></span>
                     <strong>{shantenLabel(row.shanten)}</strong>
@@ -76,9 +78,9 @@ export function UkeireResults({ session, showSettings = false, defaultOpen = tru
                 </li>
               ))}
             </ol>
-            {ranked.length > 3 && <button type="button" className="btn ukeire-expand" aria-expanded={expanded}
+            {ranked.length > previewCount && <button type="button" className="btn ukeire-expand" aria-expanded={expanded}
               onClick={() => setExpansion({ key: session.key, open: !expanded })}>
-              {expanded ? '3候補に戻す' : `すべて表示（${ranked.length}候補）`}
+              {expanded ? '上位候補に戻す' : `すべて表示（${ranked.length}候補）`}
             </button>}
             </>
           ) : analysis.current && (
