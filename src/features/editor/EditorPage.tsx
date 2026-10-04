@@ -4,6 +4,7 @@ import { clearImportDraft, peekImportDraft, setPendingShot } from '@/features/im
 import { useApp } from '@/app/store';
 import { HandView } from '@/components/HandView';
 import { TilePalette } from '@/components/TilePalette';
+import { UkeirePanel } from '@/components/UkeirePanel';
 import { WanpaiDora } from '@/components/WanpaiDora';
 import { contextSummary } from '@/domain/context';
 import { createId, nowIso } from '@/domain/ids';
@@ -597,6 +598,8 @@ export function EditorPage() {
           maxLength={LIMITS.title}
         />
       </label>
+
+      <UkeirePanel sessionKey={existing?.id ?? 'new'} concealed={concealed} drawn={null} melds={melds} doraIndicators={doraIndicators} />
 
       <section className="panel">
         <label className="check">

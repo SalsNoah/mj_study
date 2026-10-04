@@ -2,6 +2,7 @@ import { useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useApp } from '@/app/store';
 import { HandBoard } from '@/components/HandBoard';
+import { UkeirePanel } from '@/components/UkeirePanel';
 import type { TileMark } from '@/components/HandView';
 import { createId, nowIso } from '@/domain/ids';
 import {
@@ -395,6 +396,7 @@ export function TestPage() {
           </div>
         </section>
       )}
+      {phase === 'answered' && <UkeirePanel {...current} sessionKey={current.id} />}
       {error && <p className="error">{error}</p>}
     </div>
   );
