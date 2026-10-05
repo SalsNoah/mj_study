@@ -102,3 +102,70 @@ describe('calendar-aligned record series', () => {
     expect(() => buildRecordSeries(daily, 'daily', new Date('invalid'))).toThrow(RangeError);
   });
 });
+
+describe('material study calendar series', () => {
+  const event = (id: string, date: Date | string) => ({
+    id, materialId: 'material', at: typeof date === 'string' ? date : date.toISOString(),
+    title: '学習時の教材名', url: 'https://example.com/lesson', comment: '学習時のコメント',
+  });
+
+  it.each(RECORD_PERIODS)('keeps zero/one/many and duplicate events independent of problem counts in $value', ({ value }) => {
+    const today = new Date(2026, 9, 5, 12);
+    const events = Array.from({ length: 5 }, (_, index) => event(String(index), today));
+    for (const history of [undefined, [events[0]!], [...events, events[0]!]]) {
+      const series = buildRecordSeries({ '2026-10-05': log(2, 3) }, value, today, history);
+      expect(series.points.at(-1)).toMatchObject({ tested: 2, confirmed: 3, materials: history ? history.length === 1 ? 1 : 5 : 0 });
+      expect(series.points.slice(0, -1).every(({ materials }) => materials === 0)).toBe(true);
+    }
+  });
+
+  it('uses event local dates, includes boundary days and excludes future and out-of-range dates', () => {
+    const events = [
+      event('before', new Date(2026, 8, 21, 23, 59)), event('first', new Date(2026, 8, 22)),
+      event('today', new Date(2026, 9, 5, 23, 59)), event('after', new Date(2026, 9, 6)),
+      event('invalid', 'invalid'),
+    ];
+    const series = buildRecordSeries(undefined, 'daily', new Date(2026, 9, 5), events);
+    expect(series.points[0]).toMatchObject({ key: '2026-09-22', materials: 1 });
+    expect(series.points.at(-1)).toMatchObject({ key: '2026-10-05', materials: 1 });
+    expect(series.points.reduce((sum, { materials }) => sum + materials, 0)).toBe(2);
+  });
+
+  it('uses Monday weeks and calendar months across year and leap-day boundaries', () => {
+    const events = [
+      event('leap', new Date(2024, 1, 29, 23, 59)), event('march', new Date(2024, 2, 1)),
+      event('sunday', new Date(2024, 11, 29, 23, 59)), event('monday', new Date(2024, 11, 30)),
+      event('newyear', new Date(2025, 0, 1)), event('future', new Date(2025, 0, 2)),
+    ];
+    const weekly = buildRecordSeries(undefined, 'weekly', new Date(2025, 0, 1), events);
+    expect(weekly.points.at(-2)).toMatchObject({ start: '2024-12-23', materials: 1 });
+    expect(weekly.points.at(-1)).toMatchObject({ start: '2024-12-30', materials: 2 });
+    const monthly = buildRecordSeries(undefined, 'monthly', new Date(2025, 0, 1), events);
+    expect(monthly.points[0]).toMatchObject({ start: '2024-02-01', materials: 1 });
+    expect(monthly.points[1]).toMatchObject({ start: '2024-03-01', materials: 1 });
+    expect(monthly.points.at(-2)).toMatchObject({ start: '2024-12-01', materials: 2 });
+    expect(monthly.points.at(-1)).toMatchObject({ start: '2025-01-01', materials: 1 });
+  });
+
+  it.each([
+    { now: new Date(2024, 2, 12), instants: ['2024-03-09T23:30:00', '2024-03-10T01:30:00', '2024-03-10T03:30:00', '2024-03-11T00:30:00'] },
+    { now: new Date(2024, 10, 5), instants: ['2024-11-02T23:30:00', '2024-11-03T01:30:00', '2024-11-03T03:30:00', '2024-11-04T00:30:00'] },
+  ])('keeps real local days through DST changes: $instants', ({ now, instants }) => {
+    const events = instants.map((instant, index) => event(String(index), new Date(instant)));
+    for (const { value } of RECORD_PERIODS) {
+      const series = buildRecordSeries(undefined, value, now, events);
+      expect(series.points.reduce((sum, point) => sum + point.materials, 0)).toBe(4);
+    }
+    const series = buildRecordSeries(undefined, 'daily', now, events);
+    expect(series.points.slice(-4).map(({ materials }) => materials)).toEqual([1, 2, 1, 0]);
+  });
+
+  it('treats an offset timestamp as an instant rather than copying its date prefix', () => {
+    const at = '2026-10-04T23:30:00-10:00';
+    const date = new Date(at);
+    const today = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const series = buildRecordSeries(undefined, 'daily', today, [event('offset', at)]);
+    expect(series.points.at(-1)!.materials).toBe(1);
+    expect(series.points.slice(0, -1).every(({ materials }) => materials === 0)).toBe(true);
+  });
+});

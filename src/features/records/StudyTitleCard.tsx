@@ -2,8 +2,8 @@ import { useId } from 'react';
 import { BadgeIcon } from '@/components/BadgeIcon';
 import type { BadgeStatus } from '@/domain/records';
 
-export function StudyTitleCard({ status, total, label = '現在の称号', definition = '学習量はテストと確認の合計回数' }: {
-  status: BadgeStatus; total: number; label?: string; definition?: string;
+export function StudyTitleCard({ status, total, label = '現在の称号', definition = '学習量はテストと確認の合計回数', totalLabel = '累計学習量' }: {
+  status: BadgeStatus; total: number; label?: string; definition?: string; totalLabel?: string;
 }) {
   const titleId = useId();
   const number = (value: number) => value.toLocaleString('ja-JP');
@@ -12,7 +12,7 @@ export function StudyTitleCard({ status, total, label = '現在の称号', defin
       <BadgeIcon level={status.current.level} size={68} />
       <div><p className="records-title__eyebrow">{label}</p><h2 id={titleId}>{status.current.name}</h2></div>
     </div>
-    <p className="records-title__total"><span>累計学習量</span><strong>{number(total)}<small>回</small></strong></p>
+    <p className="records-title__total"><span>{totalLabel}</span><strong>{number(total)}<small>回</small></strong></p>
     <div className="records-title__progress">
       {status.next ? <>
         <div className="records-title__next"><p>次の称号 <span>{status.next.name}</span></p><p>あと <strong>{number(status.remaining)}</strong> 回</p></div>

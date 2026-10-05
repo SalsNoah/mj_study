@@ -30,6 +30,8 @@ export function SettingsPage() {
     text: string;
     problems: number;
     images: number;
+    materials: number;
+    materialEvents: number;
   } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -51,7 +53,7 @@ export function SettingsPage() {
     }
     const text = await file.text();
     try {
-      const parsed = JSON.parse(text) as { problems?: unknown[] };
+      const parsed = JSON.parse(text) as { problems?: unknown[]; materials?: unknown[]; materialStudyEvents?: unknown[] };
       const problems = Array.isArray(parsed.problems) ? parsed.problems.length : 0;
       const images = Array.isArray(parsed.problems)
         ? parsed.problems.reduce((n: number, p: unknown) => {
@@ -59,7 +61,7 @@ export function SettingsPage() {
             return n + (Array.isArray(atts) ? atts.length : 0);
           }, 0)
         : 0;
-      setImportPreview({ text, problems, images });
+      setImportPreview({ text, problems, images, materials: Array.isArray(parsed.materials) ? parsed.materials.length : 0, materialEvents: Array.isArray(parsed.materialStudyEvents) ? parsed.materialStudyEvents.length : 0 });
     } catch {
       setMsg('JSONの解析に失敗しました');
     }
@@ -131,7 +133,7 @@ export function SettingsPage() {
       <div {...viewPanelProps('settings-view', 'data', view)}>
       <section className="panel">
         <h2 className="section-title">このブラウザのデータ</h2>
-        <p>{store.problems.length} 問・約 {(sizeBytes / (1024 * 1024)).toFixed(2)} MiB</p>
+        <p>{store.problems.length} 問{(store.materials?.length ?? 0) > 0 && `・教材 ${store.materials!.length} 件`}・約 {(sizeBytes / (1024 * 1024)).toFixed(2)} MiB</p>
         <p className="hint">自動同期はありません。ブラウザのデータ削除で消えます。</p>
       </section>
       <section className="panel">
@@ -155,6 +157,7 @@ export function SettingsPage() {
           <div className="import-preview">
             <p>
               問題 {importPreview.problems} 件 / 画像 {importPreview.images} 枚
+              {(importPreview.materials > 0 || importPreview.materialEvents > 0) && <><br />教材 {importPreview.materials} 件 / 教材の学習記録 {importPreview.materialEvents} 件</>}
             </p>
             <div className="btn-row">
               <button

@@ -1,4 +1,6 @@
-import type { DailyLog } from './types';
+import { uniqueMaterialStudyEvents } from './materials';
+import { dayKey } from './records';
+import type { DailyLog, MaterialStudyEvent } from './types';
 
 export type RecordPeriod = 'daily' | 'weekly' | 'monthly';
 
@@ -9,6 +11,7 @@ export const RECORD_PERIODS: ReadonlyArray<{ value: RecordPeriod; label: string;
 ];
 
 export type RecordPoint = DailyLog & {
+  materials: number;
   key: string;
   start: string;
   end: string;
@@ -68,6 +71,7 @@ export function buildRecordSeries(
   daily: Record<string, DailyLog> | undefined,
   period: RecordPeriod,
   today = new Date(),
+  materialStudyEvents?: readonly MaterialStudyEvent[],
 ): RecordSeries {
   if (!Number.isFinite(today.getTime())) throw new RangeError('Invalid current date');
   const end = calendarDate(today.getFullYear(), today.getMonth(), today.getDate());
@@ -85,7 +89,7 @@ export function buildRecordSeries(
     return {
       key: startKey, start: startKey, end: endKey, label,
       axisLabel: period === 'monthly' ? `${startDate.getUTCFullYear()}/${startDate.getUTCMonth() + 1}` : recordDateLabel(startKey, false),
-      tested: 0, confirmed: 0,
+      tested: 0, confirmed: 0, materials: 0,
     };
   });
   const byStart = new Map(points.map((point) => [point.key, point]));
@@ -97,6 +101,14 @@ export function buildRecordSeries(
       point.tested += log.tested;
       point.confirmed += log.confirmed;
     }
+  }
+  for (const event of uniqueMaterialStudyEvents(materialStudyEvents)) {
+    const instant = new Date(event.at);
+    if (!Number.isFinite(instant.getTime())) continue;
+    const date = parseDay(dayKey(instant));
+    if (!date || date < first || date > end) continue;
+    const point = byStart.get(calendarKey(periodStart(date, period)));
+    if (point) point.materials += 1;
   }
   return { period, start: calendarKey(first), end: calendarKey(end), points };
 }
