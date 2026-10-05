@@ -22,7 +22,11 @@
       // 本体の読み込み前に配色を決めて、起動時に別テーマの色が一瞬見えないようにする
       try {
         var t = localStorage.getItem('mahjong-study:theme');
-        if (t) document.documentElement.dataset.theme = t;
+        var colors = { normal: '#1B4D3E', cool: '#0B1118', cute: '#FBE3EE', dopa: '#090B18' };
+        if (Object.prototype.hasOwnProperty.call(colors, t)) {
+          document.documentElement.dataset.theme = t;
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', colors[t]);
+        }
       } catch (e) {}
     </script>
   </head>

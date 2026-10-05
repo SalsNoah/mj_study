@@ -234,9 +234,8 @@ try {
   await expect(page.locator('.hand-stage .hand-strip > *')).toHaveCount(14);
   await expect(page.locator('.hand-view__drawn')).toHaveCount(0);
   await page.locator('.detail-tools > summary').click();
-  const legacyPngDownload=page.waitForEvent('download');
-  await page.getByRole('button',{name:'PNG保存',exact:true}).click();
-  await (await legacyPngDownload).saveAs(`${evidence}legacy-unified-hand.png`);
+  await expect(page.getByRole('button',{name:'PNG保存',exact:true})).toHaveCount(0);
+  await expect(page.locator('.png-preview')).toHaveCount(0);
   await nav('学習帳');
   await page.locator('.problem-card').filter({ hasText: '正解あり検証用の問題' }).click();
   await expect(page.getByRole('button', { name: '正解・解説を表示', exact: true })).toBeVisible();

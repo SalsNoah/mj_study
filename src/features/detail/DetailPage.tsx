@@ -17,8 +17,8 @@ import {
   shareUrlTooLong,
   type ShareOptions,
 } from '@/domain/share';
-import { renderHandPng } from '@/export/renderTiles';
 import type { StudyState } from '@/domain/types';
+import { DuplicateProblemButton } from './DuplicateProblemButton';
 
 export function DetailPage() {
   const { id } = useParams();
@@ -44,7 +44,6 @@ export function DetailPage() {
   const [shareOpts, setShareOpts] = useState<ShareOptions>(DEFAULT_SHARE_OPTIONS);
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [shareMsg, setShareMsg] = useState<string | null>(null);
-  const [pngPreview, setPngPreview] = useState<string | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
 
   if (!problem) {
@@ -102,15 +101,6 @@ export function DetailPage() {
     setShareMsg(isLocalHost(window.location.hostname)
       ? 'localhost のURLは他者向け共有に使えません。静的ホストへデプロイしたURLを使ってください。'
       : null);
-  };
-
-  const onPng = async () => {
-    const { dataUrl, blob, filename } = await renderHandPng(problem);
-    setPngPreview(dataUrl);
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = filename;
-    a.click();
   };
 
   return (
@@ -259,20 +249,18 @@ export function DetailPage() {
       <details className="details panel detail-tools">
         <summary>共有・その他</summary>
       <div className="btn-row wrap">
-        <button
-          type="button"
-          className="btn"
-          onClick={() => {
+        <DuplicateProblemButton
+          key={problem.id}
+          title={problem.title}
+          onDuplicate={() => {
+            setMsg(null);
             const r = duplicateProblem(problem.id);
             if (r.ok) {
               const newest = r.store.problems[r.store.problems.length - 1];
               if (newest) navigate(`/problems/${newest.id}`);
             } else setMsg(r.reason);
           }}
-        >
-          複製
-        </button>
-        <button type="button" className="btn" onClick={onPng}>PNG保存</button>
+        />
         <button
           type="button"
           className="btn btn-danger"
@@ -341,13 +329,6 @@ export function DetailPage() {
 
       </details>
 
-      {pngPreview && (
-        <section className="panel">
-          <h2 className="section-title">PNGプレビュー</h2>
-          <img src={pngPreview} alt="牌姿PNG" className="png-preview" />
-          <p className="hint">ダウンロードできない場合はこの画像を長押しして保存してください。</p>
-        </section>
-      )}
       {msg && <p className="ok">{msg}</p>}
     </div>
   );

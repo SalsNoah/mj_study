@@ -56,7 +56,7 @@
 .page--records .records-title__complete { margin: 0; color: var(--records-ink); font-size: 0.82rem; }
 .page--records .records-history { padding: 14px; background: var(--records-paper); border-color: var(--records-rule); box-shadow: none; }
 .page--records .records-history__heading { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 10px; margin-bottom: 12px; }
-.page--records .records-history__heading h2 { margin: 0; font-size: 0.96rem; }
+.page--records .records-history__heading h2 { margin: 0; font-size: 1rem; line-height: 1.5; }
 .page--records .records-history__heading p { margin: 0; color: var(--records-muted); font-size: 0.75rem; }
 .page--records .records-history__heading strong { color: var(--records-ink); font-size: 0.85rem; }
 .page--records .view-tabs { margin-bottom: 14px; background: var(--records-wash); }
@@ -97,7 +97,7 @@
 .page--records .records-chart__x-axis > .is-last { transform: translateX(-100%); }
 .page--records .records-empty { margin: 0 0 12px; text-align: center; color: var(--records-muted); font-size: 0.75rem; }
 .page--records .records-values { border-top: 1px solid var(--records-rule); }
-.page--records .records-values > summary { min-height: 44px; padding: 12px 0 6px; color: var(--records-ink); cursor: pointer; font-size: 0.75rem; }
+.page--records .records-values > summary { min-height: 44px; padding: 12px 0 6px; color: var(--records-ink); font-size: .875rem; }
 .page--records .records-values table { width: 100%; table-layout: fixed; border-collapse: collapse; font-size: 0.75rem; font-variant-numeric: tabular-nums; }
 .page--records .records-values caption { padding: 4px 0 8px; text-align: left; color: var(--records-muted); font-size: 0.75rem; }
 .page--records .records-values th, .page--records .records-values td { padding: 8px 4px; overflow-wrap: anywhere; text-align: right; border-bottom: 1px solid var(--records-rule); }
@@ -124,7 +124,7 @@
 .page--records .records-material-history__comment { margin: 5px 0 0; font-size: 0.8rem; white-space: pre-wrap; }
 .page--records .records-material-history__entry a { display: inline-flex; align-items: center; min-height: 44px; gap: 4px; color: var(--records-ink); font-size: 0.78rem; }
 .page--records .records-material-history__empty { margin: 0; color: var(--records-muted); font-size: 0.8rem; }
-.page--records .records-material-history__older > summary { min-height: 44px; padding: 12px 0; border-top: 1px solid var(--records-rule); color: var(--records-ink); cursor: pointer; font-size: 0.8rem; }
+.page--records .records-material-history__older > summary { min-height: 44px; padding: 12px 0; border-top: 1px solid var(--records-rule); color: var(--records-ink); font-size: .875rem; }
 .page--records .records-material-history__older > summary:focus-visible, .page--records .records-material-history__entry a:focus-visible { outline: 2px solid var(--records-ink); outline-offset: 2px; }
 @media (min-width: 720px) {
   .page--records .records-titles { grid-template-columns: repeat(2, minmax(0, 1fr)); }

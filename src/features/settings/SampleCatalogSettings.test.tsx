@@ -64,3 +64,20 @@ it('labels a later legacy-only cleanup as deletion without promising new additio
   expect(onApply).toHaveBeenCalledWith(['old-1']);
   expect(host.textContent).toContain('未編集・未学習の問題を取り除き、旧問題を戻します');
 });
+
+it('selects all visible legacy candidates only on request, without applying the update', async () => {
+  const onApply = vi.fn(() => ({ ok: true as const }));
+  await act(async () => root.render(<SampleCatalogSettings preview={{ ...preview, candidates: [
+    { id: 'first', title: '旧問題A' }, { id: 'second', title: '旧問題B' },
+  ] }} backups={[]} backupError={null} onApply={onApply} onRestore={() => ({ ok: true })}
+    onExportBackup={() => ({ ok: true, text: '{}' })} />));
+  expect([...host.querySelectorAll<HTMLInputElement>('input')].every((input) => !input.checked)).toBe(true);
+  await act(async () => button('旧候補をまとめて選択').click());
+  expect([...host.querySelectorAll<HTMLInputElement>('input')].every((input) => input.checked)).toBe(true);
+  expect(onApply).not.toHaveBeenCalled();
+  await act(async () => button('選択を解除').click());
+  expect([...host.querySelectorAll<HTMLInputElement>('input')].every((input) => !input.checked)).toBe(true);
+  await act(async () => button('旧候補をまとめて選択').click());
+  await act(async () => button('旧2題を削除して10題を追加').click());
+  expect(onApply).toHaveBeenCalledWith(['first', 'second']);
+});

@@ -2,8 +2,7 @@ import { useRef, useState } from 'react';
 import { useApp } from '@/app/store';
 import { ViewTabs, viewPanelProps } from '@/components/ViewTabs';
 import { LIMITS } from '@/domain/types';
-import { getSampleUpdatePreview } from '@/data/sampleCatalog';
-import { SampleCatalogSettings } from './SampleCatalogSettings';
+import { SampleCatalogManager } from './SampleCatalogManager';
 import { THEMES, loadTheme, saveTheme, type ThemeId } from '@/app/theme';
 
 export function SettingsPage() {
@@ -15,10 +14,6 @@ export function SettingsPage() {
     exportJson,
     importJson,
     clearAll,
-    updateSampleCatalog,
-    restoreSampleCatalog,
-    listSampleCatalogBackups,
-    exportSampleCatalogSnapshot,
     renameTag,
     deleteTag,
     lastError,
@@ -67,9 +62,6 @@ export function SettingsPage() {
     }
   };
 
-  const samplePreview = getSampleUpdatePreview(store);
-  const sampleBackups = listSampleCatalogBackups();
-
   return (
     <div className="page page--settings">
       <header className="page-header page-header--compact">
@@ -97,10 +89,25 @@ export function SettingsPage() {
               type="button"
               role="radio"
               aria-checked={theme === t.id}
+              tabIndex={theme === t.id ? 0 : -1}
+              data-theme-choice={t.id}
               className={`theme-option${theme === t.id ? ' is-on' : ''}`}
               onClick={() => {
                 saveTheme(t.id);
                 setTheme(t.id);
+              }}
+              onKeyDown={(event) => {
+                const index = THEMES.findIndex((item) => item.id === t.id);
+                const offset = event.key === 'ArrowRight' || event.key === 'ArrowDown' ? 1
+                  : event.key === 'ArrowLeft' || event.key === 'ArrowUp' ? -1 : 0;
+                const next = event.key === 'Home' ? THEMES[0]
+                  : event.key === 'End' ? THEMES[THEMES.length - 1]
+                    : offset ? THEMES[(index + offset + THEMES.length) % THEMES.length] : undefined;
+                if (!next) return;
+                event.preventDefault();
+                saveTheme(next.id);
+                setTheme(next.id);
+                event.currentTarget.parentElement?.querySelector<HTMLButtonElement>(`[data-theme-choice="${next.id}"]`)?.focus();
               }}
             >
               <span className="theme-swatch" data-theme={t.id} aria-hidden>
@@ -114,6 +121,12 @@ export function SettingsPage() {
               <small>{t.desc}</small>
             </button>
           ))}
+          <button type="button" role="radio" aria-checked="false" aria-disabled="true" disabled
+            className="theme-option theme-option--coming">
+            <span className="theme-swatch theme-swatch--coming" aria-hidden="true">✦</span>
+            <strong>萌え</strong>
+            <small>後日実装</small>
+          </button>
         </div>
       </section>
 
@@ -227,14 +240,7 @@ export function SettingsPage() {
         </ul>
       </details>
 
-      <SampleCatalogSettings
-        preview={samplePreview}
-        backups={sampleBackups.ok ? sampleBackups.backups : []}
-        backupError={sampleBackups.ok ? null : sampleBackups.reason}
-        onApply={updateSampleCatalog}
-        onRestore={restoreSampleCatalog}
-        onExportBackup={exportSampleCatalogSnapshot}
-      />
+      <SampleCatalogManager />
 
       <details className="details panel settings-danger">
         <summary>すべてのデータを削除</summary>

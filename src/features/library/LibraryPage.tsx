@@ -15,6 +15,7 @@ import { isInTest } from '@/domain/quiz';
 import { formatShortDate } from '@/domain/records';
 import type { TileCode } from '@/domain/types';
 import { LIMITS } from '@/domain/types';
+import { SampleCatalogManager } from '@/features/settings/SampleCatalogManager';
 
 type SortKey = 'updated' | 'confirmAsc' | 'lastConfirmOld' | 'lastSolvedOld';
 
@@ -37,6 +38,7 @@ export function LibraryPage() {
   const [tagMode, setTagMode] = useState<'or' | 'and'>('or');
   const [sortKey, setSortKey] = useState<SortKey>('updated');
   const [showAnswers, setShowAnswers] = useState(false);
+  const [showSamples, setShowSamples] = useState(false);
   const [searchOpts, setSearchOpts] = useState<SearchOptions>(DEFAULT_SEARCH_OPTIONS);
 
   useEffect(() => {
@@ -146,7 +148,21 @@ export function LibraryPage() {
       <header className="page-header page-header--compact">
         <h1>学習帳</h1>
         <p className="count-pill" role="status">{filtered.length} 問</p>
+        <button
+          type="button"
+          className="btn btn-sm library-sample-toggle"
+          aria-expanded={showSamples}
+          aria-controls="library-sample-panel"
+          onClick={() => setShowSamples((open) => !open)}
+        >
+          {showSamples ? 'サンプルを閉じる' : 'サンプルを追加'}
+        </button>
       </header>
+
+      {showSamples && <section id="library-sample-panel" className="panel sample-catalog" aria-labelledby="library-sample-title">
+        <h2 id="library-sample-title" className="section-title">サンプル問題</h2>
+        <SampleCatalogManager inline />
+      </section>}
 
       <section className="panel search-panel" aria-label="問題を探す">
         <label className="field">

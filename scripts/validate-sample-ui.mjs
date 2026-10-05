@@ -71,8 +71,8 @@ try {
   await expect(page.getByText(p03.explanation,{exact:true})).toHaveCount(0);
   await page.getByRole('button',{name:'正解・解説を表示',exact:true}).click();await expect(page.getByText(p03.explanation,{exact:true})).toBeVisible();await sizes('sample03-answer');
   await page.locator('.detail-tools > summary').click();
-  const pngDownloadPromise=page.waitForEvent('download');await page.getByRole('button',{name:'PNG保存',exact:true}).click();
-  await (await pngDownloadPromise).saveAs(`${evidence}sample03-unified-hand.png`);
+  await expect(page.getByRole('button',{name:'PNG保存',exact:true})).toHaveCount(0);
+  await expect(page.locator('.png-preview')).toHaveCount(0);
   await page.getByRole('link',{name:'テスト',exact:true}).click();await expect(page.getByLabel('正解ありのみ',{exact:true})).toHaveCount(0);
   await expect(page.locator('.count-pill')).toContainText('8 問');await capture('answer-only-eight');
   await page.getByRole('spinbutton',{name:'問題数',exact:true}).fill('8');await page.getByRole('button',{name:'8 問でテスト開始',exact:true}).click();

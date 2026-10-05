@@ -10,6 +10,8 @@ on:
       - 'scripts/validate-sample-ui.mjs'
       - 'scripts/validate-study-ui.mjs'
       - 'scripts/validate-material-ui.mjs'
+      - 'scripts/validate-theme-ui.mjs'
+      - 'scripts/capture-dopa-preview.mjs'
       - 'scripts/validate-dora-ui.mjs'
       - 'scripts/preview-fixture.*'
       - 'scripts/validate-icon-ui.mjs'
@@ -44,6 +46,7 @@ jobs:
           node scripts/validate-sample-ui.mjs || status=1
           node scripts/validate-study-ui.mjs || status=1
           node scripts/validate-material-ui.mjs || status=1
+          node scripts/validate-theme-ui.mjs || status=1
           exit "$status"
       - uses: actions/upload-artifact@v4
         if: always()
@@ -68,4 +71,33 @@ jobs:
         with:
           name: material-ui-screenshots
           path: evidence/material-ui/
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: theme-ui-screenshots
+          path: evidence/theme-ui/
+          retention-days: 7
+
+  dopa-preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Capture the actual DOPA editor
+        run: |
+          npm run dev -- --host 127.0.0.1 --port 5176 > /tmp/mahjong-preview-vite.log 2>&1 &
+          for i in {1..30}; do curl --silent --fail http://127.0.0.1:5176/ > /dev/null && break; sleep 1; done
+          node scripts/capture-dopa-preview.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dopa-preview
+          path: evidence/dopa-preview/
           retention-days: 7
