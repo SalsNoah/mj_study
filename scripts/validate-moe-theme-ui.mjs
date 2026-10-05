@@ -55,10 +55,10 @@ try {
   for (const width of [320,375,390,1440]) {
     await page.setViewportSize({width,height:width===1440?900:667});
     for (const route of ['作成','学習帳','テスト','学習教材','記録帳','設定']) { await nav(route); await capture(`moe-${{'作成':'editor','学習帳':'library','テスト':'test','学習教材':'materials','記録帳':'records','設定':'settings'}[route]}-${width}`); }
-    await nav('学習帳'); await page.locator('.problem-card').click(); await page.locator('.page--detail').waitFor({state:'visible'}); await capture(`moe-detail-hidden-${width}`);
+    await nav('学習帳'); await page.locator('.problem-card').click(); await expect(page.getByRole('button',{name:'正解・解説を表示',exact:true})).toBeVisible(); await capture(`moe-detail-hidden-${width}`);
     await expect(page.getByRole('button',{name:'正解・解説を表示',exact:true})).toBeVisible();
     await page.getByRole('button',{name:'正解・解説を表示',exact:true}).click(); await page.locator('.detail-tools > summary').click();
-    await page.getByRole('button',{name:'複製',exact:true}).click(); await capture(`moe-duplicate-${width}`); await page.keyboard.press('Escape');
+    await page.getByRole('button',{name:'複製',exact:true}).click(); await expect(page.getByRole('dialog')).toBeVisible(); await capture(`moe-duplicate-${width}`); await page.keyboard.press('Escape');
   }
   await nav('設定'); await expect(page.getByRole('radio',{name:/^萌え/})).toHaveAttribute('aria-checked','true');
   await page.reload(); await page.locator('.page--settings').waitFor(); await expect(page.locator('html')).toHaveAttribute('data-theme','moe');
@@ -98,9 +98,9 @@ try {
   await nav('学習帳'); await page.locator('.problem-card').click(); await page.locator('.detail-tools > summary').click();
   const danger=page.getByRole('button',{name:'削除',exact:true}); await danger.scrollIntoViewIfNeeded(); await page.mouse.move(0,0); const dangerPlain=await controlState('moe-danger-normal',danger); expect(dangerPlain.color).toBe('rgb(157, 39, 63)'); expect(dangerPlain.background).toBe('rgb(255, 237, 240)');
   await danger.hover(); const dangerHover=await controlState('moe-danger-hover',danger); expect(dangerHover.color).toBe('rgb(157, 39, 63)'); expect(dangerHover.background).toBe('rgb(255, 220, 227)'); await page.screenshot({path:`${out}moe-danger-hover.png`,animations:'disabled'}); await page.mouse.move(0,0);
-  await nav('テスト'); await page.getByRole('button',{name:'1 問でテスト開始',exact:true}).click(); await capture('moe-test-question');
-  await page.locator('.hand-stage').getByRole('button',{name:'中',exact:true}).first().click(); await page.getByRole('button',{name:'回答する',exact:true}).click(); await capture('moe-test-answer');
-  await nav('学習教材'); await page.locator('.material-record-link').click(); await capture('moe-material-detail');
+  await nav('テスト'); await page.getByRole('button',{name:'1 問でテスト開始',exact:true}).click(); await expect(page.getByRole('button',{name:'回答する',exact:true})).toBeVisible(); await capture('moe-test-question');
+  await page.locator('.hand-stage').getByRole('button',{name:'中',exact:true}).first().click(); await page.getByRole('button',{name:'回答する',exact:true}).click(); await page.locator('.verdict').waitFor(); await capture('moe-test-answer');
+  await nav('学習教材'); await page.locator('.material-record-link').click(); await page.locator('.page--material-detail').waitFor(); await capture('moe-material-detail');
   await nav('記録帳'); await page.getByRole('button',{name:'Xに記録を投稿',exact:true}).click(); await page.locator('.record-share-preview').waitFor(); await capture('moe-record-share'); await page.getByRole('button',{name:'閉じる',exact:true}).click();
   await page.setViewportSize({width:320,height:740}); await page.evaluate(()=>document.documentElement.style.fontSize='150%');
   for (const route of ['作成','学習帳','テスト','記録帳','設定']) { await nav(route); await capture(`moe-${{'作成':'editor','学習帳':'library','テスト':'test','記録帳':'records','設定':'settings'}[route]}-320-text150`); }
