@@ -15,6 +15,8 @@ import { isContentRevisionChange, validateProblem, hasErrors } from '../domain/v
 import { normalizeTagKey, validateTagName, canAddTag } from '../domain/tags';
 import type { SharePayload } from '../domain/share';
 import { createMeld } from '../domain/melds';
+import { SampleCatalogStorage, validCatalogReceipts } from './sampleCatalogStorage';
+import { canonicalJson } from '../data/sampleIdentity';
 import { applyAttemptToStudy, bumpDaily, dayKey, dayKeyFromIso, normalizeStore } from '../domain/records';
 
 export type SaveResult =
@@ -191,6 +193,47 @@ export class LocalStorageRepository {
     }
   }
 
+  private sampleCatalogStorage() {
+    return new SampleCatalogStorage(this.key, (store, expectedRaw) => {
+      if (this.memoryRevision !== null && this.memoryRevision !== store.revision) {
+        return { ok: false, code: 'conflict', reason: '保存後にデータが更新されています。再読込してください' };
+      }
+      const next: Store = { ...store, revision: store.revision + 1 };
+      const text = JSON.stringify(next);
+      if (utf16Size(text) > LIMITS.storageMaxBytes) {
+        return { ok: false, code: 'size', reason: '保存サイズが上限を超えます。データは変更していません' };
+      }
+      try {
+        // Recheck immediately before the single atomic main-store write. Snapshot writes never authorize overwriting newer work.
+        if (localStorage.getItem(this.key) !== expectedRaw) {
+          return { ok: false, code: 'conflict', reason: '別タブでデータが更新されています。再読込してください' };
+        }
+        localStorage.setItem(this.key, text);
+      } catch (error) {
+        const quota = error instanceof DOMException && ['QuotaExceededError', 'NS_ERROR_DOM_QUOTA_REACHED'].includes(error.name);
+        return { ok: false, code: quota ? 'quota' : 'access', reason: '保存に失敗しました。更新前バックアップは残しています' };
+      }
+      this.memoryRevision = next.revision;
+      return { ok: true, store: next };
+    });
+  }
+
+  updateSampleCatalog(store: Store, selectedIds: string[]): SaveResult {
+    return this.sampleCatalogStorage().update(store, selectedIds);
+  }
+
+  restoreSampleCatalog(store: Store, backupId: string): SaveResult {
+    return this.sampleCatalogStorage().restore(store, backupId);
+  }
+
+  listSampleCatalogBackups() {
+    return this.sampleCatalogStorage().list();
+  }
+
+  exportSampleCatalogSnapshot(backupId: string) {
+    return this.sampleCatalogStorage().exportSnapshot(backupId);
+  }
+
   replaceStore(store: Store): SaveResult {
     // force write with bump from memory
     const next = { ...store, schemaVersion: SCHEMA_VERSION as 1 };
@@ -225,6 +268,10 @@ export class LocalStorageRepository {
       if (!prev) {
         return { ok: false, reason: '問題が見つかりません', code: 'validation' };
       }
+      // Editors need not know about catalog metadata; an edit keeps the original identity.
+      problem = { ...problem };
+      if (prev.sample !== undefined) problem.sample = structuredClone(prev.sample);
+      else delete problem.sample;
       const bumped = isContentRevisionChange(prev, problem);
       problems = store.problems.map((p) => (p.id === problem.id ? problem : p));
       study = study.map((s) => {
@@ -263,6 +310,7 @@ export class LocalStorageRepository {
       melds: src.melds.map((m) => ({ ...m, id: createId('meld') })),
       attachments: src.attachments.map((a) => ({ ...a, id: createId('att') })),
     };
+    delete copy.sample;
     return this.saveProblem(store, copy, true);
   }
 
@@ -354,7 +402,7 @@ export class LocalStorageRepository {
   }
 
   clearAll(): SaveResult {
-    return this.persist(emptyStore());
+    return this.sampleCatalogStorage().clear(this.memoryRevision);
   }
 
   exportJson(store: Store): string {
@@ -383,7 +431,13 @@ export class LocalStorageRepository {
     }
 
     if (mode === 'replace') {
-      return this.persist(normalizeStore({ ...parsed, revision: current.revision }));
+      // Backup receipts describe local, already committed operations. Foreign or altered receipts cannot authorize an undo here.
+      const incoming = validCatalogReceipts(parsed.sampleCatalogUpdates) ? parsed.sampleCatalogUpdates ?? [] : [];
+      const local = validCatalogReceipts(current.sampleCatalogUpdates) ? current.sampleCatalogUpdates ?? [] : [];
+      const sampleCatalogUpdates = local.filter((receipt) => incoming.some((entry) => canonicalJson(entry) === canonicalJson(receipt)));
+      const replacement: Store = { ...parsed, revision: current.revision, sampleCatalogUpdates };
+      if (sampleCatalogUpdates.length === 0) delete replacement.sampleCatalogUpdates;
+      return this.persist(normalizeStore(replacement));
     }
 
     // merge: re-id problems/attempts, merge tags by name

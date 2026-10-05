@@ -46,6 +46,10 @@ type AppState = {
   importJson: (text: string, mode: 'merge' | 'replace') => SaveResult;
   addFromShare: (payload: SharePayload) => SaveResult;
   addProblems: (problems: Problem[], tagName?: string) => SaveResult;
+  updateSampleCatalog: (selectedIds: string[]) => SaveResult;
+  restoreSampleCatalog: (backupId: string) => SaveResult;
+  listSampleCatalogBackups: () => ReturnType<LocalStorageRepository['listSampleCatalogBackups']>;
+  exportSampleCatalogSnapshot: (backupId: string) => ReturnType<LocalStorageRepository['exportSampleCatalogSnapshot']>;
   replaceFromEmpty: () => SaveResult;
   getTagName: (id: string) => string;
 };
@@ -137,6 +141,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     importJson: (text, mode) => applySave(repo.importJson(store, text, mode)),
     addFromShare: (payload) => applySave(repo.addFromShare(store, payload)),
     addProblems: (problems, tagName) => applySave(repo.addProblems(store, problems, tagName)),
+    updateSampleCatalog: (ids) => applySave(repo.updateSampleCatalog(store, ids)),
+    restoreSampleCatalog: (id) => applySave(repo.restoreSampleCatalog(store, id)),
+    listSampleCatalogBackups: () => repo.listSampleCatalogBackups(),
+    exportSampleCatalogSnapshot: (id) => repo.exportSampleCatalogSnapshot(id),
     replaceFromEmpty: () => applySave(repo.replaceStore(emptyStore())),
     getTagName: (id) => store.tags.find((t) => t.id === id)?.name ?? id,
   };

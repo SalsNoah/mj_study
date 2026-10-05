@@ -102,23 +102,22 @@ export function HandView({
   ));
 
   const drawnTile = drawn && (
-    <div className="hand-view__drawn" aria-label="ツモ">
-      <TileFace
-        code={drawn}
-        size={size}
-        fluid={tight}
-        className={markClass(drawn)}
-        selected={selectedCodes?.has(drawn)}
-        onClick={
-          selectablePool === 'concealedDrawn' || onSelectDrawn
-            ? () => {
-                onSelectDrawn?.();
-                onSelectCode?.(drawn);
-              }
-            : undefined
-        }
-      />
-    </div>
+    <TileFace
+      key={`d-${drawn}`}
+      code={drawn}
+      size={size}
+      fluid={tight}
+      className={markClass(drawn)}
+      selected={selectedCodes?.has(drawn)}
+      onClick={
+        selectablePool === 'concealedDrawn' || onSelectDrawn
+          ? () => {
+              onSelectDrawn?.();
+              onSelectCode?.(drawn);
+            }
+          : undefined
+      }
+    />
   );
 
   const meldList = melds.map((m) =>
@@ -141,8 +140,7 @@ export function HandView({
     return (
       <div className="hand-view hand-view--tight">
         <div className="hand-row">
-          <div className="hand-strip">{concealedTiles}</div>
-          {drawnTile}
+          <div className="hand-strip">{concealedTiles}{drawnTile}</div>
           {melds.length > 0 && <div className="hand-melds">{meldList}</div>}
         </div>
       </div>
@@ -153,8 +151,7 @@ export function HandView({
     <div className="hand-view">
       {melds.length > 0 && <div className="hand-view__melds">{meldList}</div>}
       <div className="hand-view__main">
-        <div className="tile-row tile-row--wrap">{concealedTiles}</div>
-        {drawnTile}
+        <div className="tile-row tile-row--wrap">{concealedTiles}{drawnTile}</div>
       </div>
     </div>
   );

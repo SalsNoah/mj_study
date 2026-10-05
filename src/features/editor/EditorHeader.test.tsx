@@ -4,7 +4,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { beforeEach, afterEach, expect, it, vi } from 'vitest';
 import { AppProvider } from '@/app/store';
 import { EditorPage } from './EditorPage';
-import { createSampleProblems } from '@/data/samples';
+import { createLegacySampleProblems as createSampleProblems } from '@/data/legacySamples';
 import { emptyStore, STORAGE_KEY, LIMITS } from '@/domain/types';
 let host:HTMLDivElement;let root:Root;
 beforeEach(()=>{vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT',true);localStorage.clear();sessionStorage.clear();host=document.createElement('div');document.body.append(host);root=createRoot(host);});

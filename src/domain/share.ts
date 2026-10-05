@@ -169,7 +169,7 @@ function validateSharePayload(
     return { ok: false, reason: '手牌が不正です' };
   }
   if (!(o.drawn === null || (typeof o.drawn === 'string' && isTileCode(o.drawn)))) {
-    return { ok: false, reason: 'ツモ牌が不正です' };
+    return { ok: false, reason: '手牌データが不正です' };
   }
   if (!Array.isArray(o.doraIndicators) || !o.doraIndicators.every((t) => typeof t === 'string' && isTileCode(t))) {
     return { ok: false, reason: 'ドラ表示牌が不正です' };

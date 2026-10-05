@@ -2,7 +2,8 @@ import { useRef, useState } from 'react';
 import { useApp } from '@/app/store';
 import { ViewTabs, viewPanelProps } from '@/components/ViewTabs';
 import { LIMITS } from '@/domain/types';
-import { createSampleProblems, samplesAlreadyPresent } from '@/data/samples';
+import { getSampleUpdatePreview } from '@/data/sampleCatalog';
+import { SampleCatalogSettings } from './SampleCatalogSettings';
 import { THEMES, loadTheme, saveTheme, type ThemeId } from '@/app/theme';
 
 export function SettingsPage() {
@@ -14,7 +15,10 @@ export function SettingsPage() {
     exportJson,
     importJson,
     clearAll,
-    addProblems,
+    updateSampleCatalog,
+    restoreSampleCatalog,
+    listSampleCatalogBackups,
+    exportSampleCatalogSnapshot,
     renameTag,
     deleteTag,
     lastError,
@@ -61,15 +65,8 @@ export function SettingsPage() {
     }
   };
 
-  const addSamples = () => {
-    if (samplesAlreadyPresent(store)) {
-      setMsg('サンプルは既に追加済みです（重複作成しません）');
-      return;
-    }
-    const { problems, tagName } = createSampleProblems();
-    const r = addProblems(problems, tagName);
-    setMsg(r.ok ? 'サンプルを追加しました' : r.reason);
-  };
+  const samplePreview = getSampleUpdatePreview(store);
+  const sampleBackups = listSampleCatalogBackups();
 
   return (
     <div className="page page--settings">
@@ -227,23 +224,25 @@ export function SettingsPage() {
         </ul>
       </details>
 
-      <details className="details panel">
-        <summary>サンプル問題</summary>
-        <button type="button" className="btn" onClick={addSamples}>
-          サンプルを追加
-        </button>
-      </details>
+      <SampleCatalogSettings
+        preview={samplePreview}
+        backups={sampleBackups.ok ? sampleBackups.backups : []}
+        backupError={sampleBackups.ok ? null : sampleBackups.reason}
+        onApply={updateSampleCatalog}
+        onRestore={restoreSampleCatalog}
+        onExportBackup={exportSampleCatalogSnapshot}
+      />
 
       <details className="details panel settings-danger">
         <summary>すべてのデータを削除</summary>
-        <p className="hint">問題・履歴・画像が消えます。先にバックアップを保存してください。</p>
+        <p className="hint">問題・履歴・画像・サンプル更新前バックアップが消えます。先にJSONを保存してください。</p>
         <button
           type="button"
           className="btn btn-danger"
           onClick={() => {
             if (
               !window.confirm(
-                'すべての問題・履歴・画像を削除します。直前バックアップを推奨します。本当に削除しますか？',
+                'すべての問題・履歴・画像・サンプル更新前バックアップを削除します。必要なJSONを保存してください。本当に削除しますか？',
               )
             ) {
               return;

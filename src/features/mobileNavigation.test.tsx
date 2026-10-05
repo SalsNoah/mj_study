@@ -9,7 +9,7 @@ import { SettingsPage } from '@/features/settings/SettingsPage';
 import { EditorPage } from '@/features/editor/EditorPage';
 import { DetailPage } from '@/features/detail/DetailPage';
 import { TestPage } from '@/features/test/TestPage';
-import { createSampleProblems } from '@/data/samples';
+import { createLegacySampleProblems as createSampleProblems } from '@/data/legacySamples';
 import { emptyStore, LIMITS, STORAGE_KEY } from '@/domain/types';
 
 let host: HTMLDivElement;
@@ -163,7 +163,8 @@ it('groups settings with backup access and preserves destructive-action confirma
   await click(danger.querySelector('summary')!);
   await click(button('全件削除'));
   expect(confirm).toHaveBeenCalledTimes(1);
-  expect(confirm.mock.calls[0]![0]).toContain('すべての問題・履歴・画像を削除');
+  expect(confirm.mock.calls[0]![0]).toContain('すべての問題・履歴・画像・サンプル更新前バックアップを削除');
+  expect(confirm.mock.calls[0]![0]).toContain('必要なJSONを保存してください');
   expect(localStorage.getItem(STORAGE_KEY)).toBe(before);
   await click(button('表示・編集'));
   await click(button('データ管理'));
