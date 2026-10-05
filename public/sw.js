@@ -1,4 +1,4 @@
-const CACHE = 'mahjong-study-v28';
+const CACHE = 'mahjong-study-v29';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
