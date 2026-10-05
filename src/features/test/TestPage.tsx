@@ -39,6 +39,7 @@ const FILTERS: Array<{ id: TestFilter; label: string; hint: string }> = [
 export function TestPage() {
   const { store, recordAttempt, updateUnderstanding, getTagName } = useApp();
   const [count, setCount] = useState(5);
+  const [countInputValid, setCountInputValid] = useState(true);
   const [filters, setFilters] = useState<TestFilter[]>(['random']);
   const [tagIds, setTagIds] = useState<string[]>([]);
   const [answerView, setAnswerView] = useState<'notes' | 'ukeire'>('notes');
@@ -63,6 +64,7 @@ export function TestPage() {
   const effectiveCount = clampTestCount(count, candidates.length);
   useEffect(() => {
     setCount((previous) => clampTestCount(previous, candidates.length));
+    setCountInputValid(true);
   }, [candidates.length]);
   const excludedCount = useMemo(() => {
     const studyMap = new Map(store.study.map((s) => [s.problemId, s]));
@@ -79,6 +81,7 @@ export function TestPage() {
   };
 
   const start = () => {
+    if (!countInputValid) return;
     const picked = selectTestProblems(store.problems, store.study, store.attempts, {
       count: effectiveCount,
       filters,
@@ -159,7 +162,8 @@ export function TestPage() {
         </header>
 
         <section className="panel">
-          <TestCountControl value={effectiveCount} max={candidates.length} onChange={setCount} />
+          <TestCountControl key={candidates.length} value={effectiveCount} max={candidates.length}
+            onChange={setCount} onValidityChange={setCountInputValid} />
           <p className="hint test-eligibility-hint">正解があり、「テストに出題する」がオンの問題から出題します。</p>
         </section>
 
@@ -218,9 +222,10 @@ export function TestPage() {
             type="button"
             className="btn btn-primary btn-save"
             onClick={start}
-            disabled={candidates.length === 0}
+            disabled={candidates.length === 0 || !countInputValid}
           >
-            {candidates.length === 0 ? '条件に合う問題がありません' : `${effectiveCount} 問でテスト開始`}
+            {candidates.length === 0 ? '条件に合う問題がありません'
+              : !countInputValid ? '問題数を確認してください' : `${effectiveCount} 問でテスト開始`}
           </button>
         </div>
       </div>

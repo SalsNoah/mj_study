@@ -82,10 +82,69 @@ it('provides numeric, triangle and keyboard count controls with one-question ste
   await enter('9');
   expect(countInput().value).toBe('9');
   await enter('99');
+  expect(countInput().value).toBe('99');
+  expect(button('問題数を確認してください').disabled).toBe(true);
+  await key('Enter');
   expect(countInput().value).toBe('12');
   await click(button('12 問でテスト開始'));
   expect(host.querySelector('h1')?.textContent).toBe('テスト 1 / 12');
   expect(host.textContent).not.toContain('正解なしの学習メモ');
+});
+
+it('keeps an empty draft while replacing the number and never starts using the previous count', async () => {
+  await mount(fixture());
+  await enter('');
+  expect(countInput().value).toBe('');
+  expect(countInput().getAttribute('aria-invalid')).toBe('true');
+  expect(button('問題数を確認してください').disabled).toBe(true);
+  await click(button('問題数を確認してください'));
+  expect(host.querySelector('h1')?.textContent).toBe('テスト');
+  await enter('3');
+  expect(countInput().value).toBe('3');
+  expect(countInput().getAttribute('aria-valuenow')).toBe('3');
+  expect(button('3 問でテスト開始').disabled).toBe(false);
+  await click(button('3 問でテスト開始'));
+  expect(host.querySelector('h1')?.textContent).toBe('テスト 1 / 3');
+});
+
+it.each(['-', '-2', '1e2', '2.5', '3枚', '999999999999999999999'])
+  ('keeps the unfinished or invalid draft %s without committing a different number', async (draft) => {
+    await mount(fixture());
+    await enter(draft);
+    expect(countInput().value).toBe(draft);
+    expect(button('問題数を確認してください').disabled).toBe(true);
+    await key('Enter');
+    expect(countInput().value).toBe(draft);
+    expect(button('問題数を確認してください').disabled).toBe(true);
+    await key('Home');
+    expect(countInput().value).toBe('1');
+    expect(button('1 問でテスト開始').disabled).toBe(false);
+  });
+
+it('normalizes numeric drafts on blur or an explicit step and recovers from an empty draft', async () => {
+  await mount(fixture());
+  await enter('００９');
+  expect(countInput().value).toBe('００９');
+  expect(button('9 問でテスト開始').disabled).toBe(false);
+  await act(async () => {
+    countInput().focus();
+    countInput().blur();
+  });
+  expect(countInput().value).toBe('9');
+  await enter('0');
+  expect(button('問題数を確認してください').disabled).toBe(true);
+  await key('Enter');
+  expect(countInput().value).toBe('1');
+  await enter('');
+  await click(button('問題数を増やす'));
+  expect(countInput().value).toBe('2');
+  await enter('');
+  await key('ArrowDown');
+  expect(countInput().value).toBe('1');
+  await enter('11');
+  await key('ArrowUp');
+  expect(countInput().value).toBe('12');
+  expect(button('問題数を増やす').disabled).toBe(true);
 });
 
 it('follows a smaller candidate pool and consistently disables a zero-candidate setup, then recovers', async () => {
@@ -93,10 +152,13 @@ it('follows a smaller candidate pool and consistently disables a zero-candidate 
   const tagFilter = [...host.querySelectorAll<HTMLButtonElement>('.filter-chip')]
     .find((item) => item.querySelector('strong')?.textContent === 'タグ')!;
   await click(tagFilter);
+  await enter('');
+  expect(button('問題数を確認してください').disabled).toBe(true);
   await click(button('少数の対象'));
   expect(countInput().value).toBe('2');
   expect(countInput().max).toBe('2');
   expect(button('問題数を増やす').disabled).toBe(true);
+  expect(button('2 問でテスト開始').disabled).toBe(false);
   await click(button('対象なし'));
   await click(button('少数の対象'));
   expect(countInput().value).toBe('0');

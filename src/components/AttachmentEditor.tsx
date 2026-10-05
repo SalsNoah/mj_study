@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { attachmentRole, type AttachmentRole } from '@/domain/attachments';
 import { LIMITS, type Attachment } from '@/domain/types';
 import { AttachmentGallery } from './ProblemAttachments';
@@ -16,14 +16,15 @@ export function AttachmentEditor(props: AttachmentEditorProps) {
 }
 
 function AttachmentEditorFields({ attachments, onChange, onImage, imageMessage }: AttachmentEditorProps) {
+  const labelId = useId();
   const [newRole, setNewRole] = useState<AttachmentRole>('explanation');
   const [loading, setLoading] = useState(false);
   return (
     <div className="attachment-editor">
       <p className="attachment-editor__heading">画像（合計{LIMITS.attachmentsMax}枚まで）</p>
       <label className="field">
-        <span>追加する画像の表示先</span>
-        <select value={newRole} onChange={(event) => setNewRole(event.target.value === 'question' ? 'question' : 'explanation')}>
+        <span id={`${labelId}-new-role`}>追加する画像の表示先</span>
+        <select aria-labelledby={`${labelId}-new-role`} value={newRole} onChange={(event) => setNewRole(event.target.value === 'question' ? 'question' : 'explanation')}>
           <option value="question">問題に表示（回答前も表示）</option>
           <option value="explanation">解説に表示</option>
         </select>
@@ -51,8 +52,9 @@ function AttachmentEditorFields({ attachments, onChange, onImage, imageMessage }
           <div key={attachment.id} className="attachment-editor__item">
             <AttachmentGallery attachments={[attachment]} label={`画像 ${index + 1}`} numbered={false} />
             <label className="field">
-              <span>画像 {index + 1} の表示先</span>
+              <span id={`${labelId}-role-${index}`}>画像 {index + 1} の表示先</span>
               <select
+                aria-labelledby={`${labelId}-role-${index}`}
                 value={attachmentRole(attachment)}
                 onChange={(event) => {
                   const role: AttachmentRole = event.target.value === 'question' ? 'question' : 'explanation';

@@ -56,6 +56,11 @@
   text-align: right;
 }
 
+.page--test .test-count__error {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
 .page--test .test-eligibility-hint {
   margin: 10px 0 0;
 }
