@@ -58,7 +58,11 @@ try {
       }
     }
     await page.setViewportSize({width:320,height:740});await page.evaluate(()=>document.documentElement.style.fontSize='150%');await screenshot(`header-${theme}-320-text150`);await page.evaluate(()=>document.documentElement.style.fontSize='');
-    await page.goto(`${origin}/#/edit/image-check`); await page.locator('.editor-notes > summary').click(); await page.locator('.editor-notes > details > summary').click();
+    await page.getByRole('link',{name:'学習帳',exact:true}).click();
+    await page.getByRole('link',{name:/^画像の表示確認/}).click();
+    await page.getByRole('link',{name:'編集',exact:true}).click();
+    await expect(page.getByRole('textbox',{name:'タイトル（任意）',exact:true})).toHaveValue(problem.title);
+    await page.locator('.editor-notes > summary').click(); await page.locator('.editor-notes > details > summary').click();
     for (const width of [320,375,390,1440]) {await page.setViewportSize({width,height:width > 1000 ? 900 : 667}); await checkFrames(`editor-${theme}-${width}`,3);if(width===375 || width===1440)await screenshot(`editor-${theme}-${width}`,'.attachment-editor');}
     await page.goto(`${origin}/#/problems/image-check`); await page.locator('.attachment-thumbnail').first().waitFor(); await expect(page.locator('.attachment-thumbnail img')).toHaveCount(1); await page.getByRole('button',{name:'正解・解説を表示',exact:true}).click();
     for (const width of [320,375,390,1440]) {await page.setViewportSize({width,height:width > 1000 ? 900 : 667}); await checkFrames(`detail-${theme}-${width}`,3);if(width===375 || width===1440)await screenshot(`detail-explanation-${theme}-${width}`,'[aria-label="解説画像"]');}
