@@ -21,7 +21,7 @@ async function open(profile = seed) {
 async function nav(name) { await page.getByRole('link',{name,exact:true}).click(); const selector={'作成':'.page--editor','学習帳':'.page--library','テスト':'.page--test','学習教材':'.page--materials','記録帳':'.page--records','設定':'.page--settings'}[name]; await page.locator(selector).waitFor({state:'visible'}); }
 async function capture(name, selector) {
  if(selector)await page.locator(selector).evaluate(el=>el.scrollIntoView({block:'center'}));else await page.evaluate(()=>scrollTo(0,0));
- await page.evaluate(()=>document.fonts.ready);await page.screenshot({path:`${out}${name}.png`,animations:'disabled'});
+ await page.evaluate(()=>document.fonts.ready);const cards=page.locator('.problem-card');if(await cards.count())await expect.poll(()=>cards.first().evaluate(el=>getComputedStyle(el).opacity)).toBe('1');await page.screenshot({path:`${out}${name}.png`,animations:'disabled'});
  const g=await page.evaluate(()=>({width:innerWidth,documentWidth:document.documentElement.scrollWidth,theme:document.documentElement.dataset.theme,headings:[...document.querySelectorAll('h1,.section-title,summary')].filter(el=>el.getBoundingClientRect().width).map(el=>{const s=getComputedStyle(el),m=getComputedStyle(el,'::before');return {text:el.textContent,font:s.fontFamily,size:s.fontSize,weight:s.fontWeight,line:s.lineHeight,marker:[m.borderLeftWidth,m.borderTopWidth,m.borderBottomWidth],height:el.getBoundingClientRect().height};})}));
  expect(g.documentWidth).toBeLessThanOrEqual(g.width);results.push({name,...g});
 }
@@ -40,14 +40,14 @@ try {
   await expect(page.getByRole('radio',{name:new RegExp(`^${labels[theme]}`)})).toHaveAttribute('aria-checked','true');await capture(`theme-picker-${theme}-390`);
  }
  await page.getByRole('radio',{name:/^DOPA/}).press('ArrowRight');await expect(page.getByRole('radio',{name:/^ノーマル/})).toBeFocused();await page.getByRole('radio',{name:/^ノーマル/}).press('End');await expect(page.getByRole('radio',{name:/^DOPA/})).toBeFocused();await expect(moe).toBeDisabled();expect(await page.evaluate(()=>localStorage.getItem('mahjong-study:v1'))).toBe(original);results.push({name:'theme-persistence-keyboard-moe-disabled',status:'pass'});
- for(const theme of ['normal','dopa']) {
+ for(const theme of ['normal','cool','cute','dopa']) {
   await nav('設定');await page.getByRole('tab',{name:'表示・編集',exact:true}).click();await page.getByRole('radio',{name:new RegExp(`^${labels[theme]}`)}).click();
   for(const width of [375,1440]) {
    await page.setViewportSize({width,height:width===1440?900:740});
    await nav('作成');await capture(`${theme}-editor-${width}`);await mainDisclosures(`${theme}-${width}`);await capture(`${theme}-editor-disclosures-${width}`,'.editor-tools');
    await page.locator('.editor-notes > summary').click();await capture(`${theme}-editor-notes-${width}`,'.editor-notes');
    await nav('学習帳');await capture(`${theme}-library-${width}`);await page.locator('.library-filters > summary').click();await capture(`${theme}-library-filters-${width}`,'.library-filters');
-   await page.locator('.problem-card').click();await capture(`${theme}-detail-${width}`);await page.getByRole('button',{name:'正解・解説を表示',exact:true}).click();await page.locator('.detail-tools > summary').click();await expect(page.getByRole('button',{name:'PNG保存',exact:true})).toHaveCount(0);await capture(`${theme}-detail-tools-${width}`,'.detail-tools');
+   await page.locator('.problem-card').click();await expect(page.getByRole('button',{name:'正解・解説を表示',exact:true})).toBeVisible();await capture(`${theme}-detail-${width}`);await page.getByRole('button',{name:'正解・解説を表示',exact:true}).click();await page.locator('.detail-tools > summary').click();await expect(page.getByRole('button',{name:'PNG保存',exact:true})).toHaveCount(0);await capture(`${theme}-detail-tools-${width}`,'.detail-tools');
    await page.getByRole('button',{name:'複製',exact:true}).click();await expect(page.getByRole('dialog')).toBeVisible();await capture(`${theme}-duplicate-dialog-${width}`);await page.keyboard.press('Escape');await expect(page.getByRole('dialog')).toHaveCount(0);await expect(page.getByRole('button',{name:'複製',exact:true})).toBeFocused();
    await nav('テスト');await capture(`${theme}-test-setup-${width}`);
    await page.getByRole('button',{name:'1 問でテスト開始',exact:true}).click();await capture(`${theme}-test-question-${width}`);await page.locator('.hand-stage').getByRole('button',{name:'中',exact:true}).first().click();await page.getByRole('button',{name:'回答する',exact:true}).click();await capture(`${theme}-test-answer-${width}`);

@@ -1,0 +1,48 @@
+/* Generated decorative artwork. Existing theme colors, controls and tile faces stay intact. */
+html[data-theme='cool'] {
+  --theme-art-global: url('/themes/cool/background.webp');
+  --theme-art-card: url('/themes/cool/card.webp');
+  --theme-art-veil: rgba(11, 17, 24, .64);
+  --theme-art-card-veil: rgba(15, 23, 33, .70);
+  --theme-art-text-surface: rgba(19, 28, 39, .96);
+}
+html[data-theme='cute'] {
+  --theme-art-global: url('/themes/cute/background.webp');
+  --theme-art-card: url('/themes/cute/card.webp');
+  --theme-art-veil: rgba(255, 246, 249, .16);
+  --theme-art-card-veil: rgba(255, 255, 255, .20);
+  --theme-art-text-surface: rgba(255, 255, 255, .96);
+}
+html:is([data-theme='cool'], [data-theme='cute']) {
+  background:
+    linear-gradient(var(--theme-art-veil), var(--theme-art-veil)),
+    var(--theme-art-global) center / cover no-repeat,
+    linear-gradient(180deg, var(--bg0), var(--bg1));
+  background-attachment: fixed;
+}
+html:is([data-theme='cool'], [data-theme='cute']) .page--library .problem-card {
+  position: relative;
+  isolation: isolate;
+}
+html:is([data-theme='cool'], [data-theme='cute']) .page--library .problem-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    linear-gradient(var(--theme-art-card-veil), var(--theme-art-card-veil)),
+    var(--theme-art-card) center / cover no-repeat;
+}
+/* Protect messages outside the existing panels from every decorative highlight. */
+html:is([data-theme='cool'], [data-theme='cute']) :is(.test-title, .page--test > .hint, .materials-empty, .page--library > .empty) {
+  background: var(--theme-art-text-surface);
+  border-radius: var(--r-sm);
+}
+html[data-theme='cool'] .count-pill { background: var(--surface); }
+html:is([data-theme='cool'], [data-theme='cute']) .page--library :is(.problem-card__meta, .match-reason) { color: var(--ink); }
+html:is([data-theme='cool'], [data-theme='cute']) .page--library .problem-card .badge { background: var(--surface); }
+html:is([data-theme='cool'], [data-theme='cute']) :is(.page > .hint, .page-header > .hint, #detail-view-panel-notes > .hint, #detail-view-panel-notes > p > a, .material-back) { color: var(--ink); }
+html:is([data-theme='cool'], [data-theme='cute']) :is(.page > a, .page-header--problem h1, #detail-view-panel-notes > .problem-attachments .problem-attachments__heading span) { color: var(--ink); }
+html:is([data-theme='cool'], [data-theme='cute']) :is(.page > .error, .page > .warn, .page > .ok, .page-header > .badge) { background: var(--surface); border-radius: var(--r-sm); }

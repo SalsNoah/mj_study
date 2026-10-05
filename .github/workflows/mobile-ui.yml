@@ -11,6 +11,7 @@ on:
       - 'scripts/validate-study-ui.mjs'
       - 'scripts/validate-material-ui.mjs'
       - 'scripts/validate-theme-ui.mjs'
+      - 'scripts/validate-theme-art-ui.mjs'
       - 'scripts/validate-dopa-neon-ui.mjs'
       - 'scripts/validate-header-images-ui.mjs'
       - 'scripts/capture-dopa-preview.mjs'
@@ -49,6 +50,7 @@ jobs:
           node scripts/validate-study-ui.mjs || status=1
           node scripts/validate-material-ui.mjs || status=1
           node scripts/validate-theme-ui.mjs || status=1
+          node scripts/validate-theme-art-ui.mjs || status=1
           node scripts/validate-dopa-neon-ui.mjs || status=1
           node scripts/validate-header-images-ui.mjs || status=1
           exit "$status"
@@ -80,7 +82,28 @@ jobs:
         if: always()
         with:
           name: theme-ui-screenshots
-          path: evidence/theme-ui/
+          path: |
+            evidence/theme-ui/
+            !evidence/theme-ui/cool-*.png
+            !evidence/theme-ui/cute-*.png
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cool-theme-screenshots
+          path: evidence/theme-ui/cool-*.png
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cute-theme-screenshots
+          path: evidence/theme-ui/cute-*.png
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: generated-theme-screenshots
+          path: evidence/theme-art/
           retention-days: 7
       - uses: actions/upload-artifact@v4
         if: always()
