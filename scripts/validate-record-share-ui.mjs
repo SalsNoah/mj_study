@@ -55,7 +55,7 @@ async function capture(page, name, bottom = false) {
   await page.screenshot({ path: `${out}${name}.png`, animations: 'disabled' });
   const dimensions = await page.evaluate(() => {
     const dialog = document.querySelector('.record-share-dialog');
-    const controls = [...dialog.querySelectorAll('button, a, summary')].filter(el => el.getClientRects().length > 0).map(el => {
+    const controls = [...dialog.querySelectorAll('button, a, summary')].filter(el => { const closed=el.closest('details:not([open])'); return (!closed || el===closed.querySelector('summary')) && el.getClientRects().length>0; }).map(el => {
       const r = el.getBoundingClientRect();
       const hit = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
       return { text: el.textContent, width: r.width, height: r.height, x: r.x, right: r.right, top: r.top, bottom: r.bottom, hit: !!hit && el.contains(hit) };

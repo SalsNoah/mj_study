@@ -55,7 +55,7 @@ try {
   for (const width of [320,375,390,1440]) {
     await page.setViewportSize({width,height:width===1440?900:667});
     for (const route of ['作成','学習帳','テスト','学習教材','記録帳','設定']) { await nav(route); await capture(`moe-${{'作成':'editor','学習帳':'library','テスト':'test','学習教材':'materials','記録帳':'records','設定':'settings'}[route]}-${width}`); }
-    await nav('学習帳'); await page.locator('.problem-card').click(); await capture(`moe-detail-hidden-${width}`);
+    await nav('学習帳'); await page.locator('.problem-card').click(); await page.locator('.page--detail').waitFor({state:'visible'}); await capture(`moe-detail-hidden-${width}`);
     await expect(page.getByRole('button',{name:'正解・解説を表示',exact:true})).toBeVisible();
     await page.getByRole('button',{name:'正解・解説を表示',exact:true}).click(); await page.locator('.detail-tools > summary').click();
     await page.getByRole('button',{name:'複製',exact:true}).click(); await capture(`moe-duplicate-${width}`); await page.keyboard.press('Escape');
