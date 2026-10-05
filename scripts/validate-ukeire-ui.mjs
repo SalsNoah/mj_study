@@ -63,7 +63,15 @@ async function capture(name, selector) {
   }));
   for (const score of scoreWidths) expect(score.textWidth).toBeLessThanOrEqual(score.available + 1);
 
-  results.push({ name, geometry, ...(cta ? { cta } : {}), ...(scoreWidths.length ? { scoreWidths } : {}) });
+  const scoreSuffixes = await page.locator('.ctx-score').evaluateAll(fields => fields.map(field => {
+    const input = field.querySelector('input'); const suffix = field.querySelector('.score-suffix');
+    const box = field.querySelector('.score-number'); const a = input.getBoundingClientRect(); const b = suffix.getBoundingClientRect();
+    const style = getComputedStyle(box);
+    return { inputRight: a.right, suffixLeft: b.left, suffix: suffix.textContent,
+      groupBorder: parseFloat(style.borderLeftWidth) + parseFloat(style.borderRightWidth), groupBackground: style.backgroundColor };
+  }));
+  for (const field of scoreSuffixes) { expect(field.suffixLeft).toBeGreaterThanOrEqual(field.inputRight); expect(field.groupBorder).toBe(0); expect(field.groupBackground).toBe('rgba(0, 0, 0, 0)'); }
+  results.push({ name, geometry, scoreSuffixes, ...(cta ? { cta } : {}), ...(scoreWidths.length ? { scoreWidths } : {}) });
 }
 async function allSizes(name, selector) {
   for (const width of widths) {
@@ -99,6 +107,14 @@ try {
   expect(order.inputTargets).toEqual(['手牌','ドラ表示牌','明順子','明刻子','明槓子','暗槓子','加槓子']);
   results.push({ name: 'continuous-editor-flow', order, mixedInputClicks: 14, suitSwitchClicks: 0 });
   await allSizes('editor-empty');
+  for (const width of [375,390]) {
+    await page.setViewportSize({width,height:844});
+    const field=page.getByLabel('東の点数（百点単位）',{exact:true});
+    await field.fill('999'); await expect(field).toBeFocused();
+    await capture(`scores-999-focused-${width}`, '.ctx-scores');
+    await field.fill('250'); await field.press('Tab');
+  }
+
   await page.setViewportSize({ width: 320, height: 844 });
   await page.getByLabel('東の点数（百点単位）', { exact: true }).fill('0');
   await page.getByLabel('南の点数（百点単位）', { exact: true }).fill('999');
@@ -117,15 +133,20 @@ try {
   await page.getByRole('button', { name: '東の点数を25,000点として反映', exact: true }).click();
   await expect(page.getByLabel('東の点数（百点単位）', { exact: true })).toHaveValue('250');
   await expect(page.getByLabel('東の点数（百点単位）', { exact: true })).toBeFocused();
-  await page.getByRole('button', { name: '詳細入力', exact: true }).click();
-  for (const [label, value] of [['東','12345'],['南','100000'],['西','-100000'],['北','-25000']]) await page.getByLabel(`${label}の点数（そのまま）`, { exact: true }).fill(value);
-  await capture('scores-exact-320', '.ctx-scores');
-  await page.getByRole('button', { name: '3桁＋00に戻す', exact: true }).click();
+  await expect(page.getByRole('button', { name: '詳細入力', exact: true })).toHaveCount(0);
+  for (const [label, value] of [['東','12345'],['南','100000'],['西','-100000'],['北','-25000']]) {
+    await page.getByLabel(`${label}の点数（百点単位）`, { exact: true }).fill(value);
+    await page.getByRole('button', { name: `${label}の点数を${Number(value).toLocaleString()}点として反映`, exact: true }).click();
+  }
   expect(await page.locator('.ctx-score input').evaluateAll(inputs => inputs.map(input => input.value))).toEqual(['12345','100000','-100000','-250']);
-  await capture('scores-fallback-320', '.ctx-scores');
-  await page.getByRole('button', { name: '詳細入力', exact: true }).click();
-  for (const label of ['東','南','西','北']) await page.getByLabel(`${label}の点数（そのまま）`, { exact: true }).fill('25000');
-  await page.getByRole('button', { name: '3桁＋00に戻す', exact: true }).click();
+  expect(await page.locator('.score-suffix').allTextContents()).toEqual(['点','点','点','00']);
+  await capture('scores-exceptions-320', '.ctx-scores');
+  for (const label of ['東','南','西']) {
+    const input = page.getByLabel(`${label}の点数（そのまま）`, { exact: true });
+    await input.fill('25000'); await input.press('Tab');
+    await expect(page.getByLabel(`${label}の点数（百点単位）`, { exact: true })).toHaveValue('250');
+  }
+  await page.getByLabel('北の点数（百点単位）', { exact: true }).fill('250');
 
   for (const width of widths) {
     await page.setViewportSize({ width, height: 844 });
@@ -287,6 +308,12 @@ try {
   await page.evaluate(() => document.documentElement.style.fontSize = '150%');
   await page.setViewportSize({ width: 320, height: 720 });
   await capture('editor-320-text150');
+  await page.getByLabel('東の点数（百点単位）',{exact:true}).fill('-100000');
+  await page.getByRole('button',{name:'東の点数を-100,000点として反映',exact:true}).click();
+  await capture('scores-exception-320-text150', '.ctx-scores');
+  await page.getByLabel('東の点数（そのまま）',{exact:true}).fill('25000');
+  await page.getByLabel('東の点数（そのまま）',{exact:true}).press('Tab');
+
   await targets('.tile-actions button,.editor-save');
   await page.locator('.editor-notes > summary').click(); await capture('notes-320-text150', '.editor-notes');
   await page.locator('.editor-notes > summary').click();

@@ -49,7 +49,15 @@ async function capture(name, selector, { preserveScroll = false } = {}) {
     expect(['auto', 'scroll'].includes(pane.overflowY) && pane.scrollHeight > pane.clientHeight + 1).toBe(false);
   }
   if (geometry.listColumns) expect(geometry.listColumns).toBe(geometry.width >= 1600 ? 3 : geometry.width >= 1100 ? 2 : 1);
-  results.push({ name, geometry });
+  const scoreSuffixes = await page.locator('.ctx-score').evaluateAll(fields => fields.map(field => {
+    const input = field.querySelector('input'); const suffix = field.querySelector('.score-suffix');
+    const box = field.querySelector('.score-number'); const a = input.getBoundingClientRect(); const b = suffix.getBoundingClientRect();
+    const style = getComputedStyle(box);
+    return { inputRight: a.right, suffixLeft: b.left, suffix: suffix.textContent,
+      groupBorder: parseFloat(style.borderLeftWidth) + parseFloat(style.borderRightWidth), groupBackground: style.backgroundColor };
+  }));
+  for (const field of scoreSuffixes) { expect(field.suffixLeft).toBeGreaterThanOrEqual(field.inputRight); expect(field.groupBorder).toBe(0); expect(field.groupBackground).toBe('rgba(0, 0, 0, 0)'); }
+  results.push({ name, geometry, scoreSuffixes });
 }
 async function allSizes(name, selector) { for (const width of widths) { await page.setViewportSize({ width, height: width === 1920 ? 1080 : 900 }); await capture(`${name}-${width}`, selector); } }
 async function nav(name) { await page.getByRole('link', { name, exact: true }).click(); }
@@ -95,18 +103,20 @@ try {
   await assertFocusedControlReachable('scores-corrected-focus-1100', eastScore);
   await capture('scores-corrected-focus-1100', undefined, { preserveScroll: true });
   expect(await page.evaluate(() => localStorage.getItem('mahjong-study:v1'))).toBe(storeBeforeScoreCorrection);
-  await page.getByRole('button', { name: '詳細入力', exact: true }).click();
-  for (const [label, value] of [['東', '12345'], ['南', '100000'], ['西', '-100000'], ['北', '-25000']]) {
-    await page.getByLabel(`${label}の点数（そのまま）`, { exact: true }).fill(value);
+  await expect(page.getByRole('button', { name: '詳細入力', exact: true })).toHaveCount(0);
+  for (const [label, value] of [['東','12345'],['南','100000'],['西','-100000'],['北','-25000']]) {
+    await page.getByLabel(`${label}の点数（百点単位）`, { exact: true }).fill(value);
+    await page.getByRole('button', { name: `${label}の点数を${Number(value).toLocaleString()}点として反映`, exact: true }).click();
   }
-  await capture('scores-exact-1100', '.context-panel');
-  await page.getByRole('button', { name: '3桁＋00に戻す', exact: true }).click();
-  expect(await page.locator('.ctx-score input').evaluateAll(inputs => inputs.map(input => input.value))).toEqual(['12345', '100000', '-100000', '-250']);
-  expect(await page.locator('.score-suffix').allTextContents()).toEqual(['点', '点', '点', '00']);
-  await capture('scores-fallback-1100', '.context-panel');
-  await page.getByRole('button', { name: '詳細入力', exact: true }).click();
-  for (const label of ['東', '南', '西', '北']) await page.getByLabel(`${label}の点数（そのまま）`, { exact: true }).fill('25000');
-  await page.getByRole('button', { name: '3桁＋00に戻す', exact: true }).click();
+  expect(await page.locator('.ctx-score input').evaluateAll(inputs => inputs.map(input => input.value))).toEqual(['12345','100000','-100000','-250']);
+  expect(await page.locator('.score-suffix').allTextContents()).toEqual(['点','点','点','00']);
+  await capture('scores-exceptions-1100', '.ctx-scores');
+  for (const label of ['東','南','西']) {
+    const input = page.getByLabel(`${label}の点数（そのまま）`, { exact: true });
+    await input.fill('25000'); await input.press('Tab');
+    await expect(page.getByLabel(`${label}の点数（百点単位）`, { exact: true })).toHaveValue('250');
+  }
+  await page.getByLabel('北の点数（百点単位）', { exact: true }).fill('250');
   for (const name of ['一萬','二萬','三萬','一筒','二筒','三筒','一索','二索','三索','四索','赤五索','五索','中','中']) await page.locator('.tile-palette').getByRole('button', { name, exact: true }).click();
   await allSizes('editor-hand');
   await page.locator('.editor-tools .ukeire-panel summary').click();

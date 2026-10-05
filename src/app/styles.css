@@ -1520,15 +1520,16 @@ html { scroll-padding-top: 74px; scroll-padding-bottom: calc(var(--nav-h) + var(
 /* Compact score prefixes; non-representable existing values remain exact. */
 .ctx-scores { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .ctx-scores__heading { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-.ctx-scores__heading .btn { min-height: 44px; }
 .ctx-score { min-width: 0; }
-.score-number { display: flex; align-items: center; min-width: 0; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--surface); }
-.score-number input { width: 100%; min-width: 0; border: 0; background: transparent; text-align: right; padding: 5px 0 5px 4px; border-radius: var(--r-sm) 0 0 var(--r-sm); }
-.score-suffix { flex: none; padding-right: 4px; color: var(--ink); font-size: 0.82rem; }
+.score-number { display: flex; align-items: center; gap: 3px; min-width: 0; }
+.score-number input { width: 100%; min-width: 0; border: 1px solid var(--line); background: var(--surface); text-align: right; padding: 5px 4px; border-radius: var(--r-sm); }
+.score-suffix { flex: none; color: var(--ink); font-size: 0.82rem; }
 .score-suffix[data-empty] { visibility: hidden; }
-.score-number:focus-within { outline: 2px solid var(--accent); outline-offset: 1px; }
+.score-number input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
 .score-input-error { overflow-wrap: anywhere; }
 .score-error-actions { display: flex; flex-wrap: wrap; gap: 6px; }
 .score-error-actions .btn { min-height: 44px; }
 @media (pointer: coarse) { .score-number input, .score-suffix { font-size: max(16px, 0.82rem); } }
 @media (max-width: 560px) { .ctx-scores--wide { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+@media (max-width: 360px) { .ctx-scores { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
