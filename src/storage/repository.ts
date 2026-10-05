@@ -4,6 +4,8 @@ import {
   SCHEMA_VERSION,
   STORAGE_KEY,
   type Attempt,
+  type LearningMaterial,
+  type MaterialStudyEvent,
   type Problem,
   type Settings,
   type Store,
@@ -18,10 +20,11 @@ import { createMeld } from '../domain/melds';
 import { SampleCatalogStorage, validCatalogReceipts } from './sampleCatalogStorage';
 import { canonicalJson } from '../data/sampleIdentity';
 import { applyAttemptToStudy, bumpDaily, dayKey, dayKeyFromIso, normalizeStore } from '../domain/records';
+import { MATERIAL_LIMITS, materialSourceIds, materialStudySourceIds, validateLearningMaterial, validateMaterialData } from '../domain/materials';
 
 export type SaveResult =
   | { ok: true; store: Store }
-  | { ok: false; reason: string; code: 'quota' | 'conflict' | 'validation' | 'access' | 'corrupt' | 'size' };
+  | { ok: false; reason: string; code: 'quota' | 'conflict' | 'validation' | 'access' | 'corrupt' | 'size'; duplicateMaterialId?: string };
 
 export type LoadResult =
   | { ok: true; store: Store }
@@ -59,6 +62,10 @@ function isStoreShape(value: unknown): value is Store {
     !!o.settings &&
     typeof (o.settings as Settings).autoSort === 'boolean'
   );
+}
+
+function sameMaterialSnapshot(a: MaterialStudyEvent, b: MaterialStudyEvent): boolean {
+  return a.at === b.at && a.title === b.title && a.url === b.url && a.comment === b.comment;
 }
 
 export class LocalStorageRepository {
@@ -138,11 +145,17 @@ export class LocalStorageRepository {
         raw,
       };
     }
+    const materialData = validateMaterialData(parsed);
+    if (!materialData.ok) return { ok: false, reason: materialData.reason, code: 'corrupt', raw };
+    const { ok: _ok, ...materialFields } = materialData;
     this.memoryRevision = parsed.revision;
-    return { ok: true, store: normalizeStore(parsed) };
+    return { ok: true, store: normalizeStore({ ...parsed, ...materialFields }) };
   }
 
-  private persist(store: Store): SaveResult {
+  private persist(store: Store, expectedRaw?: string | null): SaveResult {
+    const materialData = validateMaterialData(store);
+    if (!materialData.ok) return { ok: false, reason: materialData.reason, code: 'validation' };
+    const { ok: _ok, ...materialFields } = materialData;
     if (this.memoryRevision !== null && store.revision !== this.memoryRevision + 1 && store.revision !== this.memoryRevision) {
       // caller should bump revision; we check against saved
     }
@@ -155,7 +168,7 @@ export class LocalStorageRepository {
       };
     }
 
-    const next: Store = { ...store, revision: (this.memoryRevision ?? store.revision) + 1 };
+    const next: Store = { ...store, ...materialFields, revision: (this.memoryRevision ?? store.revision) + 1 };
     const text = JSON.stringify(next);
     const bytes = utf16Size(text);
     if (bytes > LIMITS.storageMaxBytes) {
@@ -166,6 +179,9 @@ export class LocalStorageRepository {
       };
     }
     try {
+      if (expectedRaw !== undefined && localStorage.getItem(this.key) !== expectedRaw) {
+        return { ok: false, code: 'conflict', reason: '別タブでデータが更新されています。再読込してください' };
+      }
       localStorage.setItem(this.key, text);
     } catch (e) {
       const name = e instanceof DOMException ? e.name : '';
@@ -219,10 +235,14 @@ export class LocalStorageRepository {
   }
 
   updateSampleCatalog(store: Store, selectedIds: string[]): SaveResult {
+    const materials = validateMaterialData(store);
+    if (!materials.ok) return { ...materials, code: 'validation' };
     return this.sampleCatalogStorage().update(store, selectedIds);
   }
 
   restoreSampleCatalog(store: Store, backupId: string): SaveResult {
+    const materials = validateMaterialData(store);
+    if (!materials.ok) return { ...materials, code: 'validation' };
     return this.sampleCatalogStorage().restore(store, backupId);
   }
 
@@ -238,6 +258,81 @@ export class LocalStorageRepository {
     // force write with bump from memory
     const next = { ...store, schemaVersion: SCHEMA_VERSION as 1 };
     return this.persist(next);
+  }
+
+  /** Material actions must not overwrite a stale in-memory store, even within one tab. */
+  private checkMaterialWrite(store: Store): { ok: true; raw: string | null } | Extract<SaveResult, { ok: false }> {
+    const conflict: Extract<SaveResult, { ok: false }> = {
+      ok: false, code: 'conflict', reason: 'データが更新されています。再読込してから保存してください',
+    };
+    if (this.memoryRevision !== null && store.revision !== this.memoryRevision) return conflict;
+    try {
+      const raw = localStorage.getItem(this.key);
+      if (raw === null) return store.revision === 0 ? { ok: true, raw } : conflict;
+      let parsed: unknown;
+      try { parsed = JSON.parse(raw); } catch { return { ok: false, code: 'corrupt', reason: '保存データを読み取れません。データは変更していません' }; }
+      if (!isStoreShape(parsed)) return { ok: false, code: 'corrupt', reason: '保存データの形式が不正です。データは変更していません' };
+      const materialData = validateMaterialData(parsed);
+      if (!materialData.ok) return { ok: false, code: 'corrupt', reason: materialData.reason };
+      const { ok: _ok, ...materialFields } = materialData;
+      if (canonicalJson(normalizeStore({ ...parsed, ...materialFields })) !== canonicalJson(normalizeStore(store))) return conflict;
+      return { ok: true, raw };
+    } catch {
+      return { ok: false, code: 'access', reason: '保存データの読み取りに失敗しました。データは変更していません' };
+    }
+  }
+
+  saveMaterial(store: Store, material: LearningMaterial): SaveResult {
+    const checked = validateLearningMaterial(material);
+    if (!checked.ok) return { ...checked, code: 'validation' };
+    const current = this.checkMaterialWrite(store);
+    if (!current.ok) return current;
+    const materials = store.materials ?? [];
+    const duplicate = materials.find((item) => item.id !== checked.material.id && item.url === checked.material.url);
+    if (duplicate) return {
+      ok: false, code: 'validation', reason: `このURLは「${duplicate.title}」に登録済みです`, duplicateMaterialId: duplicate.id,
+    };
+    const previous = materials.find((item) => item.id === checked.material.id);
+    const now = nowIso();
+    const saved: LearningMaterial = {
+      ...checked.material, createdAt: previous?.createdAt ?? now, updatedAt: now,
+    };
+    saved.sourceIds = previous ? materialSourceIds(previous) : materialSourceIds({ ...saved, sourceIds: undefined });
+    return this.persist({ ...store, materials: previous
+      ? materials.map((item) => item.id === saved.id ? saved : item)
+      : [...materials, saved] }, current.raw);
+  }
+
+  recordMaterialStudy(store: Store, materialId: string, comment: string, eventId: string): SaveResult {
+    if (typeof eventId !== 'string' || !eventId.trim() || typeof comment !== 'string' || comment.length > MATERIAL_LIMITS.comment) {
+      return { ok: false, code: 'validation', reason: `学習記録のIDまたはコメントが不正です。コメントは${MATERIAL_LIMITS.comment}文字以内で入力してください` };
+    }
+    const current = this.checkMaterialWrite(store);
+    if (!current.ok) return current;
+    const material = store.materials?.find((item) => item.id === materialId);
+    if (!material) return { ok: false, code: 'validation', reason: '教材が見つかりません' };
+    const events = store.materialStudyEvents ?? [];
+    const existing = events.find((event) => event.id === eventId);
+    if (existing) return existing.materialId === materialId && existing.comment === comment
+      ? { ok: true, store }
+      : { ok: false, code: 'validation', reason: 'この学習記録IDは別の記録に使用されています' };
+    const at = nowIso();
+    const event: MaterialStudyEvent = { id: eventId, materialId, at, title: material.title, url: material.url, comment };
+    event.sourceIds = materialStudySourceIds(event);
+    return this.persist({
+      ...store,
+      materials: store.materials!.map((item) => item.id === materialId ? { ...item, comment, updatedAt: at } : item),
+      materialStudyEvents: [...events, event],
+    }, current.raw);
+  }
+
+  undoMaterialStudy(store: Store, eventId: string): SaveResult {
+    const current = this.checkMaterialWrite(store);
+    if (!current.ok) return current;
+    const events = store.materialStudyEvents ?? [];
+    if (!events.some((event) => event.id === eventId)) return { ok: true, store };
+    // The saved material comment is an editable note. Undo removes only this event, including after midnight.
+    return this.persist({ ...store, materialStudyEvents: events.filter((event) => event.id !== eventId) }, current.raw);
   }
 
   saveProblem(store: Store, problem: Problem, isNew: boolean, inTest?: boolean): SaveResult {
@@ -443,21 +538,32 @@ export class LocalStorageRepository {
     if (!isStoreShape(parsed)) {
       return { ok: false, reason: 'バックアップの形式が不正です', code: 'validation' };
     }
+    const materialData = validateMaterialData(parsed);
+    if (!materialData.ok) return { ok: false, reason: materialData.reason, code: 'validation' };
+    const { ok: _ok, ...materialFields } = materialData;
+    const backup: Store = { ...parsed, ...materialFields };
+    let expectedRaw: string | null | undefined;
+    if (current.materials !== undefined || current.materialStudyEvents !== undefined ||
+      backup.materials !== undefined || backup.materialStudyEvents !== undefined) {
+      const before = this.checkMaterialWrite(current);
+      if (!before.ok) return before;
+      expectedRaw = before.raw;
+    }
 
     if (mode === 'replace') {
       // Backup receipts describe local, already committed operations. Foreign or altered receipts cannot authorize an undo here.
-      const incoming = validCatalogReceipts(parsed.sampleCatalogUpdates) ? parsed.sampleCatalogUpdates ?? [] : [];
+      const incoming = validCatalogReceipts(backup.sampleCatalogUpdates) ? backup.sampleCatalogUpdates ?? [] : [];
       const local = validCatalogReceipts(current.sampleCatalogUpdates) ? current.sampleCatalogUpdates ?? [] : [];
       const sampleCatalogUpdates = local.filter((receipt) => incoming.some((entry) => canonicalJson(entry) === canonicalJson(receipt)));
-      const replacement: Store = { ...parsed, revision: current.revision, sampleCatalogUpdates };
+      const replacement: Store = { ...backup, revision: current.revision, sampleCatalogUpdates };
       if (sampleCatalogUpdates.length === 0) delete replacement.sampleCatalogUpdates;
-      return this.persist(normalizeStore(replacement));
+      return this.persist(normalizeStore(replacement), expectedRaw);
     }
 
     // merge: re-id problems/attempts, merge tags by name
     const tagIdMap = new Map<string, string>();
     const tags = [...current.tags];
-    for (const t of parsed.tags) {
+    for (const t of backup.tags) {
       const key = normalizeTagKey(t.name);
       const existing = tags.find((x) => normalizeTagKey(x.name) === key);
       if (existing) {
@@ -476,7 +582,7 @@ export class LocalStorageRepository {
     const attempts = [...current.attempts];
     const now = nowIso();
 
-    for (const p of parsed.problems) {
+    for (const p of backup.problems) {
       const newId = createId('prob');
       problemIdMap.set(p.id, newId);
       problems.push({
@@ -490,15 +596,50 @@ export class LocalStorageRepository {
       });
     }
 
-    for (const s of parsed.study) {
+    for (const s of backup.study) {
       const newPid = problemIdMap.get(s.problemId);
       if (!newPid) continue;
       study.push({ ...s, problemId: newPid });
     }
-    for (const a of parsed.attempts) {
+    for (const a of backup.attempts) {
       const newPid = problemIdMap.get(a.problemId);
       if (!newPid) continue;
       attempts.push({ ...a, id: createId('attm'), problemId: newPid });
+    }
+
+    const materials = [...(current.materials ?? [])];
+    const materialIdMap = new Map<string, string>();
+    for (const material of backup.materials ?? []) {
+      const sources = materialSourceIds(material);
+      const existing = materials.find((item) => materialSourceIds(item).some((source) => sources.includes(source))) ??
+        materials.find((item) => item.url === material.url);
+      if (existing) {
+        // Keep current content and retain every imported identity, even when all its study events are undone.
+        materialIdMap.set(material.id, existing.id);
+        const index = materials.indexOf(existing);
+        materials[index] = { ...existing, sourceIds: [...new Set([...materialSourceIds(existing), ...sources])] };
+      } else {
+        const id = materials.some((item) => item.id === material.id) ? createId('material') : material.id;
+        materialIdMap.set(material.id, id);
+        materials.push({ ...material, id, sourceIds: sources });
+      }
+    }
+    const materialStudyEvents = [...(current.materialStudyEvents ?? [])];
+    for (const event of backup.materialStudyEvents ?? []) {
+      const sources = materialStudySourceIds(event);
+      const mapped: MaterialStudyEvent = { ...event, materialId: materialIdMap.get(event.materialId)!, sourceIds: sources };
+      const existing = materialStudyEvents.find((saved) => materialStudySourceIds(saved).some((source) => sources.includes(source)));
+      if (existing) {
+        if (existing.materialId !== mapped.materialId || !sameMaterialSnapshot(existing, mapped)) {
+          return { ok: false, code: 'validation', reason: '同じ元データの学習記録に異なる内容が含まれています。データは変更していません' };
+        }
+        const index = materialStudyEvents.indexOf(existing);
+        materialStudyEvents[index] = { ...existing, sourceIds: [...new Set([...materialStudySourceIds(existing), ...sources])] };
+        continue;
+      }
+      // The source identity persists independently; a new local ID can never become another incoming event's identity.
+      const id = materialStudyEvents.some((saved) => saved.id === mapped.id) ? createId('material-study') : mapped.id;
+      materialStudyEvents.push({ ...mapped, id });
     }
 
     return this.persist({
@@ -508,7 +649,9 @@ export class LocalStorageRepository {
       study,
       attempts,
       settings: current.settings,
-    });
+      ...(current.materials !== undefined || backup.materials !== undefined ? { materials } : {}),
+      ...(current.materialStudyEvents !== undefined || backup.materialStudyEvents !== undefined ? { materialStudyEvents } : {}),
+    }, expectedRaw);
   }
 
   addFromShare(store: Store, payload: SharePayload): SaveResult {

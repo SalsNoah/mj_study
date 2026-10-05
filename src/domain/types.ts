@@ -125,6 +125,30 @@ export type Attempt = {
   result: AttemptResult;
 };
 
+/** 外部教材。問題名・問題の学習状態とは独立して保存する。 */
+export type LearningMaterial = {
+  id: string;
+  title: string;
+  url: string;
+  comment: string;
+  createdAt: string;
+  updatedAt: string;
+  /** Lossless original identities retained across imports, URL edits and history undo. */
+  sourceIds?: string[];
+};
+
+/** 1回の手動学習記録。教材を編集しても、その時の内容を残す。 */
+export type MaterialStudyEvent = {
+  id: string;
+  materialId: string;
+  at: string;
+  title: string;
+  url: string;
+  comment: string;
+  /** Original event identities are independent of IDs remapped to avoid local collisions. */
+  sourceIds?: string[];
+};
+
 export type Settings = {
   autoSort: boolean;
 };
@@ -139,6 +163,8 @@ export type Store = {
   settings: Settings;
   daily?: Record<string, DailyLog>;
   sampleCatalogUpdates?: SampleCatalogReceipt[];
+  materials?: LearningMaterial[];
+  materialStudyEvents?: MaterialStudyEvent[];
 };
 
 export const SCHEMA_VERSION = 1 as const;

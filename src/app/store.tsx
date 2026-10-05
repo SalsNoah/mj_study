@@ -14,7 +14,7 @@ import {
   type LoadResult,
   type SaveResult,
 } from '@/storage/repository';
-import { emptyStore, type Attempt, type Problem, type Settings, type Store, type StudyState, type Tag } from '@/domain/types';
+import { emptyStore, type Attempt, type LearningMaterial, type Problem, type Settings, type Store, type StudyState, type Tag } from '@/domain/types';
 import type { SharePayload } from '@/domain/share';
 
 type AppState = {
@@ -30,6 +30,9 @@ type AppState = {
   clearError: () => void;
   dismissConflict: () => void;
   saveProblem: (problem: Problem, isNew: boolean, inTest?: boolean) => SaveResult;
+  saveMaterial: (material: LearningMaterial) => SaveResult;
+  recordMaterialStudy: (materialId: string, comment: string, eventId: string) => SaveResult;
+  undoMaterialStudy: (eventId: string) => SaveResult;
   deleteProblem: (id: string) => SaveResult;
   duplicateProblem: (id: string) => SaveResult;
   confirmProblem: (id: string) => SaveResult;
@@ -116,6 +119,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     clearError: () => setLastError(null),
     dismissConflict: () => setExternalConflict(false),
     saveProblem: (p, isNew, inTest) => applySave(repo.saveProblem(store, p, isNew, inTest)),
+    saveMaterial: (material) => applySave(repo.saveMaterial(store, material)),
+    recordMaterialStudy: (id, comment, eventId) => applySave(repo.recordMaterialStudy(store, id, comment, eventId)),
+    undoMaterialStudy: (eventId) => applySave(repo.undoMaterialStudy(store, eventId)),
     deleteProblem: (id) => applySave(repo.deleteProblem(store, id)),
     duplicateProblem: (id) => applySave(repo.duplicateProblem(store, id)),
     confirmProblem: (id) => applySave(repo.confirmProblem(store, id)),
