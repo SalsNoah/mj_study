@@ -108,7 +108,7 @@ it('registers a URL and title, reopens saved fields, and never counts registrati
   expect(persisted().materialStudyEvents).toHaveLength(0);
   await click(host.querySelector<HTMLElement>('.material-back')!);
   expect(host.querySelectorAll('.material-card')).toHaveLength(1);
-  await click(host.querySelector<HTMLElement>('.material-card')!);
+  await click(host.querySelector<HTMLElement>('.material-record-link')!);
   expect(field('タイトル').value).toBe('受入れの基本');
   expect(field('URL').value).toBe('https://www.youtube.com/watch?v=lesson-a');
   expect(persisted().materialStudyEvents).toHaveLength(0);
@@ -301,4 +301,65 @@ it('blocks a missed external conflict on save and does not overwrite the newer r
   expect(field('コメント').value).toBe('古い画面のコメント');
   expect(button('コメントを保存').disabled).toBe(true);
   expect(persisted().materials![0]!.comment).toBe('最新版');
+});
+
+it('shows a direct external link and study count without navigating through the detail page', async () => {
+  const original = seed([material('youtube', { title: '動画教材', url: 'https://youtu.be/7lCDEYXw3mM?si=private-token', comment: '保存済みのメモ' })]);
+  original.materialStudyEvents = [{ id: 'study-one', materialId: 'youtube', title: '動画教材', url: original.materials![0]!.url, comment: '', at: '2026-10-04T00:00:00Z' }];
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(original));
+  await mount();
+  const before = localStorage.getItem(STORAGE_KEY);
+  const card = host.querySelector('.material-card')!;
+  expect(card.tagName).toBe('ARTICLE');
+  expect(card.querySelector('.material-count')!.textContent).toBe('学習 1 回');
+  const link = card.querySelector<HTMLAnchorElement>('.material-direct-link')!;
+  expect(link.href).toBe(original.materials![0]!.url);
+  expect(link.target).toBe('_blank');
+  expect(link.rel).toBe('noopener noreferrer');
+  await click(link);
+  expect(host.querySelector('h1')!.textContent).toBe('学習教材');
+  expect(localStorage.getItem(STORAGE_KEY)).toBe(before);
+  await click(card.querySelector<HTMLElement>('.material-record-link')!);
+  expect(field('コメント').value).toBe('保存済みのメモ');
+});
+
+it('requests only the YouTube video thumbnail without credentials or referrer and falls back on failure', async () => {
+  seed([material('youtube', { url: 'https://www.youtube.com/watch?v=7lCDEYXw3mM&list=private&si=token#secret' }), material('note', { url: 'https://note.com/author/n/content' })]);
+  await mount();
+  const images = host.querySelectorAll('img');
+  expect(images).toHaveLength(1);
+  const thumbnail = images[0]!;
+  expect(thumbnail.src).toBe('https://i.ytimg.com/vi/7lCDEYXw3mM/mqdefault.jpg');
+  expect(thumbnail.crossOrigin).toBe('anonymous');
+  expect(thumbnail.getAttribute('referrerpolicy')).toBe('no-referrer');
+  expect(thumbnail.getAttribute('loading')).toBe('lazy');
+  await act(async () => thumbnail.dispatchEvent(new Event('error')));
+  expect(host.querySelectorAll('img')).toHaveLength(0);
+  expect(host.querySelectorAll('.material-thumbnail__placeholder')).toHaveLength(2);
+  expect(host.querySelectorAll('.material-direct-link')).toHaveLength(2);
+});
+
+it('filters title and URL, distinguishes no matches, and preserves the add draft and stored events', async () => {
+  seed([material('a', { title: '牌効率 ＡＢＣ', url: 'https://example.com/lesson-a' }), material('b', { title: '守備', url: 'https://note.com/defense', comment: '牌効率という私用メモ' })]);
+  await mount();
+  const before = localStorage.getItem(STORAGE_KEY);
+  await click(button('教材を追加'));
+  await input(field('URL'), 'https://example.com/unsaved');
+  await input(field('タイトル（任意）'), '未保存の登録');
+  const search = field('教材を検索');
+  await input(search, 'abc');
+  expect(host.querySelectorAll('.material-card')).toHaveLength(1);
+  expect(host.querySelector('.count-pill')!.textContent).toBe('1 / 2 件');
+  await input(search, 'NOTE.COM');
+  expect(host.querySelector('.material-card h2')!.textContent).toBe('守備');
+  await input(search, '存在しない教材');
+  expect(host.querySelectorAll('.material-card')).toHaveLength(0);
+  expect(host.textContent).toContain('条件に合う教材はありません。');
+  expect(host.textContent).not.toContain('教材はまだありません。');
+  await click(button('検索をクリア'));
+  expect(host.querySelectorAll('.material-card')).toHaveLength(2);
+  expect(document.activeElement).toBe(search);
+  expect(field('URL').value).toBe('https://example.com/unsaved');
+  expect(field('タイトル（任意）').value).toBe('未保存の登録');
+  expect(localStorage.getItem(STORAGE_KEY)).toBe(before);
 });

@@ -4,6 +4,8 @@ import { useApp } from '@/app/store';
 import { createId, nowIso } from '@/domain/ids';
 import { countMaterialStudies, MATERIAL_LIMITS, normalizeMaterialUrl } from '@/domain/materials';
 import { materialHost } from './materialPresentation';
+import { filterMaterials } from './materialList';
+import { MaterialThumbnail } from './MaterialThumbnail';
 
 export function MaterialsPage() {
   const { store, saveMaterial, externalConflict } = useApp();
@@ -13,9 +15,12 @@ export function MaterialsPage() {
   const [title, setTitle] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [duplicateId, setDuplicateId] = useState<string | null>(null);
+  const [query, setQuery] = useState('');
   const saving = useRef(false);
+  const searchInput = useRef<HTMLInputElement>(null);
   const draftId = useRef(createId('material'));
   const materials = [...(store.materials ?? [])].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+  const visibleMaterials = filterMaterials(materials, query);
 
   const register = (event: FormEvent) => {
     event.preventDefault();
@@ -50,7 +55,7 @@ export function MaterialsPage() {
     <div className="page page--materials">
       <header className="page-header page-header--compact">
         <h1>学習教材</h1>
-        <p className="count-pill">{materials.length.toLocaleString('ja-JP')} 件</p>
+        <p className="count-pill" aria-live="polite">{query.trim() ? `${visibleMaterials.length.toLocaleString('ja-JP')} / ` : ''}{materials.length.toLocaleString('ja-JP')} 件</p>
       </header>
 
       {(showForm || materials.length === 0) ? (
@@ -78,18 +83,34 @@ export function MaterialsPage() {
         </form>
       ) : <button className="btn btn-primary materials-add" type="button" onClick={() => setShowForm(true)}>教材を追加</button>}
 
-      {materials.length === 0 ? <div className="empty materials-empty"><p>教材はまだありません。</p></div> : (
+      {materials.length > 0 && <div className="material-search">
+        <label className="field">
+          <span className="sr-only">教材を検索</span>
+          <input ref={searchInput} type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="タイトル・URLで検索" />
+        </label>
+        {query && <button className="btn" type="button" onClick={() => { setQuery(''); searchInput.current?.focus(); }}>検索をクリア</button>}
+      </div>}
+      {materials.length === 0 ? <div className="empty materials-empty"><p>教材はまだありません。</p></div> : visibleMaterials.length === 0 ? (
+        <div className="empty materials-empty" role="status"><p>条件に合う教材はありません。</p></div>
+      ) : (
         <ul className="material-list" aria-label="登録した教材">
-          {materials.map((material) => (
+          {visibleMaterials.map((material) => (
             <li key={material.id}>
-              <Link className="material-card" to={`/materials/${encodeURIComponent(material.id)}`}>
-                <div className="material-card__heading">
-                  <strong>{material.title}</strong>
+              <article className="material-card">
+                <MaterialThumbnail url={material.url} />
+                <div className="material-card__body">
+                  <h2>{material.title}</h2>
                   <span className="material-count">学習 {countMaterialStudies(store.materialStudyEvents, material.id).toLocaleString('ja-JP')} 回</span>
+                  <span className="material-source">{materialHost(material.url)}</span>
+                  {material.comment && <p className="material-card__comment">{material.comment}</p>}
                 </div>
-                <span className="material-source">{materialHost(material.url)}</span>
-                {material.comment && <p className="material-card__comment">{material.comment}</p>}
-              </Link>
+                <div className="material-card__actions">
+                  <a className="btn btn-primary material-direct-link" href={material.url} target="_blank" rel="noopener noreferrer"
+                    aria-label={`${material.title}のリンクを開く（新しいタブ）`}>リンクを開く <span aria-hidden="true">↗</span></a>
+                  <Link className="btn material-record-link" to={`/materials/${encodeURIComponent(material.id)}`}
+                    aria-label={`${material.title}の記録・コメント`}>記録・コメント</Link>
+                </div>
+              </article>
             </li>
           ))}
         </ul>
