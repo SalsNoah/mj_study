@@ -70,12 +70,15 @@ async function capture(name, selector, { preserveScroll = false } = {}) {
   const cardHands = await page.locator('.problem-card .hand-mini').evaluateAll(hands => hands.map(el => {
     const base = el.querySelector('.hand-strip > :first-child'); const drawn = el.querySelector('.hand-view__drawn');
     if (!base || !drawn) return null;
-    const a=base.getBoundingClientRect(),b=drawn.getBoundingClientRect(),c=el.getBoundingClientRect();
-    return {baseWidth:a.width,drawnWidth:b.width,baseBottom:a.bottom,drawnBottom:b.bottom,drawnRight:b.right,cardRight:c.right};
+    const a=base.getBoundingClientRect(),b=drawn.getBoundingClientRect(),c=el.getBoundingClientRect(),d=drawn.firstElementChild.getBoundingClientRect();
+    return {baseWidth:a.width,drawnWidth:b.width,baseBottom:a.bottom,drawnBottom:b.bottom,drawnRight:b.right,cardRight:c.right,baseTop:a.top,tileTop:d.top,tileBottom:d.bottom,baseHeight:a.height,tileHeight:d.height};
   }).filter(Boolean));
   if (geometry.width >= 1100) for (const hand of cardHands) {
     expect(Math.abs(hand.baseWidth-hand.drawnWidth)).toBeLessThanOrEqual(1);
     expect(Math.abs(hand.baseBottom-hand.drawnBottom)).toBeLessThanOrEqual(1);
+    expect(Math.abs(hand.baseTop-hand.tileTop)).toBeLessThanOrEqual(1);
+    expect(Math.abs(hand.baseBottom-hand.tileBottom)).toBeLessThanOrEqual(1);
+    expect(Math.abs(hand.baseHeight-hand.tileHeight)).toBeLessThanOrEqual(1);
     expect(hand.drawnRight).toBeLessThanOrEqual(hand.cardRight+1);
   }
   const scoreSuffixes = await page.locator('.ctx-score').evaluateAll(fields => fields.map(field => {

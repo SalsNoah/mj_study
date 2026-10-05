@@ -325,6 +325,18 @@ try {
   await page.getByLabel('東の点数（そのまま）',{exact:true}).fill('25000');
   await page.getByLabel('東の点数（そのまま）',{exact:true}).press('Tab');
 
+  await page.getByLabel('東の点数（百点単位）',{exact:true}).click();
+  for (const key of ['Tab','Tab','Tab','Shift+Tab','Shift+Tab','Shift+Tab']) {
+    await page.keyboard.press(key);
+    const focusedScore = await page.evaluate(() => {
+      const el=document.activeElement,r=el.getBoundingClientRect(),header=document.querySelector('.page--editor header').getBoundingClientRect(),nav=document.querySelector('.bottom-nav').getBoundingClientRect();
+      const hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);
+      return {label:el.getAttribute('aria-label'),top:r.top,bottom:r.bottom,headerBottom:header.bottom,navTop:nav.top,hit:!!hit && el.contains(hit)};
+    });
+    expect(focusedScore.hit).toBe(true);expect(focusedScore.top).toBeGreaterThanOrEqual(focusedScore.headerBottom-1);expect(focusedScore.bottom).toBeLessThanOrEqual(focusedScore.navTop);
+    results.push({name:'editor-score-keyboard-text150',key,focusedScore});
+  }
+  await page.screenshot({path:`${evidence}editor-score-keyboard-text150.png`,fullPage:false,animations:'disabled'});
   await targets('.tile-actions button,.editor-save');
   await page.locator('.editor-notes > summary').click(); await capture('notes-320-text150', '.editor-notes');
   await page.locator('.editor-notes > summary').click();

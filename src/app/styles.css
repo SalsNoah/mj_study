@@ -1510,7 +1510,7 @@ html { scroll-padding-top: 74px; scroll-padding-bottom: calc(var(--nav-h) + var(
   .page--library .problem-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
   .page--library .problem-card { height: 100%; }
   .page--library .hand-mini { --hand-tile-w: min(40px, calc((100cqw - 6px) / 14)); }
-  .page--library .hand-view__drawn { flex: 0 0 var(--hand-tile-w); width: var(--hand-tile-w); margin-left: 6px; }
+  .page--library .hand-view__drawn { display: flex; flex: 0 0 var(--hand-tile-w); width: var(--hand-tile-w); margin-left: 6px; }
   .page--library .hand-view__drawn > .tile-face, .page--library .hand-view__drawn > .tile-btn { min-width: 0; max-width: var(--hand-tile-w); }
   .sticky-actions { bottom: 16px; }
   .page--test .count-grid { max-width: 600px; }
