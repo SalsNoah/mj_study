@@ -18,7 +18,7 @@ async function open(profile = seed) {
  await ctx.route('**/*',r=>new URL(r.request().url()).origin===origin?r.continue():r.abort());
  page=await ctx.newPage();page.on('pageerror',e=>errors.push(e.message));await page.goto(origin);return ctx;
 }
-async function nav(name) { await page.getByRole('link',{name,exact:true}).click(); }
+async function nav(name) { await page.getByRole('link',{name,exact:true}).click(); const selector={'作成':'.page--editor','学習帳':'.page--library','テスト':'.page--test','学習教材':'.page--materials','記録帳':'.page--records','設定':'.page--settings'}[name]; await page.locator(selector).waitFor({state:'visible'}); }
 async function capture(name, selector) {
  if(selector)await page.locator(selector).evaluate(el=>el.scrollIntoView({block:'center'}));else await page.evaluate(()=>scrollTo(0,0));
  await page.evaluate(()=>document.fonts.ready);await page.screenshot({path:`${out}${name}.png`,animations:'disabled'});
@@ -26,6 +26,7 @@ async function capture(name, selector) {
  expect(g.documentWidth).toBeLessThanOrEqual(g.width);results.push({name,...g});
 }
 async function mainDisclosures(name) {
+ await expect(page.locator('.editor-tools > details > summary')).toHaveCount(2);await expect(page.locator('.editor-tools > details > summary').first()).toBeVisible();
  const styles=await page.locator('.editor-tools > details > summary').evaluateAll(items=>items.map(el=>{const s=getComputedStyle(el),m=getComputedStyle(el,'::before');return {font:s.fontFamily,size:s.fontSize,weight:s.fontWeight,line:s.lineHeight,letter:s.letterSpacing,marker:[m.borderLeftWidth,m.borderTopWidth,m.borderBottomWidth],height:el.getBoundingClientRect().height};}));
  expect(styles).toHaveLength(2);expect(styles[0]).toEqual(styles[1]);expect(styles[0].height).toBeGreaterThanOrEqual(44);results.push({name:`${name}-matching-disclosures`,styles});
 }
