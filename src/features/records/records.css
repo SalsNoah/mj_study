@@ -29,16 +29,16 @@
 .page--records .stat { background: var(--records-paper); border-color: var(--records-rule); padding: 9px 4px; }
 .page--records .stat span { color: var(--records-muted); font-size: 0.75rem; }
 .page--records .stat strong { color: var(--records-ink); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
-.page--records .records-title { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 12px 10px; padding: 14px; background: var(--records-paper); border-color: var(--records-rule); box-shadow: none; }
-.page--records .records-title__identity { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.page--records .records-title { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 10px; padding: 14px; background: var(--records-paper); border-color: var(--records-rule); box-shadow: none; }
+.page--records .records-title__identity { display: flex; flex: 1 1 9rem; align-items: center; gap: 10px; min-width: 0; }
 .page--records .records-title .badge-icon { width: 60px; height: 60px; filter: none; }
 .page--records .records-title__eyebrow { margin: 0 0 3px; color: var(--records-muted); font-size: 0.75rem; }
 .page--records .records-title h2 { margin: 0; color: var(--records-ink); font-size: 1.12rem; line-height: 1.5; }
-.page--records .records-title__total { display: grid; gap: 1px; margin: 0; text-align: right; }
+.page--records .records-title__total { display: grid; flex: 0 1 auto; min-width: 0; overflow-wrap: anywhere; gap: 1px; margin: 0 0 0 auto; text-align: right; }
 .page--records .records-title__total > span { color: var(--records-muted); font-size: 0.75rem; }
 .page--records .records-title__total strong { color: var(--records-ink); font-size: 1.4rem; font-weight: 600; font-variant-numeric: tabular-nums; }
 .page--records .records-title__total small { margin-left: 3px; font-size: 0.75rem; font-weight: 400; }
-.page--records .records-title__progress { grid-column: 1 / -1; padding-top: 11px; border-top: 1px solid var(--records-rule); }
+.page--records .records-title__progress { flex: 1 0 100%; min-width: 0; padding-top: 11px; border-top: 1px solid var(--records-rule); }
 .page--records .records-title__next { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 12px; margin-bottom: 8px; }
 .page--records .records-title__next p { margin: 0; color: var(--records-muted); font-size: 0.75rem; }
 .page--records .records-title__next span { margin-left: 5px; color: var(--records-ink); font-weight: 600; }
