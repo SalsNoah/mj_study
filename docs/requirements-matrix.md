@@ -1,6 +1,6 @@
 # 要件 → 実装箇所 → テスト対応表
 
-仕様書 v1.0 を唯一の基準とする。
+初版仕様書 v1.0 の対応表。変更された項目は最新の依頼と仕様書に従う。
 
 | 受入 | 要件概要 | 実装箇所 | テスト |
 |---|---|---|---|
@@ -29,7 +29,7 @@
 | A23 | 苦手優先・タグ・ランダム | `domain/quiz.ts` | unit |
 | A24 | クイズ開始前ネタバレなし | `features/review` | e2e |
 | A25 | 添付上限・圧縮・削除取消 | `export/compressImage.ts` | unit |
-| A26 | PNG出力 | `export/renderTiles.ts` | unit/manual |
+| A26 | PNG書き出しは2026-10-05の依頼で廃止。画像添付は維持 | `features/detail/DetailPage.tsx`, `export/renderTiles.ts`（添付圧縮のみ） | `DetailActions.test.tsx`, `compressImageFile.test.ts` |
 | A27 | URL往復・自動保存なし | `domain/share.ts` | unit + e2e |
 | A28 | 共有に画像・メモ・履歴なし | `domain/share.ts` | unit |
 | A29 | 正解共有OFFでpayload除外 | `domain/share.ts` | unit |

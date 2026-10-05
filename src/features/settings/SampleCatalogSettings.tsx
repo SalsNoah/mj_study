@@ -17,6 +17,7 @@ export type SampleBackupSummary = {
 
 type Outcome = { ok: true } | { ok: false; reason: string };
 type Props = {
+  inline?: boolean;
   preview: SampleUpdatePreview;
   backups: SampleBackupSummary[];
   backupError: string | null;
@@ -25,7 +26,7 @@ type Props = {
   onExportBackup: (backupId: string) => { ok: true; text: string } | { ok: false; reason: string };
 };
 
-export function SampleCatalogSettings({ preview, backups, backupError, onApply, onRestore, onExportBackup }: Props) {
+export function SampleCatalogSettings({ inline = false, preview, backups, backupError, onApply, onRestore, onExportBackup }: Props) {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [message, setMessage] = useState<{ error: boolean; text: string } | null>(null);
   const selectedIds = preview.candidates.filter((p) => selected.has(p.id)).map((p) => p.id);
@@ -42,13 +43,15 @@ export function SampleCatalogSettings({ preview, backups, backupError, onApply, 
     URL.revokeObjectURL(url);
   };
 
-  return <details className="details panel sample-catalog">
-    <summary>サンプル問題</summary>
+  const content = <>
     <p>新サンプル10題：正解あり8題・正解なし2題</p>
     {preview.preservedEdited > 0 && <p className="hint">編集したサンプル {preview.preservedEdited} 題はそのまま残します。</p>}
     {preview.candidates.length > 0 && <fieldset className="sample-candidates">
       <legend>削除する旧問題を選択</legend>
-      <p className="hint">旧サンプルと同じ内容の問題です。選ばない問題は残します。</p>
+      <p className="hint">旧サンプルと全内容が一致する問題です。選ばない問題は残します。</p>
+      <button type="button" className="btn" onClick={() => setSelected(
+        selectedIds.length === preview.candidates.length ? new Set() : new Set(preview.candidates.map((p) => p.id)),
+      )}>{selectedIds.length === preview.candidates.length ? '選択を解除' : '旧候補をまとめて選択'}</button>
       {preview.candidates.map((p) => <label className="check" key={p.id}>
         <input type="checkbox" checked={selected.has(p.id)} onChange={(event) => setSelected((previous) => {
           const next = new Set(previous);
@@ -85,5 +88,10 @@ export function SampleCatalogSettings({ preview, backups, backupError, onApply, 
         </div>
       </section>)}
     </details>}
+  </>;
+
+  return inline ? content : <details className="details panel sample-catalog">
+    <summary>サンプル問題</summary>
+    {content}
   </details>;
 }

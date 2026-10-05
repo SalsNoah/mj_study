@@ -38,6 +38,8 @@ export function TestCountControl({ value, max, onChange, onValidityChange }: {
     <div className="test-count">
       <label className="test-count__label" htmlFor={id}>問題数</label>
       <div className="test-count__controls">
+        <button type="button" aria-label="問題数を減らす" disabled={max === 0 || (valid && stepFrom <= min)}
+          onClick={() => change(stepFrom - 1)}>◀</button>
         <input
           id={id}
           type="text"
@@ -80,11 +82,8 @@ export function TestCountControl({ value, max, onChange, onValidityChange }: {
             change(next);
           }}
         />
-        <span aria-hidden="true">問</span>
         <button type="button" aria-label="問題数を増やす" disabled={max === 0 || (valid && stepFrom >= max)}
-          onClick={() => change(stepFrom + 1)}>△</button>
-        <button type="button" aria-label="問題数を減らす" disabled={max === 0 || (valid && stepFrom <= min)}
-          onClick={() => change(stepFrom - 1)}>▽</button>
+          onClick={() => change(stepFrom + 1)}>▶</button>
       </div>
       <small className="hint test-count__range" id={`${id}-range`}>{max > 0 ? `1〜${max} 問` : '対象 0 問'}</small>
       {!valid && showError && <small className="error test-count__error" id={`${id}-error`}>

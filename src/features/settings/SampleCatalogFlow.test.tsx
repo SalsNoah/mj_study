@@ -49,3 +49,22 @@ it('requires explicit legacy selection, preserves other records, and restores th
   for(const p of data.problems)expect(stored().problems.find((x:{id:string})=>x.id===p.id)).toEqual(p);
   expect(button('復元済み').disabled).toBe(true);
 });
+
+it('bulk-selects old candidates, keeps edited and self-created records, and restores the original snapshot',async()=>{
+  const data=emptyStore();const legacy=createLegacySampleProblems().problems;
+  data.tags=[{id:'sample-tag',name:'サンプル'}];
+  data.problems=legacy.map(p=>({...p,tagIds:['sample-tag']}));
+  data.problems.push({...data.problems[0]!,id:'edited-bulk',privateMemo:'編集した内容'});
+  data.problems.push({...data.problems[1]!,id:'own-bulk',title:'自作の問題'});
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(data));await mount();await samples();
+  const original=localStorage.getItem(STORAGE_KEY);
+  await click(button('旧候補をまとめて選択'));
+  expect(localStorage.getItem(STORAGE_KEY)).toBe(original);
+  expect(host.querySelectorAll('.sample-candidates input:checked')).toHaveLength(2);
+  await click(button('旧2題を削除して10題を追加'));
+  expect(stored().problems).toHaveLength(12);
+  for(const p of data.problems.slice(2))expect(stored().problems.find((x:{id:string})=>x.id===p.id)).toEqual(p);
+  await click(host.querySelector<HTMLElement>('.sample-backups > summary')!);await click(button('更新前の問題を復元'));
+  expect(stored().problems).toHaveLength(4);
+  for(const p of data.problems)expect(stored().problems.find((x:{id:string})=>x.id===p.id)).toEqual(p);
+});

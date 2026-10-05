@@ -15,6 +15,7 @@ import { ImportPage } from '@/features/import/ImportPage';
 import { ShareReceivePage } from '@/features/share/ShareReceivePage';
 import './styles.css';
 import '@/features/materials/materials.css';
+import './dopa.css';
 
 /** 仕様の #share=v1... を HashRouter の #/path と切り分ける */
 function readSharePayload(): string | null {
