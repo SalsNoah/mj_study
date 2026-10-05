@@ -110,7 +110,6 @@ export function EditorPage() {
   const [tagIds, setTagIds] = useState<string[]>(existing?.tagIds ?? []);
   const [tagInput, setTagInput] = useState('');
   const [context, setContext] = useState(imported?.context ?? existing?.context ?? (isNew ? initialContext() : emptyContext()));
-  const [exactScores, setExactScores] = useState(false);
   const scoreFields = useRef<Partial<Record<ScoreKey, HTMLInputElement | null>>>({});
   const [scoreInputs, setScoreInputs] = useState(() => ({
     east: scoreEntryFromValue(context.scores.east), south: scoreEntryFromValue(context.scores.south),
@@ -379,10 +378,10 @@ export function EditorPage() {
   };
   const normalizeScore = (key: ScoreKey) => {
     const parsed = parseScoreInput(scoreInputs[key].draft, scoreInputs[key].mode);
-    if (parsed.ok) setScoreInputs((previous) => ({ ...previous, [key]: scoreEntryFromValue(parsed.value, exactScores) }));
+    if (parsed.ok) setScoreInputs((previous) => ({ ...previous, [key]: scoreEntryFromValue(parsed.value) }));
   };
   const resetScoreDraft = (key: ScoreKey) => {
-    setScoreInputs((previous) => ({ ...previous, [key]: scoreEntryFromValue(context.scores[key], exactScores) }));
+    setScoreInputs((previous) => ({ ...previous, [key]: scoreEntryFromValue(context.scores[key]) }));
     setError(null);
     scoreFields.current[key]?.focus();
   };
@@ -390,19 +389,10 @@ export function EditorPage() {
     const parsed = parseScoreInput(scoreInputs[key].draft, 'exact');
     if (!parsed.ok || parsed.value === null) return;
     setContext((previous) => ({ ...previous, scores: { ...previous.scores, [key]: parsed.value } }));
-    setScoreInputs((previous) => ({ ...previous, [key]: scoreEntryFromValue(parsed.value, exactScores) }));
+    setScoreInputs((previous) => ({ ...previous, [key]: scoreEntryFromValue(parsed.value) }));
     setError(null);
     mark();
     scoreFields.current[key]?.focus();
-  };
-  const toggleScoreMode = () => {
-    if (SCORE_FIELDS.some(([key]) => scoreInputs[key].error)) return;
-    const next = !exactScores;
-    setExactScores(next);
-    setScoreInputs({
-      east: scoreEntryFromValue(context.scores.east, next), south: scoreEntryFromValue(context.scores.south, next),
-      west: scoreEntryFromValue(context.scores.west, next), north: scoreEntryFromValue(context.scores.north, next),
-    });
   };
 
   const countLabel = `${totalCount}/${totalMax}枚${kanCount > 0 ? `（槓+${kanCount}）` : ''}${
@@ -525,7 +515,7 @@ export function EditorPage() {
         <div className={`ctx-scores${SCORE_FIELDS.some(([key]) => scoreInputs[key].mode === 'exact' || scoreInputs[key].draft.startsWith('-') || scoreInputs[key].error) ? ' ctx-scores--wide' : ''}`} aria-label="点数状況">
           <div className="ctx-scores__heading">
             <span className="ctx-scores__label">点数</span>
-            <button type="button" className="btn btn-sm" onClick={toggleScoreMode} aria-pressed={exactScores} title={SCORE_FIELDS.some(([key]) => !!scoreInputs[key].error) ? '未反映の入力を修正してください' : '端数や大きい点数をそのまま入力'} disabled={SCORE_FIELDS.some(([key]) => !!scoreInputs[key].error)}>{exactScores ? '3桁＋00に戻す' : '詳細入力'}</button>
+
           </div>
           {SCORE_FIELDS.map(([key, label]) => (
             <label key={key} className="ctx-score">

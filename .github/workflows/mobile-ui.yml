@@ -7,6 +7,9 @@ on:
       - 'public/**'
       - 'scripts/validate-ukeire-ui.mjs'
       - 'scripts/validate-desktop-ui.mjs'
+      - 'scripts/validate-dora-ui.mjs'
+      - 'scripts/validate-icon-ui.mjs'
+      - 'index.html'
       - '.github/workflows/mobile-ui.yml'
 
 permissions:
@@ -31,6 +34,8 @@ jobs:
           for i in {1..30}; do curl --silent --fail http://127.0.0.1:5176/ > /dev/null && break; sleep 1; done
           node scripts/validate-ukeire-ui.mjs
           node scripts/validate-desktop-ui.mjs
+          node scripts/validate-dora-ui.mjs
+          node scripts/validate-icon-ui.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -38,4 +43,6 @@ jobs:
           path: |
             evidence/ukeire/
             evidence/desktop/
+            evidence/dora/
+            evidence/icons/
           retention-days: 7
