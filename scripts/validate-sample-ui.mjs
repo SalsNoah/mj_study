@@ -41,6 +41,16 @@ async function capture(name) {
   expect(geometry.documentWidth).toBeLessThanOrEqual(geometry.width);expect(geometry.separateDrawn).toBe(0);
   for(const c of geometry.controls)expect(c.height).toBeGreaterThanOrEqual(44);
   results.push({name,geometry});
+  // Full-page captures include the fixed navigation band. Also prove the actual
+  // scrolled viewport at each important mobile/desktop control.
+  for(const [part,selector] of [['candidate','.sample-candidates input:visible'],['primary','.sample-catalog > button:visible'],['restore','.sample-backup .btn-row button:last-child:visible']]){
+    const control=page.locator(selector).first();if(!await control.count())continue;
+    await control.evaluate(el=>el.scrollIntoView({block:'center'}));
+    const box=await control.evaluate(el=>{const r=el.getBoundingClientRect(),n=document.querySelector('.bottom-nav').getBoundingClientRect(),hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return {top:r.top,bottom:r.bottom,clearTop:innerWidth>=1100?n.bottom:0,clearBottom:innerWidth>=1100?innerHeight:n.top,hit:!!hit&&el.contains(hit)}});
+    expect(box.top).toBeGreaterThanOrEqual(box.clearTop-1);expect(box.bottom).toBeLessThanOrEqual(box.clearBottom+1);expect(box.hit).toBe(true);
+    await page.screenshot({path:`${evidence}${name}-${part}-viewport.png`,fullPage:false,animations:'disabled'});
+    results.push({name:`${name}-${part}-viewport`,control:box});
+  }
 }
 async function sizes(name) {for(const width of [320,375,390,1440]){await page.setViewportSize({width,height:width===1440?900:844});await capture(`${name}-${width}`);}}
 function label(code){if(code[1]==='z')return ['','東','南','西','北','白','發','中'][Number(code[0])];return `${code[0]==='0'?'赤五':['','一','二','三','四','五','六','七','八','九'][Number(code[0])]}${{m:'萬',p:'筒',s:'索'}[code[1]]}`;}
@@ -63,9 +73,9 @@ try {
   await page.locator('.detail-tools > summary').click();
   const pngDownloadPromise=page.waitForEvent('download');await page.getByRole('button',{name:'PNG保存',exact:true}).click();
   await (await pngDownloadPromise).saveAs(`${evidence}sample03-unified-hand.png`);
-  await page.getByRole('link',{name:'テスト',exact:true}).click();await page.getByLabel('正解ありのみ',{exact:true}).check();
+  await page.getByRole('link',{name:'テスト',exact:true}).click();await expect(page.getByLabel('正解ありのみ',{exact:true})).toHaveCount(0);
   await expect(page.locator('.count-pill')).toContainText('8 問');await capture('answer-only-eight');
-  await page.getByRole('button',{name:'8',exact:true}).click();await page.getByRole('button',{name:'8 問でテスト開始',exact:true}).click();
+  await page.getByRole('spinbutton',{name:'問題数',exact:true}).fill('8');await page.getByRole('button',{name:'8 問でテスト開始',exact:true}).click();
   const answered=[];
   for(let i=0;i<8;i++){
     const title=await page.locator('.test-title').textContent();const problem=added.problems.find(p=>p.title===title);expect(problem.answerEnabled).toBe(true);

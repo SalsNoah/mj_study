@@ -30,8 +30,8 @@ it('starts empty, adds ten samples only on request, and supplies exactly eight a
   for(const p of data.problems){expect(p.tagIds).toContain(sampleTag.id);expect(p.drawn).toBeNull();expect(p.concealed).toHaveLength(14);}
   expect(button('この10題は追加済み').disabled).toBe(true);
   await click(host.querySelector<HTMLAnchorElement>('a')!);
-  const answerOnly=[...host.querySelectorAll<HTMLInputElement>('input[type="checkbox"]')].find(input=>input.parentElement!.textContent!.includes('正解ありのみ'))!;
-  await click(answerOnly);expect(host.querySelector('.count-pill')!.textContent).toContain('8 問');
+  expect(host.textContent).not.toContain('正解ありのみ');
+  expect(host.querySelector('.count-pill')!.textContent).toContain('8 問');
 });
 
 it('requires explicit legacy selection, preserves other records, and restores through the visible recovery action',async()=>{

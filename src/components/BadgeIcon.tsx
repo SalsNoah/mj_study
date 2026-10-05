@@ -1,81 +1,27 @@
-type Tier = {
-  light: string;
-  dark: string;
-  shape: 'circle' | 'shield' | 'hexagon' | 'star';
-};
+const INKS = ['#8b715b', '#617663', '#a17a38', '#674d3d'];
 
-/** 3段階ごとに形と色が上がる：銅の円 → 銀の盾 → 金の六角 → 翠の星 */
-const TIERS: Tier[] = [
-  { light: '#e7b184', dark: '#8b4a1f', shape: 'circle' },
-  { light: '#eef2f6', dark: '#6f7c8a', shape: 'shield' },
-  { light: '#ffe28a', dark: '#b07d0c', shape: 'hexagon' },
-  { light: '#8ff0d8', dark: '#1b4d3e', shape: 'star' },
-];
+type Props = { level: number; locked?: boolean; size?: number };
 
-function starPath(points: number, outer: number, inner: number): string {
-  const d: string[] = [];
-  for (let i = 0; i < points * 2; i++) {
-    const r = i % 2 === 0 ? outer : inner;
-    const a = (Math.PI / points) * i - Math.PI / 2;
-    d.push(`${(32 + r * Math.cos(a)).toFixed(2)} ${(32 + r * Math.sin(a)).toFixed(2)}`);
-  }
-  return `M${d.join(' L')} Z`;
-}
-
-const SHAPES: Record<Tier['shape'], string> = {
-  circle: 'M32 4 A28 28 0 1 1 31.99 4 Z',
-  shield: 'M32 4 L56 12 V30 C56 46 45 56 32 61 C19 56 8 46 8 30 V12 Z',
-  hexagon: 'M32 3 L57 17.5 V46.5 L32 61 L7 46.5 V17.5 Z',
-  star: starPath(8, 30, 23),
-};
-
-type Props = {
-  level: number;
-  locked?: boolean;
-  size?: number;
-};
-
+/** A tile-shaped seal; stems mark progress within each three-level ink tier. */
 export function BadgeIcon({ level, locked = false, size = 48 }: Props) {
-  const tierIndex = Math.min(TIERS.length - 1, Math.floor(level / 3));
-  const colors = TIERS[tierIndex]!;
-  const bars = (level % 3) + 1;
-  const gradId = `badge-g-${level}`;
-  const path = SHAPES[colors.shape];
-  const barYs = bars === 1 ? [32] : bars === 2 ? [27, 37] : [22, 32, 42];
+  const safeLevel = Math.max(0, Math.min(11, Math.floor(level)));
+  const tier = Math.floor(safeLevel / 3);
+  const stems = (safeLevel % 3) + 1;
+  const ink = INKS[tier]!;
+  const positions = stems === 1 ? [32] : stems === 2 ? [26, 38] : [20, 32, 44];
 
   return (
-    <svg
-      className={`badge-icon${locked ? ' is-locked' : ''}`}
-      width={size}
-      height={size}
-      viewBox="0 0 64 64"
-      aria-hidden
-    >
-      <defs>
-        <linearGradient id={gradId} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor={colors.light} />
-          <stop offset="1" stopColor={colors.dark} />
-        </linearGradient>
-      </defs>
-      <path d={path} fill={`url(#${gradId})`} />
-      <path
-        d={path}
-        fill="none"
-        stroke="rgba(255,255,255,0.55)"
-        strokeWidth="2.5"
-        transform="translate(32 32) scale(0.8) translate(-32 -32)"
-      />
-      {barYs.map((y) => (
-        <polyline
-          key={y}
-          points={`21,${y - 4} 32,${y + 3} 43,${y - 4}`}
-          fill="none"
-          stroke="#fff"
-          strokeWidth="4.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      ))}
+    <svg className={`badge-icon${locked ? ' is-locked' : ''}`} width={size} height={size}
+      viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+      <rect x="11" y="7" width="44" height="53" rx="11" fill={ink} opacity="0.16" />
+      <rect x="9" y="4" width="44" height="53" rx="11" fill="#fffcf6" stroke={ink} strokeWidth="1.5" />
+      <rect x="14" y="9" width="34" height="43" rx="7" fill="none" stroke={ink} strokeWidth="0.8" opacity="0.4" />
+      {positions.map((x) => <g key={x} stroke={ink} strokeLinecap="round" strokeLinejoin="round" fill="none">
+        <path d={`M${x} 22 V40 M${x - 3} 29 H${x + 3} M${x - 3} 36 H${x + 3}`} strokeWidth="2.2" />
+        <path d={`M${x} 26 Q${x - 7} 26 ${x - 5} 21 Q${x} 21 ${x} 26 M${x} 33 Q${x + 7} 33 ${x + 5} 28 Q${x} 28 ${x} 33`} fill={ink} strokeWidth="0.8" />
+      </g>)}
+      {Array.from({ length: tier + 1 }, (_, index) => <circle key={index}
+        cx={31 - tier * 3 + index * 6} cy="46" r="1.5" fill={ink} />)}
     </svg>
   );
 }

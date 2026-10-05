@@ -3,6 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { clearImportDraft, peekImportDraft, setPendingShot } from '@/features/import/draft';
 import { useApp } from '@/app/store';
 import { HandView } from '@/components/HandView';
+import { AttachmentEditor } from '@/components/AttachmentEditor';
+import type { AttachmentRole } from '@/domain/attachments';
 import { TilePalette } from '@/components/TilePalette';
 import { RemainingButton, RemainingSettings, UkeireResults } from '@/components/UkeirePanel';
 import { parseScoreInput, scoreEntryFromValue } from '@/domain/scoreInput';
@@ -88,6 +90,7 @@ export function EditorPage() {
 
   const [title, setTitle] = useState(existing?.title ?? '');
   const titleField = useRef<HTMLInputElement | null>(null);
+  const screenshotInput = useRef<HTMLInputElement | null>(null);
   const [imported] = useState(() => (isNew ? peekImportDraft() : null));
   const [concealed, setConcealed] = useState<TileCode[]>(() =>
     imported
@@ -103,6 +106,7 @@ export function EditorPage() {
   const [target, setTarget] = useState<Target>('concealed');
   const [history, setHistory] = useState<Array<() => void>>([]);
   const [answerEnabled, setAnswerEnabled] = useState(existing?.answerEnabled ?? false);
+  const [inTest, setInTest] = useState(() => store.study.find((s) => s.problemId === existing?.id)?.inTest !== false);
   const [accepted, setAccepted] = useState<TileCode[]>(existing?.acceptedDiscards ?? []);
   const [explanation, setExplanation] = useState(existing?.explanation ?? '');
   const [privateMemo, setPrivateMemo] = useState(existing?.privateMemo ?? '');
@@ -115,6 +119,8 @@ export function EditorPage() {
     west: scoreEntryFromValue(context.scores.west), north: scoreEntryFromValue(context.scores.north),
   }));
   const [attachments, setAttachments] = useState(existing?.attachments ?? []);
+  const [imageBusy, setImageBusy] = useState(false);
+  const imageUploadLock = useRef(false);
   const [sourceUrl, setSourceUrl] = useState(existing?.sourceUrl ?? '');
   const [dirty, setDirty] = useState(!!imported);
 
@@ -313,6 +319,7 @@ export function EditorPage() {
   ]);
 
   const save = () => {
+    if (imageUploadLock.current) { setError('画像の準備が終わるまでお待ちください。'); return; }
     if (SCORE_FIELDS.some(([key]) => scoreInputs[key].error)) {
       setError('点数に未反映の入力があります。修正してから保存してください。');
       return;
@@ -326,7 +333,7 @@ export function EditorPage() {
       setError(issues.filter((i) => i.level === 'error').map((i) => i.message).join(' / '));
       return;
     }
-    const result = saveProblem(draftProblem, isNew || !existing);
+    const result = saveProblem(draftProblem, isNew || !existing, inTest);
     if (!result.ok) {
       setError(result.reason);
       return;
@@ -336,23 +343,26 @@ export function EditorPage() {
     navigate(`/problems/${draftProblem.id}`);
   };
 
-  const onImage = async (file: File | null) => {
-    if (!file) return;
+  const onImage = async (file: File | null, role: AttachmentRole) => {
+    if (!file || imageUploadLock.current) return;
     if (attachments.length >= LIMITS.attachmentsMax) {
       setImageMsg(`参考画像は${LIMITS.attachmentsMax}枚までです`);
       return;
     }
-    const result = await compressImageFile(file);
-    if (!result.ok) {
-      setImageMsg(result.reason);
-      return;
+    imageUploadLock.current = true;
+    setImageBusy(true);
+    try {
+      const result = await compressImageFile(file);
+      if (!result.ok) { setImageMsg(result.reason); return; }
+      setAttachments((current) => [...current,
+        { id: createId('att'), dataUrl: result.dataUrl, width: result.width, height: result.height, role },
+      ]);
+      setImageMsg(null);
+      mark();
+    } finally {
+      imageUploadLock.current = false;
+      setImageBusy(false);
     }
-    setAttachments([
-      ...attachments,
-      { id: createId('att'), dataUrl: result.dataUrl, width: result.width, height: result.height },
-    ]);
-    setImageMsg(null);
-    mark();
   };
 
   const addTag = () => {
@@ -639,6 +649,7 @@ export function EditorPage() {
         <p className="tile-input-tip">牌をタップして追加・削除</p>
         {supplyIssues.length > 0 && <div role="alert" className="error">入力済みの牌が上限を超えています。牌は自動で削除していません。手牌・鳴き・ドラ表示牌をタップして修正してください。{supplyIssues.map((issue) => <p key={issue}>{issue.replace('追加後', '現在')}</p>)}</div>}
         <TilePalette onPick={addTile} blockedReasons={blockedReasons} layout="all" />
+        {isNew && <button type="button" className="btn btn-sm shot-button editor-shot-mobile" onClick={() => screenshotInput.current?.click()}>スクショから</button>}
         {error && target === 'meld' && <p className="error">{error}</p>}
       </section>
 
@@ -653,6 +664,10 @@ export function EditorPage() {
 
       <section className="panel">
         <label className="check">
+          <input type="checkbox" checked={inTest} onChange={(event) => { setInTest(event.target.checked); mark(); }} />
+          テストに出題する
+        </label>
+        <label className="check">
           <input
             type="checkbox"
             checked={answerEnabled}
@@ -664,6 +679,7 @@ export function EditorPage() {
           />
           正解を設定する
         </label>
+        {inTest && !answerEnabled && <p className="hint">正解を設定するとテストの対象になります。</p>}
         {answerEnabled && (
           <div>
             <p className="hint">切るのが正解の牌をタップ（複数可・もう一度で解除）</p>
@@ -762,32 +778,8 @@ export function EditorPage() {
             placeholder="https://"
           />
         </label>
-        <label className="field">
-          <span>参考画像（最大3枚）</span>
-          <input
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            onChange={(e) => onImage(e.target.files?.[0] ?? null)}
-          />
-        </label>
-        {imageMsg && <p className="error">{imageMsg}</p>}
-        <div className="attach-grid">
-          {attachments.map((a) => (
-            <div key={a.id} className="attach-item">
-              <img src={a.dataUrl} alt="参考画像" />
-              <button
-                type="button"
-                className="btn btn-danger"
-                onClick={() => {
-                  setAttachments(attachments.filter((x) => x.id !== a.id));
-                  mark();
-                }}
-              >
-                削除
-              </button>
-            </div>
-          ))}
-        </div>
+        <AttachmentEditor attachments={attachments} onChange={(next) => { setAttachments(next); mark(); }}
+          onImage={onImage} imageMessage={imageMsg} sessionKey={existing?.id ?? 'new'} />
       </details>
 
       </details>
@@ -813,9 +805,12 @@ export function EditorPage() {
       </label>
         <div className="editor-header-actions">
         {isNew && (
-          <label className="btn btn-sm shot-button">
-            スクショから
+          <>
+            <button type="button" className="btn btn-sm shot-button editor-shot-desktop" onClick={() => screenshotInput.current?.click()}>スクショから</button>
             <input
+              ref={screenshotInput}
+              hidden
+              aria-label="スクショを読み込む"
               type="file"
               accept="image/*"
               onChange={(e) => {
@@ -826,9 +821,9 @@ export function EditorPage() {
                 navigate('/import');
               }}
             />
-          </label>
+          </>
         )}
-        <button type="button" className="btn btn-primary editor-save" onClick={save}>保存</button>
+        <button type="button" className="btn btn-primary editor-save" onClick={save} disabled={imageBusy}>保存</button>
         </div>
       </header>
       {imported && (

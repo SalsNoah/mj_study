@@ -2,6 +2,7 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { renderHandPng } from './renderTiles';
 import { tileImageUrl } from '@/components/tileImages';
 import type { TileCode } from '@/domain/types';
+import { createLegacySampleProblems } from '@/data/legacySamples';
 
 const drawImage = vi.fn();
 
@@ -38,6 +39,19 @@ it('draws a lone legacy tile at the normal start position', async () => {
   await renderHandPng({ concealed: [], drawn: '0s', melds: [], doraIndicators: [] });
   expect(drawImage).toHaveBeenCalledTimes(1);
   expect(drawImage.mock.calls[0]!.slice(1)).toEqual([40, 40, 72, 96]);
+});
+
+it('keeps question images, explanation images, and legacy images out of the hand PNG', async () => {
+  const problem = createLegacySampleProblems().problems[0]!;
+  problem.attachments = [
+    { id: 'question', role: 'question', dataUrl: 'data:image/png;base64,AQ==', width: 1, height: 1 },
+    { id: 'explanation', role: 'explanation', dataUrl: 'data:image/png;base64,Ag==', width: 1, height: 1 },
+    { id: 'legacy', dataUrl: 'data:image/png;base64,Aw==', width: 1, height: 1 },
+  ];
+  await renderHandPng(problem);
+  const drawnSources = drawImage.mock.calls.map(([image]) => (image as HTMLImageElement).src);
+  for (const attachment of problem.attachments) expect(drawnSources).not.toContain(attachment.dataUrl);
+  expect(drawnSources.length).toBeGreaterThan(0);
 });
 
 it('keeps melds and indicators separate while aligning the full hand below them', async () => {

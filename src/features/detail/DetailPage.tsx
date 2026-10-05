@@ -4,7 +4,9 @@ import { useApp } from '@/app/store';
 import { HandBoard } from '@/components/HandBoard';
 import { ViewTabs, viewPanelProps } from '@/components/ViewTabs';
 import { UkeirePanel } from '@/components/UkeirePanel';
+import { ExplanationAttachments, QuestionAttachments } from '@/components/ProblemAttachments';
 import { accuracyForProblem, isInTest } from '@/domain/quiz';
+import { attachmentsForRole } from '@/domain/attachments';
 import { formatShortDate } from '@/domain/records';
 import {
   DEFAULT_SHARE_OPTIONS,
@@ -133,6 +135,7 @@ export function DetailPage() {
               : undefined
           }
         />
+        <QuestionAttachments attachments={problem.attachments} sessionKey={answerKey} />
         {problem.answerEnabled && (
           <button
             type="button"
@@ -193,15 +196,9 @@ export function DetailPage() {
           </a>
         </p>
       )}
-      {problem.attachments.length > 0 && (
-        <div className="attach-grid">
-          {problem.attachments.map((a) => (
-            <img key={a.id} src={a.dataUrl} alt="参考画像" />
-          ))}
-        </div>
-      )}
+      <ExplanationAttachments attachments={problem.attachments} sessionKey={answerKey} visible={!problem.answerEnabled || answerVisible} />
 
-      {!problem.explanation && !problem.privateMemo && <p className="hint">解説・メモはまだありません。</p>}
+      {!problem.explanation && !problem.privateMemo && attachmentsForRole(problem.attachments, 'explanation').length === 0 && <p className="hint">解説・メモはまだありません。</p>}
       </> : <p className="hint">正解・解説は非表示です。</p>}
       </div>
       <div {...viewPanelProps('detail-view', 'ukeire', view)}>

@@ -1,0 +1,66 @@
+.page--test .test-count {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 6px 12px;
+  align-items: center;
+}
+
+.page--test .test-count__label {
+  font-weight: 700;
+  font-size: .9rem;
+}
+
+.page--test .test-count__controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.page--test .test-count__controls input {
+  width: 68px;
+  min-height: 44px;
+  padding: 6px;
+  text-align: center;
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.page--test .test-count__controls input::-webkit-inner-spin-button,
+.page--test .test-count__controls input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.page--test .test-count__controls button {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--r-btn);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 1.1rem;
+  touch-action: manipulation;
+}
+
+.page--test .test-count__controls button:disabled {
+  opacity: .45;
+  cursor: default;
+}
+
+.page--test .test-count__range {
+  grid-column: 1 / -1;
+  margin: 0;
+  text-align: right;
+}
+
+.page--test .test-count__error {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+.page--test .test-eligibility-hint {
+  margin: 10px 0 0;
+}

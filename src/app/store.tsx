@@ -29,7 +29,7 @@ type AppState = {
   reload: () => void;
   clearError: () => void;
   dismissConflict: () => void;
-  saveProblem: (problem: Problem, isNew: boolean) => SaveResult;
+  saveProblem: (problem: Problem, isNew: boolean, inTest?: boolean) => SaveResult;
   deleteProblem: (id: string) => SaveResult;
   duplicateProblem: (id: string) => SaveResult;
   confirmProblem: (id: string) => SaveResult;
@@ -115,7 +115,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     reload,
     clearError: () => setLastError(null),
     dismissConflict: () => setExternalConflict(false),
-    saveProblem: (p, isNew) => applySave(repo.saveProblem(store, p, isNew)),
+    saveProblem: (p, isNew, inTest) => applySave(repo.saveProblem(store, p, isNew, inTest)),
     deleteProblem: (id) => applySave(repo.deleteProblem(store, id)),
     duplicateProblem: (id) => applySave(repo.duplicateProblem(store, id)),
     confirmProblem: (id) => applySave(repo.confirmProblem(store, id)),

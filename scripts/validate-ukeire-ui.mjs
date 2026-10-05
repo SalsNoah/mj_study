@@ -32,6 +32,16 @@ async function fillRemaining(label, value) {
   await page.getByRole('textbox', { name: `${label}の残枚数`, exact: true }).fill(value);
 }
 async function tab(id, name) { await page.locator(`#${id}-tab-${name}`).click(); }
+async function editFirstAnswer(enabled) {
+  await page.getByRole('link',{name:'学習帳',exact:true}).click();
+  await page.locator('.problem-card').first().click();
+  await page.getByRole('link',{name:'編集',exact:true}).click();
+  await page.locator('.editor-notes > summary').click();
+  await page.getByLabel('正解を設定する',{exact:true}).setChecked(enabled);
+  if(enabled)await page.locator('.hand-stage--pick').getByRole('button',{name:'中',exact:true}).first().click();
+  await page.getByRole('button',{name:'保存',exact:true}).click();
+}
+
 async function capture(name, selector) {
   if (selector) await page.locator(selector).scrollIntoViewIfNeeded();
   else await page.evaluate(() => window.scrollTo(0, 0));
@@ -230,17 +240,19 @@ try {
   await page.getByRole('link', { name: 'テスト', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'テスト', exact: true })).toBeVisible();
   expect(await page.evaluate(() => window.scrollY)).toBe(0);
-  await page.getByLabel('正解ありのみ', { exact: true }).check();
+  await expect(page.getByLabel('正解ありのみ', { exact: true })).toHaveCount(0);
   await expect(page.locator('.count-pill')).toContainText('0 問');
   await expect(page.getByRole('button', { name: '条件に合う問題がありません', exact: true })).toBeDisabled();
   await capture('test-answer-only-empty-390');
-  await page.getByLabel('正解ありのみ', { exact: true }).uncheck();
+  await editFirstAnswer(true);
+  await page.getByRole('link',{name:'テスト',exact:true}).click();
   await allSizes('test-setup');
   await page.getByRole('button', { name: '1 問でテスト開始', exact: true }).click();
   await expect(page.locator('.ukeire-panel')).toHaveCount(0);
   await expect(page.locator('#answer-view-tab-notes')).toHaveCount(0);
   await allSizes('test-question');
-  await page.getByRole('button', { name: '解説を見る', exact: true }).click();
+  await page.locator('.hand-stage').getByRole('button',{name:'中',exact:true}).first().click();
+  await page.getByRole('button',{name:'回答する',exact:true}).click();
   await expect(page.locator('#answer-view-panel-notes')).toBeVisible();
   await allSizes('test-answered');
   await tab('answer-view', 'ukeire');
@@ -256,6 +268,7 @@ try {
   await expect(page.locator('.ukeire-panel')).toHaveCount(0);
   const data = await page.evaluate(() => JSON.parse(localStorage.getItem('mahjong-study:v1')));
   expect(data.attempts).toHaveLength(1); expect(data.study[0].confirmationCount).toBe(0);
+  await editFirstAnswer(false);
   await page.getByRole('link', { name: '学習帳', exact: true }).click();
   await expect(page.getByRole('heading', { name: '学習帳', exact: true })).toBeVisible();
   await allSizes('library');
@@ -296,8 +309,7 @@ try {
   await page.getByLabel('正解を表示', { exact: true }).uncheck();
   await expect(page.locator('.problem-card .is-correct')).toHaveCount(0);
   await page.getByRole('link', { name: 'テスト', exact: true }).click();
-  await expect(page.locator('.count-pill')).toContainText('2 問');
-  await page.getByLabel('正解ありのみ', { exact: true }).check();
+  await expect(page.getByLabel('正解ありのみ', { exact: true })).toHaveCount(0);
   await expect(page.locator('.count-pill')).toContainText('1 問');
   await allSizes('test-answer-only');
   await page.getByRole('button', { name: '1 問でテスト開始', exact: true }).click();

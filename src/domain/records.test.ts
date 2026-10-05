@@ -115,7 +115,8 @@ describe('badges', () => {
 
 describe('test candidates', () => {
   const now = new Date('2026-09-25T00:00:00.000Z');
-  const problems = [problem('low', ['t1']), problem('good'), problem('fresh'), problem('off')];
+  const problems = [problem('low', ['t1']), problem('good'), problem('fresh'), problem('off'),
+    { ...problem('memo'), answerEnabled: false, acceptedDiscards: [] }];
   const studies = [
     study('low', { lastSolvedAt: '2026-09-01T00:00:00.000Z' }),
     study('good', { lastSolvedAt: '2026-09-24T00:00:00.000Z' }),
@@ -133,7 +134,7 @@ describe('test candidates', () => {
   const ids = (filters: Parameters<typeof filterTestCandidates>[3]['filters'], tagIds: string[] = []) =>
     filterTestCandidates(problems, studies, attempts, { filters, tagIds, now }).map((p) => p.id);
 
-  it('random excludes only problems turned off', () => {
+  it('random excludes answerless problems and problems turned off', () => {
     expect(ids(['random'])).toEqual(['low', 'good', 'fresh']);
   });
 
@@ -155,7 +156,7 @@ describe('test candidates', () => {
     expect(ids(['lowAccuracy', 'fewAnswers'])).toEqual([]);
   });
 
-  it('caps the question count between 1 and 10', () => {
+  it('bounds question count from one to the eligible candidate count', () => {
     const picked = selectTestProblems(problems, studies, attempts, {
       count: 2,
       filters: ['random'],
@@ -164,5 +165,9 @@ describe('test candidates', () => {
     });
     expect(picked).toHaveLength(2);
     expect(picked.some((p) => p.id === 'off')).toBe(false);
+    expect(selectTestProblems(problems, studies, attempts, { count: 99, filters: ['random'], tagIds: [], now }))
+      .toHaveLength(3);
+    expect(selectTestProblems(problems, studies, attempts, { count: 0, filters: ['random'], tagIds: [], now }))
+      .toHaveLength(1);
   });
 });
