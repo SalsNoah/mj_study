@@ -12,6 +12,7 @@ import { UkeirePanel } from './UkeirePanel';
 import { analyzeHand } from '@/domain/ukeire';
 import { tileLabel, tileSortKey } from '@/domain/tiles';
 import { parseHandNotation } from '@/domain/parse';
+import { createMeld } from '@/domain/melds';
 
 let host: HTMLDivElement;
 let root: Root;
@@ -46,6 +47,9 @@ async function editRemaining(label: string, value: string) {
   });
 }
 function store(): Store { return JSON.parse(localStorage.getItem(STORAGE_KEY)!); }
+function expectUncollapsed(element: Element) {
+  expect(element.closest('[hidden], details:not([open])')).toBeNull();
+}
 
 describe('ukeire UI and existing study flows (jsdom; not a layout/browser test)', () => {
   it('updates on editing, saves unchanged fields, matches detail, preserves share and hides until answered', async () => {
@@ -56,19 +60,31 @@ describe('ukeire UI and existing study flows (jsdom; not a layout/browser test)'
       </Routes></MemoryRouter></AppProvider>,
     ));
     expect(host.querySelector('.ukeire-panel')!.textContent).toContain('13〜14枚で表示');
+    expectUncollapsed(host.querySelector('.ukeire-panel [role="status"]')!);
     for (const name of ['一萬','二萬','三萬','一筒','二筒','三筒','一索','二索','三索','四索','赤五索','五索','中']) {
       await click(host.querySelector<HTMLElement>(`.tile-palette button[aria-label="${name}"]`)!);
     }
     expect(host.querySelector('.ukeire-panel')!.textContent).toContain('1シャンテン');
+    expectUncollapsed(host.querySelector('.ukeire-panel .ukeire-row')!);
+    expect(host.querySelector('.ukeire-expand')).toBeNull();
     await click(host.querySelector<HTMLElement>('.tile-palette button[aria-label="中"]')!);
     expect(host.querySelectorAll('.ukeire-list > li')).toHaveLength(13);
+    expect(host.querySelectorAll('.ukeire-list > li:not([hidden])')).toHaveLength(3);
+    expectUncollapsed(host.querySelector('.ukeire-title')!);
+    for (const row of host.querySelectorAll('.ukeire-list > li:not([hidden])')) expectUncollapsed(row);
     const editorRows = host.querySelector('.ukeire-list')!.textContent;
+    await click(host.querySelector<HTMLElement>('.ukeire-expand')!);
+    expect(host.querySelectorAll('.ukeire-list > li:not([hidden])')).toHaveLength(13);
     await click(byText('戻す'));
     expect(host.querySelector('.ukeire-list')).toBeNull();
     await click(host.querySelector<HTMLElement>('.tile-palette button[aria-label="中"]')!);
+    expect(host.querySelectorAll('.ukeire-list > li:not([hidden])')).toHaveLength(3);
+    expect(host.querySelector('.ukeire-expand')!.getAttribute('aria-expanded')).toBe('false');
     await click(byText('保存'));
     expect(host.querySelector('h1')!.textContent).toBe('無題の問題');
+    await click(byText('受入れ'));
     expect(host.querySelector('.ukeire-list')!.textContent).toBe(editorRows);
+    for (const row of host.querySelectorAll('.ukeire-list > li:not([hidden])')) expectUncollapsed(row);
     expect(store().problems).toHaveLength(1);
     expect(store().problems[0]!.drawn).toBeNull();
     expect(store().problems[0]!.concealed).toHaveLength(14);
@@ -77,8 +93,8 @@ describe('ukeire UI and existing study flows (jsdom; not a layout/browser test)'
     await editRemaining('三索', '0');
     expect(host.querySelector('.remaining-control .remaining-status')).not.toBeNull();
     expect(localStorage.getItem(STORAGE_KEY)).toBe(beforeAnalysisToggle);
-    await click(host.querySelector<HTMLElement>('.ukeire-panel summary')!);
-    await click(host.querySelector<HTMLElement>('.ukeire-panel summary')!);
+    await click(host.querySelector<HTMLElement>('.ukeire-expand')!);
+    await click(host.querySelector<HTMLElement>('.ukeire-expand')!);
     expect(localStorage.getItem(STORAGE_KEY)).toBe(beforeAnalysisToggle);
     await click(byText('共有URLを生成'));
     const url = host.querySelector<HTMLTextAreaElement>('.share-box textarea')!.value;
@@ -101,7 +117,9 @@ describe('ukeire UI and existing study flows (jsdom; not a layout/browser test)'
     expect(host.querySelector('.ukeire-panel')).toBeNull();
     await click(host.querySelector<HTMLElement>('.hand-stage button[aria-label="中"]')!);
     await click(byText('回答する'));
+    await click(byText('受入れ'));
     expect(host.querySelector('.ukeire-list')!.textContent).toBe(editorRows);
+    for (const row of host.querySelectorAll('.ukeire-list > li:not([hidden])')) expectUncollapsed(row);
     expect(store().attempts).toHaveLength(1);
     expect(store().attempts[0]!.result).toBe('correct');
     const answeredStore = localStorage.getItem(STORAGE_KEY);
@@ -142,6 +160,8 @@ describe('ukeire UI and existing study flows (jsdom; not a layout/browser test)'
     await act(async () => root.render(<UkeirePanel {...props} doraIndicators={['1m']} />));
     expect(host.textContent).toContain('5枚あります');
     expect(host.textContent).not.toContain('33種・123枚');
+    expectUncollapsed(host.querySelector('[role="status"]')!);
+    expect(host.querySelector('.ukeire-row, .ukeire-expand')).toBeNull();
   });
 
   it('updates totals, distinguishes zero, rejects drafts and supports individual/all reset', async () => {
@@ -307,10 +327,14 @@ describe('ukeire UI and existing study flows (jsdom; not a layout/browser test)'
     await act(async () => root.render(<UkeirePanel {...input} />));
     const visibleRows = () => [...host.querySelectorAll<HTMLElement>('.ukeire-list > li')].filter(row => !row.hidden);
     expect(visibleRows().map(row => row.querySelector('.ukeire-discard')!.getAttribute('aria-label'))).toEqual(ranked.slice(0, 3).map(row => `${tileLabel(row.discard)}を切る`));
+    const topRows = visibleRows();
+    topRows.forEach(expectUncollapsed);
     expect(host.querySelector('.ukeire-order')!.textContent).toBe('最小シャンテン内・枚数順');
     const expand = host.querySelector<HTMLElement>('.ukeire-expand')!;
     await click(expand);
     expect(visibleRows()).toHaveLength(ranked.length);
+    expect(new Set(visibleRows().map(row => row.querySelector('.ukeire-discard')!.getAttribute('aria-label'))).size).toBe(ranked.length);
+    expect(visibleRows().slice(0, 3)).toEqual(topRows);
     expect(expand.getAttribute('aria-expanded')).toBe('true');
     for (const row of visibleRows()) {
       const name = row.querySelector('.ukeire-discard')!.getAttribute('aria-label');
@@ -319,6 +343,8 @@ describe('ukeire UI and existing study flows (jsdom; not a layout/browser test)'
     }
     await click(expand);
     expect(visibleRows()).toHaveLength(3);
+    expect(visibleRows()).toEqual(topRows);
+    topRows.forEach(expectUncollapsed);
     await editRemaining('三索', '0');
     const totals = visibleRows().map(row => Number(row.querySelector('.ukeire-total')!.textContent!.match(/・(\d+)枚/)![1]));
     expect(totals).toEqual([...totals].sort((a, b) => b - a));
@@ -333,7 +359,9 @@ describe('ukeire UI and existing study flows (jsdom; not a layout/browser test)'
     const parsed = parseHandNotation('123m456m789p23s55z');
     if (!parsed.ok) throw new Error('fixture');
     await act(async () => root.render(<UkeirePanel concealed={parsed.tiles} drawn={null} melds={[]} doraIndicators={[]} />));
-    expect(host.querySelector('summary')!.textContent).toBe('受入れ');
+    expect(host.querySelector('h2.ukeire-title')!.textContent).toBe('受入れ');
+    expectUncollapsed(host.querySelector('.ukeire-row')!);
+    expect(host.querySelector('.ukeire-list, .ukeire-expand')).toBeNull();
     expect(host.querySelector('.ukeire-current')!.textContent).toBe('テンパイ');
     expect(host.querySelector('.ukeire-panel .hint')).toBeNull();
     expect(host.textContent).not.toMatch(/（0）|理論残枚数|四麻|通常形|七対子|国士|画面内|山残枚数|手動設定中|最善打牌|13枚相当/);
@@ -364,6 +392,30 @@ describe('ukeire UI and existing study flows (jsdom; not a layout/browser test)'
     expect(visible()).toHaveLength(1); expect(visible()[0]!.querySelector('.ukeire-discard')!.getAttribute('aria-label')).toBe('東を切る');
     await click(host.querySelector<HTMLElement>('.ukeire-expand')!); expect(visible()).toHaveLength(13);
     await click(host.querySelector<HTMLElement>('.ukeire-expand')!); expect(visible()).toHaveLength(1);
+  });
+
+  it.each([
+    { concealed: '11m', melds: ['123p', '456p', '123s', '456s'], candidates: 1 },
+    { concealed: '11222m', melds: ['123p', '456p', '123s'], candidates: 2 },
+    { concealed: '11223m', melds: ['123p', '456p', '123s'], candidates: 3 },
+  ])('shows all $candidates minimum-shanten candidates without an empty expansion', async ({ concealed, melds, candidates }) => {
+    const hand = parseHandNotation(concealed);
+    if (!hand.ok) throw new Error('fixture');
+    const groups = melds.map(notation => {
+      const tiles = parseHandNotation(notation);
+      if (!tiles.ok) throw new Error('fixture');
+      const result = createMeld('chi', tiles.tiles, 'left', 0);
+      if (!result.ok) throw new Error('fixture');
+      return result.meld;
+    });
+    await act(async () => root.render(<UkeirePanel concealed={hand.tiles} drawn={null} melds={groups} doraIndicators={[]} />));
+    const rows = host.querySelectorAll('.ukeire-list > li');
+    expect(rows).toHaveLength(candidates);
+    for (const row of rows) {
+      expectUncollapsed(row);
+      expect(row.querySelector('strong')!.textContent).toBe('テンパイ');
+    }
+    expect(host.querySelector('.ukeire-expand')).toBeNull();
   });
 
 });

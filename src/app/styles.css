@@ -288,7 +288,7 @@ a.btn-primary { color: var(--on-accent); }
 .page--editor .field {
   margin-bottom: 8px;
 }
-.page--editor .section-title:not(summary) {
+.page--editor .section-title:not(summary):not(.ukeire-title) {
   display: none;
 }
 
@@ -1416,6 +1416,7 @@ details > summary:focus-visible { outline: 2px solid var(--accent); outline-offs
 }
 
 /* Analysis is read-only; tile order is not a recommendation ranking. */
+.ukeire-title { font-family: var(--font-body); letter-spacing: normal; }
 .ukeire-current { margin: 12px 0 8px; }
 .ukeire-list { list-style: none; padding: 0; margin: 8px 0 0; }
 .ukeire-row { padding: 10px 0; border-top: 1px solid var(--line); }

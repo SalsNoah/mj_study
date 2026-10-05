@@ -175,11 +175,14 @@ try {
   for (const name of ['一萬','二萬','三萬','一筒','二筒','三筒','一索','二索','三索','四索','赤五索','五索','中','中']) await pick(name);
   await expect(page.locator('.ukeire-list > li')).toHaveCount(13);
   await expect(page.locator('.ukeire-list > li:not([hidden])')).toHaveCount(3);
+  await expect(page.locator('.ukeire-title')).toBeVisible();
+  await expect(page.locator('.ukeire-list > li:visible')).toHaveCount(3);
   await expect(page.getByText('追加できない牌と理由',{exact:true})).toHaveCount(0);
   const editorRows = await page.locator('.ukeire-list').textContent();
   const toolbar = page.locator('.tile-actions');
   expect(await toolbar.locator('button').allTextContents()).toEqual(['理牌', '戻す', '全消去', '残枚数']);
   await allSizes('editor-hand');
+  await allSizes('editor-ukeire-top3', '.ukeire-panel');
   await toolbar.getByRole('button', { name: '残枚数', exact: true }).click();
   await fillRemaining('三索', '0');
   for (const width of widths) {
@@ -201,7 +204,7 @@ try {
   await expect(page.getByRole('textbox', { name: '三索の残枚数', exact: true })).toHaveValue('0');
   await page.getByRole('button', { name: 'すべて自動に戻す', exact: true }).click();
   await toolbar.getByRole('button', { name: '残枚数', exact: true }).click();
-  await page.locator('.ukeire-panel summary').click();
+  await expect(page.locator('.ukeire-title')).toBeVisible();
   await expect(page.locator('.ukeire-list')).toBeVisible();
   await page.locator('.ukeire-expand').click();
   await expect(page.locator('.ukeire-list > li:visible')).toHaveCount(13);
@@ -364,7 +367,7 @@ try {
   await page.getByRole('link', { name: '学習帳', exact: true }).click();
   await page.getByRole('link', { name: '作成', exact: true }).click();
   for (const name of ['一萬','一萬','一萬','二萬','三萬','四萬','五萬','六萬','七萬','一筒','二筒','三筒','一索','二索']) await pick(name);
-  await page.locator('.ukeire-panel summary').click();
+  await expect(page.locator('.ukeire-title')).toBeVisible();
   expect(await page.locator('.ukeire-list > li:visible .ukeire-discard').evaluateAll(elements => elements.map(el => el.getAttribute('aria-label')))).toEqual(['一萬を切る','四萬を切る','七萬を切る']);
   expect(await page.locator('.ukeire-list > li:visible .ukeire-row__heading > strong').allTextContents()).toEqual(['テンパイ','テンパイ','テンパイ']);
   const retreat = page.locator('.ukeire-row').filter({ has: page.getByLabel('二萬を切る', { exact: true }) });

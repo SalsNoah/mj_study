@@ -659,7 +659,7 @@ export function EditorPage() {
   );
   const toolsPane = (
       <aside key="tools" className="editor-tools" aria-label="受入れと補足情報">
-        <UkeireResults session={ukeire} defaultOpen={false} />
+        <UkeireResults session={ukeire} />
       <details className="details panel editor-notes" open={notesOpen}>
         <summary onClick={(event) => { event.preventDefault(); setNotesOpen((open) => !open); }}>解説・メモなど</summary>
 
