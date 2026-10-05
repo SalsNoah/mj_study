@@ -20,7 +20,7 @@ const assets = [
 ];
 async function nav(name) {
  await page.getByRole('link',{name,exact:true}).click();
- await page.locator({'作成':'.page--editor','学習帳':'.page--library','設定':'.page--settings'}[name]).waitFor({state:'visible'});
+ await page.locator({'作成':'.page--editor','学習帳':'.page--library','設定':'.page--settings','テスト':'.page--test','学習教材':'.page--materials'}[name]).waitFor({state:'visible'});
 }
 async function capture(name) {
  await page.evaluate(()=>document.fonts.ready);
@@ -64,5 +64,30 @@ try {
   const styles=await page.evaluate(()=>({theme:document.documentElement.dataset.theme,background:getComputedStyle(document.documentElement).backgroundImage,cards:[...document.querySelectorAll('.problem-card')].map(e=>({background:getComputedStyle(e,'::after').backgroundImage,streak:getComputedStyle(e,'::before').animationName}))}));
   expect(styles.theme).toBe(theme);expect(styles.background).not.toContain('neon-trails');for(const c of styles.cards){expect(c.background).not.toContain('neon-wave');expect(c.streak).toBe('none');}await capture(`isolation-${theme}-320`);results.push({name:`theme-isolation-${theme}`,...styles});await nav('設定');
  }
- expect(errors).toEqual([]);await writeFile(`${out}neon-results.json`,JSON.stringify({status:'pass',results,errors},null,2));console.log(JSON.stringify({status:'pass',records:results.length}));await ctx.close();
+ await ctx.close();
+ // Bare text needs a local dark backing even when a bright trail crosses the glyphs.
+ for(const kind of ['empty','long-title']){
+  const profile=structuredClone(seed);
+  profile.problems=kind==='empty'?[]:[{...problems[0],title:'長い題名の検証：牌効率だけでなく、巡目や対局条件、残り枚数を確かめて判断の理由を振り返る'}];
+  profile.study=kind==='empty'?[]:seed.study.slice(0,1);
+  const edge=await browser.newContext({viewport:{width:390,height:844},serviceWorkers:'block'});
+  await edge.route('**/*',r=>new URL(r.request().url()).origin===origin?r.continue():r.abort());
+  await edge.addInitScript(data=>{localStorage.setItem('mahjong-study:v1',JSON.stringify(data));localStorage.setItem('mahjong-study:theme','dopa');},profile);
+  page=await edge.newPage();page.on('pageerror',e=>errors.push(e.message));await page.goto(`${origin}/#/test`);
+  if(kind==='long-title')await page.getByRole('button',{name:'1 問でテスト開始',exact:true}).click();
+  for(const width of [320,390,1440]){
+   await page.setViewportSize({width,height:width===1440?900:740});
+   if(kind==='empty')await nav('テスト');
+   await capture(`${kind}-test-${width}`);
+   const target=page.locator(kind==='empty'?'.page--test > .hint[role=status]':'.test-title');await expect(target).toBeVisible();
+   const backing=await target.evaluate(el=>({color:getComputedStyle(el).color,background:getComputedStyle(el).backgroundColor,text:el.textContent}));
+   expect(backing.background).toBe('rgba(9, 12, 30, 0.82)');results.push({name:`${kind}-backing-${width}`,...backing});
+   if(kind==='empty'){
+    await nav('学習教材');await expect(page.locator('.materials-empty')).toBeVisible();await capture(`empty-materials-${width}`);
+    expect(await page.locator('.materials-empty').evaluate(el=>getComputedStyle(el).backgroundColor)).toBe('rgba(9, 12, 30, 0.82)');
+   }
+  }
+  await page.setViewportSize({width:320,height:740});await page.evaluate(()=>document.documentElement.style.fontSize='150%');await capture(`${kind}-text150`);await edge.close();
+ }
+ expect(errors).toEqual([]);await writeFile(`${out}neon-results.json`,JSON.stringify({status:'pass',results,errors},null,2));console.log(JSON.stringify({status:'pass',records:results.length}));
 }catch(error){if(page&&!page.isClosed())await page.screenshot({path:`${out}failure.png`,animations:'disabled'});await writeFile(`${out}neon-results.json`,JSON.stringify({status:'fail',message:String(error),results,errors},null,2));throw error;}finally{await browser.close();}

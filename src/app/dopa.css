@@ -112,6 +112,12 @@ html[data-theme='dopa'] .page--library .problem-card__meta {
   text-shadow: 0 1px 3px #090c1e;
 }
 
+/* These messages sit outside panels, so protect text from the photo's bright trails. */
+html[data-theme='dopa'] :is(.test-title, .page--test > .hint, .materials-empty) {
+  background: rgba(9, 12, 30, .82);
+  border-radius: var(--r-sm);
+}
+
 html[data-theme='dopa'] :is(.btn, .editor-save, .test-count__controls button, .view-tabs > button[aria-selected='true'], .target-tabs > button.is-active) {
   border: 1px solid transparent;
   background: linear-gradient(var(--surface), var(--surface)) padding-box, var(--dopa-rainbow) border-box;
