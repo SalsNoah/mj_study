@@ -648,8 +648,10 @@ export function EditorPage() {
 
         <p className="tile-input-tip">牌をタップして追加・削除</p>
         {supplyIssues.length > 0 && <div role="alert" className="error">入力済みの牌が上限を超えています。牌は自動で削除していません。手牌・鳴き・ドラ表示牌をタップして修正してください。{supplyIssues.map((issue) => <p key={issue}>{issue.replace('追加後', '現在')}</p>)}</div>}
-        <TilePalette onPick={addTile} blockedReasons={blockedReasons} layout="all" />
-        {isNew && <button type="button" className="btn btn-sm shot-button editor-shot-mobile" onClick={() => screenshotInput.current?.click()}>スクショから</button>}
+        <div className="editor-palette">
+          <TilePalette onPick={addTile} blockedReasons={blockedReasons} layout="all" />
+          {isNew && <button type="button" className="btn btn-sm shot-button editor-shot-mobile" aria-label="スクショから" onClick={() => screenshotInput.current?.click()}><span className="editor-shot-mobile__label"><span>スクショ</span><wbr /><span>から</span></span></button>}
+        </div>
         {error && target === 'meld' && <p className="error">{error}</p>}
       </section>
 
