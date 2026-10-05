@@ -29,39 +29,33 @@ if(appDiff)throw new Error(`Application differs from published commit: ${appDiff
 const origin='http://127.0.0.1:5176';
 const browser=await chromium.launch({headless:true});
 const screenshots=[];const errors=[];let page;
-const provenance={publishedCommit:base,publishedTree:'255142817336a6fb485b7b7f85d6eed924128223',captureCommit:execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),appDiff,viewport:{width:390,height:1100},deviceScaleFactor:3,theme:'normal',fixture:'isolated introduction samples derived from bundled catalog; no fabricated study history; no DOM or CSS substitution',sampleMap:specs.map(([i,title],index)=>({id:problems[index].id,catalogIndex:i,catalogTitle:catalog[i].title,introductionTitle:title,handAnswerExplanationUnchanged:true})),materialSource,materials:materials.map(({title,url})=>({title,url})),screenshots,errors};
-async function capture(name,selector){await page.evaluate(()=>document.fonts.ready);await page.screenshot({path:`${out}${name}-full.png`,fullPage:true,animations:'disabled'});if(selector)await page.locator(selector).screenshot({path:`${out}${name}-region.png`,animations:'disabled'});screenshots.push({name,url:page.url(),selector,geometry:await page.evaluate(()=>({width:innerWidth,height:innerHeight,dpr:devicePixelRatio,documentWidth:document.documentElement.scrollWidth,theme:document.documentElement.dataset.theme}))});}
+const provenance={publishedCommit:base,publishedTree:'255142817336a6fb485b7b7f85d6eed924128223',captureCommit:execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),appDiff,viewport:{width:390,height:1100},deviceScaleFactor:3,theme:'normal',fixture:'isolated introduction samples derived from bundled catalog; no fabricated study history; no DOM or CSS substitution',sampleMap:specs.map(([i,title],index)=>({id:problems[index].id,catalogIndex:i,catalogTitle:catalog[i].title,introductionTitle:title,handAnswerUnchanged:true,explanationUnchanged:index!==0})),materialSource,materials:materials.map(({title,url})=>({title,url})),screenshots,errors};
+async function capture(name,selector){if(selector)await page.locator(selector).waitFor({state:'visible'});await page.evaluate(()=>document.fonts.ready);await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));await page.screenshot({path:`${out}${name}-full.png`,fullPage:true,animations:'disabled'});if(selector)await page.locator(selector).screenshot({path:`${out}${name}-region.png`,animations:'disabled'});screenshots.push({name,url:page.url(),selector,geometry:await page.evaluate(()=>({width:innerWidth,height:innerHeight,dpr:devicePixelRatio,documentWidth:document.documentElement.scrollWidth,theme:document.documentElement.dataset.theme}))});}
 try{
  const context=await browser.newContext({viewport:{width:390,height:1100},deviceScaleFactor:3,isMobile:true,hasTouch:true,serviceWorkers:'block'});
  await context.addInitScript(s=>localStorage.setItem('mahjong-study:v1',JSON.stringify(s)),seed);
  await context.route('**/*',route=>{const u=new URL(route.request().url());return u.origin===origin||u.protocol==='data:'||u.hostname==='i.ytimg.com'?route.continue():route.abort();});
  page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));await page.goto(origin);
  await page.getByRole('link',{name:'学習帳',exact:true}).click();await expect(page.locator('.problem-card')).toHaveCount(3);
- await capture('01-library','.problem-list');
- await page.evaluate(()=>scrollTo(0,0));
- const twoCards=await page.locator('.problem-card').evaluateAll(nodes=>{const first=nodes[0].getBoundingClientRect(),last=nodes[1].getBoundingClientRect();return {x:0,y:first.top+scrollY-6,width:390,height:last.bottom-first.top+12}});
- await page.screenshot({path:`${out}01-library-two-cards.png`,clip:twoCards,animations:'disabled'});provenance.libraryTwoCardsClip=twoCards;
- await page.setViewportSize({width:460,height:1100});await page.evaluate(()=>scrollTo(0,0));
- await capture('01-library-460','.problem-list');
- const twoWide=await page.locator('.problem-card').evaluateAll(nodes=>{const a=nodes[0].getBoundingClientRect(),b=nodes[1].getBoundingClientRect();return {x:0,y:a.top+scrollY-6,width:460,height:b.bottom-a.top+12}});
- await page.screenshot({path:`${out}01-library-two-cards-460.png`,clip:twoWide,animations:'disabled'});provenance.libraryTwoCards460Clip=twoWide;
- await page.setViewportSize({width:390,height:1100});
- // The same saved question becomes the editor and review example.
- await page.locator('.problem-card').first().click();await expect(page.getByRole('button',{name:'正解・解説を表示',exact:true})).toBeVisible();await capture('01-detail-question','.page');
- await page.getByRole('button',{name:'正解・解説を表示',exact:true}).click();await capture('02-detail-explanation','.page');
- await page.getByRole('tab',{name:'受入れ',exact:true}).click();await capture('02-detail-ukeire','.page');
- await page.getByRole('link',{name:'編集',exact:true}).click();await capture('02-editor','.page--editor');
- await page.locator('.editor-notes > summary').click();await expect(page.locator('.editor-notes textarea').first()).toHaveValue(problems[0].explanation);await capture('02-editor-notes','.editor-notes');
- await page.getByRole('link',{name:'テスト',exact:true}).click();await page.locator('.page--test details > summary').click();await expect(page.locator('.filter-chip')).toHaveCount(5);await capture('03-test-conditions','.page--test details');
- // Select the one tagged sample using actual app controls, then answer it.
- await page.locator('.filter-chip').filter({hasText:'タグ'}).click();await page.locator('.tag-cloud button').filter({hasText:'両面・カンチャン'}).click();
- await page.getByRole('button',{name:'1 問でテスト開始',exact:true}).click();await capture('03-test-question','.page--test');
- await page.locator('.hand-stage').getByRole('button',{name:'一索',exact:true}).first().click();await page.getByRole('button',{name:'回答する',exact:true}).click();await expect(page.locator('.verdict')).toHaveText('正解');await capture('03-test-answer','.page--test');
- await page.getByRole('link',{name:'学習教材',exact:true}).click();await expect(page.locator('.material-card')).toHaveCount(3);
- for(const card of await page.locator('.material-card').all())await card.scrollIntoViewIfNeeded();
- await page.evaluate(async()=>{await Promise.all([...document.querySelectorAll('.material-thumbnail img')].map(img=>img.complete?Promise.resolve():new Promise(resolve=>{img.addEventListener('load',resolve,{once:true});img.addEventListener('error',resolve,{once:true});setTimeout(resolve,15000)})))});
- provenance.thumbnails=await page.locator('.material-thumbnail').evaluateAll(nodes=>nodes.map(node=>{const img=node.querySelector('img');return {image:img?{src:img.currentSrc,complete:img.complete,naturalWidth:img.naturalWidth,naturalHeight:img.naturalHeight}:null,fallback:!!node.querySelector('.material-thumbnail__placeholder')}}));
- await page.evaluate(()=>scrollTo(0,0));await capture('04-materials','.material-list');
- await page.getByRole('link',{name:`${materials[0].title}の記録・コメント`,exact:true}).click();await capture('04-material-detail','.page--material-detail');
- expect(errors).toEqual([]);await writeFile(`${out}provenance.json`,JSON.stringify({...provenance,status:'pass'},null,2));console.log(JSON.stringify({status:'pass',screenshots:screenshots.length,thumbnails:provenance.thumbnails}));
+ // This run only recaptures the requested editor explanation region.
+ await page.locator('.problem-card').first().click();
+ await expect(page.getByRole('button',{name:'正解・解説を表示',exact:true})).toBeVisible();
+ await page.getByRole('link',{name:'編集',exact:true}).click();
+ await expect(page.getByRole('heading',{name:'問題を編集',exact:true})).toBeVisible();
+ await expect(page).toHaveURL(/#\/edit\/launch-sample-1$/);
+ await page.locator('.editor-notes > summary').click();
+ const explanation=page.locator('.editor-notes textarea').first();
+ await expect(explanation).toHaveValue(problems[0].explanation);
+ const shortExplanation='1索切り：2索・5索の両面待ち。\n受入れは2種8枚。\n4索切り：2索待ちの1種4枚。';
+ await explanation.fill(shortExplanation);
+ await expect(explanation).toHaveValue(shortExplanation);
+ await page.evaluate(()=>document.fonts.ready);
+ await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+ provenance.explanationAdaptation={problemId:problems[0].id,original:problems[0].explanation,introduction:shortExplanation,meaningPreserved:true,method:'typed through the actual editor form; unsaved introduction sample only'};
+ provenance.explanationGeometry=await explanation.evaluate(el=>({clientHeight:el.clientHeight,scrollHeight:el.scrollHeight,clientWidth:el.clientWidth,scrollWidth:el.scrollWidth,value:el.value}));
+ expect(provenance.explanationGeometry.scrollHeight).toBeLessThanOrEqual(provenance.explanationGeometry.clientHeight);
+ expect(provenance.explanationGeometry.scrollWidth).toBeLessThanOrEqual(provenance.explanationGeometry.clientWidth);
+ await page.locator('.editor-notes > summary').click();await page.locator('.editor-notes > summary').click();
+ await capture('02-editor-notes','.editor-notes');
+ expect(errors).toEqual([]);await writeFile(`${out}provenance.json`,JSON.stringify({...provenance,status:'pass'},null,2));console.log(JSON.stringify({status:'pass',screenshots:screenshots.length,explanationGeometry:provenance.explanationGeometry}));
 }catch(error){if(page)await page.screenshot({path:`${out}failure.png`,fullPage:true});await writeFile(`${out}provenance.json`,JSON.stringify({...provenance,status:'fail',message:String(error)},null,2));throw error;}finally{await browser.close();}
