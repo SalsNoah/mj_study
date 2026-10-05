@@ -1,0 +1,35 @@
+name: Introduction screenshots only
+on:
+  push:
+    branches: ['capture/launch-v2-20261006']
+    paths:
+      - 'scripts/capture-launch-v2.mjs'
+      - '.github/workflows/launch-capture.yml'
+permissions:
+  contents: read
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - name: Capture unchanged published UI with isolated samples
+        run: |
+          npm run dev -- --host 127.0.0.1 --port 5176 > /tmp/launch-vite.log 2>&1 &
+          for i in {1..30}; do curl --silent --fail http://127.0.0.1:5176/ > /dev/null && break; sleep 1; done
+          node scripts/capture-launch-v2.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: introduction-screenshots-dpr3
+          path: evidence/launch-v2/
+          retention-days: 7
