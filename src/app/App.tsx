@@ -17,6 +17,7 @@ import './styles.css';
 import '@/features/materials/materials.css';
 import './themeBackgrounds.css';
 import './dopa.css';
+import './moe.css';
 
 /** 仕様の #share=v1... を HashRouter の #/path と切り分ける */
 function readSharePayload(): string | null {

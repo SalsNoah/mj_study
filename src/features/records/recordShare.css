@@ -16,8 +16,12 @@
 .record-share-text textarea { width: 100%; min-width: 0; resize: vertical; padding: 8px; font: inherit; line-height: 1.6; }
 .record-share-native { margin-top: 14px; }
 .record-share-native > .btn { width: 100%; }
-.record-share-native p, .record-share-fallback p { margin: 7px 0; font-size: .8125rem; line-height: 1.6; overflow-wrap: anywhere; }
+.record-share-native p, .record-share-fallback p, .record-share-copy p { margin: 7px 0; font-size: .8125rem; line-height: 1.6; overflow-wrap: anywhere; }
+.record-share-copy { margin-top: 8px; }
+.record-share-copy p:empty { display: none; }
 .record-share-fallback { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); }
+.record-share-fallback summary { min-height: 44px; padding: 10px 0; cursor: pointer; font-size: .875rem; line-height: 1.6; overflow-wrap: anywhere; }
+.record-share-fallback summary:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
 .record-share-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .record-share-actions > .btn { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; flex: 1 1 10rem; }
 .record-share-status { margin: 8px 0 0; font-size: .875rem; overflow-wrap: anywhere; }

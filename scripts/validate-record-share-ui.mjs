@@ -1,6 +1,7 @@
 // Isolated synthetic profiles. Native share is a test double; no X post or login.
 import { chromium, expect } from '@playwright/test';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
 const out = new URL('../evidence/record-share-ui/', import.meta.url).pathname;
 await mkdir(out, { recursive: true });
 const origin = process.env.MAHJONG_TEST_ORIGIN ?? 'http://127.0.0.1:5176';
@@ -13,13 +14,14 @@ history.daily = { '2000-01-01': { tested: 100, confirmed: 20 }, '2026-10-04': { 
 history.materials = [{ id: 'synthetic', title: 'PRIVATE TITLE MUST NOT BE SHARED', url: 'https://example.com/private', comment: 'PRIVATE COMMENT MUST NOT BE SHARED', createdAt: '2020-01-01T03:00:00Z', updatedAt: '2020-01-01T03:00:00Z' }];
 history.materialStudyEvents = [{ id: 'older', at: '2020-01-01T03:00:00Z' }, { id: 'today', at: '2026-10-05T03:00:00Z' }].map(event => ({ ...event, materialId: 'synthetic', title: 'PRIVATE TITLE MUST NOT BE SHARED', url: 'https://example.com/private', comment: 'PRIVATE COMMENT MUST NOT BE SHARED' }));
 const expected = '2026-10-05の学習記録\n今日：テスト5回・確認2回・教材1回\n累計：テスト113回・確認25回・教材2回\n#麻雀学習帳';
-async function open(theme, data = history, mode = 'unsupported') {
+async function open(theme, data = history, mode = 'unsupported', failArt = false) {
   const context = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1, timezoneId: 'Asia/Tokyo', serviceWorkers: 'block', acceptDownloads: true });
   await context.addInitScript(({ theme, data, mode }) => {
     localStorage.setItem('mahjong-study:v1', JSON.stringify(data));
     localStorage.setItem('mahjong-study:theme', theme);
-    window.__recordShareCalls = [];
-    Object.defineProperty(navigator, 'canShare', { configurable: true, value: mode === 'unsupported' ? undefined : payload => !!payload.files?.length });
+    window.__recordShareCalls = []; window.__recordCopiedText = '';
+    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: async text => { window.__recordCopiedText = text; } } });
+    Object.defineProperty(navigator, 'canShare', { configurable: true, value: mode === 'unsupported' ? undefined : payload => !!payload.files?.length && (mode !== 'files-only' || !('text' in payload)) });
     Object.defineProperty(navigator, 'share', { configurable: true, value: mode === 'unsupported' ? undefined : payload => {
       window.__recordShareCalls.push({ text: payload.text, fileCount: payload.files.length, type: payload.files[0].type, size: payload.files[0].size, name: payload.files[0].name, userActivation: navigator.userActivation.isActive });
       return mode === 'cancel' ? Promise.reject(new DOMException('cancelled', 'AbortError')) : mode === 'error' ? Promise.reject(new DOMException('blocked', 'NotAllowedError')) : Promise.resolve();
@@ -27,6 +29,7 @@ async function open(theme, data = history, mode = 'unsupported') {
   }, { theme, data, mode });
   await context.route('**/*', async route => {
     const url = new URL(route.request().url());
+    if (failArt && url.pathname.startsWith(`/themes/${theme}/`)) { network.push({url:url.href,action:'synthetic-art-failure'}); return route.abort(); }
     if (url.origin === origin || ['data:', 'blob:'].includes(url.protocol)) return route.continue();
     network.push({ url: url.href, action: url.origin === 'https://twitter.com' && url.pathname === '/intent/tweet' ? 'intercepted-composer-test' : 'blocked' });
     if (url.origin === 'https://twitter.com' && url.pathname === '/intent/tweet') return route.fulfill({ status: 200, contentType: 'text/plain', body: 'Synthetic composer destination. No X request was made.' });
@@ -52,7 +55,7 @@ async function capture(page, name, bottom = false) {
   await page.screenshot({ path: `${out}${name}.png`, animations: 'disabled' });
   const dimensions = await page.evaluate(() => {
     const dialog = document.querySelector('.record-share-dialog');
-    const controls = [...dialog.querySelectorAll('button, a')].map(el => {
+    const controls = [...dialog.querySelectorAll('button, a, summary')].filter(el => el.getClientRects().length > 0).map(el => {
       const r = el.getBoundingClientRect();
       const hit = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
       return { text: el.textContent, width: r.width, height: r.height, x: r.x, right: r.right, top: r.top, bottom: r.bottom, hit: !!hit && el.contains(hit) };
@@ -69,12 +72,13 @@ async function capture(page, name, bottom = false) {
   results.push({ name, ...dimensions });
 }
 try {
-  for (const theme of ['normal', 'cool', 'cute', 'dopa']) {
+  const imageHashes = [];
+  for (const theme of ['normal', 'cool', 'cute', 'dopa', 'moe']) {
     const { page, context } = await open(theme);
     const saved = await page.evaluate(() => localStorage.getItem('mahjong-study:v1'));
     await preview(page);
     await expect(page.getByRole('textbox', { name: '投稿文', exact: true })).toHaveValue(expected);
-    await expect(page.getByRole('button', { name: '画像と文面を共有', exact: true })).toHaveCount(0);
+    await expect(page.locator('.record-share-native')).toHaveCount(0);
     for (const width of [320, 390, 1440]) {
       await page.setViewportSize({ width, height: width === 1440 ? 900 : 740 });
       await page.locator('.record-share-dialog').evaluate(el => el.scrollTop = 0);
@@ -87,15 +91,17 @@ try {
     await capture(page, `${theme}-preview-320-text150`);
     await capture(page, `${theme}-actions-320-text150`, true);
     await page.evaluate(() => document.documentElement.style.fontSize = '');
+    const downloadPromise = page.waitForEvent('download');
+    await page.getByRole('link', { name: '1. 画像を保存', exact: true }).click();
+    const download = await downloadPromise;
+    await download.saveAs(`${out}record-image-${theme}.png`);
+    const bytes = await readFile(`${out}record-image-${theme}.png`);
+    expect([...bytes.subarray(0, 8)]).toEqual([137,80,78,71,13,10,26,10]);
+    expect(bytes.readUInt32BE(16)).toBe(1080); expect(bytes.readUInt32BE(20)).toBe(1080);
+    expect(download.suggestedFilename()).toBe('mahjong-study-records-2026-10-05.png');
+    const hash = createHash('sha256').update(bytes).digest('hex'); imageHashes.push(hash);
+    results.push({name:`themed-png-${theme}`,hash,bytes:bytes.length});
     if (theme === 'normal') {
-      const downloadPromise = page.waitForEvent('download');
-      await page.getByRole('link', { name: '1. 画像を保存', exact: true }).click();
-      const download = await downloadPromise;
-      await download.saveAs(`${out}record-image.png`);
-      const bytes = await readFile(`${out}record-image.png`);
-      expect([...bytes.subarray(0, 8)]).toEqual([137,80,78,71,13,10,26,10]);
-      expect(bytes.readUInt32BE(16)).toBe(1080); expect(bytes.readUInt32BE(20)).toBe(1080);
-      expect(download.suggestedFilename()).toBe('mahjong-study-records-2026-10-05.png');
       const popupPromise = page.waitForEvent('popup');
       await page.getByRole('link', { name: '2. Xの投稿画面を開く', exact: true }).click();
       const popup = await popupPromise; await popup.waitForLoadState();
@@ -112,15 +118,28 @@ try {
     expect(await page.evaluate(() => localStorage.getItem('mahjong-study:v1'))).toBe(saved);
     await context.close();
   }
-  for (const mode of ['native', 'cancel', 'error']) {
+  expect(new Set(imageHashes).size).toBe(5);
+  for (const mode of ['native', 'files-only', 'cancel', 'error']) {
     const { page, context } = await open('normal', history, mode);
-    await preview(page); await page.getByRole('button', { name: '画像と文面を共有', exact: true }).click();
+    await preview(page); await expect(page.locator('.record-share-fallback')).not.toHaveAttribute('open','');
+    await page.getByRole('button',{name:'閉じる',exact:true}).focus(); await page.keyboard.press('Shift+Tab'); await expect(page.locator('.record-share-fallback summary')).toBeFocused(); await page.keyboard.press('Tab'); await expect(page.getByRole('button',{name:'閉じる',exact:true})).toBeFocused();
+    await page.getByRole('button',{name:'投稿文をコピー',exact:true}).click(); expect(await page.evaluate(()=>window.__recordCopiedText)).toBe(expected);
+    await capture(page, `share-${mode}-primary`, true);
+    await page.getByRole('button', { name: mode === 'files-only' ? '画像を共有' : '画像付きで共有', exact: true }).click();
     const calls = await page.evaluate(() => window.__recordShareCalls);
-    expect(calls).toHaveLength(1); expect(calls[0].userActivation).toBe(true); expect(calls[0].text).toBe(expected); expect(calls[0].fileCount).toBe(1); expect(calls[0].type).toBe('image/png'); expect(calls[0].size).toBeGreaterThan(1000);
+    expect(calls).toHaveLength(1); expect(calls[0].userActivation).toBe(true); expect(calls[0].text).toBe(mode === 'files-only' ? undefined : expected); expect(calls[0].fileCount).toBe(1); expect(calls[0].type).toBe('image/png'); expect(calls[0].size).toBeGreaterThan(1000);
     expect(context.pages()).toHaveLength(1);
-    await capture(page, `share-${mode}`, true);
-    results.push({ name: `native-api-test-double-${mode}`, ...calls[0], status: 'pass', limitation: 'Does not certify an OS share sheet or X receiving both image and text.' });
+    if (mode !== 'error') await page.locator('.record-share-fallback summary').click();
+    await expect(page.locator('.record-share-fallback')).toHaveAttribute('open','');
+    await capture(page, `share-${mode}-fallback`, true);
+    results.push({ ...calls[0], fileName: calls[0].name, name: `native-api-test-double-${mode}`, status: 'pass', limitation: 'Does not certify an OS share sheet or X receiving both image and text.' });
     await context.close();
+  }
+  for (const theme of ['cool','cute','dopa','moe']) {
+    const { page, context } = await open(theme, history, 'unsupported', true);
+    await preview(page); await expect(page.getByRole('textbox',{name:'投稿文',exact:true})).toHaveValue(expected);
+    const nextDownload=page.waitForEvent('download'); await page.getByRole('link',{name:'1. 画像を保存',exact:true}).click(); await (await nextDownload).saveAs(`${out}record-image-${theme}-fallback.png`);
+    await capture(page, `share-${theme}-art-failure`); await context.close();
   }
   for (const kind of ['empty', 'large']) {
     const data = structuredClone(empty);

@@ -121,12 +121,6 @@ export function SettingsPage() {
               <small>{t.desc}</small>
             </button>
           ))}
-          <button type="button" role="radio" aria-checked="false" aria-disabled="true" disabled
-            className="theme-option theme-option--coming">
-            <span className="theme-swatch theme-swatch--coming" aria-hidden="true">✦</span>
-            <strong>萌え</strong>
-            <small>後日実装</small>
-          </button>
         </div>
       </section>
 
