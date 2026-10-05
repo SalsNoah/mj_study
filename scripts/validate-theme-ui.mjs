@@ -21,7 +21,7 @@ async function open(profile = seed) {
 async function nav(name) { await page.getByRole('link',{name,exact:true}).click(); const selector={'作成':'.page--editor','学習帳':'.page--library','テスト':'.page--test','学習教材':'.page--materials','記録帳':'.page--records','設定':'.page--settings'}[name]; await page.locator(selector).waitFor({state:'visible'}); }
 async function capture(name, selector) {
  if(selector)await page.locator(selector).evaluate(el=>el.scrollIntoView({block:'center'}));else await page.evaluate(()=>scrollTo(0,0));
- await page.evaluate(()=>document.fonts.ready);await page.screenshot({path:`${out}${name}.png`,animations:'disabled'});
+ await page.evaluate(()=>document.fonts.ready);const cards=page.locator('.problem-card');if(await cards.count())await expect.poll(()=>cards.first().evaluate(el=>getComputedStyle(el).opacity)).toBe('1');await page.screenshot({path:`${out}${name}.png`,animations:'disabled'});
  const g=await page.evaluate(()=>({width:innerWidth,documentWidth:document.documentElement.scrollWidth,theme:document.documentElement.dataset.theme,headings:[...document.querySelectorAll('h1,.section-title,summary')].filter(el=>el.getBoundingClientRect().width).map(el=>{const s=getComputedStyle(el),m=getComputedStyle(el,'::before');return {text:el.textContent,font:s.fontFamily,size:s.fontSize,weight:s.fontWeight,line:s.lineHeight,marker:[m.borderLeftWidth,m.borderTopWidth,m.borderBottomWidth],height:el.getBoundingClientRect().height};})}));
  expect(g.documentWidth).toBeLessThanOrEqual(g.width);results.push({name,...g});
 }
@@ -40,7 +40,7 @@ try {
   await expect(page.getByRole('radio',{name:new RegExp(`^${labels[theme]}`)})).toHaveAttribute('aria-checked','true');await capture(`theme-picker-${theme}-390`);
  }
  await page.getByRole('radio',{name:/^DOPA/}).press('ArrowRight');await expect(page.getByRole('radio',{name:/^ノーマル/})).toBeFocused();await page.getByRole('radio',{name:/^ノーマル/}).press('End');await expect(page.getByRole('radio',{name:/^DOPA/})).toBeFocused();await expect(moe).toBeDisabled();expect(await page.evaluate(()=>localStorage.getItem('mahjong-study:v1'))).toBe(original);results.push({name:'theme-persistence-keyboard-moe-disabled',status:'pass'});
- for(const theme of ['normal','dopa']) {
+ for(const theme of ['normal','cool','cute','dopa']) {
   await nav('設定');await page.getByRole('tab',{name:'表示・編集',exact:true}).click();await page.getByRole('radio',{name:new RegExp(`^${labels[theme]}`)}).click();
   for(const width of [375,1440]) {
    await page.setViewportSize({width,height:width===1440?900:740});

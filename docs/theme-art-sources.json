@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "assets": [
+    {
+      "path": "public/themes/cool/background.webp",
+      "theme": "cool",
+      "usage": "full viewport CSS cover background",
+      "source": "AI-generated for this project, 2026-10-05",
+      "generationMode": "built-in image generation, one new standalone image per asset; no input image",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "7b04063056c0d4bd2b7266bb1faec461669e8c1749411c7df05d3c5042b835cd",
+      "originalPNG_sha256": "2624d028959aa5030b30863448f2d51efd3f09b22d07f57c8148ce287ca982fe",
+      "decodedRGBA_sha256": "c3fb73544a4ab2a3ddeb25ffab5fe5ae2550e3e823a3f9b481655d590040728d",
+      "encoding": "Lossless WebP; original dimensions and decoded RGBA pixels unchanged",
+      "bytes": 905128,
+      "prompt": "Use case: stylized-concept\nAsset type: full-viewport background image for a calm dark navy mahjong study web app, desktop and phone adaptive cover.\nPrimary request: create a sophisticated quiet abstract background for the Cool theme. A deep midnight navy field with broad translucent icy-blue planes and very soft flowing bands of cyan light, a sense of clean spacious depth and polished frosted glass. No literal objects.\nComposition/framing: wide landscape 1536 by 1024. Full-bleed artwork, carefully balanced when cropped to a narrow central portrait. The central 65 percent should remain very dark, low-detail and evenly quiet to support light UI text and cards. Subtle layers and blue glow mostly near outer edges and corners. Gentle broad shapes rather than narrow bright lines. No distinct focal object.\nLighting/mood: calm, precise, cool, meditative; restrained soft atmospheric illumination, not neon spectacle.\nColor palette: dominant near-black navy #0b1118 and #0f1822, modest desaturated steel blue #23384b, tiny soft cyan #4cc9f0 accents at edges. Overall dark.\nMaterials/textures: smooth fine-grained frosted translucency, painterly smooth tonal depth, no visible noise pattern.\nConstraints: one original standalone background image; no text, letters, numerals, logos, watermark, UI, borders, mahjong tiles, tile faces, characters, figures, stars, icons, or busy details. Not a collage, no panels, no framed mockup. Opaque background."
+    },
+    {
+      "path": "public/themes/cool/card.webp",
+      "theme": "cool",
+      "usage": "Library problem card CSS cover background",
+      "source": "AI-generated for this project, 2026-10-05",
+      "generationMode": "built-in image generation, one new standalone image per asset; no input image",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "eedad63b4b2444153d53d9440b5b8e6943509ef60128e5c5e9438409a8c3056f",
+      "originalPNG_sha256": "8eb15e900d0d6a8234491167e902e4b795918929c8b957a1a2e418be374ac1ee",
+      "decodedRGBA_sha256": "a8e784ed75c80175f46476bf9ecafd1d36807bcea185e01086d3d601bd090117",
+      "encoding": "Lossless WebP; original dimensions and decoded RGBA pixels unchanged",
+      "bytes": 1132976,
+      "prompt": "Use case: stylized-concept\nAsset type: horizontal problem-card cover background for a calm dark navy mahjong study web app.\nPrimary request: create an original quiet abstract background for the Cool theme that harmonizes with deep midnight navy and softly illuminated frosted icy-blue layers. Two broad elegant translucent glass-like folds flow near the lower and far right edges, evoking airy depth without depicting any object.\nComposition/framing: wide landscape 1536 by 1024, intended to crop into a horizontal card. Keep the central horizontal band and left two-thirds exceptionally calm, low-detail and dark navy, so light titles and crisp white mahjong tile faces placed by the app remain highly legible. Detail concentrated at far right and lower edge, soft enough for cover crops. Broad shapes, no sharp central highlights, no focal object.\nLighting/mood: composed, clean, cool and thoughtful, subtle cyan-blue rim glow with soft falloff.\nColor palette: dominant #0f1822 and #0b1118, smoky blue #23384b, restrained icy cyan #4cc9f0 at the periphery only. Keep overall dark.\nMaterials/textures: finely smooth frosted translucent layers and gentle atmospheric gradients.\nConstraints: one original standalone background image; no text, letters, numerals, logos, watermark, UI, borders, mahjong tiles, tile faces, characters, figures, icons, stars or busy details. Not a collage, no panels, no mockup. Opaque background."
+    },
+    {
+      "path": "public/themes/cute/background.webp",
+      "theme": "cute",
+      "usage": "full viewport CSS cover background",
+      "source": "AI-generated for this project, 2026-10-05",
+      "generationMode": "built-in image generation, one new standalone image per asset; no input image",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "b9455cf21c8cd64ae288d2e154b82f3557b924b9805540cfdc292545c07aeb42",
+      "originalPNG_sha256": "9987123c170e860e3d4744427cecda3e8e16f96940b0cb1a09b782648f4d3150",
+      "decodedRGBA_sha256": "f0fcc2455f6a1e09b97a053129031143388c86f1120238950bfc2c9bc95798ce",
+      "encoding": "Lossless WebP; original dimensions and decoded RGBA pixels unchanged",
+      "bytes": 745378,
+      "prompt": "Use case: stylized-concept\nAsset type: full-viewport background image for a soft ivory-blush and lavender mahjong study web app, desktop and phone adaptive cover.\nPrimary request: create a tasteful softly cute abstract background. Airy sculptural pastel paper and cloud-like rounded folds drift around a spacious creamy ivory-blush field, with a little pale lavender and a whisper of rose. Modern, gentle and warm, not childish. No literal objects.\nComposition/framing: wide landscape 1536 by 1024. Full-bleed artwork, balanced under a narrow central portrait cover crop. Central 65 percent must be near-uniform pale ivory-blush with very subtle depth, so dark plum UI text and cards remain easy to read. Larger rounded flowing layers live mostly around edges and corners with barely visible soft shadows. Broad forms and quiet negative space, no central focal object.\nLighting/mood: tender diffuse daylight, airy and welcoming, delicate warmth, restrained whimsy.\nColor palette: dominant #fff6f9 and warm ivory, secondary very pale lavender #f6f0ff and soft rose blush, tiny muted dusty pink accents. Nearly white and low contrast throughout.\nMaterials/textures: softly rounded matte paper-like surfaces, subtle smooth cloudlike translucency; elegant editorial illustration with delicate 3D depth.\nConstraints: one original standalone background image; no text, letters, numerals, logos, watermark, UI, border, mahjong tiles, tile faces, characters, figures, hearts, flowers, stars, stickers, icons or busy details. Not a collage, no panels, no framed mockup. Opaque background."
+    },
+    {
+      "path": "public/themes/cute/card.webp",
+      "theme": "cute",
+      "usage": "Library problem card CSS cover background",
+      "source": "AI-generated for this project, 2026-10-05",
+      "generationMode": "built-in image generation, one new standalone image per asset; no input image",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "ffc2aee678f053963225852eba82480ec8e681288db7ae3c4dc5e28220ecba17",
+      "originalPNG_sha256": "6ed033e29d700700f01d7cb05a34c1ac21db615802e78d1444a124fca3c58e3c",
+      "decodedRGBA_sha256": "264c65236bc79149868b370e02189b141119565a0beff3fcffe6230909cdfd3c",
+      "encoding": "Lossless WebP; original dimensions and decoded RGBA pixels unchanged",
+      "bytes": 964366,
+      "prompt": "Use case: stylized-concept\nAsset type: horizontal problem-card cover background for a soft ivory-blush and lavender mahjong study web app.\nPrimary request: create an original softly cute abstract background that harmonizes with airy rounded pastel paper and cloud-like folds. A few very broad matte blush and lavender rounded layers curl gently along the lower and far right edges, surrounding a calm pale ivory-blush field. Delicate, warm and polished, not childish.\nComposition/framing: wide landscape 1536 by 1024, intended to crop into a horizontal card. Keep central horizontal band and left two-thirds very pale, evenly quiet, almost white and low-detail for dark plum titles and mahjong tile faces placed by the app. Gentle folds at the far right and lower edges, mild diffused shadows, no focal object and no high contrast.\nLighting/mood: soft diffuse daylight, warm airy calm, delicate playfulness.\nColor palette: dominant #fff6f9, ivory and #f6f0ff, restrained pale rose blush. Almost white overall; no saturated pink patch.\nMaterials/textures: smoothly rounded matte paper sculpture with subtle cloudlike softness and lightly layered depth.\nConstraints: one original standalone background image; no text, letters, numerals, logos, watermark, UI, borders, mahjong tiles, tile faces, characters, figures, hearts, flowers, stars, stickers, icons or busy details. Not a collage, no panels, no mockup. Opaque background."
+    }
+  ]
+}
