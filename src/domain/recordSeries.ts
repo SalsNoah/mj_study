@@ -10,8 +10,11 @@ export const RECORD_PERIODS: ReadonlyArray<{ value: RecordPeriod; label: string;
   { value: 'monthly', label: '月別', count: 12, range: '今月を含む12か月' },
 ];
 
-export type RecordPoint = DailyLog & {
-  materials: number;
+type RecordCounts = DailyLog & { materials: number };
+
+export type RecordPoint = RecordCounts & {
+  /** All valid history through this period's end, including before the visible range. */
+  cumulative: RecordCounts;
   key: string;
   start: string;
   end: string;
@@ -66,7 +69,7 @@ export function recordDateLabel(key: string, withYear = true): string {
   return `${withYear ? `${year}/` : ''}${month}/${day}`;
 }
 
-/** Calendar-aligned counts through today; missing dates contribute zero. */
+/** Calendar-aligned period counts and cumulative counts through today. */
 export function buildRecordSeries(
   daily: Record<string, DailyLog> | undefined,
   period: RecordPeriod,
@@ -88,14 +91,21 @@ export function buildRecordSeries(
         : `${recordDateLabel(startKey)}〜${recordDateLabel(endKey, !sameYear)}`;
     return {
       key: startKey, start: startKey, end: endKey, label,
-      axisLabel: period === 'monthly' ? `${startDate.getUTCFullYear()}/${startDate.getUTCMonth() + 1}` : recordDateLabel(startKey, false),
+      axisLabel: period === 'monthly' ? `${startDate.getUTCFullYear()}/${startDate.getUTCMonth() + 1}` : recordDateLabel(endKey, false),
       tested: 0, confirmed: 0, materials: 0,
+      cumulative: { tested: 0, confirmed: 0, materials: 0 },
     };
   });
   const byStart = new Map(points.map((point) => [point.key, point]));
+  const cumulative: RecordCounts = { tested: 0, confirmed: 0, materials: 0 };
   for (const [key, log] of Object.entries(daily ?? {})) {
     const date = parseDay(key);
-    if (!date || date < first || date > end) continue;
+    if (!date || date > end) continue;
+    if (date < first) {
+      cumulative.tested += log.tested;
+      cumulative.confirmed += log.confirmed;
+      continue;
+    }
     const point = byStart.get(calendarKey(periodStart(date, period)));
     if (point) {
       point.tested += log.tested;
@@ -104,11 +114,22 @@ export function buildRecordSeries(
   }
   for (const event of uniqueMaterialStudyEvents(materialStudyEvents)) {
     const instant = new Date(event.at);
-    if (!Number.isFinite(instant.getTime())) continue;
+    // Stored events use ISO instants. Reject impossible source dates before Date can roll them over.
+    if (!Number.isFinite(instant.getTime()) || !parseDay(event.at.slice(0, 10))) continue;
     const date = parseDay(dayKey(instant));
-    if (!date || date < first || date > end) continue;
+    if (!date || date > end) continue;
+    if (date < first) {
+      cumulative.materials += 1;
+      continue;
+    }
     const point = byStart.get(calendarKey(periodStart(date, period)));
     if (point) point.materials += 1;
+  }
+  for (const point of points) {
+    cumulative.tested += point.tested;
+    cumulative.confirmed += point.confirmed;
+    cumulative.materials += point.materials;
+    point.cumulative = { ...cumulative };
   }
   return { period, start: calendarKey(first), end: calendarKey(end), points };
 }
