@@ -33,6 +33,12 @@ async function handFrame(name,width,height,requireFit){
  expect(Math.abs((g.label.left+g.label.right-g.shot.left-g.shot.right)/2)).toBeLessThanOrEqual(1);expect(Math.abs((g.label.top+g.label.bottom-g.shot.top-g.shot.bottom)/2)).toBeLessThanOrEqual(1);
  for(const word of g.words){expect(word.left).toBeGreaterThanOrEqual(g.shot.left);expect(word.right).toBeLessThanOrEqual(g.shot.right);expect(word.top).toBeGreaterThanOrEqual(g.shot.top);expect(word.bottom).toBeLessThanOrEqual(g.shot.bottom);}
  await capture(name);results.push({name:`${name}-geometry`,width,height,requireFit,...g});if(requireFit){expect(g.palette.bottom).toBeLessThanOrEqual(g.nav.top+1);expect(g.hit).toBe(true);}
+ if(!requireFit){
+  await capture(`${name}-scrolled`,'.editor-shot-mobile');
+  const reachable=await page.locator('.editor-shot-mobile').evaluate(el=>{const r=el.getBoundingClientRect(),nav=document.querySelector('.bottom-nav').getBoundingClientRect(),hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return {top:r.top,bottom:r.bottom,navTop:nav.top,hit:!!hit&&el.contains(hit),scroll:scrollY}});
+  expect(reachable.top).toBeGreaterThanOrEqual(0);expect(reachable.bottom).toBeLessThanOrEqual(reachable.navTop);expect(reachable.hit).toBe(true);results.push({name:`${name}-scrolled-hit`,...reachable});
+ }
+
 }
 
 try{
