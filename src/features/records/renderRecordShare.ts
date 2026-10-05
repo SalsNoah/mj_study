@@ -1,11 +1,14 @@
 import type { RecordShareCounts, RecordShareSnapshot } from '@/domain/recordShare';
 
 const FONT = '"IBM Plex Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif';
+// Fontsource splits Japanese glyphs into unicode ranges. Loading the default
+// space alone would leave the card's Japanese text in a fallback font.
+const FONT_TEXT = '麻雀学習帳今日累計テスト確認教材回の記録は表示期間より前を含みます0123456789,/#-';
 
 /** Render only approved aggregate fields. No DOM screenshot or external images. */
 export async function renderRecordShareImage(snapshot: RecordShareSnapshot): Promise<{ blob: Blob; fileName: string }> {
   if (document.fonts) {
-    await Promise.all([document.fonts.load(`600 52px ${FONT}`), document.fonts.load(`400 36px ${FONT}`)]).catch(() => undefined);
+    await Promise.all([document.fonts.load(`600 52px ${FONT}`, FONT_TEXT), document.fonts.load(`400 36px ${FONT}`, FONT_TEXT)]).catch(() => undefined);
     await document.fonts.ready;
   }
   const canvas = document.createElement('canvas');
