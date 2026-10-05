@@ -96,6 +96,11 @@
 .page--records .records-chart__x-axis > span { position: absolute; transform: translateX(-50%); white-space: nowrap; }
 .page--records .records-chart__x-axis > .is-first { transform: none; }
 .page--records .records-chart__x-axis > .is-last { transform: translateX(-100%); }
+@media (max-width: 400px) {
+  .page--records .records-chart__x-axis { height: 3.5em; }
+  .page--records .records-chart__x-axis > span:not(.is-first):not(.is-last) { display: none; }
+  .page--records .records-chart__x-axis > .is-last { top: 1.8em; }
+}
 .page--records .records-empty { margin: 0 0 12px; text-align: center; color: var(--records-muted); font-size: 0.75rem; }
 .page--records .records-values { border-top: 1px solid var(--records-rule); }
 .page--records .records-values > summary { min-height: 44px; padding: 12px 0 6px; color: var(--records-ink); font-size: .875rem; }
