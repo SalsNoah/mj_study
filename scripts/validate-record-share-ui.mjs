@@ -6,6 +6,7 @@ await mkdir(out, { recursive: true });
 const origin = process.env.MAHJONG_TEST_ORIGIN ?? 'http://127.0.0.1:5176';
 const browser = await chromium.launch({ headless: true });
 const results = [], errors = [], network = [];
+let activePage;
 const empty = { schemaVersion: 1, revision: 0, problems: [], tags: [], study: [], attempts: [], settings: { autoSort: true }, daily: {}, materials: [], materialStudyEvents: [] };
 const history = structuredClone(empty);
 history.daily = { '2000-01-01': { tested: 100, confirmed: 20 }, '2026-10-04': { tested: 8, confirmed: 3 }, '2026-10-05': { tested: 5, confirmed: 2 } };
@@ -20,7 +21,7 @@ async function open(theme, data = history, mode = 'unsupported') {
     window.__recordShareCalls = [];
     Object.defineProperty(navigator, 'canShare', { configurable: true, value: mode === 'unsupported' ? undefined : payload => !!payload.files?.length });
     Object.defineProperty(navigator, 'share', { configurable: true, value: mode === 'unsupported' ? undefined : payload => {
-      window.__recordShareCalls.push({ text: payload.text, fileCount: payload.files.length, type: payload.files[0].type, size: payload.files[0].size, name: payload.files[0].name });
+      window.__recordShareCalls.push({ text: payload.text, fileCount: payload.files.length, type: payload.files[0].type, size: payload.files[0].size, name: payload.files[0].name, userActivation: navigator.userActivation.isActive });
       return mode === 'cancel' ? Promise.reject(new DOMException('cancelled', 'AbortError')) : mode === 'error' ? Promise.reject(new DOMException('blocked', 'NotAllowedError')) : Promise.resolve();
     } });
   }, { theme, data, mode });
@@ -32,6 +33,7 @@ async function open(theme, data = history, mode = 'unsupported') {
     return route.abort();
   });
   const page = await context.newPage();
+  activePage = page;
   page.on('pageerror', error => errors.push(error.message));
   await page.clock.setFixedTime(new Date('2026-10-05T03:00:00Z'));
   await page.goto(`${origin}/#/records`);
@@ -71,7 +73,7 @@ try {
     const { page, context } = await open(theme);
     const saved = await page.evaluate(() => localStorage.getItem('mahjong-study:v1'));
     await preview(page);
-    await expect(page.getByLabel('投稿文', { exact: true })).toHaveValue(expected);
+    await expect(page.getByRole('textbox', { name: '投稿文', exact: true })).toHaveValue(expected);
     await expect(page.getByRole('button', { name: '画像と文面を共有', exact: true })).toHaveCount(0);
     for (const width of [320, 390, 1440]) {
       await page.setViewportSize({ width, height: width === 1440 ? 900 : 740 });
@@ -114,7 +116,7 @@ try {
     const { page, context } = await open('normal', history, mode);
     await preview(page); await page.getByRole('button', { name: '画像と文面を共有', exact: true }).click();
     const calls = await page.evaluate(() => window.__recordShareCalls);
-    expect(calls).toHaveLength(1); expect(calls[0].text).toBe(expected); expect(calls[0].fileCount).toBe(1); expect(calls[0].type).toBe('image/png'); expect(calls[0].size).toBeGreaterThan(1000);
+    expect(calls).toHaveLength(1); expect(calls[0].userActivation).toBe(true); expect(calls[0].text).toBe(expected); expect(calls[0].fileCount).toBe(1); expect(calls[0].type).toBe('image/png'); expect(calls[0].size).toBeGreaterThan(1000);
     expect(context.pages()).toHaveLength(1);
     await capture(page, `share-${mode}`, true);
     results.push({ name: `native-api-test-double-${mode}`, ...calls[0], status: 'pass', limitation: 'Does not certify an OS share sheet or X receiving both image and text.' });
@@ -131,5 +133,5 @@ try {
   }
   expect(network.filter(item => item.action === 'blocked')).toEqual([]);
   expect(errors).toEqual([]);
-} catch (error) { errors.push(error.stack ?? String(error)); throw error; }
+} catch (error) { errors.push(error.stack ?? String(error)); if (activePage && !activePage.isClosed()) await activePage.screenshot({path: `${out}failure.png`, animations: 'disabled'}).catch(() => {}); throw error; }
 finally { await writeFile(`${out}results.json`, JSON.stringify({ results, errors, network }, null, 2)); await browser.close(); }
