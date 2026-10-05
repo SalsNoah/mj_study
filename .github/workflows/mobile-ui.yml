@@ -8,6 +8,7 @@ on:
       - 'scripts/validate-ukeire-ui.mjs'
       - 'scripts/validate-desktop-ui.mjs'
       - 'scripts/validate-dora-ui.mjs'
+      - 'scripts/preview-fixture.*'
       - 'scripts/validate-icon-ui.mjs'
       - 'index.html'
       - '.github/workflows/mobile-ui.yml'
@@ -32,10 +33,12 @@ jobs:
         run: |
           npm run dev -- --host 127.0.0.1 --port 5176 > /tmp/mahjong-vite.log 2>&1 &
           for i in {1..30}; do curl --silent --fail http://127.0.0.1:5176/ > /dev/null && break; sleep 1; done
-          node scripts/validate-ukeire-ui.mjs
-          node scripts/validate-desktop-ui.mjs
-          node scripts/validate-dora-ui.mjs
-          node scripts/validate-icon-ui.mjs
+          status=0
+          node scripts/validate-ukeire-ui.mjs || status=1
+          node scripts/validate-desktop-ui.mjs || status=1
+          node scripts/validate-dora-ui.mjs || status=1
+          node scripts/validate-icon-ui.mjs || status=1
+          exit "$status"
       - uses: actions/upload-artifact@v4
         if: always()
         with:

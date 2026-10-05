@@ -107,6 +107,14 @@ try {
   expect(order.inputTargets).toEqual(['手牌','ドラ表示牌','明順子','明刻子','明槓子','暗槓子','加槓子']);
   results.push({ name: 'continuous-editor-flow', order, mixedInputClicks: 14, suitSwitchClicks: 0 });
   await allSizes('editor-empty');
+  for (const width of [375,390]) {
+    await page.setViewportSize({width,height:844});
+    const field=page.getByLabel('東の点数（百点単位）',{exact:true});
+    await field.fill('999'); await expect(field).toBeFocused();
+    await capture(`scores-999-focused-${width}`, '.ctx-scores');
+    await field.fill('250'); await field.press('Tab');
+  }
+
   await page.setViewportSize({ width: 320, height: 844 });
   await page.getByLabel('東の点数（百点単位）', { exact: true }).fill('0');
   await page.getByLabel('南の点数（百点単位）', { exact: true }).fill('999');
@@ -300,6 +308,12 @@ try {
   await page.evaluate(() => document.documentElement.style.fontSize = '150%');
   await page.setViewportSize({ width: 320, height: 720 });
   await capture('editor-320-text150');
+  await page.getByLabel('東の点数（百点単位）',{exact:true}).fill('-100000');
+  await page.getByRole('button',{name:'東の点数を-100,000点として反映',exact:true}).click();
+  await capture('scores-exception-320-text150', '.ctx-scores');
+  await page.getByLabel('東の点数（そのまま）',{exact:true}).fill('25000');
+  await page.getByLabel('東の点数（そのまま）',{exact:true}).press('Tab');
+
   await targets('.tile-actions button,.editor-save');
   await page.locator('.editor-notes > summary').click(); await capture('notes-320-text150', '.editor-notes');
   await page.locator('.editor-notes > summary').click();
