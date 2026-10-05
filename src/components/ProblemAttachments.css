@@ -7,11 +7,14 @@
 .attachment-thumbnail:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
 .attachment-editor { min-width: 0; }
 .attachment-editor__heading { margin: 12px 0 8px; font-weight: 700; }
+.attachment-editor__sections { display: grid; gap: 16px; }
+.attachment-editor__section { min-width: 0; }
+.attachment-editor__section-heading { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; margin: 0 0 8px; font-size: 0.9rem; }
+.attachment-editor__section-heading span { color: var(--muted); font-size: 0.75rem; font-weight: 400; }
 .attachment-editor__items { display: grid; gap: 12px; }
 .attachment-editor__item { min-width: 0; padding: 10px; border: 1px solid var(--line); border-radius: var(--r-md); }
 .attachment-editor__item .problem-attachments { margin-top: 0; }
-.attachment-editor input[type="file"], .attachment-editor select { min-width: 0; max-width: 100%; }
-.attachment-editor select { width: 100%; }
+.attachment-editor input[type="file"] { min-width: 0; max-width: 100%; }
 .attachment-viewer-backdrop { position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; padding: max(8px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left)); background: rgb(0 0 0 / 75%); }
 .attachment-viewer { display: flex; flex-direction: column; width: min(100%, 1000px); height: 100%; max-height: 900px; min-width: 0; min-height: 0; overflow: hidden; border-radius: var(--r-md); background: var(--surface); color: var(--ink); }
 .attachment-viewer__header { display: flex; flex: none; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 12px; border-bottom: 1px solid var(--line); }

@@ -189,7 +189,7 @@ try {
   await expect(page.locator('.editor-tools .ukeire-list > li:visible')).toHaveCount(13);
   await page.locator('.editor-notes > details > summary').click();
   const sourceInput = page.getByLabel('出典URL', { exact: true });
-  const referenceInput = page.getByLabel('画像を追加', { exact: true });
+  const referenceInput = page.getByLabel('解説画像を追加', { exact: true });
   await capture('editor-short-all-open-top');
   await capture('editor-short-all-open-notes', '.editor-notes > summary');
   await sourceInput.click();
@@ -200,8 +200,8 @@ try {
   await capture('editor-short-reference-url', undefined, { preserveScroll: true });
   // Keyboard traversal reaches the last input without opening a file chooser or uploading a file.
   await sourceInput.press('Tab');
-  await expect(page.getByLabel('追加する画像の表示先',{exact:true})).toBeFocused();
-  await page.getByLabel('追加する画像の表示先',{exact:true}).press('Tab');
+  await expect(page.getByLabel('問題画像を追加',{exact:true})).toBeFocused();
+  await page.getByLabel('問題画像を追加',{exact:true}).press('Tab');
   await assertFocusedControlReachable('editor-short-reference-last-input', referenceInput);
   await capture('editor-short-reference-last-input', undefined, { preserveScroll: true });
   await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
@@ -211,7 +211,7 @@ try {
   await capture('editor-1100-text150-all-open-top');
   await sourceInput.click();
   await sourceInput.press('Tab');
-  await page.getByLabel('追加する画像の表示先',{exact:true}).press('Tab');
+  await page.getByLabel('問題画像を追加',{exact:true}).press('Tab');
   await assertFocusedControlReachable('editor-1100-text150-reference-last-input', referenceInput);
   await capture('editor-1100-text150-reference-last-input', undefined, { preserveScroll: true });
   await page.evaluate(() => document.documentElement.style.fontSize = '');
