@@ -1,4 +1,10 @@
 /* DOPA decorates the interface; tile faces and text keep solid, readable colors. */
+@property --dopa-streak-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
 [data-theme='dopa'] {
   color-scheme: dark;
   --bg0: #090b18;
@@ -44,12 +50,72 @@
   --dopa-rainbow: linear-gradient(110deg, #ff68b7, #b59aff, #67e8ff, #94f3b3, #ffe585, #ffab7c, #ff68b7);
 }
 
+html[data-theme='dopa'] {
+  background:
+    linear-gradient(rgba(6, 9, 24, .24), rgba(7, 9, 24, .42)),
+    url('/themes/dopa/neon-trails-background.jpg') center / cover no-repeat,
+    var(--bg0);
+  background-attachment: fixed;
+}
+
 html[data-theme='dopa'] :is(.panel, .hand-stage, .problem-card, .material-card, .records-title, .bottom-nav, .duplicate-confirmation) {
   border: 1px solid transparent;
   background: linear-gradient(var(--panel-solid), var(--panel-solid)) padding-box, var(--dopa-rainbow) border-box;
   background-size: 100% 100%, 300% 300%;
   box-shadow: var(--tile-shadow);
   animation: dopa-rainbow-flow 12s linear infinite;
+}
+
+html[data-theme='dopa'] :is(.panel, .hand-stage, .problem-card, .material-card, .records-title, .duplicate-confirmation) {
+  position: relative;
+}
+
+/* Only the two-pixel frame is painted. Content and taps pass through unchanged. */
+@supports (mask-composite: exclude) or (-webkit-mask-composite: xor) {
+  html[data-theme='dopa'] :is(.panel, .hand-stage, .problem-card, .material-card, .records-title, .duplicate-confirmation)::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    z-index: 1;
+    padding: 2px;
+    border-radius: inherit;
+    pointer-events: none;
+    background: conic-gradient(from var(--dopa-streak-angle),
+      transparent 0deg 24deg, rgba(103, 232, 255, .12) 42deg,
+      #67e8ff 58deg, #fff 61deg, transparent 64deg 204deg,
+      rgba(255, 104, 183, .12) 222deg, #ff68b7 238deg,
+      #fff 241deg, transparent 244deg 360deg);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    mask-composite: exclude;
+    animation: dopa-frame-streak 14s linear infinite;
+  }
+}
+
+html[data-theme='dopa'] .page--library .problem-card {
+  isolation: isolate;
+}
+html[data-theme='dopa'] .page--library .problem-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(9, 12, 30, .78), rgba(9, 12, 30, .72) 48%, rgba(9, 12, 30, .88)),
+    url('/themes/dopa/neon-wave-card.jpg') center / cover no-repeat;
+}
+html[data-theme='dopa'] .page--library .problem-card__meta {
+  color: #ddd7ee;
+  text-shadow: 0 1px 3px #090c1e;
+}
+
+/* These messages sit outside panels, so protect text from the photo's bright trails. */
+html[data-theme='dopa'] :is(.test-title, .page--test > .hint, .materials-empty) {
+  background: rgba(9, 12, 30, .82);
+  border-radius: var(--r-sm);
 }
 
 html[data-theme='dopa'] :is(.btn, .editor-save, .test-count__controls button, .view-tabs > button[aria-selected='true'], .target-tabs > button.is-active) {
@@ -73,6 +139,13 @@ html[data-theme='dopa'] .page-header h1::after {
   animation: dopa-heading-flow 12s linear infinite;
 }
 html[data-theme='dopa'] .bottom-nav__item.is-active { color: #090b18; background: var(--dopa-rainbow); background-size: 100% 100%; font-weight: 600; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .45), 0 0 14px rgba(130, 234, 255, .25); }
+@media (max-width: 1099px) {
+  html[data-theme='dopa'] .bottom-nav {
+    border-width: 1px 0 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
 html[data-theme='dopa'] :is(.field input, .field textarea, .field select):focus { box-shadow: 0 0 0 2px var(--focus-ring), 0 0 18px rgba(130, 234, 255, .14); }
 
 [data-theme='dopa'] .theme-swatch__panel {
@@ -99,6 +172,10 @@ html[data-theme='dopa'] .page--records {
 @keyframes dopa-heading-flow {
   from { background-position: 0% 50%; }
   to { background-position: 200% 50%; }
+}
+@keyframes dopa-frame-streak {
+  from { --dopa-streak-angle: 0deg; }
+  to { --dopa-streak-angle: 360deg; }
 }
 @media (prefers-reduced-motion: reduce) {
   html[data-theme='dopa'] *, html[data-theme='dopa'] *::before, html[data-theme='dopa'] *::after {
