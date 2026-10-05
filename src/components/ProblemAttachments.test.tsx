@@ -34,6 +34,13 @@ function button(label: string, scope: ParentNode = document) {
 async function key(key: string, shiftKey = false) {
   await act(async () => document.activeElement!.dispatchEvent(new KeyboardEvent('keydown', { key, shiftKey, bubbles: true, cancelable: true })));
 }
+function imageInput(role: 'question' | 'explanation') {
+  return host.querySelector<HTMLInputElement>(`.attachment-editor__section[aria-label="${role === 'question' ? '問題画像' : '解説画像'}"] input[type="file"]`)!;
+}
+function chooseFile(input: HTMLInputElement, file: File | null) {
+  Object.defineProperty(input, 'files', { configurable: true, value: file ? [file] : [] });
+  input.dispatchEvent(new Event('change', { bubbles: true }));
+}
 
 it('mounts only explicitly designated question images before revealing the explanation', async () => {
   const attachments = [question, explanation, legacy, invalid];
@@ -104,43 +111,101 @@ it('closes the image when moving to another problem or returning to an earlier o
   expect(document.body.style.overflow).not.toBe('hidden');
 });
 
-it('edits the image role without changing image bytes and limits both roles to three total', async () => {
+it('groups legacy and unknown roles as explanation images until explicitly moved', async () => {
+  await render(<AttachmentEditor attachments={[question, legacy, invalid]} onChange={vi.fn()} onImage={vi.fn()} sessionKey="editor" />);
+  const sectionImages = (label: string) => [...host.querySelectorAll<HTMLImageElement>(`.attachment-editor__section[aria-label="${label}"] img`)].map(image => image.src);
+  expect(sectionImages('問題画像')).toEqual([question.dataUrl]);
+  expect(sectionImages('解説画像')).toEqual([legacy.dataUrl, invalid.dataUrl]);
+  expect(host.querySelector('select')).toBeNull();
+  expect(host.textContent).not.toContain('追加する画像の表示先');
+  expect(host.textContent).toContain('回答前にも表示');
+  expect(imageInput('question').labels![0].textContent).toBe('問題画像を追加');
+  expect(imageInput('explanation').labels![0].textContent).toBe('解説画像を追加');
+});
+
+it('moves and previews images without changing bytes, preserves focus, and limits both sections to three total', async () => {
   const changed = vi.fn();
+  const onImage = vi.fn();
   function Editor() {
     const [attachments, setAttachments] = useState([legacy, question, explanation]);
-    return <AttachmentEditor attachments={attachments} onChange={(next) => { changed(next); setAttachments(next); }} onImage={vi.fn()} sessionKey="editor" />;
+    return <AttachmentEditor attachments={attachments} onChange={(next) => { changed(next); setAttachments(next); }} onImage={onImage} sessionKey="editor" />;
   }
   await render(<Editor />);
-  const selects = host.querySelectorAll('select');
-  expect(selects[0]!.value).toBe('explanation');
-  expect(selects[1]!.value).toBe('explanation');
-  expect([...selects[1]!.options].map((option) => option.text)).toEqual(['問題に表示（回答前も表示）', '解説に表示']);
-  const input = host.querySelector<HTMLInputElement>('input[type="file"]')!;
-  expect(input.disabled).toBe(true);
+  expect(imageInput('question').disabled).toBe(true);
+  expect(imageInput('explanation').disabled).toBe(true);
+  expect(host.textContent).toContain('画像は合計3枚までです。');
+  const file = new File(['image'], 'fourth.png', { type: 'image/png' });
   await act(async () => {
-    selects[1]!.value = 'question';
-    selects[1]!.dispatchEvent(new Event('change', { bubbles: true }));
+    chooseFile(imageInput('question'), file);
+    chooseFile(imageInput('explanation'), file);
   });
+  expect(onImage).not.toHaveBeenCalled();
+  await click(button('画像 1 を問題用へ移す'));
   expect(changed.mock.lastCall![0][0]).toEqual({ ...legacy, role: 'question' });
+  expect(document.activeElement).toBe(button('画像 1 を解説用へ移す'));
+  expect(button('画像 1 を拡大').closest('.attachment-editor__section')?.getAttribute('aria-label')).toBe('問題画像');
+  await click(button('画像 1 を拡大'));
+  expect(document.querySelector('[role="dialog"] img')?.getAttribute('src')).toBe(legacy.dataUrl);
+  await click(button('閉じる'));
+  await click(button('画像 1 を解説用へ移す'));
+  expect(changed.mock.lastCall![0][0]).toEqual({ ...legacy, role: 'explanation' });
+  expect(document.activeElement).toBe(button('画像 1 を問題用へ移す'));
   await click(button('画像 3 を削除'));
-  expect(input.disabled).toBe(false);
+  expect(imageInput('question').disabled).toBe(false);
+  expect(imageInput('explanation').disabled).toBe(false);
   expect(host.querySelectorAll('.attachment-editor__item')).toHaveLength(2);
 });
 
-it('passes the selected display role with an uploaded image and resets it for a different problem', async () => {
+it('takes the upload role directly from each section and ignores cancelling the file picker', async () => {
   const onImage = vi.fn();
-  const page = (sessionKey: string) => <AttachmentEditor attachments={[]} onChange={vi.fn()} onImage={onImage} sessionKey={sessionKey} />;
-  await render(page('a'));
-  const select = host.querySelector('select')!;
-  await act(async () => {
-    select.value = 'question';
-    select.dispatchEvent(new Event('change', { bubbles: true }));
-  });
-  const input = host.querySelector<HTMLInputElement>('input[type="file"]')!;
+  await render(<AttachmentEditor attachments={[]} onChange={vi.fn()} onImage={onImage} sessionKey="a" />);
   const file = new File(['image'], 'conditions.png', { type: 'image/png' });
-  Object.defineProperty(input, 'files', { value: [file] });
-  await act(async () => input.dispatchEvent(new Event('change', { bubbles: true })));
+  await act(async () => chooseFile(imageInput('question'), null));
+  expect(onImage).not.toHaveBeenCalled();
+  for (const role of ['question', 'explanation'] as const) {
+    await act(async () => chooseFile(imageInput(role), file));
+    expect(onImage.mock.lastCall).toEqual([file, role]);
+    expect(imageInput(role).value).toBe('');
+  }
+  expect(onImage).toHaveBeenCalledTimes(2);
+});
+
+it('locks both upload sections immediately and allows retry after a rejected upload', async () => {
+  let rejectUpload!: (error: Error) => void;
+  const onImage = vi.fn().mockImplementationOnce(() => new Promise<void>((_resolve, reject) => { rejectUpload = reject; }));
+  await render(<AttachmentEditor attachments={[]} onChange={vi.fn()} onImage={onImage} sessionKey="a" />);
+  const file = new File(['image'], 'conditions.png', { type: 'image/png' });
+  await act(async () => {
+    chooseFile(imageInput('question'), file);
+    chooseFile(imageInput('explanation'), file);
+  });
+  expect(onImage).toHaveBeenCalledTimes(1);
   expect(onImage).toHaveBeenCalledWith(file, 'question');
+  expect(imageInput('question').disabled).toBe(true);
+  expect(imageInput('explanation').disabled).toBe(true);
+  expect(host.textContent).toContain('画像を準備中…');
+  await act(async () => rejectUpload(new Error('Read failed')));
+  expect(imageInput('question').disabled).toBe(false);
+  expect(imageInput('explanation').disabled).toBe(false);
+  expect(host.textContent).toContain('画像を追加できませんでした。もう一度お試しください。');
+  await act(async () => chooseFile(imageInput('explanation'), file));
+  expect(onImage).toHaveBeenLastCalledWith(file, 'explanation');
+  expect(onImage).toHaveBeenCalledTimes(2);
+  expect(host.textContent).not.toContain('画像を追加できませんでした');
+});
+
+it('keeps validation feedback visible and resets local upload state for another problem', async () => {
+  let finishUpload!: () => void;
+  const onImage = vi.fn().mockImplementationOnce(() => new Promise<void>((resolve) => { finishUpload = resolve; }));
+  const page = (sessionKey: string) => <AttachmentEditor attachments={[]} onChange={vi.fn()} onImage={onImage} imageMessage="画像を読み込めませんでした" sessionKey={sessionKey} />;
+  await render(page('a'));
+  const file = new File(['image'], 'conditions.png', { type: 'image/png' });
+  await act(async () => chooseFile(imageInput('explanation'), file));
+  expect(imageInput('question').disabled).toBe(true);
   await render(page('b'));
-  expect(host.querySelector('select')!.value).toBe('explanation');
+  expect(imageInput('question').disabled).toBe(false);
+  expect(imageInput('explanation').disabled).toBe(false);
+  expect(host.textContent).toContain('画像を読み込めませんでした');
+  await act(async () => finishUpload());
+  expect(host.textContent).not.toContain('画像を準備中…');
 });
