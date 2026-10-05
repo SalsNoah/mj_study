@@ -41,12 +41,17 @@ try{
  await page.evaluate(()=>scrollTo(0,0));
  const twoCards=await page.locator('.problem-card').evaluateAll(nodes=>{const first=nodes[0].getBoundingClientRect(),last=nodes[1].getBoundingClientRect();return {x:0,y:first.top+scrollY-6,width:390,height:last.bottom-first.top+12}});
  await page.screenshot({path:`${out}01-library-two-cards.png`,clip:twoCards,animations:'disabled'});provenance.libraryTwoCardsClip=twoCards;
+ await page.setViewportSize({width:460,height:1100});await page.evaluate(()=>scrollTo(0,0));
+ await capture('01-library-460','.problem-list');
+ const twoWide=await page.locator('.problem-card').evaluateAll(nodes=>{const a=nodes[0].getBoundingClientRect(),b=nodes[1].getBoundingClientRect();return {x:0,y:a.top+scrollY-6,width:460,height:b.bottom-a.top+12}});
+ await page.screenshot({path:`${out}01-library-two-cards-460.png`,clip:twoWide,animations:'disabled'});provenance.libraryTwoCards460Clip=twoWide;
+ await page.setViewportSize({width:390,height:1100});
  // The same saved question becomes the editor and review example.
  await page.locator('.problem-card').first().click();await expect(page.getByRole('button',{name:'正解・解説を表示',exact:true})).toBeVisible();await capture('01-detail-question','.page');
  await page.getByRole('button',{name:'正解・解説を表示',exact:true}).click();await capture('02-detail-explanation','.page');
  await page.getByRole('tab',{name:'受入れ',exact:true}).click();await capture('02-detail-ukeire','.page');
  await page.getByRole('link',{name:'編集',exact:true}).click();await capture('02-editor','.page--editor');
- await page.locator('.editor-notes > summary').click();await expect(page.getByLabel('解説',{exact:true})).toHaveValue(problems[0].explanation);await capture('02-editor-notes','.editor-notes');
+ await page.locator('.editor-notes > summary').click();await expect(page.locator('.editor-notes textarea').first()).toHaveValue(problems[0].explanation);await capture('02-editor-notes','.editor-notes');
  await page.getByRole('link',{name:'テスト',exact:true}).click();await page.locator('.page--test details > summary').click();await expect(page.locator('.filter-chip')).toHaveCount(5);await capture('03-test-conditions','.page--test details');
  // Select the one tagged sample using actual app controls, then answer it.
  await page.locator('.filter-chip').filter({hasText:'タグ'}).click();await page.locator('.tag-cloud button').filter({hasText:'両面・カンチャン'}).click();
