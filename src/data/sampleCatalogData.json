@@ -1,0 +1,498 @@
+[
+  {
+    "sampleId": "sample-v2-01",
+    "contentVersion": "2026-10-05.3",
+    "title": "サンプル：01 孤立字牌を整理（役・打点無視／最小シャンテン→受入最大）",
+    "concealed": [
+      "1m",
+      "2m",
+      "3m",
+      "4p",
+      "5p",
+      "5p",
+      "5p",
+      "6p",
+      "2s",
+      "3s",
+      "6s",
+      "7s",
+      "8s",
+      "4z"
+    ],
+    "drawn": null,
+    "melds": [],
+    "doraIndicators": [
+      "9p"
+    ],
+    "answerEnabled": true,
+    "acceptedDiscards": [
+      "4z"
+    ],
+    "explanation": "北を切るとテンパイ。23索の両面が残り、1索・4索の2種8枚を受けられます。他の牌を切ると1シャンテンです。",
+    "privateMemo": "役・打点を無視し、打牌後のシャンテン数が最小、その中で受け入れ枚数が最大になる牌を選びます。自分の14枚とドラ表示牌だけを既知牌とし、切った牌も既知牌に含めます。他家の河・副露や自分の過去の捨て牌は考えません。受け入れはシャンテン数を1つ下げる牌です。赤五と通常五は形の計算では同じ牌として数えます。",
+    "tagIds": [],
+    "context": {
+      "roundWind": "1z",
+      "handNumber": 1,
+      "seatWind": "2z",
+      "turn": 5,
+      "honba": 0,
+      "riichiSticks": 0,
+      "ownRank": null,
+      "scores": {
+        "east": 25000,
+        "south": 25000,
+        "west": 25000,
+        "north": 25000
+      }
+    },
+    "attachments": [],
+    "sourceUrl": ""
+  },
+  {
+    "sampleId": "sample-v2-02",
+    "contentVersion": "2026-10-05.3",
+    "title": "サンプル：02 カンチャンを両面へ（役・打点無視／最小シャンテン→受入最大）",
+    "concealed": [
+      "1m",
+      "2m",
+      "3m",
+      "4m",
+      "5m",
+      "6m",
+      "6p",
+      "6p",
+      "7p",
+      "8p",
+      "9p",
+      "1s",
+      "3s",
+      "4s"
+    ],
+    "drawn": null,
+    "melds": [],
+    "doraIndicators": [
+      "9m"
+    ],
+    "answerEnabled": true,
+    "acceptedDiscards": [
+      "1s"
+    ],
+    "explanation": "1索切りは34索の両面待ちで、2索・5索の2種8枚。4索切りは13索のカンチャン待ちで2索の1種4枚です。どちらもテンパイなので、受け入れ枚数で比べます。",
+    "privateMemo": "役・打点を無視し、打牌後のシャンテン数が最小、その中で受け入れ枚数が最大になる牌を選びます。自分の14枚とドラ表示牌だけを既知牌とし、切った牌も既知牌に含めます。他家の河・副露や自分の過去の捨て牌は考えません。受け入れはシャンテン数を1つ下げる牌です。赤五と通常五は形の計算では同じ牌として数えます。",
+    "tagIds": [],
+    "context": {
+      "roundWind": "1z",
+      "handNumber": 1,
+      "seatWind": "2z",
+      "turn": 5,
+      "honba": 0,
+      "riichiSticks": 0,
+      "ownRank": null,
+      "scores": {
+        "east": 25000,
+        "south": 25000,
+        "west": 25000,
+        "north": 25000
+      }
+    },
+    "attachments": [],
+    "sourceUrl": ""
+  },
+  {
+    "sampleId": "sample-v2-03",
+    "contentVersion": "2026-10-05.3",
+    "title": "サンプル：03 同率なら内側から（役・打点無視／最小シャンテン→受入最大→内側）",
+    "concealed": [
+      "1m",
+      "2m",
+      "3m",
+      "6p",
+      "7p",
+      "8p",
+      "2s",
+      "2s",
+      "3s",
+      "4s",
+      "4s",
+      "7s",
+      "8s",
+      "9s"
+    ],
+    "drawn": null,
+    "melds": [],
+    "doraIndicators": [
+      "5z"
+    ],
+    "answerEnabled": true,
+    "acceptedDiscards": [
+      "4s"
+    ],
+    "explanation": "2索切りと4索切りは、どちらもテンパイ・受け入れ6枚で、牌効率は同率です。この問題では、将来の安全度を見込んで「同等なら内側の不要牌を先に切る」方針を採り、4索を正解にします。2索を手元に残します。河や他家の攻撃情報は未設定なので、実際の安全度が確定しているわけではありません。",
+    "privateMemo": "役・打点を無視し、打牌後のシャンテン数が最小、その中で受け入れ枚数が最大になる牌を選びます。自分の14枚とドラ表示牌だけを既知牌とし、切った牌も既知牌に含めます。他家の河・副露や自分の過去の捨て牌は考えません。受け入れはシャンテン数を1つ下げる牌です。赤五と通常五は形の計算では同じ牌として数えます。この問題では受け入れが同率なら、将来の安全度を見込んで内側の不要牌を先に切り、外側の牌を手元に残す方針を優先します。2索と4索の比較では4索が内側です。他家の河・攻撃情報がないため、2索が必ず安全、4索が常に危険という意味ではありません。",
+    "tagIds": [],
+    "context": {
+      "roundWind": "1z",
+      "handNumber": 1,
+      "seatWind": "2z",
+      "turn": 5,
+      "honba": 0,
+      "riichiSticks": 0,
+      "ownRank": null,
+      "scores": {
+        "east": 25000,
+        "south": 25000,
+        "west": 25000,
+        "north": 25000
+      }
+    },
+    "attachments": [],
+    "sourceUrl": ""
+  },
+  {
+    "sampleId": "sample-v2-04",
+    "contentVersion": "2026-10-05.3",
+    "title": "サンプル：04 五連形の三面待ち（役・打点無視／最小シャンテン→受入最大）",
+    "concealed": [
+      "1m",
+      "2m",
+      "3m",
+      "6p",
+      "6p",
+      "7p",
+      "8p",
+      "9p",
+      "2s",
+      "3s",
+      "4s",
+      "5s",
+      "6s",
+      "7z"
+    ],
+    "drawn": null,
+    "melds": [],
+    "doraIndicators": [
+      "9m"
+    ],
+    "answerEnabled": true,
+    "acceptedDiscards": [
+      "7z"
+    ],
+    "explanation": "中を切ると、23456索が1索・4索・7索を待つ三面待ちになります。4索は自分で1枚持つので、残りは4＋3＋4＝11枚です。三面待ちでも常に12枚とは限りません。",
+    "privateMemo": "役・打点を無視し、打牌後のシャンテン数が最小、その中で受け入れ枚数が最大になる牌を選びます。自分の14枚とドラ表示牌だけを既知牌とし、切った牌も既知牌に含めます。他家の河・副露や自分の過去の捨て牌は考えません。受け入れはシャンテン数を1つ下げる牌です。赤五と通常五は形の計算では同じ牌として数えます。",
+    "tagIds": [],
+    "context": {
+      "roundWind": "1z",
+      "handNumber": 1,
+      "seatWind": "2z",
+      "turn": 5,
+      "honba": 0,
+      "riichiSticks": 0,
+      "ownRank": null,
+      "scores": {
+        "east": 25000,
+        "south": 25000,
+        "west": 25000,
+        "north": 25000
+      }
+    },
+    "attachments": [],
+    "sourceUrl": ""
+  },
+  {
+    "sampleId": "sample-v2-05",
+    "contentVersion": "2026-10-05.3",
+    "title": "サンプル：05 七対子の単騎選び（役・打点無視／最小シャンテン→受入最大）",
+    "concealed": [
+      "1m",
+      "1m",
+      "4m",
+      "4m",
+      "7p",
+      "7p",
+      "9p",
+      "2s",
+      "2s",
+      "5s",
+      "5s",
+      "9s",
+      "9s",
+      "1z"
+    ],
+    "drawn": null,
+    "melds": [],
+    "doraIndicators": [
+      "9p"
+    ],
+    "answerEnabled": true,
+    "acceptedDiscards": [
+      "9p"
+    ],
+    "explanation": "9筒を切ると七対子の東単騎テンパイで残り3枚。東を切ると9筒単騎ですが、手持ち1枚とドラ表示牌1枚が見えているため残り2枚です。六つの対子を崩さず、枚数の多い単騎を選びます。",
+    "privateMemo": "役・打点を無視し、打牌後のシャンテン数が最小、その中で受け入れ枚数が最大になる牌を選びます。自分の14枚とドラ表示牌だけを既知牌とし、切った牌も既知牌に含めます。他家の河・副露や自分の過去の捨て牌は考えません。受け入れはシャンテン数を1つ下げる牌です。赤五と通常五は形の計算では同じ牌として数えます。",
+    "tagIds": [],
+    "context": {
+      "roundWind": "1z",
+      "handNumber": 1,
+      "seatWind": "2z",
+      "turn": 5,
+      "honba": 0,
+      "riichiSticks": 0,
+      "ownRank": null,
+      "scores": {
+        "east": 25000,
+        "south": 25000,
+        "west": 25000,
+        "north": 25000
+      }
+    },
+    "attachments": [],
+    "sourceUrl": ""
+  },
+  {
+    "sampleId": "sample-v2-06",
+    "contentVersion": "2026-10-05.3",
+    "title": "サンプル：06 国士無双の必要牌（役・打点無視／最小シャンテン→受入最大）",
+    "concealed": [
+      "1m",
+      "1m",
+      "9m",
+      "1p",
+      "9p",
+      "1s",
+      "9s",
+      "1z",
+      "2z",
+      "3z",
+      "4z",
+      "5z",
+      "6z",
+      "5p"
+    ],
+    "drawn": null,
+    "melds": [],
+    "doraIndicators": [
+      "2m"
+    ],
+    "answerEnabled": true,
+    "acceptedDiscards": [
+      "5p"
+    ],
+    "explanation": "5筒を切ると国士無双の中待ちテンパイ。12種類の幺九牌と1萬の対子があり、足りないのは中だけです。中は既知牌にないので残り4枚。ここでは通常の面子手だけでなく国士無双の形も数えます。",
+    "privateMemo": "役・打点を無視し、打牌後のシャンテン数が最小、その中で受け入れ枚数が最大になる牌を選びます。自分の14枚とドラ表示牌だけを既知牌とし、切った牌も既知牌に含めます。他家の河・副露や自分の過去の捨て牌は考えません。受け入れはシャンテン数を1つ下げる牌です。赤五と通常五は形の計算では同じ牌として数えます。",
+    "tagIds": [],
+    "context": {
+      "roundWind": "1z",
+      "handNumber": 1,
+      "seatWind": "2z",
+      "turn": 5,
+      "honba": 0,
+      "riichiSticks": 0,
+      "ownRank": null,
+      "scores": {
+        "east": 25000,
+        "south": 25000,
+        "west": 25000,
+        "north": 25000
+      }
+    },
+    "attachments": [],
+    "sourceUrl": ""
+  },
+  {
+    "sampleId": "sample-v2-07",
+    "contentVersion": "2026-10-05.3",
+    "title": "サンプル：07 同じ形なら赤五を残す（最小シャンテン→受入最大→赤を残す）",
+    "concealed": [
+      "4m",
+      "5m",
+      "1p",
+      "2p",
+      "3p",
+      "7p",
+      "8p",
+      "9p",
+      "2s",
+      "3s",
+      "4s",
+      "7s",
+      "7s",
+      "0m"
+    ],
+    "drawn": null,
+    "melds": [],
+    "doraIndicators": [
+      "9s"
+    ],
+    "answerEnabled": true,
+    "acceptedDiscards": [
+      "5m"
+    ],
+    "explanation": "通常の5萬・赤5萬のどちらを切っても、45萬の両面待ちで3萬・6萬の計8枚です。この問題は「同じ形・受け入れなら赤を残す」が条件なので、通常の5萬を正解にします。4萬切りは5萬・7索のシャンポンで計4枚です。",
+    "privateMemo": "役・打点を無視し、打牌後のシャンテン数が最小、その中で受け入れ枚数が最大になる牌を選びます。自分の14枚とドラ表示牌だけを既知牌とし、切った牌も既知牌に含めます。他家の河・副露や自分の過去の捨て牌は考えません。受け入れはシャンテン数を1つ下げる牌です。赤五と通常五は形の計算では同じ牌として数えます。同じ形・同じ受け入れなら、赤五を残すことを優先します。",
+    "tagIds": [],
+    "context": {
+      "roundWind": "1z",
+      "handNumber": 1,
+      "seatWind": "2z",
+      "turn": 5,
+      "honba": 0,
+      "riichiSticks": 0,
+      "ownRank": null,
+      "scores": {
+        "east": 25000,
+        "south": 25000,
+        "west": 25000,
+        "north": 25000
+      }
+    },
+    "attachments": [],
+    "sourceUrl": ""
+  },
+  {
+    "sampleId": "sample-v2-08",
+    "contentVersion": "2026-10-05.3",
+    "title": "サンプル：08 三対子と表示牌（役・打点無視／最小シャンテン→受入最大）",
+    "concealed": [
+      "1m",
+      "2m",
+      "3m",
+      "9m",
+      "9m",
+      "2p",
+      "2p",
+      "6p",
+      "7p",
+      "8p",
+      "4s",
+      "5s",
+      "8s",
+      "8s"
+    ],
+    "drawn": null,
+    "melds": [],
+    "doraIndicators": [
+      "9m"
+    ],
+    "answerEnabled": true,
+    "acceptedDiscards": [
+      "9m"
+    ],
+    "explanation": "9萬を1枚切ると1シャンテンで、2筒・3索・6索・8索の4種12枚が受け入れです。2筒切り・8索切りも1シャンテンですが、9萬は対子とドラ表示牌で3枚見えているため、受け入れは各11枚になります。",
+    "privateMemo": "役・打点を無視し、打牌後のシャンテン数が最小、その中で受け入れ枚数が最大になる牌を選びます。自分の14枚とドラ表示牌だけを既知牌とし、切った牌も既知牌に含めます。他家の河・副露や自分の過去の捨て牌は考えません。受け入れはシャンテン数を1つ下げる牌です。赤五と通常五は形の計算では同じ牌として数えます。",
+    "tagIds": [],
+    "context": {
+      "roundWind": "1z",
+      "handNumber": 1,
+      "seatWind": "2z",
+      "turn": 5,
+      "honba": 0,
+      "riichiSticks": 0,
+      "ownRank": null,
+      "scores": {
+        "east": 25000,
+        "south": 25000,
+        "west": 25000,
+        "north": 25000
+      }
+    },
+    "attachments": [],
+    "sourceUrl": ""
+  },
+  {
+    "sampleId": "sample-v2-09",
+    "contentVersion": "2026-10-05.3",
+    "title": "サンプル：09 東1局・親リーチへの押し引き（正解なし）",
+    "concealed": [
+      "2m",
+      "3m",
+      "4m",
+      "6m",
+      "7m",
+      "8m",
+      "3p",
+      "4p",
+      "5p",
+      "2s",
+      "6s",
+      "7s",
+      "7s",
+      "8s"
+    ],
+    "drawn": null,
+    "melds": [],
+    "doraIndicators": [
+      "6s"
+    ],
+    "answerEnabled": false,
+    "acceptedDiscards": [],
+    "explanation": "正解は固定していません。押す場合の速度・打点、降りる場合の安全牌を比べてください。親の河や現物が分からないため、安全度はこの手牌だけでは確定できません。追加で確認したい情報と、判断が変わる条件をメモしましょう。",
+    "privateMemo": "想定：東1局、南家の自分。親がリーチ。親の河・他家の仕掛け・自分の過去の捨て牌は未設定です。\n自分の方針：\n追加で見たい情報：\n押す条件／降りる条件：",
+    "tagIds": [],
+    "context": {
+      "roundWind": "1z",
+      "handNumber": 1,
+      "seatWind": "2z",
+      "turn": 10,
+      "honba": 0,
+      "riichiSticks": 1,
+      "ownRank": null,
+      "scores": {
+        "east": 24000,
+        "south": 25000,
+        "west": 25000,
+        "north": 25000
+      }
+    },
+    "attachments": [],
+    "sourceUrl": ""
+  },
+  {
+    "sampleId": "sample-v2-10",
+    "contentVersion": "2026-10-05.3",
+    "title": "サンプル：10 南4局2着・着順条件を整理（正解なし）",
+    "concealed": [
+      "4m",
+      "5m",
+      "6m",
+      "2p",
+      "3p",
+      "4p",
+      "6p",
+      "7p",
+      "8p",
+      "5s",
+      "5s",
+      "7s",
+      "8s",
+      "9m"
+    ],
+    "drawn": null,
+    "melds": [],
+    "doraIndicators": [
+      "4p"
+    ],
+    "answerEnabled": false,
+    "acceptedDiscards": [],
+    "explanation": "正解は固定していません。まず誰から何点アガればトップに届くか、3着へ落ちる条件は何かを整理します。速度・打点・放銃回避のどれを優先するか、相手の仕掛けや河も含めて理由をメモしてください。",
+    "privateMemo": "想定：南4局0本場、南家の自分が28,000点で2着。親33,000点、西家23,000点、北家16,000点。延長・連荘などの終了条件や同点時の順位規定、相手の河・副露は未設定です。\nトップに届くアガリ条件：\n3着へ落ちる条件：\n優先する方針と理由：",
+    "tagIds": [],
+    "context": {
+      "roundWind": "2z",
+      "handNumber": 4,
+      "seatWind": "2z",
+      "turn": 8,
+      "honba": 0,
+      "riichiSticks": 0,
+      "ownRank": 2,
+      "scores": {
+        "east": 33000,
+        "south": 28000,
+        "west": 23000,
+        "north": 16000
+      }
+    },
+    "attachments": [],
+    "sourceUrl": ""
+  }
+]

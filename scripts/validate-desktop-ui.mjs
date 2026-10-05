@@ -68,18 +68,17 @@ async function capture(name, selector, { preserveScroll = false } = {}) {
     if (geometry.width >= 1100) { expect(h.title.left).toBeGreaterThanOrEqual(h.heading.right); expect(h.title.right).toBeLessThanOrEqual(h.actions.left); }
   }
   const cardHands = await page.locator('.problem-card .hand-mini').evaluateAll(hands => hands.map(el => {
-    const base = el.querySelector('.hand-strip > :first-child'); const drawn = el.querySelector('.hand-view__drawn');
-    if (!base || !drawn) return null;
-    const a=base.getBoundingClientRect(),b=drawn.getBoundingClientRect(),c=el.getBoundingClientRect(),d=drawn.firstElementChild.getBoundingClientRect();
-    return {baseWidth:a.width,drawnWidth:b.width,baseBottom:a.bottom,drawnBottom:b.bottom,drawnRight:b.right,cardRight:c.right,baseTop:a.top,tileTop:d.top,tileBottom:d.bottom,baseHeight:a.height,tileHeight:d.height};
+    const tiles=[...el.querySelectorAll('.hand-strip > .tile-face,.hand-strip > .tile-btn')];
+    if(tiles.length!==14)return null;
+    const first=tiles[0].getBoundingClientRect(),last=tiles[13].getBoundingClientRect(),card=el.getBoundingClientRect();
+    return {count:tiles.length,firstWidth:first.width,lastWidth:last.width,firstTop:first.top,lastTop:last.top,firstBottom:first.bottom,lastBottom:last.bottom,lastRight:last.right,cardRight:card.right,separateDrawn:!!el.querySelector('.hand-view__drawn')};
   }).filter(Boolean));
-  if (geometry.width >= 1100) for (const hand of cardHands) {
-    expect(Math.abs(hand.baseWidth-hand.drawnWidth)).toBeLessThanOrEqual(1);
-    expect(Math.abs(hand.baseBottom-hand.drawnBottom)).toBeLessThanOrEqual(1);
-    expect(Math.abs(hand.baseTop-hand.tileTop)).toBeLessThanOrEqual(1);
-    expect(Math.abs(hand.baseBottom-hand.tileBottom)).toBeLessThanOrEqual(1);
-    expect(Math.abs(hand.baseHeight-hand.tileHeight)).toBeLessThanOrEqual(1);
-    expect(hand.drawnRight).toBeLessThanOrEqual(hand.cardRight+1);
+  if(geometry.width>=1100)for(const hand of cardHands){
+    expect(hand.separateDrawn).toBe(false);
+    expect(Math.abs(hand.firstWidth-hand.lastWidth)).toBeLessThanOrEqual(1);
+    expect(Math.abs(hand.firstTop-hand.lastTop)).toBeLessThanOrEqual(1);
+    expect(Math.abs(hand.firstBottom-hand.lastBottom)).toBeLessThanOrEqual(1);
+    expect(hand.lastRight).toBeLessThanOrEqual(hand.cardRight+1);
   }
   const scoreSuffixes = await page.locator('.ctx-score').evaluateAll(fields => fields.map(field => {
     const input = field.querySelector('input'); const suffix = field.querySelector('.score-suffix');
@@ -228,6 +227,14 @@ try {
   await page.locator('.library-filters > summary').click();
   await capture('library-filters-1920', '.library-filters');
   await page.locator('.library-filters > summary').click();
+  await page.locator('.problem-card').filter({hasText:'PC検証 1：手牌を振り返る'}).click();
+  await expect(page.locator('.hand-stage .hand-strip > *')).toHaveCount(14);
+  await expect(page.locator('.hand-view__drawn')).toHaveCount(0);
+  await page.locator('.detail-tools > summary').click();
+  const legacyPngDownload=page.waitForEvent('download');
+  await page.getByRole('button',{name:'PNG保存',exact:true}).click();
+  await (await legacyPngDownload).saveAs(`${evidence}legacy-unified-hand.png`);
+  await nav('学習帳');
   await page.locator('.problem-card').filter({ hasText: '正解あり検証用の問題' }).click();
   await expect(page.getByRole('button', { name: '正解・解説を表示', exact: true })).toBeVisible();
   await allSizes('detail-hidden');

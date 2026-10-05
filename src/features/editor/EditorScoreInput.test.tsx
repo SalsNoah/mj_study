@@ -6,7 +6,7 @@ import { AppProvider } from '@/app/store';
 import { EditorPage } from './EditorPage';
 import { putImportDraft } from '@/features/import/draft';
 import { emptyContext, emptyStore, STORAGE_KEY } from '@/domain/types';
-import { createSampleProblems } from '@/data/samples';
+import { createLegacySampleProblems as createSampleProblems } from '@/data/legacySamples';
 
 let host: HTMLDivElement;
 let root: Root;

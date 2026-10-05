@@ -88,7 +88,7 @@ export function validateProblem(
     issues.push({
       level: 'error',
       code: 'empty_hand',
-      message: '手牌・ツモ・副露のいずれかを入力してください',
+      message: '手牌・副露のいずれかを入力してください',
     });
   }
 
@@ -146,7 +146,7 @@ export function validateProblem(
         issues.push({
           level: 'error',
           code: 'answer_missing',
-          message: `正解に指定した牌「${a}」が手牌・ツモにありません`,
+          message: `正解に指定した牌「${a}」が手牌にありません`,
         });
       }
     }

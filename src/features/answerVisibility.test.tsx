@@ -6,7 +6,7 @@ import { AppProvider } from '@/app/store';
 import { LibraryPage } from '@/features/library/LibraryPage';
 import { DetailPage } from '@/features/detail/DetailPage';
 import { TestPage } from '@/features/test/TestPage';
-import { createSampleProblems } from '@/data/samples';
+import { createLegacySampleProblems as createSampleProblems } from '@/data/legacySamples';
 import { filterTestCandidates, selectTestProblems } from '@/domain/quiz';
 import { emptyStore, STORAGE_KEY, type Store } from '@/domain/types';
 

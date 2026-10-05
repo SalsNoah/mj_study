@@ -1442,6 +1442,13 @@ a.btn-primary { color: var(--on-accent); }
 .library-filters > summary { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 4px; }
 .filter-summary { color: var(--muted); font-size: 0.75rem; font-weight: 400; }
 .settings-danger > summary { color: var(--danger); }
+.sample-candidates { margin: 12px 0; min-width: 0; border: 1px solid var(--line); border-radius: var(--r-md); padding: 10px; }
+.sample-candidates .check { align-items: flex-start; }
+.sample-candidates .check input { flex: 0 0 auto; }
+.sample-candidates .check span { min-width: 0; overflow-wrap: anywhere; }
+.sample-backups { margin-top: 14px; }
+.sample-backup { padding-top: 8px; }
+.sample-backup + .sample-backup { margin-top: 12px; border-top: 1px solid var(--line); }
 .page--editor .ukeire-panel > summary { display: list-item; min-height: 44px; margin: 0; padding: 8px 0; }
 .page--editor .page-header--compact { position: sticky; top: 0; align-items: center; flex-wrap: wrap; z-index: 6; min-height: 56px; padding: 6px 0; background: var(--bg0); }
 .page--editor .page-header--compact h1 { margin: 0; flex: 0 0 auto; }
@@ -1509,9 +1516,7 @@ html { scroll-padding-top: 74px; scroll-padding-bottom: calc(var(--nav-h) + var(
   .page--library .tile-palette { max-width: 560px; }
   .page--library .problem-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
   .page--library .problem-card { height: 100%; }
-  .page--library .hand-mini { --hand-tile-w: min(40px, calc((100cqw - 6px) / 14)); }
-  .page--library .hand-view__drawn { display: flex; flex: 0 0 var(--hand-tile-w); width: var(--hand-tile-w); margin-left: 6px; }
-  .page--library .hand-view__drawn > .tile-face, .page--library .hand-view__drawn > .tile-btn { min-width: 0; max-width: var(--hand-tile-w); }
+  .page--library .hand-mini { --hand-tile-w: min(40px, calc(100cqw / 14)); }
   .sticky-actions { bottom: 16px; }
   .page--test .count-grid { max-width: 600px; }
   .page--test .sticky-actions { max-width: 420px; margin-left: auto; }

@@ -73,10 +73,10 @@ export async function renderHandPng(input: RenderHandInput): Promise<{ blob: Blo
   const tileH = 96;
   const pad = 40;
   const gap = 6;
+  const handTiles = [...input.concealed, ...(input.drawn ? [input.drawn] : [])];
 
   const meldWidth = input.melds.reduce((acc, m) => acc + m.tiles.length * (tileW * 0.85) + 16, 0);
-  const mainWidth =
-    input.concealed.length * (tileW + gap) + (input.drawn ? tileW + 24 : 0);
+  const mainWidth = handTiles.length * (tileW + gap);
   const doraWidth = input.doraIndicators.length * (tileW + gap);
   const contentW = Math.max(meldWidth, mainWidth, doraWidth, 400);
   const width = Math.max(1600, contentW + pad * 2);
@@ -92,8 +92,7 @@ export async function renderHandPng(input: RenderHandInput): Promise<{ blob: Blo
   const urls = new Set<string>();
   const collect = (code: TileCode, sideways = false) => urls.add(tileImageUrl(code, sideways));
   for (const code of input.doraIndicators) collect(code);
-  for (const code of input.concealed) collect(code);
-  if (input.drawn) collect(input.drawn);
+  for (const code of handTiles) collect(code);
   for (const meld of input.melds) {
     meld.tiles.forEach((code, i) => {
       if (meld.type === 'closedKan' && (i === 0 || i === 3)) return;
@@ -156,13 +155,9 @@ export async function renderHandPng(input: RenderHandInput): Promise<{ blob: Blo
   }
 
   let x = pad;
-  for (const code of input.concealed) {
+  for (const code of handTiles) {
     drawTile(ctx, code, x, y, tileW, tileH, images);
     x += tileW + gap;
-  }
-  if (input.drawn) {
-    x += 18;
-    drawTile(ctx, input.drawn, x, y, tileW, tileH, images);
   }
 
   // accessibility note in pixel data only via aria on UI; no private text here

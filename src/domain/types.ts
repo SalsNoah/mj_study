@@ -46,9 +46,26 @@ export type Attachment = {
   height: number;
 };
 
+/** Optional catalog identity; user edits retain it, user duplicates do not. */
+export type SampleProvenance = {
+  catalogId: string;
+  version: string;
+  itemId: string;
+  fingerprint: string;
+};
+
+/** Local backup receipts are committed atomically with the main store. */
+export type SampleCatalogReceipt = {
+  id: string;
+  snapshotDigest: string;
+  createdAt: string;
+  restoredAt: string | null;
+};
+
 export type Problem = {
   id: string;
   title: string;
+  sample?: SampleProvenance;
   concealed: TileCode[];
   drawn: TileCode | null;
   melds: Meld[];
@@ -119,6 +136,7 @@ export type Store = {
   attempts: Attempt[];
   settings: Settings;
   daily?: Record<string, DailyLog>;
+  sampleCatalogUpdates?: SampleCatalogReceipt[];
 };
 
 export const SCHEMA_VERSION = 1 as const;
