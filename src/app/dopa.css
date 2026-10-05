@@ -1,0 +1,111 @@
+/* DOPA decorates the interface; tile faces and text keep solid, readable colors. */
+[data-theme='dopa'] {
+  color-scheme: dark;
+  --bg0: #090b18;
+  --bg1: #15102a;
+  --glow-1: rgba(90, 66, 255, .32);
+  --glow-2: rgba(255, 64, 170, .22);
+  --ink: #f4f3ff;
+  --muted: #bcb8d5;
+  --accent: #82eaff;
+  --accent-2: #c8a0ff;
+  --on-accent: #08111d;
+  --accent-soft: #202942;
+  --danger: #ff9bb5;
+  --danger-soft: #3c1930;
+  --warn: #ffe08a;
+  --ok: #83edb7;
+  --correct: #83edb7;
+  --correct-soft: #18362d;
+  --gold: #e7c975;
+  --panel: #101428;
+  --panel-solid: #101428;
+  --surface: #171b35;
+  --stage: #17253a;
+  --track: #2a2e4b;
+  --switch-off: #434764;
+  --line: #5b5c84;
+  --nav-bg: #0d1124;
+  --focus-ring: rgba(130, 234, 255, .45);
+  --tile-back: #28477f;
+  --tile-back-edge: #192b50;
+  --memo-bg: #242039;
+  --memo-ink: #d6c5fb;
+  --banner-bg: #342a1e;
+  --banner-line: #b49b53;
+  --tile-shadow: 0 0 12px rgba(85, 223, 255, .13), 0 0 22px rgba(210, 87, 255, .12);
+  --r-lg: 12px;
+  --r-md: 8px;
+  --r-sm: 6px;
+  --r-btn: 8px;
+  --heading-spacing: normal;
+  --font-display: 'IBM Plex Sans JP', 'Hiragino Sans', sans-serif;
+  --font-body: 'IBM Plex Sans JP', 'Hiragino Sans', sans-serif;
+  --dopa-rainbow: linear-gradient(110deg, #ff68b7, #b59aff, #67e8ff, #94f3b3, #ffe585, #ffab7c, #ff68b7);
+}
+
+html[data-theme='dopa'] :is(.panel, .hand-stage, .problem-card, .material-card, .records-title, .bottom-nav) {
+  border: 1px solid transparent;
+  background: linear-gradient(var(--panel-solid), var(--panel-solid)) padding-box, var(--dopa-rainbow) border-box;
+  background-size: 100% 100%, 300% 300%;
+  box-shadow: var(--tile-shadow);
+  animation: dopa-rainbow-flow 12s linear infinite;
+}
+
+html[data-theme='dopa'] :is(.btn, .editor-save, .test-count__controls button, .view-tabs > button[aria-selected='true'], .target-tabs > button.is-active) {
+  border: 1px solid transparent;
+  background: linear-gradient(var(--surface), var(--surface)) padding-box, var(--dopa-rainbow) border-box;
+  background-size: 100% 100%, 300% 300%;
+  box-shadow: 0 0 8px rgba(103, 232, 255, .15), 0 0 14px rgba(255, 104, 183, .12);
+  animation: dopa-rainbow-flow 9s linear infinite;
+}
+html[data-theme='dopa'] :is(.btn-primary, .editor-save) { color: var(--ink); }
+html[data-theme='dopa'] :is(.btn-primary, .editor-save):not(:disabled) { box-shadow: 0 0 10px rgba(103, 232, 255, .3), 0 0 20px rgba(255, 104, 183, .2); }
+html[data-theme='dopa'] .page-header h1 { color: var(--ink); text-shadow: 0 0 14px rgba(103, 232, 255, .3), 0 0 24px rgba(218, 104, 255, .2); }
+html[data-theme='dopa'] .page-header h1::after {
+  content: '';
+  display: block;
+  height: 3px;
+  margin-top: 3px;
+  border-radius: 3px;
+  background: var(--dopa-rainbow);
+  background-size: 300% 100%;
+  animation: dopa-heading-flow 12s linear infinite;
+}
+html[data-theme='dopa'] .bottom-nav__item.is-active { color: var(--accent); box-shadow: inset 0 -2px 0 var(--accent), 0 0 12px rgba(130, 234, 255, .15); }
+html[data-theme='dopa'] :is(.field input, .field textarea, .field select):focus { box-shadow: 0 0 0 2px var(--focus-ring), 0 0 18px rgba(130, 234, 255, .14); }
+
+[data-theme='dopa'] .theme-swatch__panel {
+  border: 1px solid transparent;
+  background: linear-gradient(var(--panel-solid), var(--panel-solid)) padding-box, var(--dopa-rainbow) border-box;
+  box-shadow: var(--tile-shadow);
+}
+[data-theme='dopa'] .theme-swatch__btn { background: var(--dopa-rainbow); }
+html[data-theme='dopa'] .page--records {
+  --records-ink: #e8e3ff;
+  --records-muted: #bcb8d5;
+  --records-rule: #4f5077;
+  --records-paper: #101428;
+  --records-wash: #1b2038;
+  --records-tested: #ff93c4;
+  --records-confirmed: #79e4f5;
+  --records-materials: #a5edac;
+}
+
+@keyframes dopa-rainbow-flow {
+  from { background-position: 0 0, 0% 50%; }
+  to { background-position: 0 0, 200% 50%; }
+}
+@keyframes dopa-heading-flow {
+  from { background-position: 0% 50%; }
+  to { background-position: 200% 50%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html[data-theme='dopa'] *, html[data-theme='dopa'] *::before, html[data-theme='dopa'] *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+html[data-theme='dopa'] :is(input, textarea)::placeholder { color: var(--muted); opacity: 1; }
+html[data-theme='dopa'] :is(button, a, input, textarea, select, summary):focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }

@@ -1,0 +1,29 @@
+name: DOPA screenshot preview
+on:
+  push:
+    branches: [dopa-screenshot-preview]
+permissions:
+  contents: read
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Capture the real application
+        run: |
+          npm run dev -- --host 127.0.0.1 --port 5176 > /tmp/mahjong-dopa-preview.log 2>&1 &
+          for i in {1..30}; do curl --silent --fail http://127.0.0.1:5176/ > /dev/null && break; sleep 1; done
+          node scripts/capture-dopa-preview.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dopa-preview
+          path: evidence/dopa-preview/
+          retention-days: 7

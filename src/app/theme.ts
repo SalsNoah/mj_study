@@ -1,9 +1,10 @@
-export type ThemeId = 'normal' | 'cool' | 'cute';
+export type ThemeId = 'normal' | 'cool' | 'cute' | 'dopa';
 
 export const THEMES: Array<{ id: ThemeId; name: string; desc: string }> = [
   { id: 'normal', name: 'ノーマル', desc: '定番の緑' },
   { id: 'cool', name: 'クール', desc: 'ダーク' },
   { id: 'cute', name: 'キュート', desc: 'パステル' },
+  { id: 'dopa', name: 'DOPA', desc: '虹色ゲーミング' },
 ];
 
 /** 見た目は端末ごとの好みなので、問題データ（バックアップ対象）とは別のキーに置く。index.html の起動スクリプトも同じキーを読む */
@@ -13,10 +14,11 @@ const STATUS_BAR: Record<ThemeId, string> = {
   normal: '#1B4D3E',
   cool: '#0B1118',
   cute: '#FBE3EE',
+  dopa: '#090B18',
 };
 
 function isTheme(v: unknown): v is ThemeId {
-  return v === 'normal' || v === 'cool' || v === 'cute';
+  return v === 'normal' || v === 'cool' || v === 'cute' || v === 'dopa';
 }
 
 export function loadTheme(): ThemeId {
