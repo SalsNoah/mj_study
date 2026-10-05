@@ -8,6 +8,7 @@ import { buildRecordSeries, RECORD_PERIODS, type RecordPeriod } from '@/domain/r
 import { RecordChart } from './RecordChart';
 import { StudyTitleCard } from './StudyTitleCard';
 import { MaterialStudyHistory } from './MaterialStudyHistory';
+import { RecordShareButton } from './RecordShareButton';
 import './records.css';
 
 export function RecordsPage() {
@@ -31,6 +32,7 @@ export function RecordsPage() {
       <header className="page-header page-header--compact">
         <h1>記録帳</h1>
         <p className="count-pill">問題の連続学習 {streak} 日</p>
+        <RecordShareButton daily={daily} events={materialEvents} />
       </header>
       <section className="stat-grid" aria-label="問題の学習回数">
         <div className="stat"><span>今日のテスト</span><strong>{number(today.tested)}</strong></div>
