@@ -1480,7 +1480,7 @@ details > summary:focus-visible { outline: 2px solid var(--accent); outline-offs
 .sample-backups { margin-top: 14px; }
 .sample-backup { padding-top: 8px; }
 .sample-backup + .sample-backup { margin-top: 12px; border-top: 1px solid var(--line); }
-.page--editor .page-header--compact { position: sticky; top: 0; align-items: center; flex-wrap: wrap; z-index: 6; min-height: 56px; padding: 6px 0; background: var(--bg0); }
+.page--editor .page-header--compact { position: sticky; top: 0; align-items: center; flex-wrap: wrap; z-index: 6; min-height: 56px; padding: 6px 0; background: transparent; }
 .page--editor .page-header--compact h1 { margin: 0; flex: 0 0 auto; }
 .editor-title { display: block; flex: 1 1 8rem; min-width: 0; max-width: 520px; }
 .editor-title input { width: 100%; font-size: max(16px, 1rem); }
