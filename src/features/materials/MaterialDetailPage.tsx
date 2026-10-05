@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useId, useRef, useState, type FormEvent } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { useApp } from '@/app/store';
 import { createId } from '@/domain/ids';
@@ -21,6 +21,7 @@ export function MaterialDetailPage() {
 }
 
 function MaterialDetailEditor({ material }: { material: LearningMaterial }) {
+  const commentLabelId = useId();
   const { store, saveMaterial, recordMaterialStudy, undoMaterialStudy, externalConflict, reload } = useApp();
   const location = useLocation();
   const [baseline, setBaseline] = useState(material);
@@ -176,8 +177,8 @@ function MaterialDetailEditor({ material }: { material: LearningMaterial }) {
       </p>}
 
       <section className="panel material-study" aria-label="教材の学習">
-        <label className="field"><span>コメント</span>
-          <textarea value={comment} onChange={(event) => setComment(event.target.value)} maxLength={MATERIAL_LIMITS.comment}
+        <label className="field"><span id={commentLabelId}>コメント</span>
+          <textarea aria-labelledby={commentLabelId} value={comment} onChange={(event) => setComment(event.target.value)} maxLength={MATERIAL_LIMITS.comment}
             placeholder="学んだこと・次に見返したいこと" />
         </label>
         <div className="material-study__actions">

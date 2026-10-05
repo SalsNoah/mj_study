@@ -1,6 +1,7 @@
 .bottom-nav.bottom-nav--materials { grid-template-columns: repeat(6, minmax(0, 1fr)); }
 .bottom-nav--materials .bottom-nav__item { min-width: 44px; white-space: normal; line-height: 1.35; text-align: center; }
 .bottom-nav__label { display: block; }
+.bottom-nav__word { display: inline-block; white-space: nowrap; }
 
 .page--materials { min-width: 0; }
 .page--materials input, .page--materials textarea { width: 100%; min-width: 0; }
@@ -22,7 +23,7 @@
 .material-edit > form { padding-top: 5px; }
 .material-study__actions { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; }
 .material-study__actions .btn { padding: 7px 6px; }
-.material-status { color: var(--ok); font-size: 0.85rem; margin: 10px 0 0; }
+.material-status { color: var(--ink); font-size: 0.85rem; margin: 10px 0 0; }
 .material-next { margin-top: 10px; }
 .material-history__heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
 .material-history__heading h2 { margin-bottom: 0; }

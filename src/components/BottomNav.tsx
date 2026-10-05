@@ -21,7 +21,7 @@ export function BottomNav() {
             `bottom-nav__item${isActive ? ' is-active' : ''}`
           }
         >
-          <span className="bottom-nav__label">{item.to === '/materials' ? <>学習<wbr />教材</> : item.label}</span>
+          <span className="bottom-nav__label">{item.to === '/materials' ? <><span className="bottom-nav__word">学習</span><wbr /><span className="bottom-nav__word">教材</span></> : item.label}</span>
         </NavLink>
       ))}
     </nav>
