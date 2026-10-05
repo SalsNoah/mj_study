@@ -63,6 +63,13 @@ async function capture(name, selector) {
   }));
   for (const score of scoreWidths) expect(score.textWidth).toBeLessThanOrEqual(score.available + 1);
 
+  const headerControls = await page.locator('.page--editor header').evaluateAll(headers => headers.map(header => {
+    const box=node=>{const r=node.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width};};
+    const title=header.querySelector('.editor-title input'),save=header.querySelector('.editor-save');
+    return {title:box(title),save:box(save),heading:box(header.querySelector('h1'))};
+  }));
+  const overlaps=(a,b)=>Math.min(a.right,b.right)-Math.max(a.left,b.left)>1 && Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top)>1;
+  for(const header of headerControls){expect(header.title.width).toBeGreaterThanOrEqual(120);expect(overlaps(header.title,header.save)).toBe(false);expect(overlaps(header.title,header.heading)).toBe(false);}
   const scoreSuffixes = await page.locator('.ctx-score').evaluateAll(fields => fields.map(field => {
     const input = field.querySelector('input'); const suffix = field.querySelector('.score-suffix');
     const box = field.querySelector('.score-number'); const a = input.getBoundingClientRect(); const b = suffix.getBoundingClientRect();
@@ -71,7 +78,7 @@ async function capture(name, selector) {
       groupBorder: parseFloat(style.borderLeftWidth) + parseFloat(style.borderRightWidth), groupBackground: style.backgroundColor };
   }));
   for (const field of scoreSuffixes) { expect(field.suffixLeft).toBeGreaterThanOrEqual(field.inputRight); expect(field.groupBorder).toBe(0); expect(field.groupBackground).toBe('rgba(0, 0, 0, 0)'); }
-  results.push({ name, geometry, scoreSuffixes, ...(cta ? { cta } : {}), ...(scoreWidths.length ? { scoreWidths } : {}) });
+  results.push({ name, geometry, scoreSuffixes, headerControls, ...(cta ? { cta } : {}), ...(scoreWidths.length ? { scoreWidths } : {}) });
 }
 async function allSizes(name, selector) {
   for (const width of widths) {
@@ -106,6 +113,9 @@ try {
   expect(order.contextBottom).toBeLessThanOrEqual(order.handTop);
   expect(order.inputTargets).toEqual(['手牌','ドラ表示牌','明順子','明刻子','明槓子','暗槓子','加槓子']);
   results.push({ name: 'continuous-editor-flow', order, mixedInputClicks: 14, suitSwitchClicks: 0 });
+  await expect(page.getByLabel('タイトル（任意）',{exact:true})).toBeVisible();
+  await expect(page.locator('.editor-notes .editor-title')).toHaveCount(0);
+  await expect(page.locator('.palette-limits')).toHaveCount(0);
   await allSizes('editor-empty');
   for (const width of [375,390]) {
     await page.setViewportSize({width,height:844});
@@ -155,6 +165,7 @@ try {
   for (const name of ['一萬','二萬','三萬','一筒','二筒','三筒','一索','二索','三索','四索','赤五索','五索','中','中']) await pick(name);
   await expect(page.locator('.ukeire-list > li')).toHaveCount(13);
   await expect(page.locator('.ukeire-list > li:not([hidden])')).toHaveCount(3);
+  await expect(page.getByText('追加できない牌と理由',{exact:true})).toHaveCount(0);
   const editorRows = await page.locator('.ukeire-list').textContent();
   const toolbar = page.locator('.tile-actions');
   expect(await toolbar.locator('button').allTextContents()).toEqual(['理牌', '戻す', '全消去', '残枚数']);
