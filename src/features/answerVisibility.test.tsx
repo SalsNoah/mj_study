@@ -133,7 +133,7 @@ it('keeps answerless problem notes visible and does not add an answer toggle', a
   expect(host.querySelector('.detail-answer-toggle')).toBeNull();
 });
 
-it('combines answer-only selection with exclusions and existing filters, preserving the default mode', () => {
+it('always requires an answer and combines exclusions with existing filters', () => {
   const data = fixture();
   data.problems[0]!.tagIds = ['selected'];
   data.problems.push({ ...data.problems[0]!, id: 'excluded', tagIds: ['selected'] });
@@ -141,7 +141,8 @@ it('combines answer-only selection with exclusions and existing filters, preserv
   data.study = [{ problemId: 'excluded', contentRevision: 0, confirmationCount: 0, lastConfirmedAt: null,
     understanding: 'unrated', lastReviewedAt: null, inTest: false }];
   const all = filterTestCandidates(data.problems, data.study, [], { filters: ['random'], tagIds: [] });
-  expect(all.map((problem) => problem.id)).toEqual(['answer-a', 'memo', 'other-tag']);
+  expect(all.map((problem) => problem.id)).toEqual(['answer-a', 'other-tag']);
+  expect(filterTestCandidates(data.problems, data.study, [], { filters: ['random'], tagIds: [], answerOnly: false })).toEqual(all);
   const options = { filters: ['tags', 'fewAnswers'] as const, tagIds: ['selected'], answerOnly: true };
   const only = filterTestCandidates(data.problems, data.study, [], { ...options, filters: [...options.filters] });
   expect(only.map((problem) => problem.id)).toEqual(['answer-a']);
@@ -153,9 +154,7 @@ it('combines answer-only selection with exclusions and existing filters, preserv
 it('uses the same answer-only count and actual queue while preserving answering behavior', async () => {
   save(fixture());
   await mount(<TestPage />);
-  expect(checkbox('正解ありのみ').checked).toBe(false);
-  expect(host.querySelector('.count-pill')!.textContent).toBe('対象 2 問');
-  await click(checkbox('正解ありのみ'));
+  expect(host.textContent).not.toContain('正解ありのみ');
   expect(host.querySelector('.count-pill')!.textContent).toBe('対象 1 問');
   await click(button('1 問でテスト開始'));
   expect(host.querySelector('h1')!.textContent).toBe('テスト 1 / 1');
@@ -176,12 +175,10 @@ it('does not silently fall back to answerless problems for zero eligible answers
   data.problems = [data.problems[1]!];
   save(data);
   await mount(<TestPage />);
-  await click(checkbox('正解ありのみ'));
   expect(host.querySelector('.count-pill')!.textContent).toBe('対象 0 問');
   expect(button('条件に合う問題がありません').disabled).toBe(true);
   expect(host.textContent).toContain('条件に合う正解ありの問題がありません');
-  await click(checkbox('正解ありのみ'));
-  expect(host.querySelector('.count-pill')!.textContent).toBe('対象 1 問');
-  await click(button('1 問でテスト開始'));
-  expect(button('解説を見る')).not.toBeNull();
+  expect(host.querySelector<HTMLInputElement>('.test-count input')!.value).toBe('0');
+  expect(host.textContent).not.toContain('正解ありのみ');
+  expect(host.querySelector('.test-title')).toBeNull();
 });

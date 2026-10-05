@@ -1,5 +1,6 @@
 import { countByRankSuit, countRedsBySuit, isTileCode } from './tiles';
 import { validateMeldShape } from './melds';
+import { attachmentRole } from './attachments';
 import { LIMITS, type Problem, type TileCode } from './types';
 
 export type ValidationIssue = {
@@ -224,8 +225,8 @@ export function isContentRevisionChange(
     JSON.stringify(before.acceptedDiscards) !== JSON.stringify(after.acceptedDiscards) ||
     before.explanation !== after.explanation ||
     JSON.stringify(before.context) !== JSON.stringify(after.context) ||
-    JSON.stringify(before.attachments.map((a) => a.id)) !==
-      JSON.stringify(after.attachments.map((a) => a.id)) ||
+    JSON.stringify(before.attachments.map((a) => [a.id, attachmentRole(a)])) !==
+      JSON.stringify(after.attachments.map((a) => [a.id, attachmentRole(a)])) ||
     before.sourceUrl !== after.sourceUrl
   );
 }

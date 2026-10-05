@@ -240,7 +240,7 @@ export class LocalStorageRepository {
     return this.persist(next);
   }
 
-  saveProblem(store: Store, problem: Problem, isNew: boolean): SaveResult {
+  saveProblem(store: Store, problem: Problem, isNew: boolean, inTest?: boolean): SaveResult {
     const issues = validateProblem(problem);
     if (hasErrors(issues)) {
       return {
@@ -262,6 +262,7 @@ export class LocalStorageRepository {
         lastConfirmedAt: null,
         understanding: 'unrated',
         lastReviewedAt: null,
+        inTest: inTest ?? true,
       });
     } else {
       const prev = store.problems.find((p) => p.id === problem.id);
@@ -276,14 +277,27 @@ export class LocalStorageRepository {
       problems = store.problems.map((p) => (p.id === problem.id ? problem : p));
       study = study.map((s) => {
         if (s.problemId !== problem.id) return s;
-        if (!bumped) return s;
+        const next = inTest === undefined ? s : { ...s, inTest };
+        if (!bumped) return next;
         return {
-          ...s,
+          ...next,
           contentRevision: s.contentRevision + 1,
           understanding: 'unrated',
           lastReviewedAt: null,
         };
       });
+      // 古いバックアップなどで学習状態が無い問題も、編集時の設定を同時に保存する。
+      if (!study.some((s) => s.problemId === problem.id)) {
+        study.push({
+          problemId: problem.id,
+          contentRevision: bumped ? 1 : 0,
+          confirmationCount: 0,
+          lastConfirmedAt: null,
+          understanding: 'unrated',
+          lastReviewedAt: null,
+          inTest: inTest ?? true,
+        });
+      }
     }
 
     return this.persist({ ...store, problems, study });

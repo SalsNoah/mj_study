@@ -92,13 +92,18 @@ describe('ukeire UI and existing study flows (jsdom; not a layout/browser test)'
 
     await act(async () => root.unmount());
     root = createRoot(host);
+    const quizData = store();
+    quizData.problems[0]!.answerEnabled = true;
+    quizData.problems[0]!.acceptedDiscards = ['7z'];
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(quizData));
     await act(async () => root.render(<AppProvider><MemoryRouter><TestPage /></MemoryRouter></AppProvider>));
     await click(byText('1 問でテスト開始'));
     expect(host.querySelector('.ukeire-panel')).toBeNull();
-    await click(byText('解説を見る'));
+    await click(host.querySelector<HTMLElement>('.hand-stage button[aria-label="中"]')!);
+    await click(byText('回答する'));
     expect(host.querySelector('.ukeire-list')!.textContent).toBe(editorRows);
     expect(store().attempts).toHaveLength(1);
-    expect(store().attempts[0]!.result).toBe('selfReview');
+    expect(store().attempts[0]!.result).toBe('correct');
     const answeredStore = localStorage.getItem(STORAGE_KEY);
     expect(byText('残枚数').getAttribute('aria-expanded')).toBe('false');
     await click(byText('残枚数'));

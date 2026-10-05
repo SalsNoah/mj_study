@@ -122,25 +122,28 @@ it('keeps an invalid tile query error discoverable when filters are collapsed', 
   expect(host.querySelector('#library-tile-error')).toBeNull();
 });
 
-it('switches record tabs with accessible keyboard controls while preserving both panels', async () => {
+it('switches daily, weekly and monthly records with keyboard controls while preserving panels', async () => {
   await mount(<RecordsPage />);
   const daily = host.querySelector<HTMLDivElement>('#records-view-panel-daily')!;
-  const badges = host.querySelector<HTMLDivElement>('#records-view-panel-badges')!;
+  const weekly = host.querySelector<HTMLDivElement>('#records-view-panel-weekly')!;
+  const monthly = host.querySelector<HTMLDivElement>('#records-view-panel-monthly')!;
   const dailyTab = button('日別');
-  const badgeTab = button('称号');
+  const weeklyTab = button('週別');
   expect(daily.hidden).toBe(false);
-  expect(badges.hidden).toBe(true);
+  expect(weekly.hidden).toBe(true);
   expect(daily.getAttribute('aria-labelledby')).toBe(dailyTab.id);
-  expect(host.querySelectorAll('.daily-list li')).toHaveLength(14);
+  expect(daily.querySelectorAll('tbody tr')).toHaveLength(14);
   dailyTab.focus();
   await act(async () => dailyTab.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true })));
-  expect(document.activeElement).toBe(badgeTab);
-  expect(badgeTab.getAttribute('aria-selected')).toBe('true');
-  expect(badgeTab.tabIndex).toBe(0);
+  expect(document.activeElement).toBe(weeklyTab);
+  expect(weeklyTab.getAttribute('aria-selected')).toBe('true');
+  expect(weeklyTab.tabIndex).toBe(0);
   expect(dailyTab.tabIndex).toBe(-1);
   expect(daily.hidden).toBe(true);
-  expect(badges.hidden).toBe(false);
-  await act(async () => badgeTab.dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true })));
+  expect(weekly.hidden).toBe(false);
+  await act(async () => weeklyTab.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true })));
+  expect(monthly.hidden).toBe(false);
+  await act(async () => button('月別').dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true })));
   expect(document.activeElement).toBe(dailyTab);
   expect(host.querySelector('#records-view-panel-daily')).toBe(daily);
   expect(daily.hidden).toBe(false);
@@ -247,7 +250,7 @@ it('opens optional notes for answer errors while conditions always stay directly
   await mountProblem(<EditorPage />, '/edit/:id', data.problems[0]!.id);
   const disclosure = host.querySelector<HTMLDetailsElement>('.editor-notes')!;
   await click(disclosure.querySelector('summary')!);
-  const answer = disclosure.querySelector<HTMLInputElement>('input[type="checkbox"]')!;
+  const answer = [...disclosure.querySelectorAll('label')].find(label=>label.textContent?.trim()==='正解を設定する')!.querySelector<HTMLInputElement>('input')!;
   await click(answer);
   await click(disclosure.querySelector('summary')!);
   await click(button('保存'));
@@ -289,8 +292,8 @@ it('opens detail notes first and retains remaining adjustments and all-candidate
 it('hides answer information before answering and retains answer-tab adjustments without duplicate attempts', async () => {
   const data = seed();
   data.problems = [data.problems[0]!];
-  data.problems[0]!.answerEnabled = false;
-  data.problems[0]!.acceptedDiscards = [];
+  data.problems[0]!.answerEnabled = true;
+  data.problems[0]!.acceptedDiscards = ['1z'];
   data.problems[0]!.explanation = '回答後だけの解説';
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   await mount(<TestPage />);
@@ -298,7 +301,8 @@ it('hides answer information before answering and retains answer-tab adjustments
   expect(host.querySelector('.ukeire-panel')).toBeNull();
   expect(host.querySelector('#answer-view-panel-notes')).toBeNull();
   expect(host.textContent).not.toContain('回答後だけの解説');
-  await click(button('解説を見る'));
+  await click(host.querySelector<HTMLButtonElement>('.hand-stage button[aria-label="東"]')!);
+  await click(button('回答する'));
   expect(host.querySelector<HTMLDivElement>('#answer-view-panel-notes')!.hidden).toBe(false);
   expect(host.textContent).toContain('回答後だけの解説');
   await click(button('受入れ'));

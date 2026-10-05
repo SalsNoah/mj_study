@@ -44,6 +44,8 @@ export type Attachment = {
   dataUrl: string;
   width: number;
   height: number;
+  /** Omitted by older backups: display only with the explanation. */
+  role?: 'question' | 'explanation';
 };
 
 /** Optional catalog identity; user edits retain it, user duplicates do not. */

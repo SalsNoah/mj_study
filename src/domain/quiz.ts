@@ -150,6 +150,7 @@ export type TestOptions = {
   count: number;
   filters: TestFilter[];
   tagIds: string[];
+  /** 旧呼び出し元との互換用。値によらず正解ありの問題のみを出題する。 */
   answerOnly?: boolean;
   now?: Date;
 };
@@ -197,9 +198,16 @@ export function isInTest(study: StudyState | undefined): boolean {
   return study?.inTest !== false;
 }
 
+/** 対象がなければ0問。それ以外は対象数を上限に1問単位で指定する。 */
+export function clampTestCount(count: number, candidateCount: number): number {
+  const max = Math.max(0, Math.floor(candidateCount));
+  if (max === 0) return 0;
+  return Math.min(max, Math.max(1, Number.isFinite(count) ? Math.floor(count) : 1));
+}
+
 /**
  * テスト候補。「完全ランダム」以外の条件は、選んだものをすべて満たす問題に絞る。
- * テスト対象外にした問題は常に除く。
+ * 正解なし・テスト対象外にした問題は常に除く。
  */
 export function filterTestCandidates(
   problems: readonly Problem[],
@@ -214,7 +222,7 @@ export function filterTestCandidates(
   const tagSet = new Set(options.tagIds);
 
   return problems.filter((p) => {
-    if (options.answerOnly && !p.answerEnabled) return false;
+    if (!p.answerEnabled) return false;
     const s = studyMap.get(p.id);
     if (!isInTest(s)) return false;
     const rev = s?.contentRevision ?? 0;
@@ -244,7 +252,7 @@ export function selectTestProblems(
   random: () => number = Math.random,
 ): Problem[] {
   const candidates = filterTestCandidates(problems, study, attempts, options);
-  return shuffle(candidates, random).slice(0, Math.max(1, Math.min(10, options.count)));
+  return shuffle(candidates, random).slice(0, clampTestCount(options.count, candidates.length));
 }
 
 /** 現在の contentRevision だけの正答率 */

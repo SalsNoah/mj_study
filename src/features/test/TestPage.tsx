@@ -1,12 +1,15 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useApp } from '@/app/store';
 import { HandBoard } from '@/components/HandBoard';
 import { ViewTabs, viewPanelProps } from '@/components/ViewTabs';
 import { UkeirePanel } from '@/components/UkeirePanel';
+import { ExplanationAttachments, QuestionAttachments } from '@/components/ProblemAttachments';
 import type { TileMark } from '@/components/HandView';
 import { createId, nowIso } from '@/domain/ids';
+import { attachmentsForRole } from '@/domain/attachments';
 import {
+  clampTestCount,
   computeSessionStats,
   filterTestCandidates,
   isInTest,
@@ -16,6 +19,8 @@ import {
   type TestFilter,
 } from '@/domain/quiz';
 import type { Attempt, Problem, TileCode, Understanding } from '@/domain/types';
+import { TestCountControl } from './TestCountControl';
+import './testControls.css';
 
 type Phase = 'setup' | 'question' | 'answered' | 'result';
 
@@ -31,14 +36,11 @@ const FILTERS: Array<{ id: TestFilter; label: string; hint: string }> = [
   { id: 'tags', label: 'タグ', hint: '選んだタグのいずれかを持つ問題' },
 ];
 
-const COUNTS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-
 export function TestPage() {
   const { store, recordAttempt, updateUnderstanding, getTagName } = useApp();
   const [count, setCount] = useState(5);
   const [filters, setFilters] = useState<TestFilter[]>(['random']);
   const [tagIds, setTagIds] = useState<string[]>([]);
-  const [answerOnly, setAnswerOnly] = useState(false);
   const [answerView, setAnswerView] = useState<'notes' | 'ukeire'>('notes');
   const [phase, setPhase] = useState<Phase>('setup');
   const [queue, setQueue] = useState<Problem[]>([]);
@@ -55,9 +57,13 @@ export function TestPage() {
   const study = current ? store.study.find((s) => s.problemId === current.id) : undefined;
 
   const candidates = useMemo(
-    () => filterTestCandidates(store.problems, store.study, store.attempts, { filters, tagIds, answerOnly }),
-    [store.problems, store.study, store.attempts, filters, tagIds, answerOnly],
+    () => filterTestCandidates(store.problems, store.study, store.attempts, { filters, tagIds }),
+    [store.problems, store.study, store.attempts, filters, tagIds],
   );
+  const effectiveCount = clampTestCount(count, candidates.length);
+  useEffect(() => {
+    setCount((previous) => clampTestCount(previous, candidates.length));
+  }, [candidates.length]);
   const excludedCount = useMemo(() => {
     const studyMap = new Map(store.study.map((s) => [s.problemId, s]));
     return store.problems.filter((p) => !isInTest(studyMap.get(p.id))).length;
@@ -74,10 +80,9 @@ export function TestPage() {
 
   const start = () => {
     const picked = selectTestProblems(store.problems, store.study, store.attempts, {
-      count,
+      count: effectiveCount,
       filters,
       tagIds,
-      answerOnly,
     });
     if (picked.length === 0) {
       setError('条件に合う問題がありません');
@@ -97,7 +102,7 @@ export function TestPage() {
 
   const submit = (tile: TileCode | null) => {
     if (!current || answeredLock.current) return;
-    if (current.answerEnabled && !tile) return;
+    if (!current.answerEnabled || !tile) return;
     answeredLock.current = true;
     const attempt: Attempt = {
       id: createId('attm'),
@@ -107,7 +112,7 @@ export function TestPage() {
       questionIndex: index,
       at: nowIso(),
       selectedTile: tile,
-      result: current.answerEnabled ? judgeDiscard(tile!, current.acceptedDiscards) : 'selfReview',
+      result: judgeDiscard(tile, current.acceptedDiscards),
     };
     const r = recordAttempt(attempt);
     if (!r.ok) {
@@ -154,28 +159,8 @@ export function TestPage() {
         </header>
 
         <section className="panel">
-          <label className="check">
-            <input
-              type="checkbox"
-              checked={answerOnly}
-              onChange={(e) => { setAnswerOnly(e.target.checked); setError(null); }}
-            />
-            正解ありのみ
-          </label>
-          <h2 className="mini-title">問題数</h2>
-          <div className="count-grid" role="group" aria-label="問題数">
-            {COUNTS.map((n) => (
-              <button
-                key={n}
-                type="button"
-                className={count === n ? 'is-on' : ''}
-                aria-pressed={count === n}
-                onClick={() => setCount(n)}
-              >
-                {n}
-              </button>
-            ))}
-          </div>
+          <TestCountControl value={effectiveCount} max={candidates.length} onChange={setCount} />
+          <p className="hint test-eligibility-hint">正解があり、「テストに出題する」がオンの問題から出題します。</p>
         </section>
 
         <details className="details panel">
@@ -222,13 +207,10 @@ export function TestPage() {
           {excludedCount > 0 && (
             <p className="hint">テスト対象外にした {excludedCount} 問は出題しません。</p>
           )}
-          {candidates.length > 0 && candidates.length < count && (
-            <p className="warn">条件に合う問題が {candidates.length} 問なので、{candidates.length} 問で出題します。</p>
-          )}
         </details>
 
         {candidates.length === 0 && (
-          <p className="hint" role="status">{answerOnly ? '条件に合う正解ありの問題がありません。' : '条件に合う問題がありません。'}</p>
+          <p className="hint" role="status">条件に合う正解ありの問題がありません。</p>
         )}
         {error && <p className="error">{error}</p>}
         <div className="sticky-actions">
@@ -238,7 +220,7 @@ export function TestPage() {
             onClick={start}
             disabled={candidates.length === 0}
           >
-            {candidates.length === 0 ? '条件に合う問題がありません' : `${Math.min(count, candidates.length)} 問でテスト開始`}
+            {candidates.length === 0 ? '条件に合う問題がありません' : `${effectiveCount} 問でテスト開始`}
           </button>
         </div>
       </div>
@@ -335,6 +317,7 @@ export function TestPage() {
           marks={answerMarks}
           onSelectCode={(code) => setSelected(code)}
         />
+        <QuestionAttachments attachments={current.attachments} sessionKey={`${sessionId.current}:${index}:${current.id}`} />
         {answerMarks && (
           <p className="mark-legend">
             <i className="mark-legend__correct" />正解
@@ -348,27 +331,17 @@ export function TestPage() {
         {phase === 'question' && (
           <>
             <p className="hint test-hint">
-              {current.answerEnabled
-                ? selected
-                  ? '選んだ牌でよければ「回答する」'
-                  : '切る牌をタップしてください'
-                : 'この問題は正解なし。考えたら解説を見てください'}
+              {selected ? '選んだ牌でよければ「回答する」' : '切る牌をタップしてください'}
             </p>
             <div className="sticky-actions">
-              {current.answerEnabled ? (
-                <button
-                  type="button"
-                  className="btn btn-primary btn-save"
-                  disabled={!selected}
-                  onClick={() => submit(selected)}
-                >
-                  回答する
-                </button>
-              ) : (
-                <button type="button" className="btn btn-primary btn-save" onClick={() => submit(null)}>
-                  解説を見る
-                </button>
-              )}
+              <button
+                type="button"
+                className="btn btn-primary btn-save"
+                disabled={!selected}
+                onClick={() => submit(selected)}
+              >
+                回答する
+              </button>
             </div>
           </>
         )}
@@ -403,6 +376,8 @@ export function TestPage() {
           tabs={[{ value: 'notes', label: '解説' }, { value: 'ukeire', label: '受入れ' }]} />
         <div {...viewPanelProps('answer-view', 'notes', answerView)} className="panel">
           {current.explanation && <p className="prewrap">{current.explanation}</p>}
+          <ExplanationAttachments attachments={current.attachments}
+            sessionKey={`${sessionId.current}:${index}:${current.id}`} visible={answerView === 'notes'} />
           {current.tagIds.length > 0 && (
             <div className="tag-cloud">
               {current.tagIds.map((id) => (
@@ -412,7 +387,9 @@ export function TestPage() {
               ))}
             </div>
           )}
-          {!current.explanation && <p className="hint">解説はまだありません。</p>}
+          {!current.explanation && attachmentsForRole(current.attachments, 'explanation').length === 0 && (
+            <p className="hint">解説はまだありません。</p>
+          )}
         </div>
         <div {...viewPanelProps('answer-view', 'ukeire', answerView)}>
           <UkeirePanel {...current} sessionKey={current.id} />
