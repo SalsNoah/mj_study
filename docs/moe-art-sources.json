@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "assets": [
+    {
+      "path": "public/themes/moe/background.webp",
+      "theme": "moe",
+      "usage": "full viewport CSS cover background",
+      "source": "AI-generated for this project, 2026-10-05",
+      "generationMode": "built-in image generation, one new standalone image per asset; no input image",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "1642b149f45fc8fe235d6bfc6173b4a2862e1f612d0ccafad3b3c7a202a97655",
+      "originalPNG_sha256": "474820ad2c7f8f11f43de83e2b74dbec9c309df416725c3b2542637884255c46",
+      "decodedRGBA_sha256": "45980eda02b0c157aa6e4d3d5a300a1cfb2bac97891d5e0e83fd34a6ee7626ae",
+      "encoding": "Lossless WebP; original dimensions and decoded RGBA pixels unchanged",
+      "bytes": 1180018,
+      "originalPNG_bytes": 1805869,
+      "prompt": "Use case: stylized-concept\nAsset type: original full-viewport decorative background for a Japanese mahjong study app's new \"Moe\" theme.\nPrimary request: an irresistibly sweet, tender, nonsexual kawaii illustrated world of milky cream, strawberry pink, and pale lavender, filled with softly floating little hearts, satin bows, a few jewel-like twinkles, and two tiny original bunny plush toys cuddling heart cushions at the lower outer corners. Original designs only. The plush toys have tiny rounded bodies, warm innocent faces, rosy cheeks, and sparkling eyes; they are objects, not people. A few ivory mahjong-shaped toy blocks with plain pink backs sit beside a plush as small decorative props, with no marks.\nStyle/medium: polished original Japanese kawaii stationery illustration, delicate warm rose outlines, soft airbrushed anime coloring and pearly luminous accents, silky ribbons and plush softness. Warm and sweet, emotionally inviting. Clearly illustrated objects, not abstract paper folds.\nComposition/framing: one full-bleed landscape image, 1536 by 1024 pixels. Reserve an exceptionally broad near-uniform pale milky-cream reading area across the central 65 percent of the image, with no objects, no strong lines, no dark patches. Place the plush toys and richer decorative clusters mainly near the lower outer corners. Small hearts and delicate ribbon loops decorate the extreme top and side edges. A few very pale pink hearts near the top-center and bottom-center edge ensure a narrow central portrait crop retains a sweet impression. Center crop should stay bright and quiet. Let all decorations softly fade toward the reading area. No surrounding solid frame.\nColor palette: near-white milky cream #fff9f5 and blush white #fff5f9 dominate; strawberry milk pink #f6b2cd, soft warm rose #e987b1, pale lavender #e9dcfa in edge details. Tiny warm golden-white glints only. No saturated red or neon.\nLighting/mood: dreamy soft morning light, cozy and lovingly handmade.\nConstraints: new standalone opaque artwork. Do not include text, Japanese characters, letters, numbers, logos, watermarks, buttons, panels, screen mockups, UI, tile-face symbols, known characters, or people. No suggestive content. Do not draw anything in the central reading area. Keep negative space airy and clean.\n"
+    },
+    {
+      "path": "public/themes/moe/card.webp",
+      "theme": "moe",
+      "usage": "Library problem card CSS cover background",
+      "source": "AI-generated for this project, 2026-10-05",
+      "generationMode": "built-in image generation, one new standalone image per asset; no input image",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "23f542d4fdadc3247f856d748cd756b77f730abe58468514b8901b6f58e10463",
+      "originalPNG_sha256": "9e6870b5a4b13e6e442cd4ab03c4cbcf9df62adc4d4fbab502a21324a1430fe1",
+      "decodedRGBA_sha256": "773e1187dd30af4bb5fa5def5add0c90347286809b0e3b8ab99838bc56830af3",
+      "encoding": "Lossless WebP; original dimensions and decoded RGBA pixels unchanged",
+      "bytes": 984936,
+      "originalPNG_bytes": 1554994,
+      "prompt": "Use case: stylized-concept\nAsset type: original decorative problem-card background for a Japanese mahjong study app's new \"Moe\" theme, coordinated with an illustrated milky cream and strawberry-pink heart-and-bunny world.\nPrimary request: a sweet kawaii stationery illustration with a broad creamy-white field, tiny soft pink and lavender hearts, two lovely satin ribbon bows, delicate pearl-like twinkles, and one very small original round bunny plush holding a heart, peeking in from the far right edge. Beside the plush, a pair of tiny ivory mahjong-shaped toy blocks with plain pastel pink backs and absolutely no marks. Original design, affectionate and innocent.\nStyle/medium: polished original Japanese kawaii illustration with delicate warm rose outlines, soft airbrushed anime coloring, pearly light and velvety plush texture. Warm, cute, and tender. A gentle companion to the larger heart-and-bunny landscape, but independently composed.\nComposition/framing: one full-bleed landscape image, 1536 by 1024 pixels, designed for CSS center/cover cropping into a wide horizontal card. Keep the left 80 percent and especially the middle horizontal band almost uniform near-white milky cream and empty for real UI text and mahjong tiles. Place the small bunny and a pink bow within the extreme rightmost 15 percent at mid-height, softly fading inward so a horizontal crop still shows a little sweetness at its far right. A tiny blush heart and lavender ribbon tail may peek in at the extreme left edge at mid-height, low contrast. Other delicate hearts can sit near outer top and bottom edges. The entire composition remains extremely light, with decoration secondary to clean negative space. No enclosing frame, no central object.\nColor palette: dominant #fff9f5 and #fff7fa; gentle strawberry milk pink #f6b2cd, warm rose #e987b1, pale lavender #e9dcfa; no deep shadows, no saturated red, no neon.\nLighting/mood: creamy diffuse daylight, charming and soothing.\nConstraints: new standalone opaque artwork. No text, letters, Japanese characters, numbers, logos, watermark, UI, buttons, panels, screen mockups, tile-face symbols, known characters, people, or suggestive content. Do not render real app controls or a real playing hand. Do not add details through the reading area.\n"
+    }
+  ]
+}

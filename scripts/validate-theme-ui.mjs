@@ -38,14 +38,14 @@ async function mainDisclosures(name) {
 
 try {
  const ctx=await open();await nav('設定');const original=await page.evaluate(()=>localStorage.getItem('mahjong-study:v1'));
- await expect(page.getByRole('radio')).toHaveCount(5);const moe=page.getByRole('radio',{name:/萌え/});await expect(moe).toBeDisabled();await expect(moe).toHaveAttribute('aria-checked','false');
- const labels={normal:'ノーマル',cool:'クール',cute:'キュート',dopa:'DOPA'};
- for(const theme of ['normal','cool','cute','dopa']) {
+ await expect(page.getByRole('radio')).toHaveCount(5);const moe=page.getByRole('radio',{name:/萌え/});await expect(moe).toBeEnabled();await expect(moe).toHaveAttribute('aria-checked','false');
+ const labels={normal:'ノーマル',cool:'クール',cute:'キュート',dopa:'DOPA',moe:'萌え'};
+ for(const theme of ['normal','cool','cute','dopa','moe']) {
   await page.getByRole('radio',{name:new RegExp(`^${labels[theme]}`)}).click();await page.reload();
   expect(await page.evaluate(()=>document.documentElement.dataset.theme)).toBe(theme);expect(await page.evaluate(()=>localStorage.getItem('mahjong-study:theme'))).toBe(theme);
   await expect(page.getByRole('radio',{name:new RegExp(`^${labels[theme]}`)})).toHaveAttribute('aria-checked','true');await capture(`theme-picker-${theme}-390`);
  }
- await page.getByRole('radio',{name:/^DOPA/}).press('ArrowRight');await expect(page.getByRole('radio',{name:/^ノーマル/})).toBeFocused();await page.getByRole('radio',{name:/^ノーマル/}).press('End');await expect(page.getByRole('radio',{name:/^DOPA/})).toBeFocused();await expect(moe).toBeDisabled();expect(await page.evaluate(()=>localStorage.getItem('mahjong-study:v1'))).toBe(original);results.push({name:'theme-persistence-keyboard-moe-disabled',status:'pass'});
+ await page.getByRole('radio',{name:/^DOPA/}).press('ArrowRight');await expect(moe).toBeFocused();await moe.press('ArrowRight');await expect(page.getByRole('radio',{name:/^ノーマル/})).toBeFocused();await page.getByRole('radio',{name:/^ノーマル/}).press('End');await expect(moe).toBeFocused();await expect(moe).toHaveAttribute('aria-checked','true');expect(await page.evaluate(()=>localStorage.getItem('mahjong-study:v1'))).toBe(original);results.push({name:'theme-persistence-keyboard-moe-enabled',status:'pass'});
  for(const theme of ['normal','cool','cute','dopa']) {
   await nav('設定');await page.getByRole('tab',{name:'表示・編集',exact:true}).click();await page.getByRole('radio',{name:new RegExp(`^${labels[theme]}`)}).click();
   for(const width of [375,1440]) {
