@@ -288,7 +288,7 @@ a.btn-primary { color: var(--on-accent); }
 .page--editor .field {
   margin-bottom: 8px;
 }
-.page--editor .section-title {
+.page--editor .section-title:not(summary) {
   display: none;
 }
 
@@ -1257,7 +1257,7 @@ a.btn-primary { color: var(--on-accent); }
 .check { display: flex; gap: 8px; align-items: center; min-height: 40px; }
 .details { margin: 8px 0; }
 /* Native disclosure semantics, one type scale and one scalable marker on every page. */
-details > summary {
+details > summary, details > summary.section-title {
   display: flex;
   align-items: center;
   gap: 8px;
