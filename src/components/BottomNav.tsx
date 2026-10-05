@@ -17,6 +17,7 @@ export function BottomNav() {
           key={item.to}
           to={item.to}
           end={item.end}
+          aria-label={item.label}
           className={({ isActive }) =>
             `bottom-nav__item${isActive ? ' is-active' : ''}`
           }
