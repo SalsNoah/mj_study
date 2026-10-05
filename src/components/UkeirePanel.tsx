@@ -41,7 +41,7 @@ export function UkeirePanel({ sessionKey, ...input }: AnalysisHand & { sessionKe
   return <UkeireResults session={session} showSettings />;
 }
 
-export function UkeireResults({ session, showSettings = false, defaultOpen = true }: { session: UkeireSession; showSettings?: boolean; defaultOpen?: boolean }) {
+export function UkeireResults({ session, showSettings = false }: { session: UkeireSession; showSettings?: boolean }) {
   const { analysis } = session;
   const [expansion, setExpansion] = useState({ key: session.key, open: false });
   const expanded = expansion.key === session.key && expansion.open;
@@ -51,8 +51,8 @@ export function UkeireResults({ session, showSettings = false, defaultOpen = tru
   const minimumShanten = ranked[0]?.shanten;
   const previewCount = Math.min(3, ranked.filter((row) => row.shanten === minimumShanten).length);
   return (
-    <details className="panel ukeire-panel" open={defaultOpen}>
-      <summary className="section-title">受入れ</summary>
+    <section className="panel ukeire-panel">
+      <h2 className="section-title ukeire-title">受入れ</h2>
       {showSettings && <><RemainingButton session={session} /><RemainingSettings session={session} /></>}
       {analysis.status !== 'ready' ? (
         <div role="status">
@@ -80,7 +80,7 @@ export function UkeireResults({ session, showSettings = false, defaultOpen = tru
             </ol>
             {ranked.length > previewCount && <button type="button" className="btn ukeire-expand" aria-expanded={expanded}
               onClick={() => setExpansion({ key: session.key, open: !expanded })}>
-              {expanded ? '上位候補に戻す' : `すべて表示（${ranked.length}候補）`}
+              {expanded ? 'その他の候補を閉じる' : `その他の候補を表示（${ranked.length - previewCount}候補）`}
             </button>}
             </>
           ) : analysis.current && (
@@ -91,6 +91,6 @@ export function UkeireResults({ session, showSettings = false, defaultOpen = tru
           )}
         </>
       )}
-    </details>
+    </section>
   );
 }

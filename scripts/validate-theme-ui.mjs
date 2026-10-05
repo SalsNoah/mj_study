@@ -26,10 +26,16 @@ async function capture(name, selector) {
  expect(g.documentWidth).toBeLessThanOrEqual(g.width);results.push({name,...g});
 }
 async function mainDisclosures(name) {
- await expect(page.locator('.editor-tools > details > summary')).toHaveCount(2);await expect(page.locator('.editor-tools > details > summary').first()).toBeVisible();
- const styles=await page.locator('.editor-tools > details > summary').evaluateAll(items=>items.map(el=>{const s=getComputedStyle(el),m=getComputedStyle(el,'::before');return {font:s.fontFamily,size:s.fontSize,weight:s.fontWeight,line:s.lineHeight,letter:s.letterSpacing,marker:[m.borderLeftWidth,m.borderTopWidth,m.borderBottomWidth],height:el.getBoundingClientRect().height};}));
- expect(styles).toHaveLength(2);expect(styles[0]).toEqual(styles[1]);expect(styles[0].height).toBeGreaterThanOrEqual(44);results.push({name:`${name}-matching-disclosures`,styles});
+ const title=page.locator('.editor-tools > .ukeire-panel > .ukeire-title');
+ const summary=page.locator('.editor-tools > details > summary');
+ await expect(title).toBeVisible();await expect(summary).toHaveCount(1);await expect(summary).toBeVisible();
+ const styles=await page.locator('.editor-tools > .ukeire-panel > .ukeire-title, .editor-tools > details > summary').evaluateAll(items=>items.map(el=>{const s=getComputedStyle(el);return {font:s.fontFamily,size:s.fontSize,weight:s.fontWeight,line:s.lineHeight,letter:s.letterSpacing};}));
+ expect(styles).toHaveLength(2);expect(styles[0]).toEqual(styles[1]);
+ const disclosure=await summary.evaluate(el=>{const s=getComputedStyle(el,'::before');return {marker:[s.borderLeftWidth,s.borderTopWidth,s.borderBottomWidth],height:el.getBoundingClientRect().height};});
+ expect(disclosure.height).toBeGreaterThanOrEqual(44);expect(parseFloat(disclosure.marker[0])).toBeGreaterThan(0);
+ results.push({name:`${name}-matching-section-type`,styles,disclosure});
 }
+
 try {
  const ctx=await open();await nav('設定');const original=await page.evaluate(()=>localStorage.getItem('mahjong-study:v1'));
  await expect(page.getByRole('radio')).toHaveCount(5);const moe=page.getByRole('radio',{name:/萌え/});await expect(moe).toBeDisabled();await expect(moe).toHaveAttribute('aria-checked','false');

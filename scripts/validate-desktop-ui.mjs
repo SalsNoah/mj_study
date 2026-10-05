@@ -154,7 +154,7 @@ try {
   for (const name of ['一萬','二萬','三萬','一筒','二筒','三筒','一索','二索','三索','四索','赤五索','五索','中','中']) await page.locator('.tile-palette').getByRole('button', { name, exact: true }).click();
   await expect(page.getByText('追加できない牌と理由',{exact:true})).toHaveCount(0);
   await allSizes('editor-hand');
-  await page.locator('.editor-tools .ukeire-panel summary').click();
+  await expect(page.locator('.editor-tools .ukeire-title')).toBeVisible();
   await expect(page.locator('.ukeire-list > li:visible')).toHaveCount(3);
   await allSizes('editor-ukeire');
   await page.getByRole('button', { name: '残枚数', exact: true }).click();
