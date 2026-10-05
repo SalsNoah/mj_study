@@ -9,6 +9,7 @@ on:
       - 'scripts/validate-desktop-ui.mjs'
       - 'scripts/validate-sample-ui.mjs'
       - 'scripts/validate-study-ui.mjs'
+      - 'scripts/check-record-cumulative.mjs'
       - 'scripts/validate-material-ui.mjs'
       - 'scripts/validate-theme-ui.mjs'
       - 'scripts/validate-theme-art-ui.mjs'

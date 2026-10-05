@@ -79,6 +79,7 @@
 .page--records .records-chart { margin: 8px 0 0; }
 .page--records .records-chart__caption { margin: 0 0 14px; color: var(--records-muted); font-size: 0.75rem; }
 .page--records .records-chart__canvas { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 9px; margin-right: 3px; }
+.page--records .records-chart__unit { grid-column: 1 / -1; margin-bottom: 10px; color: var(--records-muted); font-size: 0.75rem; }
 .page--records .records-chart__y-axis { position: relative; height: 160px; min-width: 2.8em; color: var(--records-muted); font-size: 0.75rem; line-height: 1; font-variant-numeric: tabular-nums; }
 .page--records .records-chart__y-axis > span { position: absolute; right: 0; transform: translateY(-50%); }
 .page--records .records-chart__plot { position: relative; height: 160px; min-width: 0; }

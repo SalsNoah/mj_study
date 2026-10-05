@@ -15,30 +15,30 @@ function chartCeiling(max: number): number {
 export function RecordChart({ series, label }: { series: RecordSeries; label: string }) {
   const id = useId();
   const { points } = series;
-  const tested = points.reduce((total, point) => total + point.tested, 0);
-  const confirmed = points.reduce((total, point) => total + point.confirmed, 0);
-  const materials = points.reduce((total, point) => total + point.materials, 0);
-  const ceiling = chartCeiling(Math.max(...points.flatMap((point) => [point.tested, point.confirmed, point.materials])));
+  const { tested, confirmed, materials } = points.at(-1)!.cumulative;
+  const ceiling = chartCeiling(Math.max(tested, confirmed, materials));
   const x = (index: number) => index * WIDTH / (points.length - 1);
   const y = (value: number) => HEIGHT - value * HEIGHT / ceiling;
-  const line = (field: 'tested' | 'confirmed' | 'materials') => points.map((point, index) => `${x(index)},${y(point[field])}`).join(' ');
+  const line = (field: 'tested' | 'confirmed' | 'materials') => points.map((point, index) => `${x(index)},${y(point.cumulative[field])}`).join(' ');
   const ticks = [0, Math.round((points.length - 1) / 2), points.length - 1];
-  const currentNote = series.period === 'weekly' ? '月曜始まり・今週は今日までの合計'
-    : series.period === 'monthly' ? '今月は今日までの合計' : '1日ごとのテスト・確認・教材の学習回数';
+  const currentNote = '表示期間より前を含む累計・最新は今日まで'
+    + (series.period === 'weekly' ? '（月曜始まり）' : '');
+  const endpoint = series.period === 'weekly' ? '各週末' : series.period === 'monthly' ? '各月末' : '各日末';
 
   return <>
     <div className="records-period-heading">
       <h3>{label}</h3>
       <p>{recordDateLabel(series.start)}〜{recordDateLabel(series.end)}</p>
     </div>
-    <div className="records-series-totals" aria-label="表示期間の合計">
-      <p><span className="records-line-key records-line-key--tested" aria-hidden="true" /><span>テスト</span><strong>{tested.toLocaleString('ja-JP')}</strong><span>回</span></p>
-      <p><span className="records-line-key records-line-key--confirmed" aria-hidden="true" /><span>確認</span><strong>{confirmed.toLocaleString('ja-JP')}</strong><span>回</span></p>
-      <p><span className="records-line-key records-line-key--materials" aria-hidden="true" /><span>教材</span><strong>{materials.toLocaleString('ja-JP')}</strong><span>回</span></p>
+    <div className="records-series-totals" aria-label="今日までの累計">
+      <p><span className="records-line-key records-line-key--tested" aria-hidden="true" /><span>テスト累計</span><strong>{tested.toLocaleString('ja-JP')}</strong><span>回</span></p>
+      <p><span className="records-line-key records-line-key--confirmed" aria-hidden="true" /><span>確認累計</span><strong>{confirmed.toLocaleString('ja-JP')}</strong><span>回</span></p>
+      <p><span className="records-line-key records-line-key--materials" aria-hidden="true" /><span>教材累計</span><strong>{materials.toLocaleString('ja-JP')}</strong><span>回</span></p>
     </div>
     <figure className="records-chart" aria-labelledby={`${id}-caption`}>
       <figcaption id={`${id}-caption`} className="records-chart__caption">{currentNote}</figcaption>
-      <div className="records-chart__canvas" role="img" aria-label={`${label}の学習回数。テスト${tested}回、確認${confirmed}回、教材${materials}回。各期間の数値は下の一覧で確認できます。`}>
+      <div className="records-chart__canvas" role="img" aria-label={`${label}の累計学習回数。今日までの累計はテスト${tested}回、確認${confirmed}回、教材${materials}回。${endpoint}時点（最後は今日まで）の累計は下の一覧で確認できます。`}>
+        <div className="records-chart__unit" aria-hidden="true">累計（回）</div>
         <div className="records-chart__y-axis" style={{ width: `${ceiling.toLocaleString('ja-JP').length + 0.5}ch` }} aria-hidden="true">
           {[4, 3, 2, 1, 0].map((tick) => <span key={tick} style={{ top: `${100 - tick * 25}%` }}>{(ceiling * tick / 4).toLocaleString('ja-JP')}</span>)}
         </div>
@@ -50,7 +50,7 @@ export function RecordChart({ series, label }: { series: RecordSeries; label: st
             <polyline points={line('materials')} className="records-chart__line records-chart__line--materials" vectorEffect="non-scaling-stroke" />
           </svg>
           {(['tested', 'confirmed', 'materials'] as const).flatMap((field) => points.map((point, index) => <span key={`${field}-${point.key}`}
-            className={`records-chart__point records-chart__point--${field}`} style={{ left: `${index * 100 / (points.length - 1)}%`, top: `${100 - point[field] * 100 / ceiling}%` }} />))}
+            className={`records-chart__point records-chart__point--${field}`} style={{ left: `${index * 100 / (points.length - 1)}%`, top: `${100 - point.cumulative[field] * 100 / ceiling}%` }} />))}
         </div>
         <div className="records-chart__x-axis" aria-hidden="true">
           {ticks.map((index, tick) => <span key={index} style={{ left: `${index * 100 / (points.length - 1)}%` }}
@@ -58,16 +58,16 @@ export function RecordChart({ series, label }: { series: RecordSeries; label: st
         </div>
       </div>
     </figure>
-    {tested + confirmed + materials === 0 && <p className="records-empty">この期間の学習記録はまだありません</p>}
+    {tested + confirmed + materials === 0 && <p className="records-empty">学習記録はまだありません</p>}
     <details className="records-values">
-      <summary>数値を一覧で見る</summary>
+      <summary>累計を一覧で見る</summary>
       <table>
-        <caption>{label}の学習回数（古い順）</caption>
-        <thead><tr><th scope="col">{series.period === 'daily' ? '日付' : '期間'}</th><th scope="col">テスト</th><th scope="col">確認</th><th scope="col">教材</th></tr></thead>
+        <caption>{endpoint}時点の累計回数（最後は今日まで・古い順）</caption>
+        <thead><tr><th scope="col">{series.period === 'daily' ? '日付' : '期間'}</th><th scope="col">テスト累計</th><th scope="col">確認累計</th><th scope="col">教材累計</th></tr></thead>
         <tbody>{points.map((point, index) => <tr key={point.key} className={index === points.length - 1 ? 'is-current' : ''}>
-          <th scope="row">{point.label}</th><td>{point.tested.toLocaleString('ja-JP')}</td><td>{point.confirmed.toLocaleString('ja-JP')}</td><td>{point.materials.toLocaleString('ja-JP')}</td>
+          <th scope="row">{point.label}</th><td>{point.cumulative.tested.toLocaleString('ja-JP')}</td><td>{point.cumulative.confirmed.toLocaleString('ja-JP')}</td><td>{point.cumulative.materials.toLocaleString('ja-JP')}</td>
         </tr>)}</tbody>
-        <tfoot><tr><th scope="row">合計</th><td>{tested.toLocaleString('ja-JP')}</td><td>{confirmed.toLocaleString('ja-JP')}</td><td>{materials.toLocaleString('ja-JP')}</td></tr></tfoot>
+        <tfoot><tr><th scope="row">今日までの累計</th><td>{tested.toLocaleString('ja-JP')}</td><td>{confirmed.toLocaleString('ja-JP')}</td><td>{materials.toLocaleString('ja-JP')}</td></tr></tfoot>
       </table>
     </details>
   </>;

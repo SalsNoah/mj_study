@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { buildRecordSeries, RECORD_PERIODS, type RecordPeriod } from './recordSeries';
+import { countMaterialStudies, validateMaterialData } from './materials';
 import type { DailyLog } from './types';
 
 const log = (tested: number, confirmed = 0): DailyLog => ({ tested, confirmed });
@@ -167,5 +168,122 @@ describe('material study calendar series', () => {
     const series = buildRecordSeries(undefined, 'daily', today, [event('offset', at)]);
     expect(series.points.at(-1)!.materials).toBe(1);
     expect(series.points.slice(0, -1).every(({ materials }) => materials === 0)).toBe(true);
+  });
+});
+
+describe('cumulative study series', () => {
+  const event = (id: string, at: string) => ({
+    id, materialId: 'material', at, title: '教材', url: 'https://example.com/lesson', comment: '',
+  });
+
+  it.each(RECORD_PERIODS)('keeps an empty $value history at zero', ({ value }) => {
+    const series = buildRecordSeries(undefined, value, new Date(2026, 9, 5));
+    expect(series.points.every(({ cumulative }) => cumulative.tested === 0 && cumulative.confirmed === 0 && cumulative.materials === 0)).toBe(true);
+  });
+
+  it('adds once on a single activity day and holds the total across later gaps', () => {
+    const series = buildRecordSeries({ '2026-09-30': log(7, 2) }, 'daily', new Date(2026, 9, 5), [event('one', new Date(2026, 8, 30, 12).toISOString())]);
+    expect(series.points.filter(({ end }) => end < '2026-09-30').every(({ cumulative }) => cumulative.tested === 0 && cumulative.confirmed === 0 && cumulative.materials === 0)).toBe(true);
+    expect(series.points.filter(({ end }) => end >= '2026-09-30').map(({ cumulative }) => cumulative)).toEqual(Array(6).fill({ tested: 7, confirmed: 2, materials: 1 }));
+  });
+
+  it('includes old history, carries gaps and gives the same endpoint for every period without mutating input', () => {
+    const daily = {
+      '2026-10-05': log(7, 1), '2000-01-01': log(100, 50), '2026-09-24': log(4, 1),
+      '2026-09-21': log(2, 3), '2026-09-22': log(3, 2), '2026-10-06': log(999, 999),
+      '2025-02-29': log(999), '2026-09-31': log(999), 'invalid': log(999),
+    };
+    const events = [
+      event('today', new Date(2026, 9, 5, 23, 59).toISOString()),
+      event('old', new Date(2000, 0, 1, 12).toISOString()),
+      event('middle', new Date(2026, 8, 24, 12).toISOString()),
+      event('before', new Date(2026, 8, 21, 23, 59).toISOString()),
+      event('first', new Date(2026, 8, 22, 0, 0).toISOString()),
+      event('old', new Date(2026, 9, 5, 12).toISOString()),
+      event('future', new Date(2026, 9, 6, 0, 0).toISOString()),
+      event('invalid', 'invalid'), event('impossible', '2025-02-30T12:00:00Z'),
+    ];
+    const before = JSON.stringify({ daily, events });
+    const today = new Date(2026, 9, 5, 12);
+    for (const { value } of RECORD_PERIODS) {
+      const series = buildRecordSeries(daily, value, today, events);
+      expect(series.points.at(-1)!.cumulative).toEqual({ tested: 116, confirmed: 57, materials: 5 });
+      for (let i = 1; i < series.points.length; i++) {
+        for (const field of ['tested', 'confirmed', 'materials'] as const) {
+          expect(series.points[i]!.cumulative[field] - series.points[i - 1]!.cumulative[field]).toBe(series.points[i]![field]);
+        }
+      }
+    }
+    const dailySeries = buildRecordSeries(daily, 'daily', today, events);
+    expect(dailySeries.points.slice(0, 3).map(({ cumulative }) => cumulative)).toEqual([
+      { tested: 105, confirmed: 55, materials: 3 },
+      { tested: 105, confirmed: 55, materials: 3 },
+      { tested: 109, confirmed: 56, materials: 4 },
+    ]);
+    expect(dailySeries.points.at(-1)).toMatchObject({ tested: 7, confirmed: 1, materials: 1 });
+    expect(JSON.stringify({ daily, events })).toBe(before);
+  });
+
+  it.each(RECORD_PERIODS)('keeps history older than the entire $value window visible as a flat cumulative line', ({ value }) => {
+    const series = buildRecordSeries({ '2000-01-01': log(8, 3) }, value, new Date(2026, 9, 5), [event('old', '2000-01-01T12:00:00Z')]);
+    expect(series.points.every(({ tested, confirmed, materials }) => tested === 0 && confirmed === 0 && materials === 0)).toBe(true);
+    expect(series.points.map(({ cumulative }) => cumulative)).toEqual(Array(series.points.length).fill({ tested: 8, confirmed: 3, materials: 1 }));
+  });
+
+  it('uses week and month ends across leap days and new year, with the current bucket ending today', () => {
+    const daily = {
+      '2023-01-01': log(10, 1), '2024-02-28': log(1, 2), '2024-02-29': log(2, 3),
+      '2024-03-01': log(4, 1), '2024-12-29': log(8), '2024-12-30': log(16), '2025-01-01': log(32),
+    };
+    const events = ['2023-01-01', '2024-02-29', '2024-03-01', '2024-12-29', '2024-12-30', '2025-01-01'].map((date) => event(date, `${date}T12:00:00Z`));
+    const today = new Date(2025, 0, 1, 23, 59);
+    const weekly = buildRecordSeries(daily, 'weekly', today, events);
+    expect(weekly.points.at(-2)).toMatchObject({ end: '2024-12-29', axisLabel: '12/29', cumulative: { tested: 25, confirmed: 7, materials: 4 } });
+    expect(weekly.points.at(-1)).toMatchObject({ start: '2024-12-30', end: '2025-01-01', axisLabel: '1/1', cumulative: { tested: 73, confirmed: 7, materials: 6 } });
+    const monthly = buildRecordSeries(daily, 'monthly', today, events);
+    expect(monthly.points[0]).toMatchObject({ end: '2024-02-29', cumulative: { tested: 13, confirmed: 6, materials: 2 } });
+    expect(monthly.points[1]).toMatchObject({ end: '2024-03-31', cumulative: { tested: 17, confirmed: 7, materials: 3 } });
+    expect(monthly.points.at(-2)).toMatchObject({ end: '2024-12-31', cumulative: { tested: 41, confirmed: 7, materials: 5 } });
+    for (const { value } of RECORD_PERIODS) expect(buildRecordSeries(daily, value, today, events).points.at(-1)!.cumulative).toEqual({ tested: 73, confirmed: 7, materials: 6 });
+  });
+
+  it.each([
+    { today: new Date(2024, 2, 12), days: ['2024-03-09', '2024-03-10', '2024-03-11', '2024-03-12'] },
+    { today: new Date(2024, 10, 5), days: ['2024-11-02', '2024-11-03', '2024-11-04', '2024-11-05'] },
+  ])('keeps cumulative daily boundaries across DST: $days', ({ today, days }) => {
+    const daily = { '2000-01-01': log(5), ...Object.fromEntries(days.map((date, index) => [date, log(index + 1)])) };
+    const events = [event('old', '2000-01-01T12:00:00Z'), ...days.map((date) => event(date, new Date(`${date}T00:30:00`).toISOString()))];
+    expect(buildRecordSeries(daily, 'daily', today, events).points.slice(-4).map(({ cumulative }) => cumulative)).toEqual([
+      { tested: 6, confirmed: 0, materials: 2 }, { tested: 8, confirmed: 0, materials: 3 },
+      { tested: 11, confirmed: 0, materials: 4 }, { tested: 15, confirmed: 0, materials: 5 },
+    ]);
+    for (const { value } of RECORD_PERIODS) expect(buildRecordSeries(daily, value, today, events).points.at(-1)!.cumulative).toEqual({ tested: 15, confirmed: 0, materials: 5 });
+  });
+
+  it('assigns offset instants by local day and removes an undone event from all later cumulative points', () => {
+    const offset = event('offset', '2026-10-04T23:30:00-10:00');
+    const today = new Date(offset.at);
+    const old = event('old', '2000-01-01T12:00:00Z');
+    for (const { value } of RECORD_PERIODS) {
+      const before = buildRecordSeries(undefined, value, today, [old, offset]);
+      expect(before.points.at(-1)!.cumulative.materials).toBe(2);
+      expect(before.points.slice(0, -1).every(({ cumulative }) => cumulative.materials === 1)).toBe(true);
+      const after = buildRecordSeries(undefined, value, today, [offset]);
+      expect(after.points.at(-1)!.cumulative.materials).toBe(1);
+      expect(after.points.slice(0, -1).every(({ cumulative }) => cumulative.materials === 0)).toBe(true);
+    }
+  });
+
+  it('keeps every supported ISO precision and offset consistent with material validation and counts', () => {
+    const instants = [
+      '2026-10-05T00:00:00Z', '2026-10-05T00:00:00.1Z', '2026-10-05T00:00:00.12Z', '2026-10-05T00:00:00.123Z',
+      '2026-10-05T09:00:00+09:00', '2026-10-04T14:00:00-10:00', '2026-10-05T00:00:00+00:00',
+    ];
+    const events = instants.map((instant, index) => event(String(index), instant));
+    const material = { id: 'material', title: '教材', url: 'https://example.com/lesson', comment: '', createdAt: instants[0]!, updatedAt: instants[0]! };
+    expect(validateMaterialData({ materials: [material], materialStudyEvents: events }).ok).toBe(true);
+    expect(countMaterialStudies(events)).toBe(7);
+    for (const { value } of RECORD_PERIODS) expect(buildRecordSeries(undefined, value, new Date(instants[3]!), events).points.at(-1)!.cumulative.materials).toBe(7);
+    expect(validateMaterialData({ materials: [material], materialStudyEvents: [event('impossible', '2025-02-30T12:00:00Z')] }).ok).toBe(false);
   });
 });
