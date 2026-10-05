@@ -47,12 +47,7 @@ export function TilePalette({ onPick, disabled, blockedReasons = {}, layout = 's
           </div>
         ))}
       </div>
-      {Object.keys(blockedReasons).length > 0 && (
-        <details className="palette-limits">
-          <summary>追加できない牌と理由</summary>
-          <ul>{[...new Set(Object.values(blockedReasons))].map((reason) => <li key={reason}>{reason}</li>)}</ul>
-        </details>
-      )}
+
     </div>
   );
 }

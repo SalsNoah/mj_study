@@ -6,7 +6,14 @@ const evidence = new URL('../evidence/desktop/', import.meta.url).pathname;
 await mkdir(evidence, { recursive: true });
 const origin = process.env.MAHJONG_TEST_ORIGIN ?? 'http://127.0.0.1:5176';
 const fixture = JSON.parse(await readFile(new URL('../evidence/ukeire/synthetic-fixture.json', import.meta.url), 'utf8'));
-for (let i = 0; i < 4; i++) fixture.problems.push({ ...fixture.problems[i % 2], id: `desktop-extra-${i}`, title: `PC検証 ${i + 1}：手牌を振り返る` });
+for (let i = 0; i < 4; i++) {
+  const source = fixture.problems[i % 2];
+  const extra = { ...source, id: `desktop-extra-${i}`, title: `PC検証 ${i + 1}：手牌を振り返る` };
+  if (i < 2) { extra.concealed = source.concealed.slice(0, 13); extra.drawn = i === 0 ? '8m' : '9m'; }
+  if (i === 0) { extra.explanation = ''; extra.privateMemo = ''; }
+  if (i === 2) { extra.title = 'PC検証：赤牌と副露を含む長いタイトルのカードで折り返しを確認する'; extra.concealed = source.concealed.slice(0, 11); extra.drawn = null; extra.melds = [{ id: 'desktop-red-pon', type: 'pon', from: 'left', tiles: ['5p','5p','0p'] }]; }
+  fixture.problems.push(extra);
+}
 const browser = await chromium.launch({ headless: true, ...(process.env.MAHJONG_CHROMIUM_EXECUTABLE ? { executablePath: process.env.MAHJONG_CHROMIUM_EXECUTABLE } : {}) });
 const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, serviceWorkers: 'block' });
 await context.addInitScript(seed => { if (!localStorage.getItem('mahjong-study:v1')) localStorage.setItem('mahjong-study:v1', JSON.stringify(seed)); }, fixture);
@@ -33,7 +40,7 @@ async function capture(name, selector, { preserveScroll = false } = {}) {
     return { width: innerWidth, height: innerHeight, document: document.documentElement.scrollWidth,
       documentScrollTop: document.scrollingElement.scrollTop, paneScrollers,
       nav: { top: nav.top, bottom: nav.bottom },
-      overflow: [...document.querySelectorAll('.editor-workspace,.editor-main,.editor-tools,.remaining-panel,.tile-palette__row,.problem-card,.view-tabs')].filter(visible).filter(el => el.scrollWidth > el.clientWidth + 1).map(el => el.className),
+      overflow: [...document.querySelectorAll('.editor-workspace,.editor-main,.editor-tools,.remaining-panel,.tile-palette__row,.hand-strip,.problem-card,.view-tabs')].filter(visible).filter(el => el.scrollWidth > el.clientWidth + 1).map(el => el.className),
       ctas: boxes('.sticky-actions .btn-save,.editor-save'),
       main: boxes('.editor-main')[0], tools: boxes('.editor-tools')[0],
       listColumns: document.querySelector('.problem-list') ? getComputedStyle(document.querySelector('.problem-list')).gridTemplateColumns.split(' ').length : null };
@@ -43,12 +50,37 @@ async function capture(name, selector, { preserveScroll = false } = {}) {
     expect(cta.hit).toBe(true); expect(cta.top).toBeGreaterThanOrEqual(geometry.width >= 1100 ? geometry.nav.bottom : 0);
     expect(cta.bottom).toBeLessThanOrEqual(geometry.width >= 1100 ? geometry.height : geometry.nav.top);
   }
-  if (geometry.main && geometry.tools && geometry.width >= 1100) expect(geometry.tools.right).toBeLessThanOrEqual(geometry.main.left);
+  if (geometry.main && geometry.tools && geometry.width >= 1100) {
+    expect(geometry.main.right).toBeLessThanOrEqual(geometry.tools.left);
+    expect(Math.abs(geometry.main.width - geometry.tools.width)).toBeLessThanOrEqual(1);
+  }
   for (const pane of geometry.paneScrollers) {
     expect(pane.scrollTop).toBe(0);
     expect(['auto', 'scroll'].includes(pane.overflowY) && pane.scrollHeight > pane.clientHeight + 1).toBe(false);
   }
   if (geometry.listColumns) expect(geometry.listColumns).toBe(geometry.width >= 1600 ? 3 : geometry.width >= 1100 ? 2 : 1);
+  const header = await page.locator('.page--editor header').evaluateAll(headers => headers.map(el => {
+    const box = node => { const r = node.getBoundingClientRect(); return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width}; };
+    return { heading:box(el.querySelector('h1')), title:box(el.querySelector('.editor-title input')), actions:box(el.querySelector('.editor-header-actions')), titles:el.querySelectorAll('.editor-title input').length };
+  }));
+  for (const h of header) {
+    expect(h.titles).toBe(1); expect(h.title.width).toBeGreaterThanOrEqual(120);
+    if (geometry.width >= 1100) { expect(h.title.left).toBeGreaterThanOrEqual(h.heading.right); expect(h.title.right).toBeLessThanOrEqual(h.actions.left); }
+  }
+  const cardHands = await page.locator('.problem-card .hand-mini').evaluateAll(hands => hands.map(el => {
+    const base = el.querySelector('.hand-strip > :first-child'); const drawn = el.querySelector('.hand-view__drawn');
+    if (!base || !drawn) return null;
+    const a=base.getBoundingClientRect(),b=drawn.getBoundingClientRect(),c=el.getBoundingClientRect(),d=drawn.firstElementChild.getBoundingClientRect();
+    return {baseWidth:a.width,drawnWidth:b.width,baseBottom:a.bottom,drawnBottom:b.bottom,drawnRight:b.right,cardRight:c.right,baseTop:a.top,tileTop:d.top,tileBottom:d.bottom,baseHeight:a.height,tileHeight:d.height};
+  }).filter(Boolean));
+  if (geometry.width >= 1100) for (const hand of cardHands) {
+    expect(Math.abs(hand.baseWidth-hand.drawnWidth)).toBeLessThanOrEqual(1);
+    expect(Math.abs(hand.baseBottom-hand.drawnBottom)).toBeLessThanOrEqual(1);
+    expect(Math.abs(hand.baseTop-hand.tileTop)).toBeLessThanOrEqual(1);
+    expect(Math.abs(hand.baseBottom-hand.tileBottom)).toBeLessThanOrEqual(1);
+    expect(Math.abs(hand.baseHeight-hand.tileHeight)).toBeLessThanOrEqual(1);
+    expect(hand.drawnRight).toBeLessThanOrEqual(hand.cardRight+1);
+  }
   const scoreSuffixes = await page.locator('.ctx-score').evaluateAll(fields => fields.map(field => {
     const input = field.querySelector('input'); const suffix = field.querySelector('.score-suffix');
     const box = field.querySelector('.score-number'); const a = input.getBoundingClientRect(); const b = suffix.getBoundingClientRect();
@@ -57,7 +89,7 @@ async function capture(name, selector, { preserveScroll = false } = {}) {
       groupBorder: parseFloat(style.borderLeftWidth) + parseFloat(style.borderRightWidth), groupBackground: style.backgroundColor };
   }));
   for (const field of scoreSuffixes) { expect(field.suffixLeft).toBeGreaterThanOrEqual(field.inputRight); expect(field.groupBorder).toBe(0); expect(field.groupBackground).toBe('rgba(0, 0, 0, 0)'); }
-  results.push({ name, geometry, scoreSuffixes });
+  results.push({ name, geometry, scoreSuffixes, header, cardHands });
 }
 async function allSizes(name, selector) { for (const width of widths) { await page.setViewportSize({ width, height: width === 1920 ? 1080 : 900 }); await capture(`${name}-${width}`, selector); } }
 async function nav(name) { await page.getByRole('link', { name, exact: true }).click(); }
@@ -86,6 +118,9 @@ try {
   await expect(page.locator('.tile-palette button:visible')).toHaveCount(37);
   expect(await page.locator('.ctx-score input').evaluateAll(inputs => inputs.map(input => input.value))).toEqual(['250', '250', '250', '250']);
   expect(await page.locator('.score-suffix').allTextContents()).toEqual(['00', '00', '00', '00']);
+  await expect(page.locator('.editor-notes .editor-title')).toHaveCount(0);
+  await expect(page.locator('.palette-limits')).toHaveCount(0);
+  await page.getByLabel('タイトル（任意）',{exact:true}).fill('最初に入力したタイトル');
   await allSizes('editor-empty');
   await page.setViewportSize({ width: 1100, height: 768 });
   const eastScore = page.getByLabel('東の点数（百点単位）', { exact: true });
@@ -118,6 +153,7 @@ try {
   }
   await page.getByLabel('北の点数（百点単位）', { exact: true }).fill('250');
   for (const name of ['一萬','二萬','三萬','一筒','二筒','三筒','一索','二索','三索','四索','赤五索','五索','中','中']) await page.locator('.tile-palette').getByRole('button', { name, exact: true }).click();
+  await expect(page.getByText('追加できない牌と理由',{exact:true})).toHaveCount(0);
   await allSizes('editor-hand');
   await page.locator('.editor-tools .ukeire-panel summary').click();
   await expect(page.locator('.ukeire-list > li:visible')).toHaveCount(3);
@@ -130,7 +166,7 @@ try {
   await page.getByRole('button', { name: '残枚数', exact: true }).click();
   await page.locator('.editor-notes > summary').click();
   await page.getByLabel('タイトル（任意）').fill('PC入力中の下書き');
-  await page.getByLabel('解説', { exact: true }).fill('左の補足欄を開いても入力中の手牌と残数を保持');
+  await page.getByLabel('解説', { exact: true }).fill('右の補足欄を開いても入力中の手牌と残数を保持');
   await allSizes('editor-notes', '.editor-notes');
   await eastScore.fill('275');
   const titleInput = page.getByLabel('タイトル（任意）');
@@ -138,7 +174,7 @@ try {
   const scoreNode = await eastScore.elementHandle();
   for (const [index, width] of [1100, 1099, 1100, 1024, 1440].entries()) {
     await page.setViewportSize({ width, height: 768 });
-    await expect(page.locator('.editor-workspace > :first-child')).toHaveClass(width >= 1100 ? 'editor-tools' : 'editor-main');
+    await expect(page.locator('.editor-workspace > :first-child')).toHaveClass('editor-main');
     await capture(`editor-breakpoint-${index + 1}-${width}`);
     expect(await page.locator('.editor-workspace').evaluate(el => getComputedStyle(el).display)).toBe(width >= 1100 ? 'grid' : 'block');
     await expect(titleInput).toHaveValue('PC入力中の下書き');

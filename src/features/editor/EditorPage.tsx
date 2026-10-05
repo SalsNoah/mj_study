@@ -5,7 +5,6 @@ import { useApp } from '@/app/store';
 import { HandView } from '@/components/HandView';
 import { TilePalette } from '@/components/TilePalette';
 import { RemainingButton, RemainingSettings, UkeireResults } from '@/components/UkeirePanel';
-import { useWideLayout } from '@/components/useWideLayout';
 import { parseScoreInput, scoreEntryFromValue } from '@/domain/scoreInput';
 import { useUkeireSession } from '@/components/useUkeireSession';
 import { WanpaiDora } from '@/components/WanpaiDora';
@@ -82,13 +81,13 @@ function initialHand(existing?: Problem): TileCode[] {
 
 export function EditorPage() {
   const { id } = useParams();
-  const wideLayout = useWideLayout();
   const isNew = !id || id === 'new';
   const navigate = useNavigate();
   const { store, saveProblem, upsertTag } = useApp();
   const existing = store.problems.find((p) => p.id === id);
 
   const [title, setTitle] = useState(existing?.title ?? '');
+  const titleField = useRef<HTMLInputElement | null>(null);
   const [imported] = useState(() => (isNew ? peekImportDraft() : null));
   const [concealed, setConcealed] = useState<TileCode[]>(() =>
     imported
@@ -322,7 +321,8 @@ export function EditorPage() {
     setWarns(issues.filter((i) => i.level === 'warn').map((i) => i.message));
     if (hasErrors(issues)) {
       const first = issues.find((issue) => issue.level === 'error')!.code;
-      if (['title_len', 'explanation_len', 'memo_len', 'tags_per', 'attach_max', 'answer_empty', 'answer_missing', 'bad_url'].includes(first)) setNotesOpen(true);
+      if (first === 'title_len') titleField.current?.focus();
+      if (['explanation_len', 'memo_len', 'tags_per', 'attach_max', 'answer_empty', 'answer_missing', 'bad_url'].includes(first)) setNotesOpen(true);
       setError(issues.filter((i) => i.level === 'error').map((i) => i.message).join(' / '));
       return;
     }
@@ -649,17 +649,7 @@ export function EditorPage() {
         <UkeireResults session={ukeire} defaultOpen={false} />
       <details className="details panel editor-notes" open={notesOpen}>
         <summary onClick={(event) => { event.preventDefault(); setNotesOpen((open) => !open); }}>解説・メモなど</summary>
-      <label className="field">
-        <span>タイトル（任意）</span>
-        <input
-          value={title}
-          onChange={(e) => {
-            setTitle(e.target.value);
-            mark();
-          }}
-          maxLength={LIMITS.title}
-        />
-      </label>
+
 
       <section className="panel">
         <label className="check">
@@ -808,6 +798,20 @@ export function EditorPage() {
     <div className="page page--editor">
       <header className="page-header page-header--compact">
         <h1>{isNew ? '問題を作成' : '問題を編集'}</h1>
+      <label className="editor-title">
+        <span className="sr-only">タイトル（任意）</span>
+        <input
+          ref={titleField}
+          placeholder="タイトル（任意）"
+          value={title}
+          onChange={(e) => {
+            setTitle(e.target.value);
+            mark();
+          }}
+          maxLength={LIMITS.title}
+        />
+      </label>
+        <div className="editor-header-actions">
         {isNew && (
           <label className="btn btn-sm shot-button">
             スクショから
@@ -825,6 +829,7 @@ export function EditorPage() {
           </label>
         )}
         <button type="button" className="btn btn-primary editor-save" onClick={save}>保存</button>
+        </div>
       </header>
       {imported && (
         <p className="ok import-note">
@@ -841,7 +846,7 @@ export function EditorPage() {
       {error && <p className="error" role="alert">{error}</p>}
 
       <div className="editor-workspace">
-        {wideLayout ? [toolsPane, mainPane] : [mainPane, toolsPane]}
+        {[mainPane, toolsPane]}
       </div>
     </div>
   );
