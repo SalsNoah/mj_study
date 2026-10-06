@@ -18,6 +18,7 @@ async function mount(options: { backupError?: string; additions?: number; restor
   const onRestore = vi.fn(() => ({ ok: true as const }));
   const onExportBackup = vi.fn(() => ({ ok: true as const, text: '{"original":true}' }));
   await act(async () => root.render(<SampleCatalogSettings preview={{ ...preview, additions: options.additions ?? 10 }}
+    removalPreview={{ candidates: [] }} onRemove={() => ({ ok: true })}
     backups={backups.map((b) => ({ ...b, restoredAt: options.restored ? b.createdAt : null }))}
     backupError={options.backupError ?? null} onApply={onApply} onRestore={onRestore} onExportBackup={onExportBackup} />));
   return { onApply, onRestore, onExportBackup };
@@ -62,14 +63,14 @@ it('labels a later legacy-only cleanup as deletion without promising new additio
   await act(async () => host.querySelector<HTMLInputElement>('input')!.click());
   await act(async () => button('選択した旧1題を削除').click());
   expect(onApply).toHaveBeenCalledWith(['old-1']);
-  expect(host.textContent).toContain('未編集・未学習の問題を取り除き、旧問題を戻します');
+  expect(host.textContent).toContain('未編集・未学習の問題を取り除き、削除した問題を戻します');
 });
 
 it('selects all visible legacy candidates only on request, without applying the update', async () => {
   const onApply = vi.fn(() => ({ ok: true as const }));
   await act(async () => root.render(<SampleCatalogSettings preview={{ ...preview, candidates: [
     { id: 'first', title: '旧問題A' }, { id: 'second', title: '旧問題B' },
-  ] }} backups={[]} backupError={null} onApply={onApply} onRestore={() => ({ ok: true })}
+  ] }} removalPreview={{ candidates: [] }} onRemove={() => ({ ok: true })} backups={[]} backupError={null} onApply={onApply} onRestore={() => ({ ok: true })}
     onExportBackup={() => ({ ok: true, text: '{}' })} />));
   expect([...host.querySelectorAll<HTMLInputElement>('input')].every((input) => !input.checked)).toBe(true);
   await act(async () => button('旧候補をまとめて選択').click());

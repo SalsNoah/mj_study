@@ -9,6 +9,19 @@ export type SampleUpdatePreview = {
   preservedEdited: number;
 };
 
+export type SampleRemovalPreview = {
+  candidates: { id: string; title: string }[];
+};
+
+/** Removal needs both recognized provenance and unchanged content, never a title/tag guess. */
+export function getSampleRemovalPreview(store: Store): SampleRemovalPreview {
+  const templates = createSampleProblems().problems;
+  return { candidates: store.problems.filter((problem) => {
+    const template = matchingCatalogTemplate(problem, templates);
+    return template && contentFingerprint(problem, store.tags) === template.sample!.fingerprint;
+  }).map(({ id, title }) => ({ id, title })) };
+}
+
 /** Only known original identity is usable for deduplication; malformed metadata is ignored. */
 export function matchingCatalogTemplate(problem: Problem, templates = createSampleProblems().problems): Problem | undefined {
   const identity = problem.sample;

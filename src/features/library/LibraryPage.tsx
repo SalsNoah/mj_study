@@ -155,7 +155,7 @@ export function LibraryPage() {
           aria-controls="library-sample-panel"
           onClick={() => setShowSamples((open) => !open)}
         >
-          {showSamples ? 'サンプルを閉じる' : 'サンプルを追加'}
+          {showSamples ? 'サンプルを閉じる' : 'サンプル管理'}
         </button>
       </header>
 
