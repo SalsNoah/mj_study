@@ -15,6 +15,11 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - name: Use verified published app with capture-only script
+        run: |
+          cp scripts/capture-launch-v2.mjs /tmp/capture-launch-v2.mjs
+          git checkout --detach 1a2f413f720a9b7146709564b75d851d60add03c
+          cp /tmp/capture-launch-v2.mjs scripts/capture-launch-v2.mjs
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -30,6 +35,6 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: introduction-screenshots-dpr3
-          path: evidence/launch-v2/
+          name: introduction-wide-screenshots-dpr3
+          path: evidence/launch-wide/
           retention-days: 7
