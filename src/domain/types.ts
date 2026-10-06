@@ -133,6 +133,8 @@ export type LearningMaterial = {
   comment: string;
   createdAt: string;
   updatedAt: string;
+  /** Omitted by older backups and active materials; archive never removes study history. */
+  archivedAt?: string;
   /** Lossless original identities retained across imports, URL edits and history undo. */
   sourceIds?: string[];
 };

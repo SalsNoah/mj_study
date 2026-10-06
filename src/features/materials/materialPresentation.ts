@@ -7,7 +7,7 @@ export function materialHost(url: string): string {
 }
 
 export function materialFingerprint(material: LearningMaterial): string {
-  return JSON.stringify([material.id, material.title, material.url, material.comment, material.createdAt, material.updatedAt]);
+  return JSON.stringify([material.id, material.title, material.url, material.comment, material.createdAt, material.updatedAt, material.archivedAt]);
 }
 
 export function materialHistory(events: readonly MaterialStudyEvent[] | undefined, materialId: string): MaterialStudyEvent[] {

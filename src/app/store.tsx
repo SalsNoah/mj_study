@@ -31,6 +31,7 @@ type AppState = {
   dismissConflict: () => void;
   saveProblem: (problem: Problem, isNew: boolean, inTest?: boolean) => SaveResult;
   saveMaterial: (material: LearningMaterial) => SaveResult;
+  setMaterialArchived: (materialId: string, archived: boolean) => SaveResult;
   recordMaterialStudy: (materialId: string, comment: string, eventId: string) => SaveResult;
   undoMaterialStudy: (eventId: string) => SaveResult;
   deleteProblem: (id: string) => SaveResult;
@@ -121,6 +122,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     dismissConflict: () => setExternalConflict(false),
     saveProblem: (p, isNew, inTest) => applySave(repo.saveProblem(store, p, isNew, inTest)),
     saveMaterial: (material) => applySave(repo.saveMaterial(store, material)),
+    setMaterialArchived: (id, archived) => applySave(repo.setMaterialArchived(store, id, archived)),
     recordMaterialStudy: (id, comment, eventId) => applySave(repo.recordMaterialStudy(store, id, comment, eventId)),
     undoMaterialStudy: (eventId) => applySave(repo.undoMaterialStudy(store, eventId)),
     deleteProblem: (id) => applySave(repo.deleteProblem(store, id)),

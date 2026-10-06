@@ -5,6 +5,11 @@
 
 .page--materials { min-width: 0; }
 .page--materials input, .page--materials textarea { width: 100%; min-width: 0; }
+.material-views { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.material-views .btn { flex: 1 1 140px; min-height: 44px; }
+.material-views [aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
+.material-archive p { margin: 0 0 10px; overflow-wrap: anywhere; }
+.material-archive .hint { margin: 10px 0 0; }
 .materials-add { margin-bottom: 12px; }
 .material-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
 .material-search { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
