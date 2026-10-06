@@ -1,5 +1,6 @@
 // Generated local artwork and synthetic study profiles only. No external content.
 import { chromium, expect } from '@playwright/test';
+import { openEditorNotes } from './editor-ui-helpers.mjs';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 const out = new URL('../evidence/moe-theme/', import.meta.url).pathname;
@@ -114,7 +115,7 @@ try {
   const focus=await controlState('moe-focus-undo',undo); expect(parseFloat(focus.outlineWidth)).toBeGreaterThanOrEqual(2); await capture('moe-focus-control');
   await page.getByRole('button',{name:'残枚数',exact:true}).click(); await capture('moe-remaining-390','.remaining-panel');
   await page.getByRole('button',{name:'残枚数',exact:true}).click();
-  await page.locator('.editor-notes > summary').click(); await capture('moe-notes-390','.editor-notes');
+  await openEditorNotes(page); await capture('moe-notes-390','.editor-notes');
   const animationState=()=>page.evaluate(()=>[document.body,document.getElementById('root'),...document.querySelectorAll('.page-header h1,.panel,.btn,.bottom-nav__item.is-active')].filter(Boolean).flatMap(el=>['::before','::after'].map(pseudo=>{const s=getComputedStyle(el,pseudo);return {tag:el.tagName,className:el.className,pseudo,name:s.animationName,duration:s.animationDuration,transform:s.transform,position:s.backgroundPosition,opacity:s.opacity,pointer:s.pointerEvents,content:s.content};})).filter(s=>s.name.includes('moe-')));
   const motionBefore=await animationState(); expect(motionBefore.length).toBeGreaterThan(0);
   for(const item of motionBefore) { for(const duration of item.duration.split(',')) expect(parseFloat(duration)).toBeGreaterThanOrEqual(4); expect(item.pointer).toBe('none'); }

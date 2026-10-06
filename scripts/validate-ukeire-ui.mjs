@@ -1,6 +1,7 @@
 // Read-only browser QA against this checkout, using a fresh profile and synthetic data.
 import { chromium } from 'playwright';
 import { expect } from '@playwright/test';
+import { openEditorNotes } from './editor-ui-helpers.mjs';
 import { mkdir, writeFile } from 'node:fs/promises';
 
 const evidence = new URL('../evidence/ukeire/', import.meta.url).pathname;
@@ -36,7 +37,7 @@ async function editFirstAnswer(enabled) {
   await page.getByRole('link',{name:'学習帳',exact:true}).click();
   await page.locator('.problem-card').first().click();
   await page.getByRole('link',{name:'編集',exact:true}).click();
-  await page.locator('.editor-notes > summary').click();
+  await openEditorNotes(page);
   await page.getByLabel('正解を設定する',{exact:true}).setChecked(enabled);
   if(enabled)await page.locator('.hand-stage--pick').getByRole('button',{name:'中',exact:true}).first().click();
   await page.getByRole('button',{name:'保存',exact:true}).click();
@@ -194,10 +195,13 @@ try {
     await targets('.remaining-panel button,.remaining-panel input');
     results.push({ name: `remaining-geometry-${width}`, geometry });
   }
-  await page.locator('.editor-notes > summary').click();
+  await openEditorNotes(page);
   await page.getByLabel('タイトル（任意）').fill('スマホ検証用の問題');
   await page.getByLabel('解説', { exact: true }).fill('検証用の短い解説です。');
   await allSizes('editor-notes', '.editor-notes');
+  // This first saved fixture deliberately stays answerless for the zero-candidate test.
+  await page.getByLabel('正解を設定する', { exact: true }).uncheck();
+  await expect(page.getByLabel('テストに出題する', { exact: true })).toHaveCount(0);
   await page.locator('.editor-notes > summary').click();
   await page.getByLabel('本場', { exact: true }).fill('2');
   await allSizes('editor-context');
@@ -283,7 +287,7 @@ try {
   await allSizes('settings-data');
   await page.getByRole('link', { name: '作成', exact: true }).click();
   for (const name of ['一萬','二萬','三萬','一筒','二筒','三筒','一索','二索','三索','四索','赤五索','五索','中','中']) await pick(name);
-  await page.locator('.editor-notes > summary').click();
+  await openEditorNotes(page);
   await page.getByLabel('タイトル（任意）').fill('正解あり検証用の問題');
   await page.getByLabel('正解を設定する', { exact: true }).check();
   await page.locator('.hand-stage--pick').getByRole('button', { name: '中', exact: true }).first().click();
@@ -353,7 +357,7 @@ try {
   }
   await page.screenshot({path:`${evidence}editor-score-keyboard-text150.png`,fullPage:false,animations:'disabled'});
   await targets('.tile-actions button,.editor-save');
-  await page.locator('.editor-notes > summary').click(); await capture('notes-320-text150', '.editor-notes');
+  await openEditorNotes(page); await capture('notes-320-text150', '.editor-notes');
   await page.locator('.editor-notes > summary').click();
   for (const name of ['一萬','二萬','三萬','一筒','二筒','三筒','一索','二索','三索','四索','五索','中','中']) await pick(name);
   await page.getByRole('button', { name: '残枚数', exact: true }).click();

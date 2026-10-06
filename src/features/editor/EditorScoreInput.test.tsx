@@ -50,7 +50,10 @@ async function input(label: string, value: string) {
     el.dispatchEvent(new Event('input', { bubbles: true }));
   });
 }
-async function addHand() { await click(host.querySelector<HTMLElement>('.tile-palette button[aria-label="一萬"]')!); }
+async function addHand() {
+  await click(host.querySelector<HTMLElement>('.tile-palette button[aria-label="一萬"]')!);
+  await click(host.querySelector<HTMLElement>('.hand-stage--pick button[aria-label="一萬"]')!);
+}
 const saved = () => JSON.parse(localStorage.getItem(STORAGE_KEY)!).problems[0];
 function seedScores(scores: ReturnType<typeof emptyContext>['scores']) {
   const store = emptyStore();

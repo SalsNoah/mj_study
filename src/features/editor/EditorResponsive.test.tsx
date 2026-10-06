@@ -25,7 +25,7 @@ it('retains focus in the main score input when crossing narrow to wide', async (
 });
 it('retains focus in the explanation when crossing wide to narrow', async () => {
  await resize(true);
- await act(async () => host.querySelector<HTMLElement>('.editor-notes > summary')!.click());
+ expect(host.querySelector<HTMLDetailsElement>('.editor-notes')!.open).toBe(true);
  const field=host.querySelector<HTMLTextAreaElement>('.editor-notes textarea')!;
  field.focus(); expect(document.activeElement).toBe(field);
  await resize(false);

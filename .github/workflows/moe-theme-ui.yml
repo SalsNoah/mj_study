@@ -7,6 +7,7 @@ on:
       - 'src/features/settings/SettingsPage.tsx'
       - 'public/themes/moe/**'
       - 'scripts/validate-moe-theme-ui.mjs'
+      - 'scripts/editor-ui-helpers.mjs'
       - 'docs/moe-art-sources.json'
       - '.github/workflows/moe-theme-ui.yml'
 permissions:
