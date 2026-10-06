@@ -211,14 +211,21 @@ export function hasErrors(issues: readonly ValidationIssue[]): boolean {
   return issues.some((i) => i.level === 'error');
 }
 
+/** 旧ツモ枠の統合・理牌だけは同じ手牌。コピーで比較し、赤牌と同牌の枚数は区別する。 */
+function handTileSignature(problem: Pick<Problem, 'concealed' | 'drawn'>): string {
+  return JSON.stringify([
+    ...problem.concealed,
+    ...(problem.drawn ? [problem.drawn] : []),
+  ].sort());
+}
+
 /** 内容変更で contentRevision を増やす対象か（タイトル・タグ・私用メモのみは対象外） */
 export function isContentRevisionChange(
   before: Problem,
   after: Problem,
 ): boolean {
   return (
-    JSON.stringify(before.concealed) !== JSON.stringify(after.concealed) ||
-    before.drawn !== after.drawn ||
+    handTileSignature(before) !== handTileSignature(after) ||
     JSON.stringify(before.melds) !== JSON.stringify(after.melds) ||
     JSON.stringify(before.doraIndicators) !== JSON.stringify(after.doraIndicators) ||
     before.answerEnabled !== after.answerEnabled ||
