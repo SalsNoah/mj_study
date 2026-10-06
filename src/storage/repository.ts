@@ -370,17 +370,33 @@ export class LocalStorageRepository {
     const materials = store.materials ?? [];
     const duplicate = materials.find((item) => item.id !== checked.material.id && item.url === checked.material.url);
     if (duplicate) return {
-      ok: false, code: 'validation', reason: `このURLは「${duplicate.title}」に登録済みです`, duplicateMaterialId: duplicate.id,
+      ok: false, code: 'validation', reason: duplicate.archivedAt ? `このURLはアーカイブした「${duplicate.title}」に登録済みです。既存の教材を復元してください` : `このURLは「${duplicate.title}」に登録済みです`, duplicateMaterialId: duplicate.id,
     };
     const previous = materials.find((item) => item.id === checked.material.id);
     const now = nowIso();
     const saved: LearningMaterial = {
       ...checked.material, createdAt: previous?.createdAt ?? now, updatedAt: now,
     };
+    // Content editors cannot implicitly archive or restore an existing material.
+    if (previous?.archivedAt !== undefined) saved.archivedAt = previous.archivedAt;
+    else delete saved.archivedAt;
     saved.sourceIds = previous ? materialSourceIds(previous) : materialSourceIds({ ...saved, sourceIds: undefined });
     return this.persist({ ...store, materials: previous
       ? materials.map((item) => item.id === saved.id ? saved : item)
       : [...materials, saved] }, current.raw);
+  }
+
+  setMaterialArchived(store: Store, materialId: string, archived: boolean): SaveResult {
+    const current = this.checkCurrentWrite(store);
+    if (!current.ok) return current;
+    const material = store.materials?.find((item) => item.id === materialId);
+    if (!material) return { ok: false, code: 'validation', reason: '教材が見つかりません' };
+    if ((material.archivedAt !== undefined) === archived) return { ok: true, store };
+    const now = nowIso();
+    const saved = { ...material, updatedAt: now };
+    if (archived) saved.archivedAt = now;
+    else delete saved.archivedAt;
+    return this.persist({ ...store, materials: store.materials!.map((item) => item.id === materialId ? saved : item) }, current.raw);
   }
 
   recordMaterialStudy(store: Store, materialId: string, comment: string, eventId: string): SaveResult {
@@ -396,6 +412,7 @@ export class LocalStorageRepository {
     if (existing) return existing.materialId === materialId && existing.comment === comment
       ? { ok: true, store }
       : { ok: false, code: 'validation', reason: 'この学習記録IDは別の記録に使用されています' };
+    if (material.archivedAt !== undefined) return { ok: false, code: 'validation', reason: 'アーカイブした教材は復元してから学習を記録してください' };
     const at = nowIso();
     const event: MaterialStudyEvent = { id: eventId, materialId, at, title: material.title, url: material.url, comment };
     event.sourceIds = materialStudySourceIds(event);

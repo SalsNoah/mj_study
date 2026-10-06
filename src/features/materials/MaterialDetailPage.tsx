@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState, type FormEvent } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { useApp } from '@/app/store';
+import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { useUnsavedChanges } from '@/components/useUnsavedChanges';
 import { createId } from '@/domain/ids';
 import { countMaterialStudies, MATERIAL_LIMITS, normalizeMaterialUrl } from '@/domain/materials';
@@ -38,7 +39,7 @@ function MaterialDetailEditor({ material, missing, onDiscardMissing }: {
   onDiscardMissing: () => void;
 }) {
   const commentLabelId = useId();
-  const { store, saveMaterial, recordMaterialStudy, undoMaterialStudy, externalConflict, reload } = useApp();
+  const { store, saveMaterial, setMaterialArchived, recordMaterialStudy, undoMaterialStudy, externalConflict, reload } = useApp();
   const location = useLocation();
   const [baseline, setBaseline] = useState(material);
   const [title, setTitle] = useState(material.title);
@@ -48,6 +49,10 @@ function MaterialDetailEditor({ material, missing, onDiscardMissing }: {
   const [duplicateId, setDuplicateId] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(() => location.state?.registered ? '教材を登録しました' : null);
   const [recorded, setRecorded] = useState(false);
+  const [confirmArchive, setConfirmArchive] = useState(false);
+  const archiveButton = useRef<HTMLButtonElement>(null);
+  const archiveLocked = useRef(false);
+  const focusArchive = useRef(false);
   const [conflictError, setConflictError] = useState(false);
   const studyId = useRef(createId('material-study'));
   const studyLocked = useRef(false);
@@ -63,6 +68,9 @@ function MaterialDetailEditor({ material, missing, onDiscardMissing }: {
   const events = materialHistory(store.materialStudyEvents, material.id);
   const latestEvent = events[0];
   const safeLink = normalizeMaterialUrl(material.url);
+  const archived = material.archivedAt !== undefined;
+  const duplicateArchived = store.materials?.some((item) => item.id === duplicateId && item.archivedAt !== undefined);
+  const studyCount = countMaterialStudies(store.materialStudyEvents, material.id);
 
   useEffect(() => {
     if (!missing && (discardOnReload.current || (!dirty && stale && !externalConflict))) {
@@ -150,7 +158,7 @@ function MaterialDetailEditor({ material, missing, onDiscardMissing }: {
   const unsaved = useUnsavedChanges({ dirty, onSave: saveDraft });
 
   const recordStudy = () => {
-    if (blocked || metadataDirty || studyLocked.current) return;
+    if (blocked || archived || metadataDirty || studyLocked.current) return;
     studyLocked.current = true;
     const saved = receive(recordMaterialStudy(material.id, comment, studyId.current), '学習を記録しました');
     if (saved) {
@@ -170,6 +178,7 @@ function MaterialDetailEditor({ material, missing, onDiscardMissing }: {
   };
 
   const startNextStudy = () => {
+    if (blocked || archived) return;
     studyId.current = createId('material-study');
     studyLocked.current = false;
     focusNextStudy.current = true;
@@ -177,16 +186,58 @@ function MaterialDetailEditor({ material, missing, onDiscardMissing }: {
     setMessage(null);
   };
 
+  // Prevent two synchronous clicks from reusing the same pre-save store.
+  useEffect(() => {
+    archiveLocked.current = false;
+    if (focusArchive.current) {
+      focusArchive.current = false;
+      archiveButton.current?.focus();
+    }
+  });
+  const changeArchive = (nextArchived: boolean) => {
+    setConfirmArchive(false);
+    if (blocked || dirty || archiveLocked.current) return;
+    archiveLocked.current = true;
+    const saved = receive(setMaterialArchived(material.id, nextArchived), nextArchived ? '教材をアーカイブしました。履歴を残して、いつでも復元できます。' : '教材を学習中に復元しました');
+    if (saved) {
+      studyLocked.current = false;
+      studyId.current = createId('material-study');
+      focusArchive.current = true;
+      setRecorded(false);
+    } else archiveLocked.current = false;
+  };
+
   if (missing && !dirty) return <MissingMaterial />;
+
+  const archiveControl = <>
+    <button className="btn" type="button" ref={archiveButton} disabled={blocked || dirty}
+      aria-describedby={dirty ? 'material-archive-dirty' : undefined}
+      onClick={() => archived ? changeArchive(false) : setConfirmArchive(true)}>{archived ? '学習中に復元する' : '教材をアーカイブ'}</button>
+    {dirty && <p className="hint" id="material-archive-dirty">タイトル・URL・コメントの変更を保存するか、元の値に戻してから操作してください。</p>}
+  </>;
 
   return (
     <div className="page page--materials page--material-detail">
       {unsaved.dialog}
-      <Link className="material-back" to="/materials">‹ 学習教材</Link>
+      {confirmArchive && <ConfirmDialog
+        title="教材をアーカイブしますか？"
+        description={`「${material.title}」1件を学習中の一覧から移します。コメントと学習履歴${studyCount.toLocaleString('ja-JP')}回は残り、回数・グラフ・称号も変わりません。アーカイブ一覧からいつでも復元できます。`}
+        confirmLabel="アーカイブする"
+        confirmDisabled={blocked || dirty}
+        returnFocus={archiveButton.current}
+        onCancel={() => setConfirmArchive(false)}
+        onConfirm={() => changeArchive(true)}
+      />}
+      <Link className="material-back" to={archived ? '/materials?view=archived' : '/materials'}>‹ 学習教材</Link>
       <header className="page-header material-detail-heading">
         <h1>{material.title}</h1>
-        <p className="material-count">学習 {countMaterialStudies(store.materialStudyEvents, material.id).toLocaleString('ja-JP')} 回</p>
+        <p className="material-count">学習 {studyCount.toLocaleString('ja-JP')} 回</p>
       </header>
+
+      {archived && <section className="panel material-archive" aria-label="教材の整理">
+        <p>アーカイブした教材です。{materialDate(material.archivedAt!)} に移動しました。学習を再開するには復元してください。</p>
+        {archiveControl}
+      </section>}
 
       <section className="panel material-content" aria-label="教材">
         <p className="material-source">{materialHost(material.url)}</p>
@@ -204,6 +255,7 @@ function MaterialDetailEditor({ material, missing, onDiscardMissing }: {
             <button className="btn" type="submit" disabled={blocked}>教材情報を保存</button>
           </form>
         </details>
+        {!archived && <div className="material-archive" role="group" aria-label="教材の整理">{archiveControl}</div>}
       </section>
 
       {blocked && <div className="material-conflict" role="alert">
@@ -215,7 +267,7 @@ function MaterialDetailEditor({ material, missing, onDiscardMissing }: {
         }}>入力を破棄して再読込</button>
       </div>}
       {error && <p className="error" role="alert">{error}
-        {duplicateId && <> <Link to={`/materials/${encodeURIComponent(duplicateId)}`}>登録済みの教材を開く</Link></>}
+        {duplicateId && <> <Link to={`/materials/${encodeURIComponent(duplicateId)}`}>{duplicateArchived ? 'アーカイブした教材を開いて復元' : '登録済みの教材を開く'}</Link></>}
       </p>}
 
       <section className="panel material-study" aria-label="教材の学習">
@@ -225,11 +277,11 @@ function MaterialDetailEditor({ material, missing, onDiscardMissing }: {
         </label>
         <div className="material-study__actions">
           <button className="btn" type="button" disabled={blocked} onClick={saveComment}>コメントを保存</button>
-          <button className="btn btn-primary" type="button" ref={studyButton} disabled={blocked || metadataDirty || recorded} onClick={recordStudy}>学習した</button>
+          <button className="btn btn-primary" type="button" ref={studyButton} disabled={blocked || archived || metadataDirty || recorded} onClick={recordStudy}>学習した</button>
         </div>
         {metadataDirty && <p className="hint">教材情報を保存してから学習を記録してください。</p>}
         {message && <p className="material-status" role="status">{message}</p>}
-        {recorded && <button className="btn material-next" type="button" disabled={blocked} onClick={startNextStudy}>次の学習を記録する</button>}
+        {recorded && !archived && <button className="btn material-next" type="button" disabled={blocked} onClick={startNextStudy}>次の学習を記録する</button>}
       </section>
 
       <section className="panel material-history" aria-labelledby="material-history-heading">

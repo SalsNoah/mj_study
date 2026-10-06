@@ -65,10 +65,12 @@ export function validateLearningMaterial(value: unknown): { ok: true; material: 
   if (!url.ok) return url;
   if (!validComment(value.comment)) return { ok: false, reason: `コメントは${MATERIAL_LIMITS.comment}文字以内で入力してください` };
   if (!validInstant(value.createdAt) || !validInstant(value.updatedAt)) return { ok: false, reason: '教材の保存日時が不正です' };
+  if (value.archivedAt !== undefined && !validInstant(value.archivedAt)) return { ok: false, reason: '教材のアーカイブ日時が不正です' };
   if (!validSourceIds(value.sourceIds)) return { ok: false, reason: '教材の元データ識別情報が不正です' };
   return { ok: true, material: {
     id: value.id, title: value.title.trim(), url: url.url, comment: value.comment,
     createdAt: value.createdAt, updatedAt: value.updatedAt,
+    ...(value.archivedAt !== undefined ? { archivedAt: value.archivedAt } : {}),
     ...(value.sourceIds !== undefined ? { sourceIds: [...value.sourceIds] } : {}),
   } };
 }

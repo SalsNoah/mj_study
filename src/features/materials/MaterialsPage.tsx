@@ -1,5 +1,5 @@
 import { useRef, useState, type FormEvent } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useApp } from '@/app/store';
 import { createId, nowIso } from '@/domain/ids';
 import { countMaterialStudies, MATERIAL_LIMITS, normalizeMaterialUrl } from '@/domain/materials';
@@ -10,6 +10,8 @@ import { MaterialThumbnail } from './MaterialThumbnail';
 export function MaterialsPage() {
   const { store, saveMaterial, externalConflict } = useApp();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const archived = searchParams.get('view') === 'archived';
   const [showForm, setShowForm] = useState(false);
   const [url, setUrl] = useState('');
   const [title, setTitle] = useState('');
@@ -20,7 +22,10 @@ export function MaterialsPage() {
   const searchInput = useRef<HTMLInputElement>(null);
   const draftId = useRef(createId('material'));
   const materials = [...(store.materials ?? [])].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
-  const visibleMaterials = filterMaterials(materials, query);
+  const archivedCount = materials.filter((material) => material.archivedAt !== undefined).length;
+  const selectedMaterials = materials.filter((material) => (material.archivedAt !== undefined) === archived);
+  const visibleMaterials = filterMaterials(selectedMaterials, query);
+  const duplicateArchived = materials.some((material) => material.id === duplicateId && material.archivedAt !== undefined);
 
   const register = (event: FormEvent) => {
     event.preventDefault();
@@ -55,8 +60,17 @@ export function MaterialsPage() {
     <div className="page page--materials">
       <header className="page-header page-header--compact">
         <h1>学習教材</h1>
-        <p className="count-pill" aria-live="polite">{query.trim() ? `${visibleMaterials.length.toLocaleString('ja-JP')} / ` : ''}{materials.length.toLocaleString('ja-JP')} 件</p>
+        <p className="count-pill" aria-live="polite">{query.trim() ? `${visibleMaterials.length.toLocaleString('ja-JP')} / ` : ''}{selectedMaterials.length.toLocaleString('ja-JP')} 件</p>
       </header>
+
+      <div className="material-views" role="group" aria-label="教材の表示">
+        <button className="btn" type="button" aria-pressed={!archived} onClick={() => setSearchParams((previous) => {
+          const next = new URLSearchParams(previous); next.delete('view'); return next;
+        })}>学習中 {materials.length - archivedCount} 件</button>
+        <button className="btn" type="button" aria-pressed={archived} onClick={() => setSearchParams((previous) => {
+          const next = new URLSearchParams(previous); next.set('view', 'archived'); return next;
+        })}>アーカイブ {archivedCount} 件</button>
+      </div>
 
       {(showForm || materials.length === 0) ? (
         <form className="panel material-form" aria-labelledby="material-add-title" onSubmit={register} noValidate>
@@ -73,7 +87,7 @@ export function MaterialsPage() {
               placeholder="あとで見つけやすい名前" />
           </label>
           {error && <p className="error" role="alert" id="material-add-error">{error}
-            {duplicateId && <> <Link to={`/materials/${encodeURIComponent(duplicateId)}`}>登録済みの教材を開く</Link></>}
+            {duplicateId && <> <Link to={`/materials/${encodeURIComponent(duplicateId)}`}>{duplicateArchived ? 'アーカイブした教材を開いて復元' : '登録済みの教材を開く'}</Link></>}
           </p>}
           {externalConflict && <p className="error" role="alert">別タブの更新を再読込してから登録してください。</p>}
           <div className="btn-row">
@@ -90,10 +104,10 @@ export function MaterialsPage() {
         </label>
         {query && <button className="btn" type="button" onClick={() => { setQuery(''); searchInput.current?.focus(); }}>検索をクリア</button>}
       </div>}
-      {materials.length === 0 ? <div className="empty materials-empty"><p>教材はまだありません。</p></div> : visibleMaterials.length === 0 ? (
+      {selectedMaterials.length === 0 ? <div className="empty materials-empty" role="status"><p>{archived ? 'アーカイブした教材はありません。' : materials.length === 0 ? '教材はまだありません。' : '学習中の教材はありません。アーカイブから復元できます。'}</p></div> : visibleMaterials.length === 0 ? (
         <div className="empty materials-empty" role="status"><p>条件に合う教材はありません。</p></div>
       ) : (
-        <ul className="material-list" aria-label="登録した教材">
+        <ul className="material-list" aria-label={archived ? "アーカイブした教材" : "登録した教材"}>
           {visibleMaterials.map((material) => (
             <li key={material.id}>
               <article className="material-card">
@@ -108,7 +122,7 @@ export function MaterialsPage() {
                   <a className="btn btn-primary material-direct-link" href={material.url} target="_blank" rel="noopener noreferrer"
                     aria-label={`${material.title}のリンクを開く（新しいタブ）`}>リンクを開く <span aria-hidden="true">↗</span></a>
                   <Link className="btn material-record-link" to={`/materials/${encodeURIComponent(material.id)}`}
-                    aria-label={`${material.title}の記録・コメント`}>記録・コメント</Link>
+                    aria-label={`${material.title}の${archived ? '履歴・復元' : '記録・コメント'}`}>{archived ? '履歴・復元' : '記録・コメント'}</Link>
                 </div>
               </article>
             </li>

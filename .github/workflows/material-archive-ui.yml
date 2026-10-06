@@ -1,0 +1,38 @@
+name: Material archive UI checks
+on:
+  pull_request:
+    paths:
+      - 'src/features/materials/**'
+      - 'src/domain/materials*'
+      - 'src/storage/repository*'
+      - 'src/app/store.tsx'
+      - 'scripts/validate-material-archive-ui.mjs'
+      - '.github/workflows/material-archive-ui.yml'
+permissions:
+  contents: read
+jobs:
+  material-archive-ui:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npx vitest run src/domain/materials.test.ts src/storage/materialsStorage.test.ts src/storage/materialArchive.test.ts src/storage/materialProvenance.test.ts src/features/materials/MaterialsPage.test.tsx src/features/unsavedChanges.test.tsx --maxWorkers=1
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - name: Verify reversible material archive using synthetic records
+        run: |
+          npm run preview -- --host 127.0.0.1 --port 5181 --base /mj_study/ > /tmp/mahjong-archive-preview.log 2>&1 &
+          for i in {1..30}; do curl --silent --fail http://127.0.0.1:5181/mj_study/ > /dev/null && break; sleep 1; done
+          node scripts/validate-material-archive-ui.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: material-archive-screenshots
+          path: evidence/material-archive/
+          retention-days: 7

@@ -60,8 +60,8 @@ async function mount(path = '/materials', reloadControl = false) {
   ));
 }
 
-function button(text: string): HTMLButtonElement {
-  const result = [...host.querySelectorAll<HTMLButtonElement>('button')].find((item) => item.textContent?.trim() === text);
+function button(text: string, scope: ParentNode = host): HTMLButtonElement {
+  const result = [...scope.querySelectorAll<HTMLButtonElement>('button')].find((item) => item.textContent?.trim() === text);
   if (!result) throw new Error(`Missing button: ${text}`);
   return result;
 }
@@ -363,4 +363,197 @@ it('filters title and URL, distinguishes no matches, and preserves the add draft
   expect(field('URL').value).toBe('https://example.com/unsaved');
   expect(field('タイトル（任意）').value).toBe('未保存の登録');
   expect(localStorage.getItem(STORAGE_KEY)).toBe(before);
+});
+
+it('confirms one titled archive with preserved history, traps and returns focus, then restores after reload', async () => {
+  seed(); await mount('/materials/material-a', true);
+  await input(field('コメント'), '残す学習コメント'); await click(button('学習した'));
+  const before = persisted(), archive = button('教材をアーカイブ');
+  archive.focus(); await click(archive);
+  let dialog = document.querySelector('[role="dialog"]')!;
+  expect(dialog.textContent).toContain('「牌効率の基本」1件');
+  expect(dialog.textContent).toContain('学習履歴1回');
+  expect(document.activeElement).toBe(button('キャンセル', dialog));
+  await act(async () => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true, bubbles: true })));
+  expect(document.activeElement).toBe(button('アーカイブする', dialog));
+  await act(async () => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true })));
+  expect(document.activeElement).toBe(button('キャンセル', dialog));
+  await act(async () => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })));
+  expect(document.querySelector('[role="dialog"]')).toBeNull(); expect(document.activeElement).toBe(archive);
+  expect(persisted()).toEqual(before);
+  await click(archive); dialog = document.querySelector('[role="dialog"]')!;
+  await click(button('アーカイブする', dialog));
+  expect(persisted().materials![0]!.archivedAt).toBe('2026-10-05T04:00:00.000Z');
+  expect(persisted().materialStudyEvents).toEqual(before.materialStudyEvents);
+  expect(field('コメント').value).toBe('残す学習コメント');
+  expect(host.querySelector('.material-count')!.textContent).toBe('学習 1 回');
+  expect(document.activeElement).toBe(button('学習中に復元する'));
+  expect(button('学習した').disabled).toBe(true);
+  expect(host.querySelector('.material-history-list')!.textContent).toContain('残す学習コメント');
+  await click(button('テスト用再読込'));
+  expect(button('学習した').disabled).toBe(true);
+  await click(host.querySelector<HTMLElement>('.material-back')!);
+  expect(document.querySelector('[role="dialog"]')).toBeNull();
+  expect(button('アーカイブ 1 件').getAttribute('aria-pressed')).toBe('true');
+  expect(button('学習中 0 件').getAttribute('aria-pressed')).toBe('false');
+  expect(host.querySelector('.material-record-link')!.textContent).toBe('履歴・復元');
+  await click(host.querySelector<HTMLElement>('.material-record-link')!);
+  const restore = button('学習中に復元する'); restore.focus(); await click(restore);
+  expect(document.activeElement).toBe(button('教材をアーカイブ'));
+  expect(persisted().materials![0]).not.toHaveProperty('archivedAt');
+  expect(persisted().materialStudyEvents).toEqual(before.materialStudyEvents);
+  expect(button('学習した').disabled).toBe(false);
+  await click(host.querySelector<HTMLElement>('.material-back')!);
+  expect(document.querySelector('[role="dialog"]')).toBeNull();
+  expect(button('学習中 1 件').getAttribute('aria-pressed')).toBe('true');
+});
+
+it('defaults to active materials and searches each view with correct counts and distinct empty states', async () => {
+  seed([material('active', { title: '守備', url: 'https://example.com/active' }),
+    material('archived', { title: '牌効率', url: 'https://example.com/archived', archivedAt: '2026-10-03T00:00:00Z' })]);
+  await mount();
+  const raw = localStorage.getItem(STORAGE_KEY);
+  expect(host.querySelectorAll('.material-card')).toHaveLength(1);
+  expect(host.querySelector('.material-card h2')!.textContent).toBe('守備');
+  expect(host.querySelector('.count-pill')!.textContent).toBe('1 件');
+  await input(field('教材を検索'), '牌効率');
+  expect(host.textContent).toContain('条件に合う教材はありません。');
+  const archiveView = button('アーカイブ 1 件'); archiveView.focus(); await click(archiveView);
+  expect(document.activeElement).toBe(archiveView);
+  expect(archiveView.getAttribute('aria-pressed')).toBe('true');
+  expect(field('教材を検索').value).toBe('牌効率');
+  expect(host.querySelector('.material-card h2')!.textContent).toBe('牌効率');
+  expect(host.querySelector('.count-pill')!.textContent).toBe('1 / 1 件');
+  await input(field('教材を検索'), 'example.com/active');
+  expect(host.querySelectorAll('.material-card')).toHaveLength(0);
+  await click(button('学習中 1 件'));
+  expect(host.querySelector('.material-card h2')!.textContent).toBe('守備');
+  expect(localStorage.getItem(STORAGE_KEY)).toBe(raw);
+});
+
+it('shows a useful active empty state when every material is archived and supports an archived list deep link', async () => {
+  seed([material('material-a', { archivedAt: '2026-10-03T00:00:00Z' })]);
+  await mount();
+  expect(host.textContent).toContain('学習中の教材はありません。アーカイブから復元できます。');
+  expect(host.querySelectorAll('.material-card')).toHaveLength(0);
+  await click(button('アーカイブ 1 件'));
+  expect(host.querySelectorAll('.material-card')).toHaveLength(1);
+  await click(host.querySelector<HTMLElement>('.material-record-link')!);
+  expect(host.querySelector('.material-back')!.getAttribute('href')).toBe('/materials?view=archived');
+  expect(host.textContent).toContain('アーカイブした教材です');
+  expect(button('学習した').disabled).toBe(true);
+});
+
+it('opens the archive list directly and distinguishes an empty archive from no search matches', async () => {
+  seed(); await mount('/materials?view=archived');
+  expect(button('アーカイブ 0 件').getAttribute('aria-pressed')).toBe('true');
+  expect(host.textContent).toContain('アーカイブした教材はありません。');
+  expect(host.textContent).not.toContain('条件に合う教材はありません。');
+});
+
+it.each(['タイトル', 'URL', 'コメント'])('blocks archive until dirty %s is saved or reverted and keeps navigation protection', async (name) => {
+  seed(); await mount('/materials/material-a');
+  const raw = localStorage.getItem(STORAGE_KEY), original = field(name).value;
+  await input(field(name), name === 'URL' ? 'https://example.com/new' : '未保存の変更');
+  expect(button('教材をアーカイブ').disabled).toBe(true);
+  await click(button('教材をアーカイブ'));
+  expect(document.querySelector('[role="dialog"]')).toBeNull();
+  expect(host.textContent).toContain('タイトル・URL・コメントの変更を保存するか、元の値に戻してから操作してください。');
+  await click(host.querySelector<HTMLElement>('.material-back')!);
+  const dialog = document.querySelector('[role="dialog"]')!;
+  expect(dialog.textContent).toContain('変更を保存しますか？');
+  await click(button('この画面に残る', dialog));
+  expect(field(name).value).not.toBe(original);
+  expect(localStorage.getItem(STORAGE_KEY)).toBe(raw);
+  await input(field(name), original);
+  expect(button('教材をアーカイブ').disabled).toBe(false);
+  await input(field(name), name === 'URL' ? 'https://example.com/new' : '保存する変更');
+  await click(button(name === 'コメント' ? 'コメントを保存' : '教材情報を保存'));
+  expect(button('教材をアーカイブ').disabled).toBe(false);
+  expect(persisted().materialStudyEvents).toHaveLength(0);
+});
+
+it('keeps archived status while editing and disables restore until its draft is saved', async () => {
+  seed([material('material-a', { archivedAt: '2026-10-03T00:00:00Z' })]);
+  await mount('/materials/material-a');
+  await input(field('コメント'), '整理後のメモ');
+  expect(button('学習中に復元する').disabled).toBe(true);
+  expect(button('学習した').disabled).toBe(true);
+  await click(button('コメントを保存'));
+  expect(persisted().materials![0]!.archivedAt).toBe('2026-10-03T00:00:00Z');
+  expect(button('学習中に復元する').disabled).toBe(false);
+  await click(button('学習中に復元する'));
+  expect(field('コメント').value).toBe('整理後のメモ');
+  expect(persisted().materialStudyEvents).toHaveLength(0);
+});
+
+it('offers a visible restore path for an archived duplicate without adding another material', async () => {
+  seed([material('material-a', { archivedAt: '2026-10-03T00:00:00Z', comment: '残すメモ' })]);
+  await mount(); await click(button('教材を追加'));
+  await input(field('URL'), 'https://EXAMPLE.com/lesson-a'); await click(button('登録する'));
+  const link = host.querySelector<HTMLElement>('[role="alert"] a')!;
+  expect(link.textContent).toBe('アーカイブした教材を開いて復元');
+  await click(link);
+  expect(button('学習中に復元する').disabled).toBe(false);
+  expect(field('コメント').value).toBe('残すメモ');
+  expect(persisted().materials).toHaveLength(1); expect(persisted().materialStudyEvents).toHaveLength(0);
+});
+
+it('keeps archive and restore failures actionable and retries without history changes', async () => {
+  seed(); await mount('/materials/material-a');
+  const original = persisted();
+  const archive = button('教材をアーカイブ'); archive.focus(); await click(archive);
+  vi.spyOn(Storage.prototype, 'setItem').mockImplementationOnce(() => { throw new DOMException('full', 'QuotaExceededError'); });
+  await click(button('アーカイブする', document.querySelector('[role="dialog"]')!));
+  expect(persisted()).toEqual(original); expect(document.querySelector('[role="dialog"]')).toBeNull();
+  expect(host.querySelector('[role="alert"]')).not.toBeNull(); expect(document.activeElement).toBe(archive);
+  await click(archive); await click(button('アーカイブする', document.querySelector('[role="dialog"]')!));
+  const archived = persisted();
+  vi.spyOn(Storage.prototype, 'setItem').mockImplementationOnce(() => { throw new Error('denied'); });
+  await click(button('学習中に復元する'));
+  expect(persisted()).toEqual(archived); expect(host.querySelector('[role="alert"]')).not.toBeNull();
+  expect(button('学習した').disabled).toBe(true);
+  await click(button('学習中に復元する'));
+  expect(persisted().materials![0]).not.toHaveProperty('archivedAt');
+  expect(persisted().materialStudyEvents).toEqual(original.materialStudyEvents);
+});
+
+it('detects an external archive with the same updatedAt and retains the dirty draft until explicit reload', async () => {
+  const original = seed(); await mount('/materials/material-a', true);
+  await input(field('コメント'), '残す未保存メモ');
+  const external = structuredClone(original);
+  external.materials![0]!.archivedAt = '2026-10-03T00:00:00Z';
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(external));
+  await click(button('テスト用再読込'));
+  expect(field('コメント').value).toBe('残す未保存メモ');
+  expect(button('コメントを保存').disabled).toBe(true);
+  expect(button('学習中に復元する').disabled).toBe(true);
+  expect(button('学習した').disabled).toBe(true);
+  await click(button('入力を破棄して再読込'));
+  expect(field('コメント').value).toBe(original.materials![0]!.comment);
+  expect(button('学習中に復元する').disabled).toBe(false);
+  expect(button('学習した').disabled).toBe(true);
+});
+
+it('rejects archive when a newer write appears while confirmation is open', async () => {
+  seed(); await mount('/materials/material-a');
+  await click(button('教材をアーカイブ'));
+  const external = persisted(); external.revision += 1; external.materials![0]!.comment = '別タブのコメント';
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(external));
+  await click(button('アーカイブする', document.querySelector('[role="dialog"]')!));
+  expect(persisted()).toEqual(external);
+  expect(button('教材をアーカイブ').disabled).toBe(true);
+  expect(host.querySelector('.material-conflict')).not.toBeNull();
+});
+
+it('accepts repeated restore clicks without a stale conflict or an extra write', async () => {
+  seed([material('material-a', { archivedAt: '2026-10-03T00:00:00Z' })]);
+  await mount('/materials/material-a');
+  const writes = vi.spyOn(Storage.prototype, 'setItem');
+  const restore = button('学習中に復元する');
+  await act(async () => { restore.click(); restore.click(); });
+  expect(persisted().materials![0]).not.toHaveProperty('archivedAt');
+  expect(writes).toHaveBeenCalledTimes(1);
+  expect(button('教材をアーカイブ').disabled).toBe(false);
+  expect(host.querySelector('[role="alert"]')).toBeNull();
 });
