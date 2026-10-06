@@ -9,6 +9,7 @@ import { RecordChart } from './RecordChart';
 import { StudyTitleCard } from './StudyTitleCard';
 import { MaterialStudyHistory } from './MaterialStudyHistory';
 import { RecordShareButton } from './RecordShareButton';
+import { TagStudySummary } from './TagStudySummary';
 import './records.css';
 
 export function RecordsPage() {
@@ -51,6 +52,7 @@ export function RecordsPage() {
           <RecordChart series={series[index]!} label={period.range} />
         </div>)}
       </section>
+      <TagStudySummary store={store} />
       <MaterialStudyHistory events={materialEvents} />
     </div>
   );

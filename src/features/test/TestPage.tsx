@@ -19,6 +19,7 @@ import {
   type TestFilter,
 } from '@/domain/quiz';
 import type { Attempt, Problem, TileCode, Understanding } from '@/domain/types';
+import { sessionRetestCandidates, snapshotSessionQuestions, type SessionQuestion, type SessionResults } from '@/domain/sessionRetest';
 import { TestCountControl } from './TestCountControl';
 import './testControls.css';
 
@@ -44,18 +45,21 @@ export function TestPage() {
   const [tagIds, setTagIds] = useState<string[]>([]);
   const [answerView, setAnswerView] = useState<'notes' | 'ukeire'>('notes');
   const [phase, setPhase] = useState<Phase>('setup');
-  const [queue, setQueue] = useState<Problem[]>([]);
+  const [queue, setQueue] = useState<SessionQuestion[]>([]);
   const [index, setIndex] = useState(0);
   const [selected, setSelected] = useState<TileCode | null>(null);
   const sessionId = useRef(createId('sess'));
-  const [sessionAttempts, setSessionAttempts] = useState<Attempt[]>([]);
-  const [sessionUnderstandings, setSessionUnderstandings] = useState<Understanding[]>([]);
-  const [understandingNow, setUnderstandingNow] = useState<Understanding | null>(null);
+  const [sessionResults, setSessionResults] = useState<SessionResults>({});
   const answeredLock = useRef(false);
   const [error, setError] = useState<string | null>(null);
 
-  const current = queue[index];
-  const study = current ? store.study.find((s) => s.problemId === current.id) : undefined;
+  const question = queue[index];
+  const current = question?.problem;
+  const results = Object.values(sessionResults);
+  const currentResult = results.find(({ attempt }) => attempt.questionIndex === index);
+  const understandingNow = currentResult?.understanding ?? 'unrated';
+  const sessionAttempts = results.map(({ attempt }) => attempt);
+  const retest = sessionRetestCandidates(sessionId.current, queue, sessionResults, store.problems, store.study);
 
   const candidates = useMemo(
     () => filterTestCandidates(store.problems, store.study, store.attempts, { filters, tagIds }),
@@ -80,37 +84,42 @@ export function TestPage() {
     });
   };
 
-  const start = () => {
-    if (!countInputValid) return;
-    const picked = selectTestProblems(store.problems, store.study, store.attempts, {
-      count: effectiveCount,
-      filters,
-      tagIds,
-    });
+  const beginSession = (picked: Problem[]) => {
     if (picked.length === 0) {
       setError('条件に合う問題がありません');
       return;
     }
     sessionId.current = createId('sess');
-    setQueue(picked);
+    setQueue(snapshotSessionQuestions(picked, store.study));
     setIndex(0);
     setPhase('question');
     setSelected(null);
-    setSessionAttempts([]);
-    setSessionUnderstandings([]);
-    setUnderstandingNow(null);
+    setSessionResults({});
     answeredLock.current = false;
     setError(null);
   };
 
+  const start = () => {
+    if (!countInputValid) return;
+    beginSession(selectTestProblems(store.problems, store.study, store.attempts, {
+      count: effectiveCount, filters, tagIds,
+    }));
+  };
+
+  const startRetest = () => {
+    // The original filters already qualified this cohort. Answers may change them.
+    const eligible = sessionRetestCandidates(sessionId.current, queue, sessionResults, store.problems, store.study);
+    beginSession(eligible.problems);
+  };
+
   const submit = (tile: TileCode | null) => {
-    if (!current || answeredLock.current) return;
+    if (!question || !current || answeredLock.current) return;
     if (!current.answerEnabled || !tile) return;
     answeredLock.current = true;
     const attempt: Attempt = {
       id: createId('attm'),
       problemId: current.id,
-      contentRevision: study?.contentRevision ?? 0,
+      contentRevision: question.contentRevision,
       sessionId: sessionId.current,
       questionIndex: index,
       at: nowIso(),
@@ -123,16 +132,30 @@ export function TestPage() {
       answeredLock.current = false;
       return;
     }
-    setSessionAttempts((a) => [...a, attempt]);
+    setSessionResults((previous) => ({ ...previous, [attempt.id]: { attempt, understanding: 'unrated' } }));
+    setError(null);
     setAnswerView('notes');
     setPhase('answered');
   };
 
   const rate = (u: Understanding) => {
-    if (!current) return;
-    updateUnderstanding(current.id, u);
-    setUnderstandingNow(u);
-    setSessionUnderstandings((list) => [...list, u]);
+    if (!current || !currentResult || phase !== 'answered') return;
+    const latestStudy = store.study.find((s) => s.problemId === current.id);
+    if (!store.problems.some((p) => p.id === current.id) || !latestStudy ||
+      latestStudy.contentRevision !== currentResult.attempt.contentRevision) {
+      setError('理解度を保存できませんでした。問題の内容・学習状態が変わったか、見つかりません。');
+      return;
+    }
+    const saved = updateUnderstanding(current.id, u);
+    if (!saved.ok) {
+      setError(`理解度を保存できませんでした。${saved.reason}`);
+      return;
+    }
+    setSessionResults((previous) => ({
+      ...previous,
+      [currentResult.attempt.id]: { ...currentResult, understanding: u },
+    }));
+    setError(null);
   };
 
   const next = () => {
@@ -142,15 +165,12 @@ export function TestPage() {
     }
     setIndex(index + 1);
     setSelected(null);
-    setUnderstandingNow(null);
+    setError(null);
     setPhase('question');
     answeredLock.current = false;
   };
 
-  const stats = useMemo(
-    () => computeSessionStats(sessionAttempts, sessionUnderstandings),
-    [sessionAttempts, sessionUnderstandings],
-  );
+  const stats = computeSessionStats(sessionAttempts, results.map(({ understanding }) => understanding));
 
   if (phase === 'setup') {
     const tagOn = filters.includes('tags');
@@ -255,17 +275,28 @@ export function TestPage() {
           )}
           <ol className="result-list">
             {sessionAttempts.map((a) => {
-              const p = queue.find((q) => q.id === a.problemId);
+              const p = queue.find((q) => q.problem.id === a.problemId)?.problem;
               return (
                 <li key={a.id}>
                   <span className={`result-mark result-mark--${a.result}`}>
                     {a.result === 'correct' ? '○' : a.result === 'incorrect' ? '×' : '—'}
                   </span>
                   <Link to={`/problems/${a.problemId}`}>{p?.title.trim() || '無題の問題'}</Link>
+                  {sessionResults[a.id]?.understanding === 'uncertain' && <span className="hint">まだ不安</span>}
                 </li>
               );
             })}
           </ol>
+        </section>
+        <section className="panel">
+          <button type="button" className="btn btn-primary" onClick={startRetest} disabled={retest.problems.length === 0}>
+            今回の誤答・不安 {retest.problems.length}問を再テスト
+          </button>
+          {retest.excludedCount > 0 && <p className="hint" role="status">
+            削除・内容や出題設定の変更で {retest.excludedCount}問を除外しました。
+          </p>}
+          {retest.problems.length === 0 && <p className="hint">今回の回答に再テストできる問題はありません。</p>}
+          {error && <p className="error" role="alert">{error}</p>}
         </section>
         <div className="btn-row">
           <button type="button" className="btn btn-primary" onClick={() => setPhase('setup')}>
@@ -361,6 +392,7 @@ export function TestPage() {
             <button
               type="button"
               className={understandingNow === 'understood' ? 'is-on' : ''}
+              aria-pressed={understandingNow === 'understood'}
               onClick={() => rate('understood')}
             >
               理解できた
@@ -368,6 +400,7 @@ export function TestPage() {
             <button
               type="button"
               className={understandingNow === 'uncertain' ? 'is-on' : ''}
+              aria-pressed={understandingNow === 'uncertain'}
               onClick={() => rate('uncertain')}
             >
               まだ不安
@@ -406,7 +439,7 @@ export function TestPage() {
               {index + 1 >= queue.length ? '結果を見る' : '次の問題へ'}
             </button>
           </div>)}
-      {error && <p className="error">{error}</p>}
+      {error && <p className="error" role="alert">{error}</p>}
     </div>
   );
 }
