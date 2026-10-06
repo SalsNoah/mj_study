@@ -3,11 +3,14 @@ on:
   pull_request:
     paths:
       - 'src/app/moe.css'
+      - 'src/app/App.tsx'
+      - 'src/components/useDecorativeMotion*'
       - 'src/app/theme*'
       - 'src/components/ConfirmDialog.tsx'
       - 'src/features/settings/SettingsPage.tsx'
       - 'public/themes/moe/**'
       - 'scripts/validate-moe-theme-ui.mjs'
+      - 'scripts/validate-moe-motion-ui.mjs'
       - 'scripts/editor-ui-helpers.mjs'
       - 'docs/moe-art-sources.json'
       - '.github/workflows/moe-theme-ui.yml'
@@ -16,7 +19,7 @@ permissions:
 jobs:
   moe-theme-ui:
     runs-on: ubuntu-latest
-    timeout-minutes: 7
+    timeout-minutes: 9
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -31,9 +34,16 @@ jobs:
           npm run dev -- --host 127.0.0.1 --port 5176 > /tmp/mahjong-moe-vite.log 2>&1 &
           for i in {1..30}; do curl --silent --fail http://127.0.0.1:5176/ > /dev/null && break; sleep 1; done
           node scripts/validate-moe-theme-ui.mjs
+          node scripts/validate-moe-motion-ui.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: moe-theme-screenshots
           path: evidence/moe-theme/
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: moe-motion-screenshots
+          path: evidence/moe-motion/
           retention-days: 7
