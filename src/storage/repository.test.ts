@@ -144,6 +144,62 @@ describe('LocalStorageRepository', () => {
     } finally { repo.dispose(); }
   });
 
+  it.each([false, true])('keeps legacy hand identity and history on metadata edits (real tile change: %s)', (changeTile) => {
+    const key = 'test:legacy-revision';
+    const repo = new LocalStorageRepository(key);
+    try {
+      const problem = sampleProblem({
+        concealed: ['9s', '5m', '0m', '5m'], drawn: '3p',
+        sample: { catalogId: 'legacy', version: '1', itemId: 'item', fingerprint: 'original' },
+      });
+      const untouched = sampleProblem({ title: '別の問題' });
+      const at = '2026-10-01T10:00:00.000Z';
+      const store = {
+        ...emptyStore(),
+        problems: [problem, untouched],
+        study: [{ problemId: problem.id, contentRevision: 4, confirmationCount: 3,
+          understanding: 'understood' as const, lastReviewedAt: at, lastConfirmedAt: at,
+          lastSolvedAt: at, lastCorrectAt: at, inTest: false }],
+        attempts: [{ id: 'answer-old', problemId: problem.id, contentRevision: 4, sessionId: 'session-old',
+          questionIndex: 0, at, selectedTile: '5m' as const, result: 'correct' as const }],
+        daily: { '2026-10-01': { tested: 1, confirmed: 3 } },
+      };
+      const original = structuredClone(store);
+      const raw = JSON.stringify(store);
+      localStorage.setItem(key, raw);
+      const loaded = repo.load();
+      if (!loaded.ok) throw new Error(loaded.reason);
+      expect(loaded.store.problems).toEqual(store.problems);
+      expect(localStorage.getItem(key)).toBe(raw);
+
+      const edited: Problem = { ...problem, title: '編集後', tagIds: ['new-tag'], privateMemo: '個人メモ',
+        concealed: ['5m', '0m', '5m', '3p', changeTile ? '8s' : '9s'], drawn: null,
+        updatedAt: '2026-10-02T10:00:00.000Z' };
+      const saved = repo.saveProblem(loaded.store, edited, false);
+      if (!saved.ok) throw new Error(saved.reason);
+      const expectedStudy = changeTile
+        ? [{ ...store.study[0]!, contentRevision: 5, understanding: 'unrated', lastReviewedAt: null }]
+        : store.study;
+      expect(saved.store.problems).toEqual([edited, untouched]);
+      expect(saved.store.study).toEqual(expectedStudy);
+      expect(saved.store.attempts).toEqual(store.attempts);
+      expect(saved.store.daily).toEqual(store.daily);
+      expect(store).toEqual(original);
+
+      // Repeated title saves and reloads must not create another content revision.
+      const again = repo.saveProblem(saved.store, { ...edited, title: '再編集後' }, false);
+      if (!again.ok) throw new Error(again.reason);
+      const reloaded = repo.load();
+      if (!reloaded.ok) throw new Error(reloaded.reason);
+      expect(reloaded.store.study).toEqual(expectedStudy);
+      expect(reloaded.store.attempts).toEqual(store.attempts);
+      expect(reloaded.store.daily).toEqual(store.daily);
+      expect(reloaded.store.problems[0]).toEqual({ ...edited, title: '再編集後' });
+      expect(reloaded.store.problems[1]).toEqual(untouched);
+      expect(reloaded.store.schemaVersion).toBe(store.schemaVersion);
+    } finally { repo.dispose(); }
+  });
+
   it('resubscribes after effect cleanup without duplicating callbacks or writing storage', () => {
     const repo = new LocalStorageRepository('test:v1');
     const handler = vi.fn();
