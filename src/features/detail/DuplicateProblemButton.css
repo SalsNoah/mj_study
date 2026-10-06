@@ -22,3 +22,14 @@
 .duplicate-confirmation p { margin-block: 12px 20px; overflow-wrap: anywhere; }
 .duplicate-confirmation__actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
 .duplicate-confirmation__actions .btn { min-height: 44px; }
+.duplicate-confirmation--long {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow: hidden;
+}
+.duplicate-confirmation--long > h2,
+.duplicate-confirmation--long > .duplicate-confirmation__actions { flex: none; }
+.duplicate-confirmation__content { min-height: 0; overflow: auto; overscroll-behavior: contain; }
+.duplicate-confirmation__content > p { margin-top: 0; }
+.duplicate-confirmation__content > ul { margin-bottom: 0; padding-left: 1.4em; overflow-wrap: anywhere; }

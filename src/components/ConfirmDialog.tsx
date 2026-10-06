@@ -67,10 +67,12 @@ export function ConfirmDialog({ title, description, confirmLabel, danger = false
     <div className="duplicate-confirmation-backdrop" onClick={(event) => {
       if (event.target === event.currentTarget) dismiss();
     }}>
-      <div ref={panel} className="duplicate-confirmation" role="dialog" aria-modal="true" aria-labelledby={titleId} aria-describedby={descriptionId}>
+      <div ref={panel} className={`duplicate-confirmation${children ? ' duplicate-confirmation--long' : ''}`} role="dialog" aria-modal="true" aria-labelledby={titleId} aria-describedby={descriptionId}>
         <h2 id={titleId}>{title}</h2>
-        <p id={descriptionId}>{description}</p>
-        {children}
+        {children ? <div className="duplicate-confirmation__content">
+          <p id={descriptionId}>{description}</p>
+          {children}
+        </div> : <p id={descriptionId}>{description}</p>}
         <div className="duplicate-confirmation__actions">
           <button ref={cancelButton} type="button" className="btn" onClick={dismiss}>キャンセル</button>
           <button type="button" className={`btn ${danger ? 'btn-danger' : 'btn-primary'}`} onClick={() => {

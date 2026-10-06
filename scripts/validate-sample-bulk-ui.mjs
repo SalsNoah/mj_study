@@ -40,9 +40,12 @@ try {
       await expect(page.getByRole('dialog').locator('li')).toHaveCount(10);
       await expect(button('キャンセル')).toBeFocused();
       expect(await page.getByRole('dialog').locator('li').allTextContents()).toEqual(original.problems.map(({ title }) => title));
+      await expect(page.getByRole('dialog').getByRole('heading')).toBeInViewport();
+      await expect(button('キャンセル')).toBeInViewport();
+      await expect(button('10題を削除する')).toBeInViewport();
       await page.evaluate(() => document.fonts.ready);
       await page.screenshot({ path: `${evidence}/${theme}-${width}-text${scale}-confirm-initial.png`, animations: 'disabled' });
-      await page.getByRole('dialog').evaluate(element => { element.scrollTop = 0; });
+      await page.locator('.duplicate-confirmation__content').evaluate(element => { element.scrollTop = 0; });
       await page.evaluate(() => document.fonts.ready);
       await page.screenshot({ path: `${evidence}/${theme}-${width}-text${scale}-confirm-top.png`, animations: 'disabled' });
       for (const target of [page.getByRole('dialog').locator('li').first(), page.getByRole('dialog').locator('li').last(), button('キャンセル'), button('10題を削除する')]) {
