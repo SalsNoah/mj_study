@@ -41,9 +41,9 @@ export function ConfirmDialog({ title, description, confirmLabel, danger = false
         event.stopPropagation();
         dismiss();
       } else if (event.key === 'Tab') {
-        const buttons = [...dialog.querySelectorAll<HTMLButtonElement>('button:not([disabled])')];
-        const first = buttons[0];
-        const last = buttons[buttons.length - 1];
+        const targets = [...dialog.querySelectorAll<HTMLElement>('button:not([disabled]), [tabindex="0"]')];
+        const first = targets[0];
+        const last = targets[targets.length - 1];
         if (event.shiftKey && (document.activeElement === first || !dialog.contains(document.activeElement))) {
           event.preventDefault();
           last?.focus();
@@ -69,7 +69,7 @@ export function ConfirmDialog({ title, description, confirmLabel, danger = false
     }}>
       <div ref={panel} className={`duplicate-confirmation${children ? ' duplicate-confirmation--long' : ''}`} role="dialog" aria-modal="true" aria-labelledby={titleId} aria-describedby={descriptionId}>
         <h2 id={titleId}>{title}</h2>
-        {children ? <div className="duplicate-confirmation__content">
+        {children ? <div className="duplicate-confirmation__content" role="region" aria-labelledby={titleId} tabIndex={0}>
           <p id={descriptionId}>{description}</p>
           {children}
         </div> : <p id={descriptionId}>{description}</p>}

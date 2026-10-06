@@ -74,10 +74,13 @@ it('traps focus, ignores repeated activation, and restores through the shared ba
   const trigger = button('サンプル10題を一括削除');
   await act(async () => { trigger.click(); trigger.click(); });
   expect(document.querySelectorAll('[role="dialog"]')).toHaveLength(1);
+  const content = document.querySelector<HTMLElement>('[role="dialog"] [role="region"]')!;
+  expect(content.tabIndex).toBe(0);
+  content.focus();
   await key('Tab', true);
   expect(document.activeElement).toBe(button('10題を削除する'));
   await key('Tab');
-  expect(document.activeElement).toBe(button('キャンセル'));
+  expect(document.activeElement).toBe(content);
   const confirm = button('10題を削除する');
   await act(async () => { confirm.click(); confirm.click(); });
   expect(saved().problems).toHaveLength(0);

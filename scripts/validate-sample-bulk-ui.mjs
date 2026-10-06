@@ -48,6 +48,15 @@ try {
       await page.locator('.duplicate-confirmation__content').evaluate(element => { element.scrollTop = 0; });
       await page.evaluate(() => document.fonts.ready);
       await page.screenshot({ path: `${evidence}/${theme}-${width}-text${scale}-confirm-top.png`, animations: 'disabled' });
+      const content = page.getByRole('dialog').getByRole('region');
+      await page.keyboard.press('Shift+Tab');
+      await expect(content).toBeFocused();
+      await content.press('End');
+      await expect(page.getByRole('dialog').locator('li').last()).toBeInViewport();
+      await content.press('Home');
+      await expect(page.getByRole('dialog').locator('li').first()).toBeInViewport();
+      await content.press('Tab');
+      await expect(button('キャンセル')).toBeFocused();
       for (const target of [page.getByRole('dialog').locator('li').first(), page.getByRole('dialog').locator('li').last(), button('キャンセル'), button('10題を削除する')]) {
         await target.scrollIntoViewIfNeeded();
         await expect(target).toBeInViewport();
