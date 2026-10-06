@@ -15,7 +15,6 @@ import {
   type SaveResult,
 } from '@/storage/repository';
 import { emptyStore, type Attempt, type LearningMaterial, type Problem, type Settings, type Store, type StudyState, type Tag } from '@/domain/types';
-import type { SharePayload } from '@/domain/share';
 
 type AppState = {
   store: Store;
@@ -48,7 +47,6 @@ type AppState = {
   clearAll: () => SaveResult;
   exportJson: () => string;
   importJson: (text: string, mode: 'merge' | 'replace') => SaveResult;
-  addFromShare: (payload: SharePayload) => SaveResult;
   addProblems: (problems: Problem[], tagName?: string) => SaveResult;
   updateSampleCatalog: (selectedIds: string[]) => SaveResult;
   removeSampleCatalog: (expectedIds: string[]) => SaveResult;
@@ -148,7 +146,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     clearAll: () => applySave(repo.clearAll()),
     exportJson: () => repo.exportJson(store),
     importJson: (text, mode) => applySave(repo.importJson(store, text, mode)),
-    addFromShare: (payload) => applySave(repo.addFromShare(store, payload)),
     addProblems: (problems, tagName) => applySave(repo.addProblems(store, problems, tagName)),
     updateSampleCatalog: (ids) => applySave(repo.updateSampleCatalog(store, ids)),
     removeSampleCatalog: (ids) => applySave(repo.removeSampleCatalog(store, ids)),

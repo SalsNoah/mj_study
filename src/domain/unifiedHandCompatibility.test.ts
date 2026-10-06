@@ -5,7 +5,6 @@ import { analyzeHand, tileCounts } from './ukeire';
 import { remainingLimits } from './remaining';
 import { standardTileCount, validateProblem } from './validate';
 import { judgeDiscard } from './quiz';
-import { decodeSharePayload, DEFAULT_SHARE_OPTIONS, encodeSharePayload, extractSharePayload } from './share';
 import { LocalStorageRepository } from '@/storage/repository';
 
 const tiles = (notation: string) => {
@@ -49,17 +48,11 @@ it.each(['merge', 'replace'] as const)('retains the original split and accepted 
   repo.dispose();
 });
 
-it('retains the original split in old share URLs and validates the same answers', () => {
+it('validates accepted red tiles consistently for existing split and unified hands', () => {
   const original = legacyProblem();
-  const shared = decodeSharePayload(encodeSharePayload(extractSharePayload(original, [], DEFAULT_SHARE_OPTIONS)));
-  expect(shared.ok).toBe(true);
-  if (!shared.ok) throw new Error(shared.reason);
-  expect(shared.payload.concealed).toEqual(original.concealed);
-  expect(shared.payload.drawn).toBe('0s');
-  expect(shared.payload.acceptedDiscards).toEqual(['0s']);
   expect(validateProblem(original)).toEqual(validateProblem(unified(original)));
-  expect(judgeDiscard(shared.payload.drawn!, shared.payload.acceptedDiscards!)).toBe('correct');
-  expect(judgeDiscard('5s', shared.payload.acceptedDiscards!)).toBe('incorrect');
+  expect(judgeDiscard(original.drawn!, original.acceptedDiscards)).toBe('correct');
+  expect(judgeDiscard('5s', original.acceptedDiscards)).toBe('incorrect');
 });
 
 it.each([false, true])('preserves 14-equivalent count, known tiles, remaining limits and complete analysis (meld=%s)', (withMeld) => {

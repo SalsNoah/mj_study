@@ -239,6 +239,8 @@ html[data-theme='moe'] :is(.btn, .test-count__controls :where(button), .theme-op
 }
 html[data-theme='moe'] .btn:disabled::after { content: none; }
 html[data-theme='moe'] .page--test > .test-start-actions { background: transparent; }
+/* Empty-test labels keep an opaque reading surface over the illustrated face. */
+html[data-theme='moe'] .page--test > .test-start-actions button.btn:disabled { opacity: 1; }
 /* Portraits decorate only unopened editor slots; revealed indicators remain real tiles. */
 html[data-theme='moe'] .page--editor .wanpai > .is-back:nth-child(1) { --moe-maid-back: url('/themes/moe/maid-01-black-long.webp'); }
 html[data-theme='moe'] .page--editor .wanpai > .is-back:nth-child(2) { --moe-maid-back: url('/themes/moe/maid-02-chestnut-bob.webp'); }

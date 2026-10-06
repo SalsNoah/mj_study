@@ -6,7 +6,6 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { AppProvider } from '@/app/store';
 import { emptyContext, emptyStore, STORAGE_KEY, type Problem, type Store } from '@/domain/types';
 import { filterTestCandidates } from '@/domain/quiz';
-import { DEFAULT_SHARE_OPTIONS, extractSharePayload } from '@/domain/share';
 import { LocalStorageRepository, type SaveResult } from '@/storage/repository';
 import { putImportDraft } from '@/features/import/draft';
 import { EditorPage } from './EditorPage';
@@ -113,13 +112,13 @@ it('keeps an OCR draft answerless when saved', async () => {
   expect(readStore().problems[0]).toMatchObject({ answerEnabled: false, acceptedDiscards: [] });
 });
 
-it.each(['duplicate', 'share'] as const)('does not enable answers when opening an answerless %s for editing', async source => {
+it.each(['duplicate', 'restored legacy import'] as const)('does not enable answers when opening an answerless %s for editing', async source => {
   const initial = seed(false, false);
   const repo = new LocalStorageRepository();
   let saved: Store;
   try {
     saved = resultStore(source === 'duplicate' ? repo.duplicateProblem(initial, 'existing')
-      : repo.addFromShare(initial, extractSharePayload(initial.problems[0]!, [], DEFAULT_SHARE_OPTIONS)));
+      : repo.importJson(initial, repo.exportJson(initial), 'merge'));
   } finally { repo.dispose(); }
   const added = saved.problems.find(problem => problem.id !== 'existing')!;
   await mount(added.id);
