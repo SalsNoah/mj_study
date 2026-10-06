@@ -27,11 +27,11 @@ function option(theme: ThemeId) {
   return host.querySelector<HTMLButtonElement>(`[data-theme-choice="${theme}"]`)!;
 }
 
-it('allows all five themes, including 萌え, without editing saved learning data', async () => {
+it('allows all five themes, including MOE, without editing saved learning data', async () => {
   const before = localStorage.getItem(STORAGE_KEY);
   const options = [...host.querySelectorAll<HTMLButtonElement>('[role="radio"]')];
   expect(options).toHaveLength(5);
-  expect(option('moe').textContent).toContain('萌え');
+  expect(option('moe').textContent).toContain('MOE');
   expect(host.textContent).not.toContain('後日実装');
   for (const theme of ['moe', 'normal', 'cool', 'cute', 'dopa'] as const) {
     expect(option(theme).disabled).toBe(false);
@@ -45,7 +45,7 @@ it('allows all five themes, including 萌え, without editing saved learning dat
   }
 });
 
-it('includes 萌え in arrow-key wrapping, Home and End with a single tab stop', async () => {
+it('includes MOE in arrow-key wrapping, Home and End with a single tab stop', async () => {
   expect(host.querySelectorAll('[role="radio"][tabindex="0"]')).toHaveLength(1);
   option('normal').focus();
   const steps: Array<[string, ThemeId]> = [
@@ -62,7 +62,7 @@ it('includes 萌え in arrow-key wrapping, Home and End with a single tab stop',
   }
 });
 
-it('restores 萌え on a fresh mount and can switch back to another theme', async () => {
+it('restores MOE on a fresh mount and can switch back to another theme', async () => {
   await act(async () => option('moe').click());
   await act(async () => root.render(null));
   delete document.documentElement.dataset.theme;

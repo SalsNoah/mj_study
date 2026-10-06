@@ -3,6 +3,7 @@ import type { ThemeId } from '@/app/theme';
 
 const FONT = '"IBM Plex Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif';
 const ROUND_FONT = '"Zen Maru Gothic", "Hiragino Maru Gothic ProN", sans-serif';
+const MOE_FONT = '"Mochiy Pop One", "Zen Maru Gothic", sans-serif';
 // Fontsource splits Japanese glyphs into unicode ranges. Loading the default
 // space alone would leave the card's Japanese text in a fallback font.
 const FONT_TEXT = '麻雀学習帳今日累計テスト確認教材回の記録は表示期間より前を含みます0123456789,/#-';
@@ -35,12 +36,14 @@ function loadThemeArt(path: string): Promise<HTMLImageElement | null> {
 /** Render approved aggregate fields and the chosen theme's bundled decoration only. */
 export async function renderRecordShareImage(snapshot: RecordShareSnapshot, theme: ThemeId = 'normal'): Promise<{ blob: Blob; fileName: string }> {
   const style = Object.prototype.hasOwnProperty.call(STYLES, theme) ? STYLES[theme] : STYLES.normal;
-  const font = style.round ? ROUND_FONT : FONT;
-  const strong = style.round ? 700 : 600;
+  const font = style === STYLES.moe ? MOE_FONT : style.round ? ROUND_FONT : FONT;
+  const strong = style === STYLES.moe ? 400 : style.round ? 700 : 600;
   const artwork = style.art ? Promise.all(style.art.map(loadThemeArt)) : Promise.resolve([null, null]);
   if (document.fonts) {
-    if (style.round) await import('@/app/cuteFont').catch(() => undefined);
+    if (style === STYLES.moe) await import('@/app/moeFont').catch(() => undefined);
+    else if (style.round) await import('@/app/cuteFont').catch(() => undefined);
     await Promise.all([document.fonts.load(`${strong} 52px ${font}`, FONT_TEXT), document.fonts.load(`400 36px ${font}`, FONT_TEXT)]).catch(() => undefined);
+    if (style === STYLES.moe) await document.fonts.load(`400 36px ${ROUND_FONT}`, FONT_TEXT).catch(() => undefined);
     await document.fonts.ready;
   }
   const [backgroundArt, cardArt] = await artwork;
@@ -75,11 +78,13 @@ export async function renderRecordShareImage(snapshot: RecordShareSnapshot, them
     ctx.fillStyle = color;
     ctx.textAlign = align;
     ctx.textBaseline = 'alphabetic';
+    const readable = style === STYLES.moe && (size < 32 || /^[\d,]+$/.test(value));
+    const textFont = readable ? ROUND_FONT : font;
     let fittedSize = size;
-    ctx.font = `${weight} ${fittedSize}px ${font}`;
+    ctx.font = `${weight} ${fittedSize}px ${textFont}`;
     while (ctx.measureText(value).width > width && fittedSize > 24) {
       fittedSize -= 1;
-      ctx.font = `${weight} ${fittedSize}px ${font}`;
+      ctx.font = `${weight} ${fittedSize}px ${textFont}`;
     }
     if (ctx.measureText(value).width > width) throw new Error('Record image text exceeds its safe width');
     ctx.fillText(value, x, y);

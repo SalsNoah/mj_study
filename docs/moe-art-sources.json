@@ -1,21 +1,19 @@
 {
-  "version": 1,
+  "version": 2,
   "assets": [
     {
       "path": "public/themes/moe/background.webp",
       "theme": "moe",
       "usage": "full viewport CSS cover background",
-      "source": "AI-generated for this project, 2026-10-05",
-      "generationMode": "built-in image generation, one new standalone image per asset; no input image",
+      "source": "AI-generated for this project, 2026-10-06",
+      "generationMode": "built-in image generation; background edited from the existing project artwork; portraits share an original adult character style reference",
       "width": 1536,
       "height": 1024,
-      "sha256": "1642b149f45fc8fe235d6bfc6173b4a2862e1f612d0ccafad3b3c7a202a97655",
-      "originalPNG_sha256": "474820ad2c7f8f11f43de83e2b74dbec9c309df416725c3b2542637884255c46",
-      "decodedRGBA_sha256": "45980eda02b0c157aa6e4d3d5a300a1cfb2bac97891d5e0e83fd34a6ee7626ae",
-      "encoding": "Lossless WebP; original dimensions and decoded RGBA pixels unchanged",
-      "bytes": 1180018,
-      "originalPNG_bytes": 1805869,
-      "prompt": "Use case: stylized-concept\nAsset type: original full-viewport decorative background for a Japanese mahjong study app's new \"Moe\" theme.\nPrimary request: an irresistibly sweet, tender, nonsexual kawaii illustrated world of milky cream, strawberry pink, and pale lavender, filled with softly floating little hearts, satin bows, a few jewel-like twinkles, and two tiny original bunny plush toys cuddling heart cushions at the lower outer corners. Original designs only. The plush toys have tiny rounded bodies, warm innocent faces, rosy cheeks, and sparkling eyes; they are objects, not people. A few ivory mahjong-shaped toy blocks with plain pink backs sit beside a plush as small decorative props, with no marks.\nStyle/medium: polished original Japanese kawaii stationery illustration, delicate warm rose outlines, soft airbrushed anime coloring and pearly luminous accents, silky ribbons and plush softness. Warm and sweet, emotionally inviting. Clearly illustrated objects, not abstract paper folds.\nComposition/framing: one full-bleed landscape image, 1536 by 1024 pixels. Reserve an exceptionally broad near-uniform pale milky-cream reading area across the central 65 percent of the image, with no objects, no strong lines, no dark patches. Place the plush toys and richer decorative clusters mainly near the lower outer corners. Small hearts and delicate ribbon loops decorate the extreme top and side edges. A few very pale pink hearts near the top-center and bottom-center edge ensure a narrow central portrait crop retains a sweet impression. Center crop should stay bright and quiet. Let all decorations softly fade toward the reading area. No surrounding solid frame.\nColor palette: near-white milky cream #fff9f5 and blush white #fff5f9 dominate; strawberry milk pink #f6b2cd, soft warm rose #e987b1, pale lavender #e9dcfa in edge details. Tiny warm golden-white glints only. No saturated red or neon.\nLighting/mood: dreamy soft morning light, cozy and lovingly handmade.\nConstraints: new standalone opaque artwork. Do not include text, Japanese characters, letters, numbers, logos, watermarks, buttons, panels, screen mockups, UI, tile-face symbols, known characters, or people. No suggestive content. Do not draw anything in the central reading area. Keep negative space airy and clean.\n"
+      "sha256": "3b2a74a1c112231cbd973e2972bf10abc6cdd5b8d1d64b8c81f61c797adc74b8",
+      "originalPNG_sha256": "dac669392e10949930923308ecaf070bc3e3c0751c668b32b2151ca023d7b857",
+      "encoding": "WebP, quality 88, method 6; original dimensions retained",
+      "bytes": 152124,
+      "design": "Clearly adult, nonsexual maid illustration; no text or tile-face symbols. Background keeps a quiet upper reading area."
     },
     {
       "path": "public/themes/moe/card.webp",
@@ -32,6 +30,93 @@
       "bytes": 984936,
       "originalPNG_bytes": 1554994,
       "prompt": "Use case: stylized-concept\nAsset type: original decorative problem-card background for a Japanese mahjong study app's new \"Moe\" theme, coordinated with an illustrated milky cream and strawberry-pink heart-and-bunny world.\nPrimary request: a sweet kawaii stationery illustration with a broad creamy-white field, tiny soft pink and lavender hearts, two lovely satin ribbon bows, delicate pearl-like twinkles, and one very small original round bunny plush holding a heart, peeking in from the far right edge. Beside the plush, a pair of tiny ivory mahjong-shaped toy blocks with plain pastel pink backs and absolutely no marks. Original design, affectionate and innocent.\nStyle/medium: polished original Japanese kawaii illustration with delicate warm rose outlines, soft airbrushed anime coloring, pearly light and velvety plush texture. Warm, cute, and tender. A gentle companion to the larger heart-and-bunny landscape, but independently composed.\nComposition/framing: one full-bleed landscape image, 1536 by 1024 pixels, designed for CSS center/cover cropping into a wide horizontal card. Keep the left 80 percent and especially the middle horizontal band almost uniform near-white milky cream and empty for real UI text and mahjong tiles. Place the small bunny and a pink bow within the extreme rightmost 15 percent at mid-height, softly fading inward so a horizontal crop still shows a little sweetness at its far right. A tiny blush heart and lavender ribbon tail may peek in at the extreme left edge at mid-height, low contrast. Other delicate hearts can sit near outer top and bottom edges. The entire composition remains extremely light, with decoration secondary to clean negative space. No enclosing frame, no central object.\nColor palette: dominant #fff9f5 and #fff7fa; gentle strawberry milk pink #f6b2cd, warm rose #e987b1, pale lavender #e9dcfa; no deep shadows, no saturated red, no neon.\nLighting/mood: creamy diffuse daylight, charming and soothing.\nConstraints: new standalone opaque artwork. No text, letters, Japanese characters, numbers, logos, watermark, UI, buttons, panels, screen mockups, tile-face symbols, known characters, people, or suggestive content. Do not render real app controls or a real playing hand. Do not add details through the reading area.\n"
+    },
+    {
+      "path": "public/themes/moe/maid-01-black-long.webp",
+      "theme": "moe",
+      "usage": "decorative unopened dora slot in the editor only",
+      "source": "AI-generated for this project, 2026-10-06",
+      "generationMode": "built-in image generation; background edited from the existing project artwork; portraits share an original adult character style reference",
+      "width": 264,
+      "height": 360,
+      "sha256": "7406fac8390af907c5f7f416ea360d836d15d6a82752f2be5b782e005e7fd0fc",
+      "originalPNG_sha256": "3b637ffe4ff06db2bbe4209a96d68844d1e38c9449e86304314223ea0c7db901",
+      "encoding": "WebP, quality 92, method 6; portrait resized/cropped to tile aspect ratio",
+      "bytes": 26458,
+      "design": "Clearly adult, nonsexual maid illustration; no text or tile-face symbols. Background keeps a quiet upper reading area."
+    },
+    {
+      "path": "public/themes/moe/maid-02-chestnut-bob.webp",
+      "theme": "moe",
+      "usage": "decorative unopened dora slot in the editor only",
+      "source": "AI-generated for this project, 2026-10-06",
+      "generationMode": "built-in image generation; background edited from the existing project artwork; portraits share an original adult character style reference",
+      "width": 264,
+      "height": 360,
+      "sha256": "2bb498b60f216910d417f19baff32bce497da827fee9f4b99d7c049fb3b915e5",
+      "originalPNG_sha256": "ad0eda24a4e787e85f1f967b7cf6dc362c3a01e38a531e723c058fb15de93c34",
+      "encoding": "WebP, quality 92, method 6; portrait resized/cropped to tile aspect ratio",
+      "bytes": 29052,
+      "design": "Clearly adult, nonsexual maid illustration; no text or tile-face symbols. Background keeps a quiet upper reading area."
+    },
+    {
+      "path": "public/themes/moe/maid-03-honey-updo.webp",
+      "theme": "moe",
+      "usage": "decorative unopened dora slot in the editor only",
+      "source": "AI-generated for this project, 2026-10-06",
+      "generationMode": "built-in image generation; background edited from the existing project artwork; portraits share an original adult character style reference",
+      "width": 264,
+      "height": 360,
+      "sha256": "b4a54428d4aebb56f7e5f9b4920936706910c3b07327bd498bdfac8d201fd024",
+      "originalPNG_sha256": "87d5e0f8850de17cfed37ba813ea51bbea3fea1dd378f8a1c92a1ebfb837965d",
+      "encoding": "WebP, quality 92, method 6; portrait resized/cropped to tile aspect ratio",
+      "bytes": 28486,
+      "design": "Clearly adult, nonsexual maid illustration; no text or tile-face symbols. Background keeps a quiet upper reading area."
+    },
+    {
+      "path": "public/themes/moe/maid-04-silver-braid.webp",
+      "theme": "moe",
+      "usage": "decorative unopened dora slot in the editor only",
+      "source": "AI-generated for this project, 2026-10-06",
+      "generationMode": "built-in image generation; background edited from the existing project artwork; portraits share an original adult character style reference",
+      "width": 264,
+      "height": 360,
+      "sha256": "bc45ed72370c92f654e1fd041b3eac2c8d98673dcec471b7b5abb274f67f39d0",
+      "originalPNG_sha256": "a9caf662e534452ee0405c9d9fd37498e078f7f602f154d15e85ee4b5eeedc54",
+      "encoding": "WebP, quality 92, method 6; portrait resized/cropped to tile aspect ratio",
+      "bytes": 30508,
+      "design": "Clearly adult, nonsexual maid illustration; no text or tile-face symbols. Background keeps a quiet upper reading area."
+    },
+    {
+      "path": "public/themes/moe/maid-05-lavender-waves.webp",
+      "theme": "moe",
+      "usage": "decorative unopened dora slot in the editor only",
+      "source": "AI-generated for this project, 2026-10-06",
+      "generationMode": "built-in image generation; background edited from the existing project artwork; portraits share an original adult character style reference",
+      "width": 264,
+      "height": 360,
+      "sha256": "cf88266cbb21f4a81e78ffbba788f43f94c505f471003edb4c6f1bd394002a9c",
+      "originalPNG_sha256": "90917e51227a56205cb87a5e8112a6b5d269935692c03d67cd10efb9f5690d07",
+      "encoding": "WebP, quality 92, method 6; portrait resized/cropped to tile aspect ratio",
+      "bytes": 29624,
+      "design": "Clearly adult, nonsexual maid illustration; no text or tile-face symbols. Background keeps a quiet upper reading area."
     }
-  ]
+  ],
+  "previousBackground": {
+    "path": "public/themes/moe/background.webp",
+    "theme": "moe",
+    "usage": "full viewport CSS cover background",
+    "source": "AI-generated for this project, 2026-10-05",
+    "generationMode": "built-in image generation, one new standalone image per asset; no input image",
+    "width": 1536,
+    "height": 1024,
+    "sha256": "1642b149f45fc8fe235d6bfc6173b4a2862e1f612d0ccafad3b3c7a202a97655",
+    "originalPNG_sha256": "474820ad2c7f8f11f43de83e2b74dbec9c309df416725c3b2542637884255c46",
+    "decodedRGBA_sha256": "45980eda02b0c157aa6e4d3d5a300a1cfb2bac97891d5e0e83fd34a6ee7626ae",
+    "encoding": "Lossless WebP; original dimensions and decoded RGBA pixels unchanged",
+    "bytes": 1180018,
+    "originalPNG_bytes": 1805869,
+    "prompt": "Use case: stylized-concept\nAsset type: original full-viewport decorative background for a Japanese mahjong study app's new \"Moe\" theme.\nPrimary request: an irresistibly sweet, tender, nonsexual kawaii illustrated world of milky cream, strawberry pink, and pale lavender, filled with softly floating little hearts, satin bows, a few jewel-like twinkles, and two tiny original bunny plush toys cuddling heart cushions at the lower outer corners. Original designs only. The plush toys have tiny rounded bodies, warm innocent faces, rosy cheeks, and sparkling eyes; they are objects, not people. A few ivory mahjong-shaped toy blocks with plain pink backs sit beside a plush as small decorative props, with no marks.\nStyle/medium: polished original Japanese kawaii stationery illustration, delicate warm rose outlines, soft airbrushed anime coloring and pearly luminous accents, silky ribbons and plush softness. Warm and sweet, emotionally inviting. Clearly illustrated objects, not abstract paper folds.\nComposition/framing: one full-bleed landscape image, 1536 by 1024 pixels. Reserve an exceptionally broad near-uniform pale milky-cream reading area across the central 65 percent of the image, with no objects, no strong lines, no dark patches. Place the plush toys and richer decorative clusters mainly near the lower outer corners. Small hearts and delicate ribbon loops decorate the extreme top and side edges. A few very pale pink hearts near the top-center and bottom-center edge ensure a narrow central portrait crop retains a sweet impression. Center crop should stay bright and quiet. Let all decorations softly fade toward the reading area. No surrounding solid frame.\nColor palette: near-white milky cream #fff9f5 and blush white #fff5f9 dominate; strawberry milk pink #f6b2cd, soft warm rose #e987b1, pale lavender #e9dcfa in edge details. Tiny warm golden-white glints only. No saturated red or neon.\nLighting/mood: dreamy soft morning light, cozy and lovingly handmade.\nConstraints: new standalone opaque artwork. Do not include text, Japanese characters, letters, numbers, logos, watermarks, buttons, panels, screen mockups, UI, tile-face symbols, known characters, or people. No suggestive content. Do not draw anything in the central reading area. Keep negative space airy and clean.\n"
+  },
+  "preservation": "Previous background remains in repository history. Original generated PNGs, full prompts and working conversion evidence are retained in the project source archive."
 }
