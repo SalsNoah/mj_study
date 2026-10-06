@@ -369,7 +369,7 @@ try {
   await capture('remaining-320-shortviewport', '.remaining-control');
   await page.evaluate(() => document.documentElement.style.fontSize = '');
   await page.getByRole('link', { name: '学習帳', exact: true }).click();
-  await discardFixtureDraft(page);
+  await discardFixtureDraft(page, '.page--library');
   await page.getByRole('link', { name: '作成', exact: true }).click();
   for (const name of ['一萬','一萬','一萬','二萬','三萬','四萬','五萬','六萬','七萬','一筒','二筒','三筒','一索','二索']) await pick(name);
   await expect(page.locator('.ukeire-title')).toBeVisible();

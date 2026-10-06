@@ -28,7 +28,7 @@ async function open(failImages = false, failFont = false) {
   await expect(page.locator('html')).toHaveAttribute('data-theme','moe');
   return {context,failed};
 }
-async function nav(name) { await page.getByRole('link',{name,exact:true}).click(); await discardFixtureDraft(page); await page.locator({'作成':'.page--editor','学習帳':'.page--library','テスト':'.page--test','学習教材':'.page--materials','記録帳':'.page--records','設定':'.page--settings'}[name]).waitFor(); }
+async function nav(name) { await page.getByRole('link',{name,exact:true}).click(); await discardFixtureDraft(page, {'作成':'.page--editor','学習帳':'.page--library','テスト':'.page--test','学習教材':'.page--materials','記録帳':'.page--records','設定':'.page--settings'}[name]); await page.locator({'作成':'.page--editor','学習帳':'.page--library','テスト':'.page--test','学習教材':'.page--materials','記録帳':'.page--records','設定':'.page--settings'}[name]).waitFor(); }
 async function capture(name, selector) {
   if (selector) await page.locator(selector).scrollIntoViewIfNeeded(); else await page.evaluate(() => scrollTo(0,0));
   await page.evaluate(() => document.fonts.ready);

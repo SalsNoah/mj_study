@@ -12,8 +12,9 @@ export async function openEditorNotes(page) {
 /** Explicitly abandon synthetic drafts when a layout fixture moves to its next screen.
  * Behavioral Save/Discard/Stay coverage lives in validate-unsaved-ui.mjs.
  */
-export async function discardFixtureDraft(page) {
+export async function discardFixtureDraft(page, destination) {
   const prompt = page.getByRole('dialog', { name: '変更を保存しますか？', exact: true });
+  await expect.poll(async () => (await prompt.isVisible()) || (await page.locator(destination).isVisible())).toBe(true);
   if (await prompt.isVisible()) {
     await prompt.getByRole('button', { name: '保存せずに移動', exact: true }).click();
     await expect(prompt).toHaveCount(0);

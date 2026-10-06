@@ -92,7 +92,7 @@ async function capture(name, selector, { preserveScroll = false } = {}) {
   results.push({ name, geometry, scoreSuffixes, header, cardHands });
 }
 async function allSizes(name, selector) { for (const width of widths) { await page.setViewportSize({ width, height: width === 1920 ? 1080 : 900 }); await capture(`${name}-${width}`, selector); } }
-async function nav(name) { await page.getByRole('link', { name, exact: true }).click(); await discardFixtureDraft(page); }
+async function nav(name) { await page.getByRole('link', { name, exact: true }).click(); await discardFixtureDraft(page, {'作成':'.page--editor','学習帳':'.page--library','テスト':'.page--test','学習教材':'.page--materials','記録帳':'.page--records','設定':'.page--settings'}[name]); }
 async function assertFocusedControlReachable(name, control) {
   await expect(control).toBeFocused();
   const geometry = await control.evaluate(el => {
