@@ -74,9 +74,9 @@ it('adds ten samples from the initially closed library panel without navigating 
   await mount();
   expect(localStorage.getItem(STORAGE_KEY)).toBeNull();
   expect(host.querySelector('#library-sample-panel')).toBeNull();
-  expect(button('サンプルを追加').getAttribute('aria-expanded')).toBe('false');
+  expect(button('サンプル管理').getAttribute('aria-expanded')).toBe('false');
 
-  await click(button('サンプルを追加'));
+  await click(button('サンプル管理'));
   expect(button('サンプルを閉じる').getAttribute('aria-expanded')).toBe('true');
   expect(host.querySelector('#library-sample-panel > details')).toBeNull();
   expect(localStorage.getItem(STORAGE_KEY)).toBeNull();
@@ -94,7 +94,7 @@ it('adds ten samples from the initially closed library panel without navigating 
   const raw = localStorage.getItem(STORAGE_KEY);
   await click(button('サンプルを閉じる'));
   expect(host.querySelector('#library-sample-panel')).toBeNull();
-  await click(button('サンプルを追加'));
+  await click(button('サンプル管理'));
   await click(button('この10題は追加済み'));
   expect(localStorage.getItem(STORAGE_KEY)).toBe(raw);
 });
@@ -102,7 +102,7 @@ it('adds ten samples from the initially closed library panel without navigating 
 it('does not duplicate an existing complete catalog or write a backup for opening it', async () => {
   await mount(fixture(createSampleProblems().problems));
   const raw = localStorage.getItem(STORAGE_KEY);
-  await click(button('サンプルを追加'));
+  await click(button('サンプル管理'));
   expect(button('この10題は追加済み').disabled).toBe(true);
   await click(button('この10題は追加済み'));
   expect(localStorage.getItem(STORAGE_KEY)).toBe(raw);
@@ -115,7 +115,7 @@ it('fills only missing catalog items while preserving edited samples and custom 
   const own = { ...createLegacySampleProblems().problems[0]!, id: 'custom', title: '自作問題', tagIds: ['sample-tag'] };
   data.problems.push(own);
   await mount(data);
-  await click(button('サンプルを追加'));
+  await click(button('サンプル管理'));
   expect(host.textContent).toContain('編集したサンプル 1 題はそのまま残します');
   expect(candidates()).toHaveLength(0);
   await click(button('サンプル1題を追加'));
@@ -131,12 +131,12 @@ it('requires a fresh explicit legacy selection after closing and offers restorat
   const data = fixture(createLegacySampleProblems().problems);
   data.problems.push({ ...data.problems[0]!, id: 'edited-legacy', privateMemo: '残す編集' });
   await mount(data);
-  await click(button('サンプルを追加'));
+  await click(button('サンプル管理'));
   expect(candidates()).toHaveLength(2);
   expect(candidates().every((input) => !input.checked)).toBe(true);
   await click(candidates()[0]!);
   await click(button('サンプルを閉じる'));
-  await click(button('サンプルを追加'));
+  await click(button('サンプル管理'));
   expect(candidates().every((input) => !input.checked)).toBe(true);
   await click(candidates()[0]!);
   await click(button('旧1題を削除して10題を追加'));
@@ -161,7 +161,7 @@ it('leaves the exact saved data and visible library unchanged when the original 
     if (key.startsWith(`${STORAGE_KEY}:sample-catalog-backup:`)) throw new DOMException('full', 'QuotaExceededError');
     originalSetItem.call(this, key, value);
   });
-  await click(button('サンプルを追加'));
+  await click(button('サンプル管理'));
   await click(candidates()[0]!);
   await click(button('旧1題を削除して10題を追加'));
 
@@ -192,10 +192,10 @@ it.each([false, true])('preserves text, tile and tag filters, sorting and answer
   await click(colorSwap);
   const selectedColorSwap = colorSwap.checked;
   if (showAnswers) await click(answer);
-  await click(button('サンプルを追加'));
+  await click(button('サンプル管理'));
   await click(button('旧問題を残して10題を追加'));
   await click(button('サンプルを閉じる'));
-  await click(button('サンプルを追加'));
+  await click(button('サンプル管理'));
 
   expect(text.value).toBe('サンプル');
   expect(tile.value).toBe('234m');
@@ -211,7 +211,7 @@ it.each([false, true])('preserves text, tile and tag filters, sorting and answer
 
 it('uses the same backups in settings and reflects a settings restoration when returning to the library', async () => {
   await mount();
-  await click(button('サンプルを追加'));
+  await click(button('サンプル管理'));
   await click(button('サンプル10題を追加'));
   await click(host.querySelector<HTMLAnchorElement>('a[href="/settings"]')!);
   await click(button('データ管理'));
@@ -224,7 +224,7 @@ it('uses the same backups in settings and reflects a settings restoration when r
   expect(stored().problems).toHaveLength(0);
   await click(host.querySelector<HTMLAnchorElement>('a[href="/library"]')!);
   expect(host.querySelector('.count-pill')!.textContent).toBe('0 問');
-  await click(button('サンプルを追加'));
+  await click(button('サンプル管理'));
   expect(button('サンプル10題を追加').disabled).toBe(false);
   expect(button('復元済み').disabled).toBe(true);
 });

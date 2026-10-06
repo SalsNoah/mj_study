@@ -50,7 +50,8 @@ type AppState = {
   addFromShare: (payload: SharePayload) => SaveResult;
   addProblems: (problems: Problem[], tagName?: string) => SaveResult;
   updateSampleCatalog: (selectedIds: string[]) => SaveResult;
-  restoreSampleCatalog: (backupId: string) => SaveResult;
+  removeSampleCatalog: (expectedIds: string[]) => SaveResult;
+  restoreSampleCatalog: (backupId: string) => ReturnType<LocalStorageRepository['restoreSampleCatalog']>;
   listSampleCatalogBackups: () => ReturnType<LocalStorageRepository['listSampleCatalogBackups']>;
   exportSampleCatalogSnapshot: (backupId: string) => ReturnType<LocalStorageRepository['exportSampleCatalogSnapshot']>;
   replaceFromEmpty: () => SaveResult;
@@ -148,7 +149,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     addFromShare: (payload) => applySave(repo.addFromShare(store, payload)),
     addProblems: (problems, tagName) => applySave(repo.addProblems(store, problems, tagName)),
     updateSampleCatalog: (ids) => applySave(repo.updateSampleCatalog(store, ids)),
-    restoreSampleCatalog: (id) => applySave(repo.restoreSampleCatalog(store, id)),
+    removeSampleCatalog: (ids) => applySave(repo.removeSampleCatalog(store, ids)),
+    restoreSampleCatalog: (id) => {
+      const result = repo.restoreSampleCatalog(store, id);
+      applySave(result);
+      return result;
+    },
     listSampleCatalogBackups: () => repo.listSampleCatalogBackups(),
     exportSampleCatalogSnapshot: (id) => repo.exportSampleCatalogSnapshot(id),
     replaceFromEmpty: () => applySave(repo.replaceStore(emptyStore())),

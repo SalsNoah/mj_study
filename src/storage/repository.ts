@@ -17,7 +17,7 @@ import { isContentRevisionChange, validateProblem, hasErrors } from '../domain/v
 import { normalizeTagKey, validateTagName, canAddTag } from '../domain/tags';
 import type { SharePayload } from '../domain/share';
 import { createMeld } from '../domain/melds';
-import { SampleCatalogStorage, validCatalogReceipts } from './sampleCatalogStorage';
+import { SampleCatalogStorage, validCatalogReceipts, type SampleRestoreResult } from './sampleCatalogStorage';
 import { canonicalJson } from '../data/sampleIdentity';
 import { applyAttemptToStudy, bumpDaily, dayKey, dayKeyFromIso, normalizeStore } from '../domain/records';
 import { MATERIAL_LIMITS, materialSourceIds, materialStudySourceIds, validateLearningMaterial, validateMaterialData } from '../domain/materials';
@@ -66,6 +66,78 @@ function isStoreShape(value: unknown): value is Store {
 
 function sameMaterialSnapshot(a: MaterialStudyEvent, b: MaterialStudyEvent): boolean {
   return a.at === b.at && a.title === b.title && a.url === b.url && a.comment === b.comment;
+}
+
+function validOrphanHistory(backup: Store): boolean {
+  const activeIds = new Set(backup.problems.map((problem) => problem?.id));
+  const studies = backup.study.filter((state) => !activeIds.has(state?.problemId));
+  const attempts = backup.attempts.filter((attempt) => !activeIds.has(attempt?.problemId));
+  const nonempty = (value: unknown): value is string => typeof value === 'string' && value.trim().length > 0;
+  return studies.every((state) => state && nonempty(state.problemId) && Number.isFinite(state.confirmationCount) &&
+    Number.isFinite(state.contentRevision)) && new Set(studies.map((state) => state.problemId)).size === studies.length &&
+    attempts.every((attempt) => attempt && nonempty(attempt.problemId) && nonempty(attempt.id) &&
+      typeof attempt.at === 'string' && Number.isFinite(Date.parse(attempt.at)) &&
+      Number.isFinite(attempt.contentRevision) && nonempty(attempt.sessionId) && Number.isFinite(attempt.questionIndex) &&
+      ['correct', 'incorrect', 'selfReview'].includes(attempt.result)) &&
+    new Set(attempts.map((attempt) => attempt.id)).size === attempts.length;
+}
+
+/** Sample removal retains history without active cards. Merge those records without duplicating a repeated backup. */
+function mergeOrphanHistory(backup: Store, problems: Problem[], study: StudyState[], attempts: Attempt[]): { ok: true } | Extract<SaveResult, { ok: false }> {
+  const activeSourceIds = new Set(backup.problems.map(({ id }) => id));
+  const orphanIds = new Set([...backup.study, ...backup.attempts].map(({ problemId }) => problemId)
+    .filter((id) => !activeSourceIds.has(id)));
+  const incomingStudy = normalizeStore(backup).study;
+  const existingStudy = [...normalizeStore({ ...emptyStore(), study, attempts }).study];
+  const sameRecords = (a: unknown[], b: unknown[]) => canonicalJson(a.map(canonicalJson).sort()) === canonicalJson(b.map(canonicalJson).sort());
+  const overlappingHistory = (): Extract<SaveResult, { ok: false }> => ({ ok: false, code: 'conflict',
+    reason: '削除済み問題の履歴が重なるため安全に結合できません。取り込みを中止しました。現在のデータは変更していません' });
+  for (const sourceId of orphanIds) {
+    const sourceStudy = incomingStudy.filter(({ problemId }) => problemId === sourceId);
+    const sourceAttempts = backup.attempts.filter(({ problemId }) => problemId === sourceId);
+    const namespace = `sample-history:${JSON.stringify(sourceId)}`;
+    const isNamespace = (id: string) => id === namespace || id.startsWith(`${namespace}:`) &&
+      /^[1-9]\d*$/.test(id.slice(namespace.length + 1));
+    const project = (problemId: string, remapped: boolean) => ({
+      mappedStudy: sourceStudy.map((state) => ({ ...state, problemId })),
+      mappedAttempts: sourceAttempts.map((attempt) => ({ ...attempt, problemId,
+        id: remapped ? `${problemId}:attempt:${JSON.stringify(attempt.id)}` : attempt.id })),
+      previousStudy: existingStudy.filter((state) => state.problemId === problemId),
+      previousAttempts: attempts.filter((attempt) => attempt.problemId === problemId),
+    });
+    const knownIds = new Set([...existingStudy, ...attempts].map(({ problemId }) => problemId)
+      .filter((id) => id === sourceId || isNamespace(id)));
+    const known = [...knownIds].map((id) => project(id, id !== sourceId));
+    // Restore can reconnect the original event to a new problem ID while keeping its
+    // event ID. Full payload equality (apart from that reference) identifies that group.
+    const reconnectedIds = new Set(attempts.filter((existing) => sourceAttempts.some((attempt) =>
+      attempt.id === existing.id && canonicalJson({ ...attempt, problemId: existing.problemId }) === canonicalJson(existing)))
+      .map(({ problemId }) => problemId));
+    known.push(...[...reconnectedIds].filter((id) => id !== sourceId).map((id) => project(id, false)));
+    // Search every existing representation before considering an empty ID. A restored
+    // active card or a now-free earlier collision slot must not duplicate known history.
+    if (known.some(({ mappedStudy, mappedAttempts, previousStudy, previousAttempts }) =>
+      sameRecords(previousStudy, mappedStudy) && sameRecords(previousAttempts, mappedAttempts))) continue;
+    if (known.some(({ mappedStudy, previousStudy, mappedAttempts, previousAttempts }) => {
+      if (mappedAttempts.some((attempt) => previousAttempts.some((existing) => existing.id === attempt.id))) return true;
+      // Confirmations can be the entire history. Reusing a card ID does not prove
+      // that a different state is independent, so do not duplicate ambiguous study.
+      return mappedStudy.length > 0 && previousStudy.length > 0;
+    })) return overlappingHistory();
+    for (let suffix = 0; ; suffix++) {
+      // Lossless source IDs plus collision probing avoid hashes and new import authority/schema fields.
+      const problemId = suffix === 0 ? sourceId : `${namespace}${suffix === 1 ? '' : `:${suffix - 1}`}`;
+      if (problems.some(({ id }) => id === problemId)) continue;
+      const { mappedStudy, mappedAttempts, previousStudy, previousAttempts } = project(problemId, suffix !== 0);
+      if (previousStudy.length || previousAttempts.length ||
+        mappedAttempts.some((attempt) => attempts.some((existing) => existing.id === attempt.id))) continue;
+      study.push(...mappedStudy);
+      existingStudy.push(...mappedStudy);
+      attempts.push(...mappedAttempts);
+      break;
+    }
+  }
+  return { ok: true };
 }
 
 export class LocalStorageRepository {
@@ -240,7 +312,13 @@ export class LocalStorageRepository {
     return this.sampleCatalogStorage().update(store, selectedIds);
   }
 
-  restoreSampleCatalog(store: Store, backupId: string): SaveResult {
+  removeSampleCatalog(store: Store, expectedIds: string[]): SaveResult {
+    const materials = validateMaterialData(store);
+    if (!materials.ok) return { ...materials, code: 'validation' };
+    return this.sampleCatalogStorage().remove(store, expectedIds);
+  }
+
+  restoreSampleCatalog(store: Store, backupId: string): SampleRestoreResult {
     const materials = validateMaterialData(store);
     if (!materials.ok) return { ...materials, code: 'validation' };
     return this.sampleCatalogStorage().restore(store, backupId);
@@ -560,6 +638,10 @@ export class LocalStorageRepository {
       return this.persist(normalizeStore(replacement), expectedRaw);
     }
 
+    if (!validOrphanHistory(backup)) {
+      return { ok: false, reason: '問題を削除済みの学習履歴が不正です。データは変更していません', code: 'validation' };
+    }
+
     // merge: re-id problems/attempts, merge tags by name
     const tagIdMap = new Map<string, string>();
     const tags = [...current.tags];
@@ -606,6 +688,9 @@ export class LocalStorageRepository {
       if (!newPid) continue;
       attempts.push({ ...a, id: createId('attm'), problemId: newPid });
     }
+
+    const orphanHistory = mergeOrphanHistory(backup, problems, study, attempts);
+    if (!orphanHistory.ok) return orphanHistory;
 
     const materials = [...(current.materials ?? [])];
     const materialIdMap = new Map<string, string>();

@@ -1,4 +1,4 @@
-import { getSampleUpdatePreview, missingCatalogProblems } from '@/data/sampleCatalog';
+import { getSampleRemovalPreview, getSampleUpdatePreview, matchingCatalogTemplate, missingCatalogProblems } from '@/data/sampleCatalog';
 import { canonicalJson, contentFingerprint, SAMPLE_TAG_NAME } from '@/data/sampleIdentity';
 import { createId, nowIso } from '@/domain/ids';
 import { normalizeStore } from '@/domain/records';
@@ -9,6 +9,7 @@ import type { SaveResult } from './repository';
 
 type Failure = Extract<SaveResult, { ok: false }>;
 type Result<T> = ({ ok: true } & T) | Failure;
+export type SampleRestoreResult = Result<{ store: Store; preservedCopies: number }>;
 export type SampleBackupSummary = {
   id: string;
   createdAt: string;
@@ -207,15 +208,36 @@ export class SampleCatalogStorage {
     }
     const addedProblems = additions.map((problem) => ({ ...problem, tagIds: [tag!.id] }));
     const addedStudy = addedProblems.map((problem) => initialStudy(problem.id));
+    return this.applyChange(store, current.raw, removedIds, addedProblems, addedStudy, tags);
+  }
+
+  remove(store: Store, expectedIds: string[]): SaveResult {
+    const current = this.currentMatches(store);
+    if (!current.ok) return current;
+    const previous = this.readAll(store);
+    if (!previous.ok) return previous;
+    const removedIds = getSampleRemovalPreview(store).candidates.map(({ id }) => id);
+    if (!Array.isArray(expectedIds) || expectedIds.length !== removedIds.length ||
+      new Set(expectedIds).size !== expectedIds.length || removedIds.some((id) => !expectedIds.includes(id))) {
+      return failure('削除対象が変わりました。件数と問題名を再確認してください', 'conflict');
+    }
+    if (removedIds.length === 0) return { ok: true, store };
+    return this.applyChange(store, current.raw, removedIds, [], [], store.tags, true);
+  }
+
+  private applyChange(store: Store, originalRaw: string | null, removedIds: string[],
+    addedProblems: Problem[], addedStudy: StudyState[], tags: Store['tags'], retainHistory = false): SaveResult {
     const id = createId('sample-backup');
     const createdAt = nowIso();
     const snapshot: CatalogSnapshot = { format: 'mahjong-study-sample-backup', version: 1, id, createdAt,
-      before: current.raw === null ? emptyStore() : JSON.parse(current.raw) as Store, removedIds, addedProblems, addedStudy, addedTags: tags };
+      before: originalRaw === null ? emptyStore() : JSON.parse(originalRaw) as Store, removedIds, addedProblems, addedStudy, addedTags: tags };
     const removed = new Set(removedIds);
     const next: Store = { ...store, tags,
       problems: [...store.problems.filter((problem) => !removed.has(problem.id)), ...addedProblems],
-      study: [...store.study.filter((state) => !removed.has(state.problemId)), ...addedStudy],
-      attempts: store.attempts.filter((attempt) => !removed.has(attempt.problemId)),
+      // Removing a sample from the library must not erase its learning or change accuracy/totals.
+      // Orphan records are supported by load, normalization, JSON backup and selective restore.
+      study: [...(retainHistory ? store.study : store.study.filter((state) => !removed.has(state.problemId))), ...addedStudy],
+      attempts: retainHistory ? store.attempts : store.attempts.filter((attempt) => !removed.has(attempt.problemId)),
       sampleCatalogUpdates: [...(store.sampleCatalogUpdates ?? []), { id, createdAt, restoredAt: null, snapshotDigest: snapshotDigest(snapshot) }] };
     if (!validStore(next)) return failure('更新後のデータの検証に失敗しました');
     if (JSON.stringify({ ...next, revision: store.revision + 1 }).length * 2 > LIMITS.storageMaxBytes) {
@@ -232,7 +254,7 @@ export class SampleCatalogStorage {
       return failure('更新前バックアップを保存・確認できません。データは変更していません',
         error instanceof DOMException && ['QuotaExceededError', 'NS_ERROR_DOM_QUOTA_REACHED'].includes(error.name) ? 'quota' : 'access');
     }
-    return this.commit(next, current.raw);
+    return this.commit(next, originalRaw);
   }
 
   /** Called only by the explicit, confirmed “delete all data” action. */
@@ -300,7 +322,7 @@ export class SampleCatalogStorage {
     return cleared.ok ? cleared : recover({ ...cleared, reason: cleared.code === 'conflict' ? '別タブでデータが更新されたため削除を中止しました' : '問題データの削除保存に失敗しました' });
   }
 
-  restore(store: Store, id: string): SaveResult {
+  restore(store: Store, id: string): SampleRestoreResult {
     const current = this.currentMatches(store);
     if (!current.ok) return current;
     const all = this.readAll(store);
@@ -308,7 +330,7 @@ export class SampleCatalogStorage {
     const snapshot = all.snapshots.find((entry) => entry.id === id);
     const receipt = store.sampleCatalogUpdates?.find((entry) => entry.id === id);
     if (!snapshot || !receipt) return failure('適用済みの更新とバックアップを確認できません。データは変更していません', 'corrupt');
-    if (receipt.restoredAt) return { ok: true, store };
+    if (receipt.restoredAt) return { ok: true, store, preservedCopies: 0 };
     const removable = new Set(snapshot.addedProblems.filter((original) => {
       const problem = store.problems.find((entry) => entry.id === original.id);
       const states = store.study.filter((state) => state.problemId === original.id);
@@ -318,6 +340,26 @@ export class SampleCatalogStorage {
         states.length === 1 && baseline && sameStudy(states[0]!, baseline) &&
         !store.attempts.some((attempt) => attempt.problemId === original.id);
     }).map((problem) => problem.id));
+    const preservedCopies = new Set<string>();
+    const retainedOriginalIds = new Set<string>();
+    if (snapshot.addedProblems.length === 0) {
+      // Only undo a removal of recognized originals. A later untouched, unstudied re-add
+      // can give way to the original card/history; edits or learning always keep their copy.
+      for (const original of snapshot.before.problems.filter((problem) => snapshot.removedIds.includes(problem.id))) {
+        const template = matchingCatalogTemplate(original);
+        if (!template || contentFingerprint(original, snapshot.before.tags) !== template.sample!.fingerprint) continue;
+        retainedOriginalIds.add(original.id);
+        for (const candidate of store.problems) {
+          if (snapshot.before.problems.some((problem) => problem.id === candidate.id) ||
+            !matchingCatalogTemplate(candidate, [template])) continue;
+          const states = store.study.filter((state) => state.problemId === candidate.id);
+          if (contentFingerprint(candidate, store.tags) === template.sample!.fingerprint &&
+            states.length === 1 && sameStudy(states[0]!, initialStudy(candidate.id)) &&
+            !store.attempts.some((attempt) => attempt.problemId === candidate.id)) removable.add(candidate.id);
+          else preservedCopies.add(candidate.id);
+        }
+      }
+    }
     const problems = store.problems.filter((problem) => !removable.has(problem.id));
     const study = store.study.filter((state) => !removable.has(state.problemId));
     const attempts = [...store.attempts];
@@ -344,6 +386,22 @@ export class SampleCatalogStorage {
       let restored = { ...structuredClone(original), tagIds };
       const existing = problems.find((problem) => problem.id === original.id);
       if (existing && canonicalJson(existing) !== canonicalJson(restored)) restored = { ...restored, id: createId('prob') };
+      if (restored.id !== original.id && retainedOriginalIds.has(original.id)) {
+        const originalState = normalizeStore(snapshot.before).study.find((state) => state.problemId === original.id);
+        if (originalState) {
+          const retained = study.filter((state) => state.problemId === original.id);
+          const laterAttempts = attempts.some((attempt) => attempt.problemId === original.id &&
+            !snapshot.before.attempts.some((entry) => canonicalJson(entry) === canonicalJson(attempt)));
+          if (retained.length > 1 || retained.length === 1 && !sameStudy(retained[0]!, originalState) || laterAttempts) {
+            return failure('再使用された問題IDの学習状態を安全に分けられません。復元を中止しました。データは変更していません', 'conflict');
+          }
+          // The unchanged state still belongs to the removed original. Reconnect it;
+          // the unrelated card must not inherit its confirmations or understanding.
+          if (retained[0]) study[study.indexOf(retained[0])] = { ...retained[0], problemId: restored.id };
+          else study.push({ ...originalState, problemId: restored.id });
+          study.push(initialStudy(original.id));
+        }
+      }
       if (!existing || restored.id !== existing.id) problems.push(restored);
       problemMap.set(original.id, restored.id);
       for (const state of snapshot.before.study.filter((entry) => entry.problemId === original.id)) {
@@ -356,12 +414,18 @@ export class SampleCatalogStorage {
       const restored = { ...original, problemId };
       const existing = attempts.find((attempt) => attempt.id === original.id);
       if (!existing) attempts.push(restored);
+      else if (retainedOriginalIds.has(original.problemId) && canonicalJson(existing) === canonicalJson(original)) {
+        // This exact event survived sample removal. If its old problem ID was reused,
+        // reconnect it to the restored original rather than counting the event twice.
+        attempts[attempts.indexOf(existing)] = restored;
+      }
       else if (canonicalJson(existing) !== canonicalJson(restored)) attempts.push({ ...restored, id: createId('attm') });
     }
     const next = { ...store, problems, tags, study, attempts,
       // Daily totals were never subtracted during update, and later totals must remain intact.
       sampleCatalogUpdates: store.sampleCatalogUpdates!.map((entry) => entry.id === id ? { ...entry, restoredAt: nowIso() } : entry) };
     if (!validStore(next)) return failure('復元後のデータの検証に失敗しました。データは変更していません');
-    return this.commit(next, current.raw);
+    const result = this.commit(next, current.raw);
+    return result.ok ? { ...result, preservedCopies: preservedCopies.size } : result;
   }
 }

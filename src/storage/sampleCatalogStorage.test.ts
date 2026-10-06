@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createLegacySampleProblems } from '@/data/legacySamples';
-import { getSampleUpdatePreview } from '@/data/sampleCatalog';
+import { getSampleRemovalPreview, getSampleUpdatePreview } from '@/data/sampleCatalog';
 import { createSampleProblems, samplesAlreadyPresent } from '@/data/samples';
 import { contentFingerprint } from '@/data/sampleIdentity';
 import { normalizeStore } from '@/domain/records';
@@ -517,5 +517,288 @@ describe('explicit deletion of all data', () => {
     expect(repo.load().ok).toBe(false);
     expect(success(repo.clearAll()).problems).toEqual([]);
     expect([...data.keys()].some((key) => key.startsWith(PREFIX))).toBe(false);
+  });
+});
+
+
+describe('safe bulk removal of current samples', () => {
+  const remove = (store: Store) => success(repo.removeSampleCatalog(store, getSampleRemovalPreview(store).candidates.map(({ id }) => id)));
+  const lastBackup = (store: Store) => store.sampleCatalogUpdates!.at(-1)!.id;
+
+  it('keeps an empty catalog unchanged and adds only missing originals after repeated removal/addition', () => {
+    let store = load();
+    expect(remove(store)).toEqual(store);
+    expect(data.size).toBe(0);
+    store = update(store);
+    const firstIds = store.problems.map(({ id }) => id);
+    store = remove(store);
+    expect(store.problems).toHaveLength(0);
+    expect(store.study.map(({ problemId }) => problemId)).toEqual(firstIds);
+    const raw = data.get(KEY);
+    const count = data.size;
+    expect(remove(store)).toEqual(store);
+    expect(data.get(KEY)).toBe(raw);
+    expect(data.size).toBe(count);
+    store = update(store);
+    expect(store.problems).toHaveLength(10);
+    expect(new Set(store.problems.map((problem) => problem.sample!.itemId)).size).toBe(10);
+    const again = data.get(KEY);
+    expect(update(store)).toEqual(store);
+    expect(data.get(KEY)).toBe(again);
+    store = remove(store);
+    store = update(store);
+    expect(store.problems).toHaveLength(10);
+    expect(store.problems.filter((problem) => problem.answerEnabled)).toHaveLength(8);
+  });
+
+  it('protects edited samples, metadata-free duplicates, tag/title-only custom data, legacy matches and unknown provenance', () => {
+    let store = update(legacy());
+    const original = store.problems[2]!;
+    store = success(repo.saveProblem(store, { ...original, privateMemo: '保存する追記' }, false));
+    store = success(repo.duplicateProblem(store, store.problems[3]!.id));
+    store = success(repo.saveProblem(store, custom({ title: 'サンプル問題', tagIds: original.tagIds }), true));
+    const unknown = { ...store.problems[3]!, id: 'unknown-sample', sample: { ...store.problems[3]!.sample!, version: 'unrecognized' } };
+    store = success(repo.saveProblem(store, unknown, true));
+    const protectedProblems = store.problems.filter((problem) => !getSampleRemovalPreview(store).candidates.some(({ id }) => id === problem.id));
+    expect(getSampleRemovalPreview(store).candidates).toHaveLength(9);
+    store = remove(store);
+    expect(store.problems).toEqual(protectedProblems);
+    store = update(store);
+    expect(store.problems).toHaveLength(protectedProblems.length + 9);
+    expect(store.problems.find(({ id }) => id === original.id)?.privateMemo).toBe('保存する追記');
+    expect(getSampleUpdatePreview(store).additions).toBe(0);
+  });
+
+  it('retains all study, attempts, daily totals, tags and material records through deletion, reload, export and restoration', () => {
+    let store = update();
+    store = success(repo.recordAttempt(store, attempt(store.problems[0]!.id)));
+    store = success(repo.confirmProblem(store, store.problems[1]!.id));
+    store = success(repo.saveMaterial(store, { id: 'material-keep', title: '教材', url: 'https://example.com/study',
+      comment: '', createdAt: '2026-10-05T10:00:00.000Z', updatedAt: '2026-10-05T10:00:00.000Z' }));
+    store = success(repo.recordMaterialStudy(store, 'material-keep', '検討済み', 'material-study-keep'));
+    const before = structuredClone(store);
+    store = remove(store);
+    const id = lastBackup(store);
+    expect(store.problems).toEqual([]);
+    for (const field of ['study', 'attempts', 'daily', 'tags', 'materials', 'materialStudyEvents'] as const) expect(store[field]).toEqual(before[field]);
+    const snapshot = JSON.parse(data.get(PREFIX + id)!);
+    expect(snapshot.before).toEqual(before);
+    expect(snapshot.addedProblems).toEqual([]);
+    expect(snapshot.addedStudy).toEqual([]);
+    const exported = repo.exportSampleCatalogSnapshot(id);
+    expect(exported.ok).toBe(true);
+    if (exported.ok) expect(JSON.parse(exported.text)).toEqual(before);
+    repo.dispose(); repo = new LocalStorageRepository(KEY); store = load();
+    expect(store.study).toEqual(before.study);
+    expect(store.attempts).toEqual(before.attempts);
+    store = success(repo.importJson(store, repo.exportJson(store), 'replace'));
+    expect(store.attempts).toEqual(before.attempts);
+    store = success(repo.restoreSampleCatalog(store, id));
+    expect(store.problems).toEqual(before.problems);
+    expect(store.study).toEqual(before.study);
+    expect(store.attempts).toEqual(before.attempts);
+    expect(store.daily).toEqual(before.daily);
+  });
+
+  it('restores deletion after later custom edits and learning without reverting or duplicating history', () => {
+    let store = update();
+    const own = custom();
+    store = success(repo.saveProblem(store, own, true));
+    store = success(repo.recordAttempt(store, attempt(store.problems[0]!.id)));
+    const originalSamples = store.problems.filter((problem) => problem.id !== own.id);
+    store = remove(store);
+    const id = lastBackup(store);
+    store = success(repo.saveProblem(store, { ...own, privateMemo: '削除後の編集' }, false));
+    store = success(repo.recordAttempt(store, attempt(own.id, 'custom-attempt')));
+    const later = structuredClone(store);
+    store = success(repo.restoreSampleCatalog(store, id));
+    expect(store.problems.find((problem) => problem.id === own.id)).toEqual(later.problems[0]);
+    expect(store.problems).toEqual(expect.arrayContaining(originalSamples));
+    expect(store.study).toEqual(later.study);
+    expect(store.attempts).toEqual(later.attempts);
+    expect(store.daily).toEqual(later.daily);
+    const raw = data.get(KEY);
+    expect(success(repo.restoreSampleCatalog(store, id))).toEqual(store);
+    expect(data.get(KEY)).toBe(raw);
+  });
+
+  it('restores original cards after re-addition without keeping untouched duplicates', () => {
+    let store = update();
+    store = success(repo.recordAttempt(store, attempt(store.problems[0]!.id)));
+    const before = structuredClone(store);
+    store = remove(store);
+    const id = lastBackup(store);
+    store = update(store);
+    const laterIds = store.problems.map(({ id }) => id);
+    const result = repo.restoreSampleCatalog(store, id);
+    store = success(result);
+    expect(result).toMatchObject({ ok: true, preservedCopies: 0 });
+    expect(store.problems).toEqual(before.problems);
+    expect(store.study).toEqual(before.study);
+    expect(store.attempts).toEqual(before.attempts);
+    expect(store.problems.some(({ id: problemId }) => laterIds.includes(problemId))).toBe(false);
+    expect(update(store).problems).toEqual(before.problems);
+  });
+
+  it('keeps and counts later edited, learned, confirmed and test-customized copies during restore', () => {
+    let store = update();
+    const originals = structuredClone(store.problems);
+    store = remove(store);
+    const id = lastBackup(store);
+    store = update(store);
+    const later = store.problems.slice(0, 4);
+    store = success(repo.saveProblem(store, { ...later[0]!, privateMemo: '再追加後の編集' }, false));
+    store = success(repo.recordAttempt(store, attempt(later[1]!.id, 'later-answer')));
+    store = success(repo.confirmProblem(store, later[2]!.id));
+    store = success(repo.setInTest(store, later[3]!.id, false));
+    const beforeRestore = structuredClone(store);
+    const result = repo.restoreSampleCatalog(store, id);
+    store = success(result);
+    expect(result).toMatchObject({ ok: true, preservedCopies: 4 });
+    expect(store.problems).toHaveLength(14);
+    expect(store.problems).toEqual(expect.arrayContaining(originals));
+    expect(store.problems).toEqual(expect.arrayContaining(beforeRestore.problems.slice(0, 4)));
+    expect(store.study).toEqual(expect.arrayContaining(beforeRestore.study.filter((state) => later.some(({ id: problemId }) => problemId === state.problemId))));
+    expect(store.attempts).toEqual(beforeRestore.attempts);
+    expect(store.daily).toEqual(beforeRestore.daily);
+    expect(update(store).problems).toEqual(store.problems);
+  });
+
+  it('reconnects exact retained study and attempts when a later custom problem reuses the original ID', () => {
+    let store = update();
+    const original = store.problems[0]!;
+    store = success(repo.recordAttempt(store, attempt(original.id, 'original-answer')));
+    store = success(repo.confirmProblem(store, original.id));
+    store = success(repo.updateUnderstanding(store, original.id, 'understood'));
+    const originalState = structuredClone(store.study.find(({ problemId }) => problemId === original.id)!);
+    store = remove(store);
+    const id = lastBackup(store);
+    const own = custom({ id: original.id, title: '同じIDで後から作った問題' });
+    store = success(repo.replaceStore({ ...store, problems: [own] }));
+    const beforeRestore = structuredClone(store);
+    store = success(repo.restoreSampleCatalog(store, id));
+    const restored = store.problems.find((problem) => problem.sample?.itemId === original.sample!.itemId)!;
+    expect(restored.id).not.toBe(original.id);
+    expect(store.problems.find(({ id: problemId }) => problemId === own.id)).toEqual(own);
+    expect(store.study.find(({ problemId }) => problemId === restored.id)).toEqual({ ...originalState, problemId: restored.id });
+    expect(store.study.find(({ problemId }) => problemId === own.id)).toMatchObject({
+      confirmationCount: 0, contentRevision: 0, understanding: 'unrated', lastConfirmedAt: null,
+      lastReviewedAt: null, lastSolvedAt: null, lastCorrectAt: null,
+    });
+    expect(store.attempts).toHaveLength(beforeRestore.attempts.length);
+    expect(store.attempts[0]).toEqual({ ...beforeRestore.attempts[0], problemId: restored.id });
+    expect(store.daily).toEqual(beforeRestore.daily);
+    const restoredOnce = structuredClone(store);
+    store = success(repo.restoreSampleCatalog(store, id));
+    expect(store).toEqual(restoredOnce);
+  });
+
+  it.each(['snapshot study absent', 'current study absent'] as const)('handles a reused ID with %s without borrowing custom history', (kind) => {
+    let store = update();
+    const original = store.problems[0]!;
+    store = success(repo.confirmProblem(store, original.id));
+    const originalState = structuredClone(store.study.find(({ problemId }) => problemId === original.id)!);
+    if (kind === 'snapshot study absent') store = success(repo.replaceStore({ ...store, study: store.study.filter(({ problemId }) => problemId !== original.id) }));
+    store = remove(store);
+    const id = lastBackup(store);
+    const own = custom({ id: original.id });
+    const customState = { ...originalState, confirmationCount: 9, understanding: 'uncertain' as const };
+    store = success(repo.replaceStore({ ...store, problems: [own], study: [
+      ...store.study.filter(({ problemId }) => problemId !== original.id),
+      ...(kind === 'snapshot study absent' ? [customState] : []),
+    ] }));
+    store = success(repo.restoreSampleCatalog(store, id));
+    const restored = store.problems.find((problem) => problem.sample?.itemId === original.sample!.itemId)!;
+    if (kind === 'snapshot study absent') {
+      expect(store.study.find(({ problemId }) => problemId === own.id)).toEqual(customState);
+      expect(store.study.find(({ problemId }) => problemId === restored.id)).toBeUndefined();
+    } else {
+      expect(store.study.find(({ problemId }) => problemId === own.id)).toMatchObject({ confirmationCount: 0, understanding: 'unrated' });
+      expect(store.study.find(({ problemId }) => problemId === restored.id)).toEqual({ ...originalState, problemId: restored.id });
+    }
+  });
+
+  it.each(['changed study', 'later attempt'] as const)('refuses an ambiguous ID-reuse restore with %s without writing', (kind) => {
+    let store = update();
+    const original = store.problems[0]!;
+    store = success(repo.recordAttempt(store, attempt(original.id, 'original-answer')));
+    store = remove(store);
+    const id = lastBackup(store);
+    const own = custom({ id: original.id, title: '同じIDで後から作った問題' });
+    store = success(repo.replaceStore({ ...store, problems: [own], study: store.study.map((state) =>
+      kind === 'changed study' && state.problemId === own.id ? { ...state, confirmationCount: 9 } : state) }));
+    if (kind === 'later attempt') store = success(repo.recordAttempt(store, attempt(own.id, 'later-custom-answer')));
+    const before = structuredClone(store);
+    const saved = [...data.entries()];
+    const writes = vi.mocked(localStorage.setItem).mock.calls.length;
+    expect(repo.restoreSampleCatalog(store, id)).toMatchObject({ ok: false, code: 'conflict' });
+    expect(vi.mocked(localStorage.setItem).mock.calls).toHaveLength(writes);
+    expect([...data.entries()]).toEqual(saved);
+    expect(store).toEqual(before);
+    expect(load()).toEqual(before);
+  });
+
+  it('refuses an old confirmation-only removal backup after its restored sample is confirmed again', () => {
+    let store = update();
+    const originalId = store.problems[0]!.id;
+    store = success(repo.confirmProblem(store, originalId));
+    store = remove(store);
+    const backup = repo.exportJson(store);
+    const id = lastBackup(store);
+    store = success(repo.restoreSampleCatalog(store, id));
+    store = success(repo.confirmProblem(store, originalId));
+    const before = structuredClone(store);
+    const saved = [...data.entries()];
+    const writes = vi.mocked(localStorage.setItem).mock.calls.length;
+    expect(repo.importJson(store, backup, 'merge')).toMatchObject({ ok: false, code: 'conflict' });
+    expect(vi.mocked(localStorage.setItem).mock.calls).toHaveLength(writes);
+    expect([...data.entries()]).toEqual(saved);
+    expect(store).toEqual(before);
+    expect(load()).toEqual(before);
+  });
+
+  it.each(['backup-quota', 'backup-readback', 'main-quota', 'late-read', 'concurrent'] as const)('does not overwrite originals after %s failure', (kind) => {
+    const store = update();
+    const before = data.get(KEY);
+    const external = JSON.stringify({ ...store, revision: store.revision + 1, settings: { autoSort: false } });
+    let backupKey: string | undefined;
+    vi.mocked(localStorage.setItem).mockImplementation((key, value) => {
+      if (key.startsWith(PREFIX)) {
+        if (kind === 'backup-quota') throw new DOMException('full', 'QuotaExceededError');
+        backupKey = key;
+      }
+      if (key === KEY && kind === 'main-quota') throw new DOMException('full', 'QuotaExceededError');
+      data.set(key, value);
+      if (key === backupKey && kind === 'concurrent') data.set(KEY, external);
+    });
+    vi.mocked(localStorage.getItem).mockImplementation((key) => {
+      if (key === backupKey && kind === 'backup-readback') return 'unverified';
+      if (backupKey && key === KEY && kind === 'late-read') throw new Error('read denied');
+      return data.get(key) ?? null;
+    });
+    const result = repo.removeSampleCatalog(store, store.problems.map(({ id }) => id));
+    expect(result.ok).toBe(false);
+    expect(data.get(KEY)).toBe(kind === 'concurrent' ? external : before);
+    if (backupKey) expect(JSON.parse(data.get(backupKey)!).before).toEqual(store);
+  });
+
+  it('rejects stale targets, stale tabs and repeated activation without new writes', () => {
+    let store = update();
+    const ids = store.problems.map(({ id }) => id);
+    const before = data.get(KEY);
+    expect(repo.removeSampleCatalog(store, ids.slice(1))).toMatchObject({ ok: false, code: 'conflict' });
+    expect(repo.removeSampleCatalog(store, [...ids, ids[0]!])).toMatchObject({ ok: false, code: 'conflict' });
+    expect(data.get(KEY)).toBe(before);
+    const old = store;
+    store = success(repo.saveProblem(store, { ...store.problems[0]!, title: '更新したタイトル' }, false));
+    const latest = data.get(KEY);
+    expect(repo.removeSampleCatalog(old, ids)).toMatchObject({ ok: false, code: 'conflict' });
+    expect(repo.removeSampleCatalog(store, ids)).toMatchObject({ ok: false, code: 'conflict' });
+    expect(data.get(KEY)).toBe(latest);
+    const targetIds = getSampleRemovalPreview(store).candidates.map(({ id }) => id);
+    store = success(repo.removeSampleCatalog(store, targetIds));
+    const after = data.get(KEY);
+    expect(repo.removeSampleCatalog(store, targetIds)).toMatchObject({ ok: false, code: 'conflict' });
+    expect(data.get(KEY)).toBe(after);
   });
 });

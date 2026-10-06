@@ -1,20 +1,18 @@
-name: Moe theme UI checks
+name: Sample bulk UI checks
 on:
   pull_request:
     paths:
-      - 'src/app/moe.css'
-      - 'src/app/theme*'
+      - 'src/data/sampleCatalog.ts'
+      - 'src/storage/**'
+      - 'src/app/store.tsx'
       - 'src/components/ConfirmDialog.tsx'
-      - 'src/features/settings/SettingsPage.tsx'
-      - 'public/themes/moe/**'
-      - 'scripts/validate-moe-theme-ui.mjs'
-      - 'scripts/editor-ui-helpers.mjs'
-      - 'docs/moe-art-sources.json'
-      - '.github/workflows/moe-theme-ui.yml'
+      - 'src/features/settings/Sample*'
+      - 'scripts/validate-sample-bulk-ui.mjs'
+      - '.github/workflows/sample-bulk-ui.yml'
 permissions:
   contents: read
 jobs:
-  moe-theme-ui:
+  sample-bulk-ui:
     runs-on: ubuntu-latest
     timeout-minutes: 7
     steps:
@@ -26,14 +24,14 @@ jobs:
       - run: npm ci
       - run: npm run build
       - run: npx playwright install --with-deps chromium
-      - name: Inspect generated artwork, controls and reduced motion
+      - name: Exercise synthetic sample addition, safe removal and restoration
         run: |
-          npm run dev -- --host 127.0.0.1 --port 5176 > /tmp/mahjong-moe-vite.log 2>&1 &
+          npm run dev -- --host 127.0.0.1 --port 5176 > /tmp/mahjong-sample-bulk.log 2>&1 &
           for i in {1..30}; do curl --silent --fail http://127.0.0.1:5176/ > /dev/null && break; sleep 1; done
-          node scripts/validate-moe-theme-ui.mjs
+          node scripts/validate-sample-bulk-ui.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: moe-theme-screenshots
-          path: evidence/moe-theme/
+          name: sample-bulk-screenshots
+          path: evidence/sample-bulk/
           retention-days: 7
