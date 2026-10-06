@@ -226,8 +226,7 @@ it('keeps conditions above the full palette and preserves drafts while opening o
   expect(handPanel.querySelectorAll('.hand-strip .tile-btn')).toHaveLength(14);
   const remaining = await adjustFirstRemaining();
   const disclosure = host.querySelector<HTMLDetailsElement>('.editor-notes')!;
-  expect(disclosure.open).toBe(false);
-  await click(disclosure.querySelector('summary')!);
+  expect(disclosure.open).toBe(true);
   const notes = disclosure.querySelector<HTMLTextAreaElement>('textarea')!;
   await input(notes, '保存前の解説を保持');
   await click(disclosure.querySelector('summary')!);
@@ -249,10 +248,11 @@ it('opens optional notes for answer errors while conditions always stay directly
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   await mountProblem(<EditorPage />, '/edit/:id', data.problems[0]!.id);
   const disclosure = host.querySelector<HTMLDetailsElement>('.editor-notes')!;
-  await click(disclosure.querySelector('summary')!);
+  expect(disclosure.open).toBe(true);
   const answer = [...disclosure.querySelectorAll('label')].find(label=>label.textContent?.trim()==='正解を設定する')!.querySelector<HTMLInputElement>('input')!;
   await click(answer);
   await click(disclosure.querySelector('summary')!);
+  expect(disclosure.open).toBe(false);
   await click(button('保存'));
   expect(disclosure.open).toBe(true);
   expect(host.querySelector('[role="alert"]')!.textContent).toContain('正解');

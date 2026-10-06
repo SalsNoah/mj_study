@@ -28,6 +28,7 @@ import {
 } from '@/domain/types';
 import { hasErrors, standardTileCount, validateProblem } from '@/domain/validate';
 import { compressImageFile } from '@/export/renderTiles';
+import './editorOptions.css';
 
 type Target = 'concealed' | 'dora' | 'meld';
 
@@ -102,10 +103,10 @@ export function EditorPage() {
     imported?.doraIndicators ?? existing?.doraIndicators ?? (isNew ? ['4z'] : []),
   );
   const ukeire = useUkeireSession({ concealed, drawn: null, melds, doraIndicators }, existing?.id ?? 'new');
-  const [notesOpen, setNotesOpen] = useState(false);
+  const [notesOpen, setNotesOpen] = useState(true);
   const [target, setTarget] = useState<Target>('concealed');
   const [history, setHistory] = useState<Array<() => void>>([]);
-  const [answerEnabled, setAnswerEnabled] = useState(existing?.answerEnabled ?? false);
+  const [answerEnabled, setAnswerEnabled] = useState(existing?.answerEnabled ?? (isNew && !imported));
   const [inTest, setInTest] = useState(() => store.study.find((s) => s.problemId === existing?.id)?.inTest !== false);
   const [accepted, setAccepted] = useState<TileCode[]>(existing?.acceptedDiscards ?? []);
   const [explanation, setExplanation] = useState(existing?.explanation ?? '');
@@ -666,10 +667,6 @@ export function EditorPage() {
 
       <section className="panel">
         <label className="check">
-          <input type="checkbox" checked={inTest} onChange={(event) => { setInTest(event.target.checked); mark(); }} />
-          テストに出題する
-        </label>
-        <label className="check">
           <input
             type="checkbox"
             checked={answerEnabled}
@@ -681,9 +678,12 @@ export function EditorPage() {
           />
           正解を設定する
         </label>
-        {inTest && !answerEnabled && <p className="hint">正解を設定するとテストの対象になります。</p>}
         {answerEnabled && (
           <div>
+            <label className="check editor-test-option">
+              <input type="checkbox" checked={inTest} onChange={(event) => { setInTest(event.target.checked); mark(); }} />
+              テストに出題する
+            </label>
             <p className="hint">切るのが正解の牌をタップ（複数可・もう一度で解除）</p>
             <div className="hand-stage hand-stage--pick">
               <HandView

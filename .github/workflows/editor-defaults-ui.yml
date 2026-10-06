@@ -1,0 +1,38 @@
+name: Editor defaults UI checks
+on:
+  pull_request:
+    paths:
+      - 'src/features/editor/**'
+      - 'src/features/settings/SettingsPage.tsx'
+      - 'src/app/styles.css'
+      - 'src/domain/quiz.ts'
+      - 'src/domain/validate.ts'
+      - 'src/storage/repository.ts'
+      - 'scripts/validate-editor-defaults-ui.mjs'
+      - '.github/workflows/editor-defaults-ui.yml'
+permissions:
+  contents: read
+jobs:
+  editor-defaults-ui:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - name: Verify defaults, saved choices, keyboard controls and creator link
+        run: |
+          npm run preview -- --host 127.0.0.1 --port 5179 > /tmp/mahjong-editor-preview.log 2>&1 &
+          for i in {1..30}; do curl --silent --fail http://127.0.0.1:5179/ > /dev/null && break; sleep 1; done
+          node scripts/validate-editor-defaults-ui.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: editor-defaults-screenshots
+          path: evidence/editor-defaults/
+          retention-days: 7

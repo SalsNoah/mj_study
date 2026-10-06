@@ -1,6 +1,7 @@
 // Synthetic local profiles only; no external documents, images, or credentials.
 import { chromium } from 'playwright';
 import { expect } from '@playwright/test';
+import { openEditorNotes } from './editor-ui-helpers.mjs';
 import { mkdir, writeFile } from 'node:fs/promises';
 const out = new URL('../evidence/theme-ui/', import.meta.url).pathname;
 await mkdir(out, { recursive: true });
@@ -51,7 +52,7 @@ try {
   for(const width of [375,1440]) {
    await page.setViewportSize({width,height:width===1440?900:740});
    await nav('作成');await capture(`${theme}-editor-${width}`);await mainDisclosures(`${theme}-${width}`);await capture(`${theme}-editor-disclosures-${width}`,'.editor-tools');
-   await page.locator('.editor-notes > summary').click();await capture(`${theme}-editor-notes-${width}`,'.editor-notes');
+   await openEditorNotes(page);await capture(`${theme}-editor-notes-${width}`,'.editor-notes');
    await nav('学習帳');await capture(`${theme}-library-${width}`);await page.locator('.library-filters > summary').click();await capture(`${theme}-library-filters-${width}`,'.library-filters');
    await page.locator('.problem-card').click();await expect(page.getByRole('button',{name:'正解・解説を表示',exact:true})).toBeVisible();await capture(`${theme}-detail-${width}`);await page.getByRole('button',{name:'正解・解説を表示',exact:true}).click();await page.locator('.detail-tools > summary').click();await expect(page.getByRole('button',{name:'PNG保存',exact:true})).toHaveCount(0);await capture(`${theme}-detail-tools-${width}`,'.detail-tools');
    await page.getByRole('button',{name:'複製',exact:true}).click();await expect(page.getByRole('dialog')).toBeVisible();await capture(`${theme}-duplicate-dialog-${width}`);await page.keyboard.press('Escape');await expect(page.getByRole('dialog')).toHaveCount(0);await expect(page.getByRole('button',{name:'複製',exact:true})).toBeFocused();

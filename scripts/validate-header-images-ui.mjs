@@ -1,6 +1,7 @@
 // Synthetic landscape, portrait and square images; no user photos or private documents.
 import { chromium } from 'playwright';
 import { expect } from '@playwright/test';
+import { openEditorNotes } from './editor-ui-helpers.mjs';
 import { mkdir, writeFile } from 'node:fs/promises';
 const out = new URL('../evidence/header-images/', import.meta.url).pathname;
 await mkdir(out, {recursive:true});
@@ -50,7 +51,7 @@ try {
       results.push({name:`header-${theme}-${width}`, ...header});
       await screenshot(`header-${theme}-${width}`);
       if(width===375 || width===1440){
-        await page.locator('.editor-notes > summary').click();
+        await openEditorNotes(page);
         await page.evaluate(()=>scrollTo(0,350));await screenshot(`header-scrolled-${theme}-${width}`);
         const scrolled=await page.locator('.page--editor > header').evaluate(el=>({scroll:scrollY,top:el.getBoundingClientRect().top,background:getComputedStyle(el).backgroundColor}));
         results.push({name:`header-scrolled-${theme}-${width}`,...scrolled});
@@ -62,7 +63,7 @@ try {
     await page.getByRole('link',{name:/^画像の表示確認/}).click();
     await page.getByRole('link',{name:'編集',exact:true}).click();
     await expect(page.getByRole('textbox',{name:'タイトル（任意）',exact:true})).toHaveValue(problem.title);
-    await page.locator('.editor-notes > summary').click(); await page.locator('.editor-notes > details > summary').click();
+    await openEditorNotes(page); await page.locator('.editor-notes > details > summary').click();
     for (const width of [320,375,390,1440]) {await page.setViewportSize({width,height:width > 1000 ? 900 : 667}); await checkFrames(`editor-${theme}-${width}`,3);if(width===375 || width===1440)await screenshot(`editor-${theme}-${width}`,'.attachment-editor');}
     await page.goto(`${origin}/#/problems/image-check`); await page.locator('.attachment-thumbnail').first().waitFor(); await expect(page.locator('.attachment-thumbnail img')).toHaveCount(1); await page.getByRole('button',{name:'正解・解説を表示',exact:true}).click();
     for (const width of [320,375,390,1440]) {await page.setViewportSize({width,height:width > 1000 ? 900 : 667}); await checkFrames(`detail-${theme}-${width}`,3);if(width===375 || width===1440)await screenshot(`detail-explanation-${theme}-${width}`,'[aria-label="解説画像"]');}

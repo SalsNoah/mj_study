@@ -259,6 +259,11 @@ export function SettingsPage() {
       </details>
 
       </div>
+      <div className="btn-row">
+        <a className="btn" href="https://x.com/Sals_mj" target="_blank" rel="noopener noreferrer" aria-label="製作者のX（新しいタブで開く）">
+          製作者のX
+        </a>
+      </div>
     </div>
   );
 }

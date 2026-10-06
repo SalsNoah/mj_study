@@ -1,6 +1,7 @@
 // Desktop QA on an isolated local profile. All seed records were created by the mobile test.
 import { chromium } from 'playwright';
 import { expect } from '@playwright/test';
+import { openEditorNotes } from './editor-ui-helpers.mjs';
 import { readFile, mkdir, writeFile } from 'node:fs/promises';
 const evidence = new URL('../evidence/desktop/', import.meta.url).pathname;
 await mkdir(evidence, { recursive: true });
@@ -163,7 +164,7 @@ try {
   await page.getByRole('textbox', { name: '三索の残枚数', exact: true }).fill('0');
   await allSizes('editor-remaining', '.remaining-panel');
   await page.getByRole('button', { name: '残枚数', exact: true }).click();
-  await page.locator('.editor-notes > summary').click();
+  await openEditorNotes(page);
   await page.getByLabel('タイトル（任意）').fill('PC入力中の下書き');
   await page.getByLabel('解説', { exact: true }).fill('右の補足欄を開いても入力中の手牌と残数を保持');
   await allSizes('editor-notes', '.editor-notes');

@@ -6,6 +6,7 @@ on:
       - 'src/**'
       - 'public/**'
       - 'scripts/validate-ukeire-ui.mjs'
+      - 'scripts/editor-ui-helpers.mjs'
       - 'scripts/validate-desktop-ui.mjs'
       - 'scripts/validate-sample-ui.mjs'
       - 'scripts/validate-study-ui.mjs'

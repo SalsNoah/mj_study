@@ -28,6 +28,7 @@ it('starts only a new manual problem with east 1/east seat/turn 6/25000 and a no
   for (let count = 0; count < 3; count++) await click(north);
   expect(north.disabled).toBe(true);
   expect(host.querySelector<HTMLButtonElement>('.tile-palette button[aria-label="東"]')!.disabled).toBe(false);
+  await click(host.querySelector<HTMLButtonElement>('.hand-stage--pick button[aria-label="北"]')!);
   await click([...host.querySelectorAll<HTMLButtonElement>('button')].find(button => button.textContent === '保存')!);
   const problem = JSON.parse(localStorage.getItem(STORAGE_KEY)!).problems[0];
   expect(problem.doraIndicators).toEqual(['4z']);

@@ -16,10 +16,10 @@ async function mount(){await act(async()=>root.render(<AppProvider><MemoryRouter
 
 it('blocks fifth clicks immediately, restores availability after removal and undo',async()=>{
  await mount();for(let n=0;n<4;n++)await click(tile('一萬'));expect(tile('一萬').disabled).toBe(true);
- for(let n=0;n<8;n++)await click(tile('一萬'));expect(host.querySelectorAll('.hand-stage .tile-btn[aria-label="一萬"]')).toHaveLength(4);
+ for(let n=0;n<8;n++)await click(tile('一萬'));expect(host.querySelectorAll('.tile-input .hand-stage .tile-btn[aria-label="一萬"]')).toHaveLength(4);
  expect(tile('一萬').getAttribute('aria-description')).toContain('最大4枚');
  await click(host.querySelector<HTMLElement>('.hand-stage .tile-btn[aria-label="一萬"]')!);expect(tile('一萬').disabled).toBe(false);
- await click(button('戻す'));expect(tile('一萬').disabled).toBe(true);await click(button('保存'));expect(JSON.parse(localStorage.getItem(STORAGE_KEY)!).problems[0].concealed).toHaveLength(4);
+ await click(button('戻す'));expect(tile('一萬').disabled).toBe(true);await click(host.querySelector<HTMLElement>('.hand-stage--pick .tile-btn[aria-label="一萬"]')!);await click(button('保存'));expect(JSON.parse(localStorage.getItem(STORAGE_KEY)!).problems[0].concealed).toHaveLength(4);
 });
 it('shares red and ordinary limits and permits other suits',async()=>{
  await mount();await click(tile('赤五萬'));expect(tile('赤五萬').disabled).toBe(true);for(let n=0;n<3;n++)await click(tile('五萬'));expect(tile('五萬').disabled).toBe(true);expect(tile('赤五萬').disabled).toBe(true);expect(tile('赤五筒').disabled).toBe(false);

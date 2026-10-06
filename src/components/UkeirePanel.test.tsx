@@ -80,6 +80,7 @@ describe('ukeire UI and existing study flows (jsdom; not a layout/browser test)'
     await click(host.querySelector<HTMLElement>('.tile-palette button[aria-label="中"]')!);
     expect(host.querySelectorAll('.ukeire-list > li:not([hidden])')).toHaveLength(3);
     expect(host.querySelector('.ukeire-expand')!.getAttribute('aria-expanded')).toBe('false');
+    await click(byText('正解を設定する', 'label').querySelector<HTMLInputElement>('input')!);
     await click(byText('保存'));
     expect(host.querySelector('h1')!.textContent).toBe('無題の問題');
     await click(byText('受入れ'));
