@@ -217,7 +217,7 @@ export function TestPage() {
           <p className="hint" role="status">条件に合う正解ありの問題がありません。</p>
         )}
         {error && <p className="error">{error}</p>}
-        <div className="sticky-actions">
+        <div className="sticky-actions test-start-actions">
           <button
             type="button"
             className="btn btn-primary btn-save"
