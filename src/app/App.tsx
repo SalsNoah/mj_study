@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { HashRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { useMemo } from 'react';
+import { HashRouter, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { AppProvider, useApp } from './store';
 import { RouteScroll } from '@/components/RouteScroll';
 import { BottomNav } from '@/components/BottomNav';
@@ -13,6 +13,7 @@ import { MaterialDetailPage } from '@/features/materials/MaterialDetailPage';
 import { SettingsPage } from '@/features/settings/SettingsPage';
 import { ImportPage } from '@/features/import/ImportPage';
 import { ShareReceivePage } from '@/features/share/ShareReceivePage';
+import { parseShareFromHash } from '@/domain/share';
 import './styles.css';
 import '@/features/materials/materials.css';
 import './themeBackgrounds.css';
@@ -21,11 +22,8 @@ import './moe.css';
 
 /** 仕様の #share=v1... を HashRouter の #/path と切り分ける */
 function readSharePayload(): string | null {
-  const raw = window.location.hash;
-  if (raw.startsWith('#share=')) {
-    return decodeURIComponent(raw.slice('#share='.length));
-  }
-  return null;
+  const hash = window.location.hash;
+  return hash.startsWith('#share=') ? parseShareFromHash(hash) : null;
 }
 
 function CorruptGate({ children }: { children: React.ReactNode }) {
@@ -70,26 +68,19 @@ function CorruptGate({ children }: { children: React.ReactNode }) {
 }
 
 function AppRoutes() {
-  const [share, setShare] = useState<string | null>(() => readSharePayload());
+  const location = useLocation();
+  const navigate = useNavigate();
+  const share = useMemo(readSharePayload, [location]);
 
-  useEffect(() => {
-    const onHash = () => setShare(readSharePayload());
-    window.addEventListener('hashchange', onHash);
-    return () => window.removeEventListener('hashchange', onHash);
-  }, []);
-
-  if (share) {
+  if (share !== null) {
     return (
       <CorruptGate>
-        <ShareReceivePage encoded={share} />
+        <ShareReceivePage key={share} encoded={share} />
         <div className="page" style={{ paddingTop: 0 }}>
           <button
             type="button"
             className="btn"
-            onClick={() => {
-              window.location.hash = '#/library';
-              setShare(null);
-            }}
+            onClick={() => navigate('/library')}
           >
             学習帳へ戻る
           </button>
@@ -99,7 +90,7 @@ function AppRoutes() {
   }
 
   return (
-    <HashRouter>
+    <>
       <RouteScroll />
       <CorruptGate>
         <Routes>
@@ -119,7 +110,7 @@ function AppRoutes() {
         </Routes>
         <BottomNav />
       </CorruptGate>
-    </HashRouter>
+    </>
   );
 }
 
@@ -127,7 +118,9 @@ export default function App() {
   return (
     <AppProvider>
       <div className="app-shell">
-        <AppRoutes />
+        <HashRouter>
+          <AppRoutes />
+        </HashRouter>
       </div>
     </AppProvider>
   );

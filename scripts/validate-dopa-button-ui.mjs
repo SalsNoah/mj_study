@@ -429,7 +429,7 @@ try {
   await go('/test');
   const moeCta = page.locator('.test-start-actions');
   const moePaint = await moeCta.evaluate(el => ({ image: getComputedStyle(el).backgroundImage, color: getComputedStyle(el).backgroundColor }));
-  expect(moePaint.image).toContain('linear-gradient');
+  expect(moePaint).toEqual({ image: 'none', color: 'rgba(0, 0, 0, 0)' });
   await frame('moe-test-start-isolation-375', moeCta);
   results.push({ name: 'moe-isolation', disabled: moeDisabled, cta: moePaint });
 

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '@/app/store';
 import { HandBoard } from '@/components/HandBoard';
@@ -8,6 +8,7 @@ export function ShareReceivePage({ encoded }: { encoded: string }) {
   const { addFromShare, store } = useApp();
   const navigate = useNavigate();
   const [msg, setMsg] = useState<string | null>(null);
+  const importLock = useRef(false);
 
   const decoded = useMemo(() => decodeSharePayload(encoded), [encoded]);
 
@@ -66,8 +67,11 @@ export function ShareReceivePage({ encoded }: { encoded: string }) {
           type="button"
           className="btn btn-primary"
           onClick={() => {
+            if (importLock.current) return;
+            importLock.current = true;
             const r = addFromShare(payload as SharePayload);
             if (!r.ok) {
+              importLock.current = false;
               setMsg(r.reason);
               return;
             }

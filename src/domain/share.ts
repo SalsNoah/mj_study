@@ -152,6 +152,10 @@ function isWind(v: unknown): v is ProblemContext['roundWind'] {
   return v === null || v === '1z' || v === '2z' || v === '3z' || v === '4z';
 }
 
+function isNullableInteger(value: unknown, min: number, max: number): value is number | null {
+  return value === null || (typeof value === 'number' && Number.isInteger(value) && value >= min && value <= max);
+}
+
 function validateSharePayload(
   raw: unknown,
 ): { ok: true; payload: SharePayload } | DecodeError {
@@ -248,6 +252,24 @@ function validateSharePayload(
   if (!isWind(ctx.roundWind) || !isWind(ctx.seatWind)) {
     return { ok: false, reason: '風が不正です' };
   }
+  if (!isNullableInteger(ctx.handNumber, 1, 4) || !isNullableInteger(ctx.turn, 1, 30)
+    || !isNullableInteger(ctx.honba, 0, 99) || !isNullableInteger(ctx.riichiSticks, 0, 99)
+    || !isNullableInteger(ctx.ownRank, 1, 4)) {
+    return { ok: false, reason: '対局条件の数値が不正です' };
+  }
+  if (!ctx.scores || typeof ctx.scores !== 'object' || Array.isArray(ctx.scores)) {
+    return { ok: false, reason: '点数状況が不正です' };
+  }
+  const scores = ctx.scores as Record<string, unknown>;
+  if (!isNullableInteger(scores.east, -100000, 200000) || !isNullableInteger(scores.south, -100000, 200000)
+    || !isNullableInteger(scores.west, -100000, 200000) || !isNullableInteger(scores.north, -100000, 200000)) {
+    return { ok: false, reason: '点数状況が不正です' };
+  }
+  const context: ProblemContext = {
+    roundWind: ctx.roundWind, handNumber: ctx.handNumber, seatWind: ctx.seatWind,
+    turn: ctx.turn, honba: ctx.honba, riichiSticks: ctx.riichiSticks, ownRank: ctx.ownRank,
+    scores: { east: scores.east, south: scores.south, west: scores.west, north: scores.north },
+  };
 
   const payload: SharePayload = {
     v: SHARE_FORMAT_VERSION,
@@ -256,7 +278,7 @@ function validateSharePayload(
     drawn: o.drawn as TileCode | null,
     melds,
     doraIndicators: o.doraIndicators as TileCode[],
-    context: o.context as ProblemContext,
+    context,
   };
 
   // オプションフィールド：無いなら含めない（正解OFF）
@@ -312,9 +334,12 @@ function validateSharePayload(
   return { ok: true, payload };
 }
 
-export function buildShareUrl(appOrigin: string, basePath: string, encoded: string): string {
-  const base = `${appOrigin.replace(/\/$/, '')}${basePath === '/' ? '' : basePath.replace(/\/$/, '')}/`;
-  return `${base}#share=${encoded}`;
+export function buildShareUrl(appUrl: string, basePath: string, encoded: string): string {
+  const url = new URL(basePath || './', appUrl);
+  if (!url.pathname.endsWith('/')) url.pathname += '/';
+  url.search = '';
+  url.hash = `share=${encoded}`;
+  return url.href;
 }
 
 export function parseShareFromHash(hash: string): string | null {

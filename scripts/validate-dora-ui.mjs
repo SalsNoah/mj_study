@@ -47,9 +47,9 @@ try{
  const url=await page.locator('.share-box textarea').inputValue();
  await page.getByRole('link',{name:'テスト',exact:true}).click();await page.getByRole('button',{name:'1 問でテスト開始',exact:true}).click();
  await capture('test-five',['北','一萬','赤五筒','中','北']);
- // The public #share route has a pre-existing router defect. Test the unchanged preview component in an explicit fixture.
- await page.goto(`${origin}/scripts/preview-fixture.html${new URL(url).hash}`);await page.getByRole('heading',{name:'共有プレビュー（読取専用）',exact:true}).waitFor();
+ // Use the actual app-generated URL and router, including the unchanged five-slot preview.
+ await page.goto(url);await page.getByRole('heading',{name:'共有プレビュー（読取専用）',exact:true}).waitFor();
  await capture('preview-five',['北','一萬','赤五筒','中','北']);
  expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('mahjong-study:v1')).problems.length)).toBe(1);
- expect(errors).toEqual([]);await writeFile(`${out}dora-results.json`,JSON.stringify({status:'pass',previewScope:'isolated component fixture; public share routing is a known baseline defect, not validated',results,errors},null,2));
+ expect(errors).toEqual([]);await writeFile(`${out}dora-results.json`,JSON.stringify({status:'pass',previewScope:'actual app-generated share URL and router; no automatic import',results,errors},null,2));
 }catch(error){await page.screenshot({path:`${out}failure.png`,animations:'disabled'});await writeFile(`${out}dora-results.json`,JSON.stringify({status:'fail',message:String(error),results,errors},null,2));throw error;}finally{await browser.close();}
