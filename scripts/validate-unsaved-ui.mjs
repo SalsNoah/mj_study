@@ -87,6 +87,18 @@ try {
   expect((await data()).materials).toEqual([]); await writer.close();
   results.push({ name: 'cross-tab-material-removal-keeps-draft-after-reload', status: 'pass' });
 
+  await open('normal', 390, 100, '/materials/qa-material');
+  await nav('学習帳'); await page.goBack();
+  await expect(page.getByLabel('コメント', { exact: true })).toHaveValue(material.comment);
+  await page.getByLabel('コメント', { exact: true }).fill('進む前の下書き');
+  await page.evaluate(() => history.forward()); await expect(dialog()).toBeVisible(); await stay();
+  await expect(page.getByLabel('コメント', { exact: true })).toHaveValue('進む前の下書き');
+  await page.evaluate(() => history.forward()); await expect(dialog()).toBeVisible(); await saveLeave();
+  await expect(page.getByRole('heading', { name: '学習帳', exact: true })).toBeVisible();
+  expect((await data()).materials[0].comment).toBe('進む前の下書き');
+  expect((await data()).materialStudyEvents).toEqual([]);
+  results.push({ name: 'native-forward-stay-and-save', status: 'pass' });
+
   for (const theme of ['normal', 'cool', 'cute', 'dopa', 'moe']) for (const [width, scale] of [[390, 100], [320, 150], [1440, 100]]) {
     await open(theme, width, scale, '/edit/qa-editor'); await title().fill('変更を残したい問題'); await nav('学習帳'); await expect(dialog()).toBeVisible();
     await capture(`editor-${theme}-${width}-text${scale}`); await stay(); await expect(title()).toHaveValue('変更を残したい問題');
