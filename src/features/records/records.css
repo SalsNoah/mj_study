@@ -135,3 +135,10 @@
 @media (min-width: 720px) {
   .page--records .records-titles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+
+.page--records .records-tag-summary { background: var(--records-paper); border-color: var(--records-rule); box-shadow: none; }
+.page--records .records-tag-summary__list { list-style: none; margin: 0; padding: 0; }
+.page--records .records-tag-summary__list li { padding: 12px 0; border-top: 1px solid var(--records-rule); overflow-wrap: anywhere; }
+.page--records .records-tag-summary h3 { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 12px; margin: 0; font-size: .9rem; }
+.page--records .records-tag-summary h3 span { color: var(--records-muted); font-weight: 400; }
+.page--records .records-tag-summary li p { margin: 6px 0 0; font-size: .8rem; font-variant-numeric: tabular-nums; }
