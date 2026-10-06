@@ -2,6 +2,7 @@ import { createHashRouter, Navigate, Route, RouterProvider, Routes, useLocation,
 import { AppProvider, useApp } from './store';
 import { RouteScroll } from '@/components/RouteScroll';
 import { BottomNav } from '@/components/BottomNav';
+import { useDecorativeMotion } from '@/components/useDecorativeMotion';
 import { LibraryPage } from '@/features/library/LibraryPage';
 import { EditorPage } from '@/features/editor/EditorPage';
 import { DetailPage } from '@/features/detail/DetailPage';
@@ -114,6 +115,7 @@ export function createAppRouter() {
 }
 
 export default function App({ router }: { router: RouterProviderProps['router'] }) {
+  useDecorativeMotion();
   return (
     <AppProvider>
       <div className="app-shell">
