@@ -39,17 +39,6 @@ try{
   const stored=await page.evaluate(()=>localStorage.getItem('mahjong-study:v1'));
   // Timing uses live animation only; no animation-disabling screenshot in this section.
   await visibleMotion('large-background-planes-advance');
-  const amplitude=await page.evaluate(async()=>{
-    const animations=document.getAnimations().filter(a=>a.animationName==='moe-heart-drift'&&a.effect?.target===document.body);
-    if(animations.length!==2)throw new Error(`Expected two body animation planes, got ${animations.length}`);
-    const previous=animations.map(a=>({time:a.currentTime,state:a.playState}));
-    animations.forEach(a=>{a.pause();const timing=a.effect.getTiming();a.currentTime=Number(timing.delay)+Number(timing.duration)/2;});
-    await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
-    const measured=['::before','::after'].map(pseudo=>{const style=getComputedStyle(document.body,pseudo);return {pseudo,y:new DOMMatrix(style.transform).m42};});
-    animations.forEach((a,i)=>{a.currentTime=previous[i].time;if(previous[i].state==='running')a.play();});
-    return measured;
-  });
-  expect(amplitude.map(x=>x.y)).toEqual([-36,-30]);results.push({name:'body-plane-actual-half-cycle-amplitudes',amplitude});
   await page.screenshot({path:`${out}live-heart-motion-before.png`});await page.waitForTimeout(1200);await page.screenshot({path:`${out}live-heart-motion-after.png`});
   const other=await context.newPage();await other.goto(`${origin}/#test`);await other.bringToFront();await page.waitForTimeout(100);
   const nativeVisibility=await page.evaluate(()=>document.visibilityState);
@@ -77,6 +66,18 @@ try{
   const hit=await page.locator('.tile-palette button').first().evaluate(el=>{const r=el.getBoundingClientRect();return el.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2));});expect(hit).toBe(true);
   await nav('設定','.page--settings');
   for(const [theme,label]of [['normal','ノーマル'],['cool','クール'],['cute','キュート'],['dopa','DOPA'],['moe','MOE']]){await page.getByRole('radio',{name:new RegExp(`^${label}`)}).click();await expect(page.locator('html')).toHaveAttribute('data-theme',theme);const state=await planes();if(theme==='moe')expect(state.every(x=>x.name.includes('moe-'))).toBe(true);else expect(state.some(x=>x.name.includes('moe-'))).toBe(false);results.push({name:`motion-theme-isolation-${theme}`,planes:state});}
+  // Seek only after all CSS-controlled pause/resume checks: WAAPI play overrides CSS play-state.
+  const amplitude=await page.evaluate(async()=>{
+    const animations=document.getAnimations().filter(a=>a.animationName==='moe-heart-drift'&&a.effect?.target===document.body);
+    if(animations.length!==2)throw new Error(`Expected two body animation planes, got ${animations.length}`);
+    const previous=animations.map(a=>({time:a.currentTime,state:a.playState}));
+    animations.forEach(a=>{a.pause();const timing=a.effect.getTiming();a.currentTime=Number(timing.delay)+Number(timing.duration)/2;});
+    await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+    const measured=['::before','::after'].map(pseudo=>{const style=getComputedStyle(document.body,pseudo);return {pseudo,y:new DOMMatrix(style.transform).m42};});
+    animations.forEach((a,i)=>{a.currentTime=previous[i].time;if(previous[i].state==='running')a.play();});
+    return measured;
+  });
+  expect(amplitude.map(x=>x.y)).toEqual([-36,-30]);results.push({name:'body-plane-actual-half-cycle-amplitudes',amplitude});
   expect(await page.evaluate(()=>localStorage.getItem('mahjong-study:v1'))).toBe(stored);expect(errors).toEqual([]);
 }catch(error){errors.push(error.stack??String(error));await page.screenshot({path:`${out}failure.png`}).catch(()=>{});throw error;}
 finally{await writeFile(`${out}results.json`,JSON.stringify({revision,results,errors,limits:['960x600 is a CSS viewport geometry proxy, not a physical browser zoom test.','Synthetic visibility coverage is distinguished from an actually observed hidden browser tab.','Physical iOS Safari and touch behavior are not tested.']},null,2));await browser.close();}
