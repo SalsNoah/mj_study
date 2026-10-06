@@ -14,6 +14,7 @@ on:
       - 'scripts/validate-theme-ui.mjs'
       - 'scripts/validate-theme-art-ui.mjs'
       - 'scripts/validate-dopa-neon-ui.mjs'
+      - 'scripts/validate-dopa-button-ui.mjs'
       - 'scripts/validate-header-images-ui.mjs'
       - 'scripts/capture-dopa-preview.mjs'
       - 'scripts/validate-dora-ui.mjs'
@@ -54,6 +55,7 @@ jobs:
           node scripts/validate-theme-art-ui.mjs || status=1
           node scripts/validate-dopa-neon-ui.mjs || status=1
           node scripts/validate-header-images-ui.mjs || status=1
+          node scripts/validate-dopa-button-ui.mjs || status=1
           exit "$status"
       - uses: actions/upload-artifact@v4
         if: always()
@@ -117,6 +119,13 @@ jobs:
         with:
           name: header-images-screenshots
           path: evidence/header-images/
+          retention-days: 7
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dopa-button-screenshots
+          path: evidence/dopa-buttons/
           retention-days: 7
 
   dopa-preview:

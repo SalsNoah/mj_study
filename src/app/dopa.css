@@ -118,6 +118,8 @@ html[data-theme='dopa'] :is(.test-title, .page--test > .hint, .materials-empty) 
   border-radius: var(--r-sm);
 }
 
+html[data-theme='dopa'] :is(.page--test, .page--import) > .sticky-actions { background: transparent; }
+
 html[data-theme='dopa'] :is(.btn, .editor-save, .test-count__controls button, .view-tabs > button[aria-selected='true'], .target-tabs > button.is-active) {
   border: 1px solid transparent;
   background: linear-gradient(var(--surface), var(--surface)) padding-box, var(--dopa-rainbow) border-box;
@@ -127,6 +129,12 @@ html[data-theme='dopa'] :is(.btn, .editor-save, .test-count__controls button, .v
 }
 html[data-theme='dopa'] :is(.btn-primary, .editor-save, .target-tabs > button.is-active) { color: var(--ink); }
 html[data-theme='dopa'] :is(.btn-primary, .editor-save):not(:disabled) { box-shadow: 0 0 10px rgba(103, 232, 255, .3), 0 0 20px rgba(255, 104, 183, .2); }
+html[data-theme='dopa'] button.btn:disabled {
+  opacity: .45;
+  cursor: default;
+  box-shadow: none;
+  animation: none;
+}
 html[data-theme='dopa'] .page-header h1 { color: var(--ink); text-shadow: 0 0 14px rgba(103, 232, 255, .3), 0 0 24px rgba(218, 104, 255, .2); }
 html[data-theme='dopa'] .page-header h1::after {
   content: '';
