@@ -160,7 +160,9 @@ it('uses the same answer-only count and actual queue while preserving answering 
   expect(host.querySelector('h1')!.textContent).toBe('テスト 1 / 1');
   expect(host.textContent).not.toContain('答えが分かる解説');
   expect(host.querySelector('.hand-stage .is-correct')).toBeNull();
+  expect(host.querySelector('.hand-stage [aria-pressed="true"]')).toBeNull();
   await click(host.querySelector<HTMLButtonElement>('.hand-stage button[aria-label="東"]')!);
+  expect(host.querySelector('.hand-stage button[aria-label="東"]')!.getAttribute('aria-pressed')).toBe('true');
   await click(button('回答する'));
   expect(host.querySelector('.verdict')!.textContent).toBe('正解');
   expect(host.textContent).toContain('答えが分かる解説');

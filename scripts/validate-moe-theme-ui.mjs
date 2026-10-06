@@ -1,6 +1,6 @@
 // Generated local artwork and synthetic study profiles only. No external content.
 import { chromium, expect } from '@playwright/test';
-import { openEditorNotes } from './editor-ui-helpers.mjs';
+import { openEditorNotes, discardFixtureDraft } from './editor-ui-helpers.mjs';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 const out = new URL('../evidence/moe-theme/', import.meta.url).pathname;
@@ -28,7 +28,7 @@ async function open(failImages = false, failFont = false) {
   await expect(page.locator('html')).toHaveAttribute('data-theme','moe');
   return {context,failed};
 }
-async function nav(name) { await page.getByRole('link',{name,exact:true}).click(); await page.locator({'作成':'.page--editor','学習帳':'.page--library','テスト':'.page--test','学習教材':'.page--materials','記録帳':'.page--records','設定':'.page--settings'}[name]).waitFor(); }
+async function nav(name) { await page.getByRole('link',{name,exact:true}).click(); await discardFixtureDraft(page); await page.locator({'作成':'.page--editor','学習帳':'.page--library','テスト':'.page--test','学習教材':'.page--materials','記録帳':'.page--records','設定':'.page--settings'}[name]).waitFor(); }
 async function capture(name, selector) {
   if (selector) await page.locator(selector).scrollIntoViewIfNeeded(); else await page.evaluate(() => scrollTo(0,0));
   await page.evaluate(() => document.fonts.ready);

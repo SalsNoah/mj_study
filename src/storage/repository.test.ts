@@ -128,4 +128,45 @@ describe('LocalStorageRepository', () => {
     expect(st?.confirmationCount).toBe(0);
     expect(st?.understanding).toBe('unrated');
   });
+
+  it('refuses a stale problem draft even when the stored revision number is unchanged', () => {
+    const repo = new LocalStorageRepository('test:v1');
+    try {
+      const problem = sampleProblem();
+      const saved = repo.saveProblem(emptyStore(), problem, true);
+      if (!saved.ok) throw new Error(saved.reason);
+      const newer = { ...saved.store, problems: [{ ...problem, title: 'newer' }] };
+      localStorage.setItem('test:v1', JSON.stringify(newer));
+      const raw = localStorage.getItem('test:v1');
+      const result = repo.saveProblem(saved.store, { ...problem, title: 'stale draft' }, false);
+      expect(result).toMatchObject({ ok: false, code: 'conflict' });
+      expect(localStorage.getItem('test:v1')).toBe(raw);
+    } finally { repo.dispose(); }
+  });
+
+  it('resubscribes after effect cleanup without duplicating callbacks or writing storage', () => {
+    const repo = new LocalStorageRepository('test:v1');
+    const handler = vi.fn();
+    try {
+      const store = emptyStore();
+      localStorage.setItem('test:v1', JSON.stringify(store));
+      repo.load();
+      const raw = localStorage.getItem('test:v1');
+      const notify = () => window.dispatchEvent(new StorageEvent('storage', {
+        key: 'test:v1', newValue: JSON.stringify({ ...store, revision: 1 }),
+      }));
+      repo.setExternalChangeHandler(handler);
+      notify();
+      expect(handler).toHaveBeenCalledTimes(1);
+      repo.setExternalChangeHandler(null);
+      repo.dispose();
+      notify();
+      expect(handler).toHaveBeenCalledTimes(1);
+      repo.setExternalChangeHandler(handler);
+      repo.setExternalChangeHandler(handler);
+      notify();
+      expect(handler).toHaveBeenCalledTimes(2);
+      expect(localStorage.getItem('test:v1')).toBe(raw);
+    } finally { repo.dispose(); }
+  });
 });

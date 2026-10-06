@@ -1,6 +1,7 @@
+import { TestRouter as MemoryRouter } from '@/test/TestRouter';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { AppProvider } from '@/app/store';
 import { EditorPage } from './EditorPage';

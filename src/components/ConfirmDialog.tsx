@@ -2,10 +2,13 @@ import { useEffect, useId, useRef, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import '@/features/detail/DuplicateProblemButton.css';
 
-export function ConfirmDialog({ title, description, confirmLabel, danger = false, children, returnFocus, onCancel, onConfirm }: {
+export function ConfirmDialog({ title, description, confirmLabel, cancelLabel = 'キャンセル', confirmDisabled = false, secondaryAction, danger = false, children, returnFocus, onCancel, onConfirm }: {
   title: string;
   description: string;
   confirmLabel: string;
+  cancelLabel?: string;
+  confirmDisabled?: boolean;
+  secondaryAction?: { label: string; onClick: () => void };
   danger?: boolean;
   children?: ReactNode;
   returnFocus: HTMLElement | null;
@@ -74,8 +77,13 @@ export function ConfirmDialog({ title, description, confirmLabel, danger = false
           {children}
         </div> : <p id={descriptionId}>{description}</p>}
         <div className="duplicate-confirmation__actions">
-          <button ref={cancelButton} type="button" className="btn" onClick={dismiss}>キャンセル</button>
-          <button type="button" className={`btn ${danger ? 'btn-danger' : 'btn-primary'}`} onClick={() => {
+          <button ref={cancelButton} type="button" className="btn" onClick={dismiss}>{cancelLabel}</button>
+          {secondaryAction && <button type="button" className="btn btn-danger" onClick={() => {
+            if (settled.current) return;
+            settled.current = true;
+            secondaryAction.onClick();
+          }}>{secondaryAction.label}</button>}
+          <button type="button" disabled={confirmDisabled} className={`btn ${danger ? 'btn-danger' : 'btn-primary'}`} onClick={() => {
             if (settled.current) return;
             settled.current = true;
             onConfirm();

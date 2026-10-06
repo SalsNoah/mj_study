@@ -34,6 +34,7 @@ describe('test participation in a single problem save', () => {
     let store = saved(repo.saveProblem(emptyStore(), problem(), true));
     store.study[0] = { ...store.study[0]!, contentRevision: 3, confirmationCount: 4,
       understanding: 'understood', lastReviewedAt: '2026-02-01T00:00:00.000Z' };
+    localStorage.setItem(key, JSON.stringify(store));
     const before = structuredClone(store);
     const writes = vi.spyOn(Storage.prototype, 'setItem');
     const changed = saved(repo.saveProblem(store, store.problems[0]!, false, false));
@@ -56,6 +57,7 @@ describe('test participation in a single problem save', () => {
     const changed = saved(repo.saveProblem(store, problem(), false, false));
     expect(changed.study[0]).toMatchObject({ problemId: 'problem', inTest: false, contentRevision: 0 });
     const legacy = { ...changed, study: changed.study.map(({ inTest: _inTest, ...s }) => s) };
+    localStorage.setItem(key, JSON.stringify(legacy));
     expect(isInTest(legacy.study[0])).toBe(true);
     expect(saved(repo.saveProblem(legacy, problem(), false, false)).study[0]?.inTest).toBe(false);
   });

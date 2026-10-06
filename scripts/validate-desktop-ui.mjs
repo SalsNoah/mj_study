@@ -1,7 +1,7 @@
 // Desktop QA on an isolated local profile. All seed records were created by the mobile test.
 import { chromium } from 'playwright';
 import { expect } from '@playwright/test';
-import { openEditorNotes } from './editor-ui-helpers.mjs';
+import { openEditorNotes, discardFixtureDraft } from './editor-ui-helpers.mjs';
 import { readFile, mkdir, writeFile } from 'node:fs/promises';
 const evidence = new URL('../evidence/desktop/', import.meta.url).pathname;
 await mkdir(evidence, { recursive: true });
@@ -92,7 +92,7 @@ async function capture(name, selector, { preserveScroll = false } = {}) {
   results.push({ name, geometry, scoreSuffixes, header, cardHands });
 }
 async function allSizes(name, selector) { for (const width of widths) { await page.setViewportSize({ width, height: width === 1920 ? 1080 : 900 }); await capture(`${name}-${width}`, selector); } }
-async function nav(name) { await page.getByRole('link', { name, exact: true }).click(); }
+async function nav(name) { await page.getByRole('link', { name, exact: true }).click(); await discardFixtureDraft(page); }
 async function assertFocusedControlReachable(name, control) {
   await expect(control).toBeFocused();
   const geometry = await control.evaluate(el => {

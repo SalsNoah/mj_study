@@ -1,6 +1,6 @@
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import { MemoryRouter } from 'react-router-dom';
+import { TestRouter as MemoryRouter } from '@/test/TestRouter';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { AppProvider } from '@/app/store';
 import { EditorPage } from '@/features/editor/EditorPage';

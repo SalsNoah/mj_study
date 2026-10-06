@@ -1,13 +1,14 @@
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
-import App from '@/app/App';
+import App, { createAppRouter } from '@/app/App';
 import { createLegacySampleProblems } from '@/data/legacySamples';
 import { emptyStore, STORAGE_KEY, type Store } from '@/domain/types';
 import { DEFAULT_SHARE_OPTIONS, decodeSharePayload, encodeSharePayload, extractSharePayload } from '@/domain/share';
 
 let host: HTMLDivElement;
 let root: Root;
+let router: ReturnType<typeof createAppRouter>;
 beforeEach(() => {
   vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true);
   vi.stubEnv('BASE_URL', './');
@@ -18,6 +19,7 @@ beforeEach(() => {
 });
 afterEach(async () => {
   await act(async () => root.unmount());
+  router?.dispose();
   host.remove(); window.history.replaceState({}, '', '/');
   vi.restoreAllMocks(); vi.unstubAllGlobals(); vi.unstubAllEnvs();
 });
@@ -34,7 +36,8 @@ function button(label: string) {
 async function mount(hash: string, store = emptyStore()) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
   window.history.replaceState({}, '', `/mj_study/${hash}`);
-  await act(async () => root.render(<App />));
+  router = createAppRouter();
+  await act(async () => root.render(<App router={router} />));
 }
 async function click(label: string) { await act(async () => button(label).click()); }
 

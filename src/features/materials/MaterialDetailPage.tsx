@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState, type FormEvent } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { useApp } from '@/app/store';
+import { useUnsavedChanges } from '@/components/useUnsavedChanges';
 import { createId } from '@/domain/ids';
 import { countMaterialStudies, MATERIAL_LIMITS, normalizeMaterialUrl } from '@/domain/materials';
 import type { LearningMaterial } from '@/domain/types';
@@ -9,18 +10,33 @@ import { materialDate, materialFingerprint, materialHistory, materialHost } from
 
 export function MaterialDetailPage() {
   const { id } = useParams();
-  const { store } = useApp();
-  const material = store.materials?.find((item) => item.id === id);
-  if (!material) return (
-    <div className="page page--materials">
-      <h1>教材が見つかりません</h1>
-      <Link className="btn" to="/materials">学習教材へ戻る</Link>
-    </div>
-  );
-  return <MaterialDetailEditor key={material.id} material={material} />;
+  return <MaterialDetailSession key={id} id={id} />;
 }
 
-function MaterialDetailEditor({ material }: { material: LearningMaterial }) {
+function MissingMaterial() {
+  return <div className="page page--materials">
+    <h1>教材が見つかりません</h1>
+    <Link className="btn" to="/materials">学習教材へ戻る</Link>
+  </div>;
+}
+
+function MaterialDetailSession({ id }: { id?: string }) {
+  const { store } = useApp();
+  const material = store.materials?.find((item) => item.id === id);
+  const [retainedMaterial, setRetainedMaterial] = useState(material);
+  useEffect(() => { if (material) setRetainedMaterial(material); }, [material]);
+  // Reloading an external deletion must not unmount an editor that still owns a draft.
+  const displayed = material ?? retainedMaterial;
+  if (!displayed) return <MissingMaterial />;
+  return <MaterialDetailEditor key={displayed.id} material={displayed} missing={!material}
+    onDiscardMissing={() => setRetainedMaterial(undefined)} />;
+}
+
+function MaterialDetailEditor({ material, missing, onDiscardMissing }: {
+  material: LearningMaterial;
+  missing: boolean;
+  onDiscardMissing: () => void;
+}) {
   const commentLabelId = useId();
   const { store, saveMaterial, recordMaterialStudy, undoMaterialStudy, externalConflict, reload } = useApp();
   const location = useLocation();
@@ -42,14 +58,14 @@ function MaterialDetailEditor({ material }: { material: LearningMaterial }) {
   const discardOnReload = useRef(false);
   const metadataDirty = title !== baseline.title || url !== baseline.url;
   const dirty = metadataDirty || comment !== baseline.comment;
-  const stale = materialFingerprint(material) !== materialFingerprint(baseline);
+  const stale = missing || materialFingerprint(material) !== materialFingerprint(baseline);
   const blocked = externalConflict || stale || conflictError;
   const events = materialHistory(store.materialStudyEvents, material.id);
   const latestEvent = events[0];
   const safeLink = normalizeMaterialUrl(material.url);
 
   useEffect(() => {
-    if (discardOnReload.current || (!dirty && stale && !externalConflict)) {
+    if (!missing && (discardOnReload.current || (!dirty && stale && !externalConflict))) {
       discardOnReload.current = false;
       setBaseline(material);
       setTitle(material.title);
@@ -59,7 +75,7 @@ function MaterialDetailEditor({ material }: { material: LearningMaterial }) {
       setError(null);
       setDuplicateId(null);
     }
-  }, [material, dirty, stale, externalConflict]);
+  }, [material, dirty, stale, externalConflict, missing]);
 
   useEffect(() => {
     if (!recorded && focusNextStudy.current) {
@@ -111,6 +127,28 @@ function MaterialDetailEditor({ material }: { material: LearningMaterial }) {
     if (saved) setComment(saved.comment);
   };
 
+  const saveDraft = (): boolean => {
+    if (blocked) {
+      setError('保存内容が別の画面で更新されています。再読込してから保存してください。');
+      return false;
+    }
+    const normalized = normalizeMaterialUrl(url);
+    if (!normalized.ok) {
+      setError(normalized.reason);
+      setMessage(null);
+      if (metadataDetails.current) metadataDetails.current.open = true;
+      return false;
+    }
+    // Save all editable fields atomically; leaving the page never records a study event.
+    const saved = receive(saveMaterial({ ...baseline, title: title.trim() || materialHost(normalized.url), url: normalized.url, comment }), '変更を保存しました');
+    if (!saved) return false;
+    setTitle(saved.title);
+    setUrl(saved.url);
+    setComment(saved.comment);
+    return true;
+  };
+  const unsaved = useUnsavedChanges({ dirty, onSave: saveDraft });
+
   const recordStudy = () => {
     if (blocked || metadataDirty || studyLocked.current) return;
     studyLocked.current = true;
@@ -139,8 +177,11 @@ function MaterialDetailEditor({ material }: { material: LearningMaterial }) {
     setMessage(null);
   };
 
+  if (missing && !dirty) return <MissingMaterial />;
+
   return (
     <div className="page page--materials page--material-detail">
+      {unsaved.dialog}
       <Link className="material-back" to="/materials">‹ 学習教材</Link>
       <header className="page-header material-detail-heading">
         <h1>{material.title}</h1>
@@ -168,6 +209,7 @@ function MaterialDetailEditor({ material }: { material: LearningMaterial }) {
       {blocked && <div className="material-conflict" role="alert">
         <p>保存内容が別の画面で更新されています。入力内容を残したまま、上書きを止めています。</p>
         <button className="btn" type="button" onClick={() => {
+          if (missing) onDiscardMissing();
           discardOnReload.current = true;
           reload();
         }}>入力を破棄して再読込</button>
