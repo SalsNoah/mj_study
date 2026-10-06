@@ -723,7 +723,7 @@ function ProblemEditor() {
           />
         </label>
         <label className="field">
-          <span>自分のメモ（共有されません）</span>
+          <span>自分のメモ</span>
           <textarea
             value={privateMemo}
             onChange={(e) => {

@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import { createHashRouter, Navigate, Route, RouterProvider, Routes, useLocation, useNavigate, type RouterProviderProps } from 'react-router-dom';
 import { AppProvider, useApp } from './store';
 import { RouteScroll } from '@/components/RouteScroll';
@@ -12,19 +11,11 @@ import { MaterialsPage } from '@/features/materials/MaterialsPage';
 import { MaterialDetailPage } from '@/features/materials/MaterialDetailPage';
 import { SettingsPage } from '@/features/settings/SettingsPage';
 import { ImportPage } from '@/features/import/ImportPage';
-import { ShareReceivePage } from '@/features/share/ShareReceivePage';
-import { parseShareFromHash } from '@/domain/share';
 import './styles.css';
 import '@/features/materials/materials.css';
 import './themeBackgrounds.css';
 import './dopa.css';
 import './moe.css';
-
-/** 仕様の #share=v1... を HashRouter の #/path と切り分ける */
-function readSharePayload(): string | null {
-  const hash = window.location.hash;
-  return hash.startsWith('#share=') ? parseShareFromHash(hash) : null;
-}
 
 function CorruptGate({ children }: { children: React.ReactNode }) {
   const { loadError, corruptRaw, externalConflict, reload } = useApp();
@@ -68,15 +59,19 @@ function CorruptGate({ children }: { children: React.ReactNode }) {
 }
 
 function AppRoutes() {
-  const location = useLocation();
+  useLocation();
   const navigate = useNavigate();
-  const share = useMemo(readSharePayload, [location]);
 
-  if (share !== null) {
+  // Retired links are identified without decoding or inspecting their payload.
+  // Subscribe to router location above so Back/Forward also updates this branch.
+  if (window.location.hash === '#share' || window.location.hash.startsWith('#share=')) {
     return (
       <CorruptGate>
-        <ShareReceivePage key={share} encoded={share} />
-        <div className="page" style={{ paddingTop: 0 }}>
+        <div className="page">
+          <header className="page-header">
+            <h1>問題共有は終了しました</h1>
+            <p className="hint">このリンクから問題を表示・追加することはできません。</p>
+          </header>
           <button
             type="button"
             className="btn"

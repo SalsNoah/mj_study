@@ -8,15 +8,6 @@ import { ExplanationAttachments, QuestionAttachments } from '@/components/Proble
 import { accuracyForProblem, isInTest } from '@/domain/quiz';
 import { attachmentsForRole } from '@/domain/attachments';
 import { formatShortDate } from '@/domain/records';
-import {
-  DEFAULT_SHARE_OPTIONS,
-  buildShareUrl,
-  encodeSharePayload,
-  extractSharePayload,
-  isLocalHost,
-  shareUrlTooLong,
-  type ShareOptions,
-} from '@/domain/share';
 import type { StudyState } from '@/domain/types';
 import { DuplicateProblemButton } from './DuplicateProblemButton';
 
@@ -41,9 +32,6 @@ export function DetailPage() {
   if (answerState.key !== answerKey) setAnswerState({ key: answerKey, visible: false });
   const [undoState, setUndoState] = useState<StudyState | null>(null);
   const confirmLock = useRef(false);
-  const [shareOpts, setShareOpts] = useState<ShareOptions>(DEFAULT_SHARE_OPTIONS);
-  const [shareUrl, setShareUrl] = useState<string | null>(null);
-  const [shareMsg, setShareMsg] = useState<string | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
 
   if (!problem) {
@@ -83,23 +71,6 @@ export function DetailPage() {
     undoConfirm(problem.id, undoState);
     setUndoState(null);
     confirmLock.current = false;
-  };
-
-  const onShare = () => {
-    const tags = problem.tagIds.map(getTagName);
-    const payload = extractSharePayload(problem, tags, shareOpts);
-    const encoded = encodeSharePayload(payload);
-    const basePath = import.meta.env.BASE_URL || '/';
-    const url = buildShareUrl(window.location.href, basePath, encoded);
-    if (shareUrlTooLong(url)) {
-      setShareMsg('共有URLが8000文字を超えました。解説を外すか短くしてください。');
-      setShareUrl(null);
-      return;
-    }
-    setShareUrl(url);
-    setShareMsg(isLocalHost(window.location.hostname)
-      ? 'localhost のURLは他者向け共有に使えません。静的ホストへデプロイしたURLを使ってください。'
-      : null);
   };
 
   return (
@@ -246,7 +217,7 @@ export function DetailPage() {
 
       </div>
       <details className="details panel detail-tools">
-        <summary>共有・その他</summary>
+        <summary>その他</summary>
       <div className="btn-row wrap">
         <DuplicateProblemButton
           key={problem.id}
@@ -273,58 +244,6 @@ export function DetailPage() {
           削除
         </button>
       </div>
-
-      <section className="panel">
-        <h2 className="section-title">URL共有</h2>
-        <div className="check-grid">
-          <label className="check">
-            <input
-              type="checkbox"
-              checked={shareOpts.includeAnswerAndExplanation}
-              onChange={(e) =>
-                setShareOpts({ ...shareOpts, includeAnswerAndExplanation: e.target.checked })
-              }
-            />
-            正解・解説を含める
-          </label>
-          <label className="check">
-            <input
-              type="checkbox"
-              checked={shareOpts.includeTags}
-              onChange={(e) => setShareOpts({ ...shareOpts, includeTags: e.target.checked })}
-            />
-            タグを含める
-          </label>
-          <label className="check">
-            <input
-              type="checkbox"
-              checked={shareOpts.includeSourceUrl}
-              onChange={(e) => setShareOpts({ ...shareOpts, includeSourceUrl: e.target.checked })}
-            />
-            出典URLを含める
-          </label>
-        </div>
-        <button type="button" className="btn btn-primary" onClick={onShare}>
-          共有URLを生成
-        </button>
-        {shareMsg && <p className="warn">{shareMsg}</p>}
-        {shareUrl && (
-          <div className="share-box">
-            <p className="hint">プレビュー（画像・メモ・履歴は含まれません）</p>
-            <textarea readOnly value={shareUrl} rows={4} />
-            <button
-              type="button"
-              className="btn"
-              onClick={async () => {
-                await navigator.clipboard.writeText(shareUrl);
-                setMsg('コピーしました');
-              }}
-            >
-              コピー
-            </button>
-          </div>
-        )}
-      </section>
 
       </details>
 

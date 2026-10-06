@@ -179,7 +179,7 @@ it('uses the visible untitled fallback in confirmation', async () => {
   expect(document.querySelector('[role="dialog"]')!.textContent).toContain('「無題の問題」を複製します。');
 });
 
-it('removes PNG export and preview while retaining attached images and URL sharing', async () => {
+it('retains attached images and compact remaining tools after PNG and problem sharing retirement', async () => {
   await mount();
   const before = localStorage.getItem(STORAGE_KEY);
   expect(host.textContent).not.toContain('PNG保存');
@@ -188,7 +188,9 @@ it('removes PNG export and preview while retaining attached images and URL shari
   expect(host.querySelectorAll('.problem-attachments img')).toHaveLength(1);
   await click(button('正解・解説を表示'));
   expect(host.querySelectorAll('.problem-attachments img')).toHaveLength(3);
-  await click(button('共有URLを生成'));
-  expect(host.querySelector<HTMLTextAreaElement>('.share-box textarea')!.value).toContain('#share=v1.');
+  expect(host.textContent).not.toContain('共有');
+  expect(host.querySelector('.share-box, .detail-tools section')).toBeNull();
+  expect(host.querySelector('.detail-tools summary')?.textContent).toBe('その他');
+  expect([...host.querySelectorAll('.detail-tools button')].map((item) => item.textContent?.trim())).toEqual(['複製', '削除']);
   expect(localStorage.getItem(STORAGE_KEY)).toBe(before);
 });

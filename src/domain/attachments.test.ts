@@ -2,7 +2,6 @@ import { afterEach, beforeEach, expect, it } from 'vitest';
 import { attachmentRole, attachmentsForRole } from './attachments';
 import { createLegacySampleProblems } from '@/data/legacySamples';
 import { LocalStorageRepository } from '@/storage/repository';
-import { DEFAULT_SHARE_OPTIONS, decodeSharePayload, encodeSharePayload, extractSharePayload } from './share';
 import { emptyStore, type Attachment } from './types';
 import { isContentRevisionChange } from './validate';
 
@@ -54,16 +53,6 @@ it('duplicates all image roles with new IDs, without modifying the source or ima
   expect(copy.attachments.map((image) => image.id)).not.toEqual(images.map((image) => image.id));
   expect(copy.attachments.map((image) => [image.role, image.dataUrl, image.width, image.height])).toEqual(images.map((image) => [image.role, image.dataUrl, image.width, image.height]));
   expect(original.problems[0]!.attachments).toEqual(images);
-});
-
-it('keeps every image out of share URLs even when answer and explanation sharing is enabled', () => {
-  const payload = extractSharePayload(fixture().problems[0]!, [], DEFAULT_SHARE_OPTIONS);
-  expect(payload).not.toHaveProperty('attachments');
-  const decoded = decodeSharePayload(encodeSharePayload(payload));
-  expect(decoded.ok).toBe(true);
-  if (decoded.ok) expect(JSON.stringify(decoded.payload)).not.toContain('data:image');
-  const invalidPayload = { ...payload, attachments: images };
-  expect(decodeSharePayload(encodeSharePayload(invalidPayload))).toMatchObject({ ok: false });
 });
 
 it('changes the content revision when an image moves into or out of the question, but not when a legacy role is made explicit', () => {

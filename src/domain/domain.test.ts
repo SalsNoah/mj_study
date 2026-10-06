@@ -6,13 +6,6 @@ import { validateProblem, hasErrors } from './validate';
 import { emptyContext, type Problem } from './types';
 import { parseHandNotation } from './parse';
 import { normalizeTagKey, validateTagName } from './tags';
-import {
-  decodeSharePayload,
-  encodeSharePayload,
-  extractSharePayload,
-  payloadOmitsAnswer,
-  DEFAULT_SHARE_OPTIONS,
-} from './share';
 
 function t(n: string) {
   const r = parseHandNotation(n);
@@ -121,62 +114,5 @@ describe('tags A09', () => {
     expect(normalizeTagKey('  ABC ')).toBe('abc');
     const v = validateTagName('abc', [{ id: '1', name: 'ABC' }]);
     expect(v.ok).toBe(false);
-  });
-});
-
-describe('share A27 A28 A29 A31', () => {
-  const problem: Problem = {
-    id: 'internal',
-    title: '題',
-    concealed: t('123m'),
-    drawn: '4m',
-    melds: [],
-    doraIndicators: t('1p'),
-    answerEnabled: true,
-    acceptedDiscards: ['1m'],
-    explanation: '解説',
-    privateMemo: '秘密',
-    tagIds: ['t1'],
-    context: emptyContext(),
-    attachments: [
-      { id: 'a1', dataUrl: 'data:image/png;base64,xx', width: 1, height: 1 },
-    ],
-    sourceUrl: 'https://example.com',
-    createdAt: '2026-01-01T00:00:00.000Z',
-    updatedAt: '2026-01-01T00:00:00.000Z',
-  };
-
-  it('roundtrips and omits private fields', () => {
-    const payload = extractSharePayload(problem, ['タグ'], {
-      ...DEFAULT_SHARE_OPTIONS,
-      includeTags: true,
-      includeSourceUrl: true,
-    });
-    const encoded = encodeSharePayload(payload);
-    const decoded = decodeSharePayload(encoded);
-    expect(decoded.ok).toBe(true);
-    if (!decoded.ok) return;
-    expect(decoded.payload.title).toBe('題');
-    expect(JSON.stringify(decoded.payload)).not.toContain('秘密');
-    expect(JSON.stringify(decoded.payload)).not.toContain('data:image');
-    expect(JSON.stringify(decoded.payload)).not.toContain('internal');
-  });
-
-  it('can omit answer and explanation completely', () => {
-    const payload = extractSharePayload(problem, [], {
-      includeAnswerAndExplanation: false,
-      includeTags: false,
-      includeSourceUrl: false,
-    });
-    expect(payloadOmitsAnswer(payload)).toBe(true);
-    const decoded = decodeSharePayload(encodeSharePayload(payload));
-    expect(decoded.ok).toBe(true);
-    if (!decoded.ok) return;
-    expect(payloadOmitsAnswer(decoded.payload)).toBe(true);
-  });
-
-  it('rejects broken / unknown version', () => {
-    expect(decodeSharePayload('v9.abc').ok).toBe(false);
-    expect(decodeSharePayload('v1.!!!').ok).toBe(false);
   });
 });

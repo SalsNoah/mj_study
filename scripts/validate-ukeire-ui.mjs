@@ -2,7 +2,9 @@
 import { chromium } from 'playwright';
 import { expect } from '@playwright/test';
 import { openEditorNotes, discardFixtureDraft } from './editor-ui-helpers.mjs';
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+
+const legacy = JSON.parse(await readFile(new URL('../src/test/fixtures/legacy-problem-share.json', import.meta.url), 'utf8'));
 
 const evidence = new URL('../evidence/ukeire/', import.meta.url).pathname;
 await mkdir(evidence, { recursive: true });
@@ -238,9 +240,29 @@ try {
   await expect(page.getByRole('textbox', { name: '六索の残枚数', exact: true })).toHaveValue('0');
   expect(await page.evaluate(() => localStorage.getItem('mahjong-study:v1'))).toBe(saved);
   await allSizes('detail-ukeire', '.remaining-panel');
+  await expect(page.locator('.detail-tools > summary')).toHaveText('その他');
   await page.locator('.detail-tools > summary').click();
-  await page.getByRole('button', { name: '共有URLを生成', exact: true }).click();
-  expect(await page.locator('.share-box textarea').inputValue()).toContain('#share=v1.');
+  await expect(page.getByRole('button', { name: '共有URLを生成', exact: true })).toHaveCount(0);
+  await expect(page.locator('.share-box,.detail-tools textarea,.detail-tools .check-grid')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: '複製', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: '削除', exact: true })).toBeVisible();
+  const detailUrl = page.url();
+  await page.goto(`${origin}/${legacy.hash}`);
+  await expect(page.getByRole('heading', { name: '問題共有は終了しました', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: '自分の学習帳に追加', exact: true })).toHaveCount(0);
+  await expect(page.locator('.hand-stage,.ukeire-panel,.remaining-panel')).toHaveCount(0);
+  await expect(page.locator('body')).not.toContainText(legacy.title);
+  await allSizes('retired-share');
+  expect(await page.evaluate(() => localStorage.getItem('mahjong-study:v1'))).toBe(saved);
+  await page.getByRole('button', { name: '学習帳へ戻る', exact: true }).click();
+  await expect(page.getByRole('heading', { name: '学習帳', exact: true })).toBeVisible();
+  await page.goto(detailUrl);
+  await expect(page.getByRole('heading', { name: 'スマホ検証用の問題', exact: true })).toBeVisible();
+  await tab('detail-view', 'ukeire');
+  await expect(page.locator('.ukeire-list')).toHaveText(editorRows);
+  await expect(page.locator('.ukeire-list > li:visible')).toHaveCount(3);
+  await expect(page.locator('.remaining-panel')).not.toBeVisible();
+  await allSizes('detail-ukeire-after-retired-url', '.ukeire-panel');
   expect(await page.evaluate(() => localStorage.getItem('mahjong-study:v1'))).toBe(saved);
   await page.getByRole('button', { name: '確認した', exact: true }).click();
   await page.getByRole('button', { name: '取り消す', exact: true }).click();
@@ -292,7 +314,7 @@ try {
   await page.getByLabel('正解を設定する', { exact: true }).check();
   await page.locator('.hand-stage--pick').getByRole('button', { name: '中', exact: true }).first().click();
   await page.getByLabel('解説', { exact: true }).fill('正解表示を開いた後の検証用解説');
-  await page.getByLabel('自分のメモ（共有されません）').fill('正解表示を開いた後の私用メモ');
+  await page.getByLabel('自分のメモ', { exact: true }).fill('正解表示を開いた後の私用メモ');
   await page.getByRole('button', { name: '保存', exact: true }).click();
   await expect(page.getByRole('heading', { name: '正解あり検証用の問題' })).toBeVisible();
   await expect(page.locator('.hand-stage .is-correct')).toHaveCount(0);
