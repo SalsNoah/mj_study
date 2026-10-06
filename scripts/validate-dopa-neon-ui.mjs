@@ -1,3 +1,4 @@
+import { discardFixtureDraft } from './editor-ui-helpers.mjs';
 // Synthetic local profiles and the two owner-supplied decorative assets only.
 import { chromium } from 'playwright';
 import { expect } from '@playwright/test';
@@ -19,7 +20,7 @@ const assets = [
  ['neon-wave-card.jpg','f84271de459bbaae2b6ae3979fa9e6a349c56d517af0dd9af1b7ec76e03677d3',465,260],
 ];
 async function nav(name) {
- await page.getByRole('link',{name,exact:true}).click();
+ await page.getByRole('link',{name,exact:true}).click(); await discardFixtureDraft(page, {'作成':'.page--editor','学習帳':'.page--library','テスト':'.page--test','学習教材':'.page--materials','記録帳':'.page--records','設定':'.page--settings'}[name]);
  await page.locator({'作成':'.page--editor','学習帳':'.page--library','設定':'.page--settings','テスト':'.page--test','学習教材':'.page--materials'}[name]).waitFor({state:'visible'});
 }
 async function capture(name) {

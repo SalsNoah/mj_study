@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { clearImportDraft, peekImportDraft, setPendingShot } from '@/features/import/draft';
 import { useApp } from '@/app/store';
 import { HandView } from '@/components/HandView';
 import { AttachmentEditor } from '@/components/AttachmentEditor';
-import type { AttachmentRole } from '@/domain/attachments';
+import { useUnsavedChanges } from '@/components/useUnsavedChanges';
+import { attachmentRole, type AttachmentRole } from '@/domain/attachments';
 import { TilePalette } from '@/components/TilePalette';
 import { RemainingButton, RemainingSettings, UkeireResults } from '@/components/UkeirePanel';
 import { parseScoreInput, scoreEntryFromValue } from '@/domain/scoreInput';
@@ -84,10 +85,20 @@ function initialHand(existing?: Problem): TileCode[] {
 
 export function EditorPage() {
   const { id } = useParams();
+  return <ProblemEditor key={id ?? 'new'} />;
+}
+
+function ProblemEditor() {
+  const { id } = useParams();
   const isNew = !id || id === 'new';
   const navigate = useNavigate();
-  const { store, saveProblem, upsertTag } = useApp();
+  const { store, saveProblem, upsertTag, externalConflict } = useApp();
   const existing = store.problems.find((p) => p.id === id);
+  const [original] = useState(() => JSON.stringify(existing));
+  const [problemId] = useState(() => existing?.id ?? createId('prob'));
+  const saved = useRef(false);
+  const mounted = useRef(true);
+  useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
 
   const [title, setTitle] = useState(existing?.title ?? '');
   const titleField = useRef<HTMLInputElement | null>(null);
@@ -107,7 +118,9 @@ export function EditorPage() {
   const [target, setTarget] = useState<Target>('concealed');
   const [history, setHistory] = useState<Array<() => void>>([]);
   const [answerEnabled, setAnswerEnabled] = useState(existing?.answerEnabled ?? (isNew && !imported));
-  const [inTest, setInTest] = useState(() => store.study.find((s) => s.problemId === existing?.id)?.inTest !== false);
+  const currentInTest = store.study.find((s) => s.problemId === existing?.id)?.inTest !== false;
+  const [inTest, setInTest] = useState(currentInTest);
+  const [originalInTest] = useState(currentInTest);
   const [accepted, setAccepted] = useState<TileCode[]>(existing?.acceptedDiscards ?? []);
   const [explanation, setExplanation] = useState(existing?.explanation ?? '');
   const [privateMemo, setPrivateMemo] = useState(existing?.privateMemo ?? '');
@@ -123,7 +136,6 @@ export function EditorPage() {
   const [imageBusy, setImageBusy] = useState(false);
   const imageUploadLock = useRef(false);
   const [sourceUrl, setSourceUrl] = useState(existing?.sourceUrl ?? '');
-  const [dirty, setDirty] = useState(!!imported);
 
   useEffect(() => {
     if (imported) clearImportDraft();
@@ -163,19 +175,6 @@ export function EditorPage() {
   }, [knownTiles, concealed.length, handMax, doraIndicators.length, melds.length, target, meldType, meldFrom]);
 
 
-  useEffect(() => {
-    const onBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (dirty) {
-        e.preventDefault();
-        e.returnValue = '';
-      }
-    };
-    window.addEventListener('beforeunload', onBeforeUnload);
-    return () => window.removeEventListener('beforeunload', onBeforeUnload);
-  }, [dirty]);
-
-  const mark = useCallback(() => setDirty(true), []);
-
   const pushHistory = (undo: () => void) => {
     setHistory((h) => [...h.slice(-49), undo]);
   };
@@ -190,7 +189,6 @@ export function EditorPage() {
   const addTile = (code: TileCode) => {
     if (blockedReasons[code]) { setError(blockedReasons[code]!); return; }
     setError(null);
-    mark();
     if (target === 'concealed') {
       if (concealed.length >= handMax) return;
       setHand([...concealed, code], concealed);
@@ -230,14 +228,12 @@ export function EditorPage() {
 
   const removeMeld = (meldId: string) => {
     setError(null);
-    mark();
     const prev = melds;
     setMelds(melds.filter((m) => m.id !== meldId));
     pushHistory(() => setMelds(prev));
   };
 
   const removeConcealedAt = (index: number) => {
-    mark();
     setHand(
       concealed.filter((_, i) => i !== index),
       concealed,
@@ -246,7 +242,6 @@ export function EditorPage() {
 
   const removeDoraAt = (index: number) => {
     setError(null);
-    mark();
     const prev = doraIndicators;
     setDora(doraIndicators.filter((_, i) => i !== index));
     pushHistory(() => setDora(prev));
@@ -258,7 +253,6 @@ export function EditorPage() {
     last();
     setError(null);
     setHistory((h) => h.slice(0, -1));
-    mark();
   };
 
   const clearAll = () => {
@@ -267,14 +261,12 @@ export function EditorPage() {
     setMelds([]);
     setDora([]);
     setAccepted([]);
-    mark();
   };
 
   const doSort = () => {
     const prev = concealed;
     setConcealed(maybeSortConcealed(concealed, true));
     pushHistory(() => setConcealed(prev));
-    mark();
   };
 
   const startMeldTab = (type: MeldType) => {
@@ -286,7 +278,7 @@ export function EditorPage() {
   const draftProblem = useMemo((): Problem => {
     const now = nowIso();
     return {
-      id: existing?.id ?? createId('prob'),
+      id: problemId,
       title,
       concealed,
       drawn: null,
@@ -304,6 +296,7 @@ export function EditorPage() {
       updatedAt: now,
     };
   }, [
+    problemId,
     existing,
     title,
     concealed,
@@ -319,11 +312,32 @@ export function EditorPage() {
     sourceUrl,
   ]);
 
-  const save = () => {
-    if (imageUploadLock.current) { setError('画像の準備が終わるまでお待ちください。'); return; }
+  // Compare the editable values, not interaction history. Invalid score drafts and unfinished
+  // tag entry also count, while view toggles and a change reverted to its original do not.
+  const snapshot = JSON.stringify({
+    title, concealed, melds, doraIndicators, answerEnabled, inTest,
+    accepted: [...accepted].sort(), explanation, privateMemo, tagIds: [...tagIds].sort(),
+    context, attachments: attachments.map(item => ({ ...item, role: attachmentRole(item) })), sourceUrl, tagInput,
+    invalidScores: SCORE_FIELDS.map(([key]) => scoreInputs[key].error ? scoreInputs[key].draft : null),
+  });
+  const baseline = useRef(snapshot);
+  const dirty = !!imported || imageBusy || snapshot !== baseline.current;
+
+  const saveDraft = (): boolean => {
+    if (saved.current) return false;
+    if (externalConflict || JSON.stringify(existing) !== original || currentInTest !== originalInTest) {
+      setError('保存内容が別の画面で更新されています。入力内容を残したまま、上書きを止めています。再読込してから編集してください。');
+      return false;
+    }
+    if (imageUploadLock.current) { setError('画像の準備が終わるまでお待ちください。'); return false; }
+    if (tagInput.trim()) {
+      setNotesOpen(true);
+      setError('入力中の新しいタグを追加するか、入力欄を空にしてから保存してください。');
+      return false;
+    }
     if (SCORE_FIELDS.some(([key]) => scoreInputs[key].error)) {
       setError('点数に未反映の入力があります。修正してから保存してください。');
-      return;
+      return false;
     }
     const issues = validateProblem(draftProblem);
     setWarns(issues.filter((i) => i.level === 'warn').map((i) => i.message));
@@ -332,16 +346,20 @@ export function EditorPage() {
       if (first === 'title_len') titleField.current?.focus();
       if (['explanation_len', 'memo_len', 'tags_per', 'attach_max', 'answer_empty', 'answer_missing', 'bad_url'].includes(first)) setNotesOpen(true);
       setError(issues.filter((i) => i.level === 'error').map((i) => i.message).join(' / '));
-      return;
+      return false;
     }
     const result = saveProblem(draftProblem, isNew || !existing, inTest);
     if (!result.ok) {
       setError(result.reason);
-      return;
+      return false;
     }
-    setDirty(false);
+    saved.current = true;
     setError(null);
-    navigate(`/problems/${draftProblem.id}`);
+    return true;
+  };
+  const unsaved = useUnsavedChanges({ dirty, onSave: saveDraft, saveDisabled: imageBusy });
+  const save = () => {
+    if (saveDraft()) unsaved.leave(() => { void navigate(`/problems/${draftProblem.id}`); });
   };
 
   const onImage = async (file: File | null, role: AttachmentRole) => {
@@ -354,15 +372,15 @@ export function EditorPage() {
     setImageBusy(true);
     try {
       const result = await compressImageFile(file);
+      if (!mounted.current) return;
       if (!result.ok) { setImageMsg(result.reason); return; }
       setAttachments((current) => [...current,
         { id: createId('att'), dataUrl: result.dataUrl, width: result.width, height: result.height, role },
       ]);
       setImageMsg(null);
-      mark();
     } finally {
       imageUploadLock.current = false;
-      setImageBusy(false);
+      if (mounted.current) setImageBusy(false);
     }
   };
 
@@ -375,7 +393,6 @@ export function EditorPage() {
     if ('tag' in r && !tagIds.includes(r.tag.id) && tagIds.length < LIMITS.tagsPerProblem) {
       setTagIds([...tagIds, r.tag.id]);
       setTagInput('');
-      mark();
     }
   };
 
@@ -385,7 +402,6 @@ export function EditorPage() {
     setScoreInputs((previous) => ({ ...previous, [key]: { draft, mode, error: parsed.ok ? null : parsed.error } }));
     if (parsed.ok) setContext((previous) => ({ ...previous, scores: { ...previous.scores, [key]: parsed.value } }));
     setError(null);
-    mark();
   };
   const normalizeScore = (key: ScoreKey) => {
     const parsed = parseScoreInput(scoreInputs[key].draft, scoreInputs[key].mode);
@@ -402,7 +418,6 @@ export function EditorPage() {
     setContext((previous) => ({ ...previous, scores: { ...previous.scores, [key]: parsed.value } }));
     setScoreInputs((previous) => ({ ...previous, [key]: scoreEntryFromValue(parsed.value) }));
     setError(null);
-    mark();
     scoreFields.current[key]?.focus();
   };
 
@@ -422,7 +437,6 @@ export function EditorPage() {
                 className={context.roundWind === o.value ? 'is-on' : ''}
                 onClick={() => {
                   setContext({ ...context, roundWind: o.value });
-                  mark();
                 }}
               >
                 {o.label}
@@ -439,7 +453,6 @@ export function EditorPage() {
                   ...context,
                   handNumber: e.target.value === '' ? null : Number(e.target.value),
                 });
-                mark();
               }}
             >
               <option value="">局</option>
@@ -458,7 +471,6 @@ export function EditorPage() {
                 className={context.seatWind === o.value ? 'is-on' : ''}
                 onClick={() => {
                   setContext({ ...context, seatWind: o.value });
-                  mark();
                 }}
               >
                 {o.label}
@@ -475,7 +487,6 @@ export function EditorPage() {
                   ...context,
                   turn: e.target.value === '' ? null : Number(e.target.value),
                 });
-                mark();
               }}
             >
               <option value="">巡目</option>
@@ -499,7 +510,6 @@ export function EditorPage() {
                   ...context,
                   honba: e.target.value === '' ? null : Number(e.target.value),
                 });
-                mark();
               }}
             />
             <span className="ctx-mini__unit">本場</span>
@@ -517,7 +527,6 @@ export function EditorPage() {
                   ...context,
                   riichiSticks: e.target.value === '' ? null : Number(e.target.value),
                 });
-                mark();
               }}
             />
             <span className="ctx-mini__unit">供託</span>
@@ -673,7 +682,6 @@ export function EditorPage() {
             onChange={(e) => {
               setAnswerEnabled(e.target.checked);
               if (!e.target.checked) setAccepted([]);
-              mark();
             }}
           />
           正解を設定する
@@ -681,7 +689,7 @@ export function EditorPage() {
         {answerEnabled && (
           <div>
             <label className="check editor-test-option">
-              <input type="checkbox" checked={inTest} onChange={(event) => { setInTest(event.target.checked); mark(); }} />
+              <input type="checkbox" checked={inTest} onChange={(event) => { setInTest(event.target.checked); }} />
               テストに出題する
             </label>
             <p className="hint">切るのが正解の牌をタップ（複数可・もう一度で解除）</p>
@@ -693,11 +701,11 @@ export function EditorPage() {
                 tight
                 selectablePool="concealedDrawn"
                 marks={new Map(accepted.map((c) => [c, 'correct' as const]))}
+                selectedCodes={acceptedSet}
                 onSelectCode={(c) => {
                   setAccepted((a) =>
                     acceptedSet.has(c) ? a.filter((x) => x !== c) : [...a, c],
                   );
-                  mark();
                 }}
               />
             </div>
@@ -709,7 +717,6 @@ export function EditorPage() {
             value={explanation}
             onChange={(e) => {
               setExplanation(e.target.value);
-              mark();
             }}
             rows={3}
             maxLength={LIMITS.explanation}
@@ -721,7 +728,6 @@ export function EditorPage() {
             value={privateMemo}
             onChange={(e) => {
               setPrivateMemo(e.target.value);
-              mark();
             }}
             rows={2}
             maxLength={LIMITS.privateMemo}
@@ -745,7 +751,6 @@ export function EditorPage() {
                           ? [...ids, t.id]
                           : ids,
                     );
-                    mark();
                   }}
                 >
                   {t.name}
@@ -775,12 +780,11 @@ export function EditorPage() {
             value={sourceUrl}
             onChange={(e) => {
               setSourceUrl(e.target.value);
-              mark();
             }}
             placeholder="https://"
           />
         </label>
-        <AttachmentEditor attachments={attachments} onChange={(next) => { setAttachments(next); mark(); }}
+        <AttachmentEditor attachments={attachments} onChange={(next) => { setAttachments(next); }}
           onImage={onImage} imageMessage={imageMsg} sessionKey={existing?.id ?? 'new'} />
       </details>
 
@@ -790,6 +794,7 @@ export function EditorPage() {
 
   return (
     <div className="page page--editor">
+      {unsaved.dialog}
       <header className="page-header page-header--compact">
         <h1>{isNew ? '問題を作成' : '問題を編集'}</h1>
       <label className="editor-title">
@@ -800,7 +805,6 @@ export function EditorPage() {
           value={title}
           onChange={(e) => {
             setTitle(e.target.value);
-            mark();
           }}
           maxLength={LIMITS.title}
         />

@@ -160,6 +160,8 @@ export class LocalStorageRepository {
 
   setExternalChangeHandler(handler: ((info: { revision: number }) => void) | null) {
     this.onExternalChange = handler;
+    // React StrictMode can dispose and then resubscribe the same repository.
+    if (handler && typeof window !== 'undefined') window.addEventListener('storage', this.handleStorage);
   }
 
   private handleStorage = (ev: StorageEvent) => {
@@ -338,8 +340,8 @@ export class LocalStorageRepository {
     return this.persist(next);
   }
 
-  /** Material actions must not overwrite a stale in-memory store, even within one tab. */
-  private checkMaterialWrite(store: Store): { ok: true; raw: string | null } | Extract<SaveResult, { ok: false }> {
+  /** Draft saves must not overwrite a stale in-memory store, even within one tab. */
+  private checkCurrentWrite(store: Store): { ok: true; raw: string | null } | Extract<SaveResult, { ok: false }> {
     const conflict: Extract<SaveResult, { ok: false }> = {
       ok: false, code: 'conflict', reason: 'データが更新されています。再読込してから保存してください',
     };
@@ -363,7 +365,7 @@ export class LocalStorageRepository {
   saveMaterial(store: Store, material: LearningMaterial): SaveResult {
     const checked = validateLearningMaterial(material);
     if (!checked.ok) return { ...checked, code: 'validation' };
-    const current = this.checkMaterialWrite(store);
+    const current = this.checkCurrentWrite(store);
     if (!current.ok) return current;
     const materials = store.materials ?? [];
     const duplicate = materials.find((item) => item.id !== checked.material.id && item.url === checked.material.url);
@@ -385,7 +387,7 @@ export class LocalStorageRepository {
     if (typeof eventId !== 'string' || !eventId.trim() || typeof comment !== 'string' || comment.length > MATERIAL_LIMITS.comment) {
       return { ok: false, code: 'validation', reason: `学習記録のIDまたはコメントが不正です。コメントは${MATERIAL_LIMITS.comment}文字以内で入力してください` };
     }
-    const current = this.checkMaterialWrite(store);
+    const current = this.checkCurrentWrite(store);
     if (!current.ok) return current;
     const material = store.materials?.find((item) => item.id === materialId);
     if (!material) return { ok: false, code: 'validation', reason: '教材が見つかりません' };
@@ -405,7 +407,7 @@ export class LocalStorageRepository {
   }
 
   undoMaterialStudy(store: Store, eventId: string): SaveResult {
-    const current = this.checkMaterialWrite(store);
+    const current = this.checkCurrentWrite(store);
     if (!current.ok) return current;
     const events = store.materialStudyEvents ?? [];
     if (!events.some((event) => event.id === eventId)) return { ok: true, store };
@@ -414,6 +416,8 @@ export class LocalStorageRepository {
   }
 
   saveProblem(store: Store, problem: Problem, isNew: boolean, inTest?: boolean): SaveResult {
+    const current = this.checkCurrentWrite(store);
+    if (!current.ok) return current;
     const issues = validateProblem(problem);
     if (hasErrors(issues)) {
       return {
@@ -473,7 +477,7 @@ export class LocalStorageRepository {
       }
     }
 
-    return this.persist({ ...store, problems, study });
+    return this.persist({ ...store, problems, study }, current.raw);
   }
 
   deleteProblem(store: Store, problemId: string): SaveResult {
@@ -623,7 +627,7 @@ export class LocalStorageRepository {
     let expectedRaw: string | null | undefined;
     if (current.materials !== undefined || current.materialStudyEvents !== undefined ||
       backup.materials !== undefined || backup.materialStudyEvents !== undefined) {
-      const before = this.checkMaterialWrite(current);
+      const before = this.checkCurrentWrite(current);
       if (!before.ok) return before;
       expectedRaw = before.raw;
     }

@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { HashRouter, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import { createHashRouter, Navigate, Route, RouterProvider, Routes, useLocation, useNavigate, type RouterProviderProps } from 'react-router-dom';
 import { AppProvider, useApp } from './store';
 import { RouteScroll } from '@/components/RouteScroll';
 import { BottomNav } from '@/components/BottomNav';
@@ -114,13 +114,15 @@ function AppRoutes() {
   );
 }
 
-export default function App() {
+export function createAppRouter() {
+  return createHashRouter([{ path: '*', element: <AppRoutes /> }]);
+}
+
+export default function App({ router }: { router: RouterProviderProps['router'] }) {
   return (
     <AppProvider>
       <div className="app-shell">
-        <HashRouter>
-          <AppRoutes />
-        </HashRouter>
+        <RouterProvider router={router} />
       </div>
     </AppProvider>
   );
