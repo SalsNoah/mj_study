@@ -10,6 +10,8 @@ await mkdir(out,{recursive:true});
 const when='2026-10-01T00:00:00.000Z';
 const item=(id,title)=>({id,title,url:`https://example.com/${id}`,comment:'保存済みの学習コメント',createdAt:when,updatedAt:when});
 const seed={schemaVersion:1,revision:0,problems:[],tags:[],study:[],attempts:[],settings:{autoSort:true},daily:{},materials:[item('first','牌効率を振り返る'),item('second','守備の考え方'),{...item('archived','以前の教材'),archivedAt:when}],materialStudyEvents:[0,1].map(n=>({id:`event-${n}`,materialId:'first',at:when,title:'牌効率を振り返る',url:'https://example.com/first',comment:`学習記録${n+1}`}))};
+for (const material of seed.materials) material.sourceIds = [JSON.stringify(['material-v1', material.id, material.createdAt, material.url])];
+for (const event of seed.materialStudyEvents) event.sourceIds = [JSON.stringify(['material-study-v1', event.id, event.materialId, event.at, event.title, event.url, event.comment])];
 const browser=await chromium.launch({headless:true});const contexts=[],results=[],errors=[],network=[];let page;
 const data=()=>page.evaluate(()=>JSON.parse(localStorage.getItem('mahjong-study:v1')));
 const dialog=()=>page.getByRole('dialog',{name:'教材をアーカイブしますか？',exact:true});
