@@ -194,3 +194,5 @@ html[data-theme='dopa'] .page--records {
 
 html[data-theme='dopa'] :is(input, textarea)::placeholder { color: var(--muted); opacity: 1; }
 html[data-theme='dopa'] :is(button, a, input, textarea, select, summary):focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+html[data-theme='dopa'] :is(.seg, .target-tabs--scroll) > button:focus-visible { outline-offset: -2px; }
+html[data-theme='dopa'] .seg > button.is-on:focus-visible { outline-color: var(--on-accent); }

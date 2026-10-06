@@ -124,8 +124,32 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: dopa-button-screenshots
-          path: evidence/dopa-buttons/
+          name: dopa-button-focus-screenshots
+          path: |
+            evidence/dopa-buttons/*focus*.png
+            evidence/dopa-buttons/results.json
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dopa-button-state-screenshots
+          path: |
+            evidence/dopa-buttons/*-normal-*.png
+            evidence/dopa-buttons/*-hover-*.png
+            evidence/dopa-buttons/*-active-*.png
+            evidence/dopa-buttons/results.json
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dopa-button-flow-screenshots
+          path: |
+            evidence/dopa-buttons/*.png
+            evidence/dopa-buttons/results.json
+            !evidence/dopa-buttons/*focus*.png
+            !evidence/dopa-buttons/*-normal-*.png
+            !evidence/dopa-buttons/*-hover-*.png
+            !evidence/dopa-buttons/*-active-*.png
           retention-days: 7
 
   dopa-preview:
