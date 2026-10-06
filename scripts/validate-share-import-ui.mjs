@@ -189,7 +189,7 @@ try {
       await expect(page.getByRole('heading', { name: '問題を編集', exact: true })).toBeVisible();
       await noProblemSharing();
       await openEditorNotes(page);
-      await expect(page.getByLabel('自分のメモ', { exact: true })).toHaveValue(entry.privateMemo);
+      await expect(page.getByRole('textbox', { name: '自分のメモ', exact: true })).toHaveValue(entry.privateMemo);
       await capture(`editor-${entry.id}-${width}`);
       expect(await rawStore()).toBe(expectedStore);
     }
