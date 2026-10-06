@@ -184,7 +184,7 @@ try {
   }
   await titleNode.dispose(); await scoreNode.dispose();
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.getByLabel('自分のメモ（共有されません）').fill('低い画面でも追加情報へ届く');
+  await page.getByLabel('自分のメモ').fill('低い画面でも追加情報へ届く');
   await capture('editor-short-notes', '.editor-notes');
   await page.locator('.editor-tools .ukeire-expand').click();
   await expect(page.locator('.editor-tools .ukeire-list > li:visible')).toHaveCount(13);

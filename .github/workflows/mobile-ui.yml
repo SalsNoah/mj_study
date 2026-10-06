@@ -19,7 +19,6 @@ on:
       - 'scripts/validate-header-images-ui.mjs'
       - 'scripts/capture-dopa-preview.mjs'
       - 'scripts/validate-dora-ui.mjs'
-      - 'scripts/preview-fixture.*'
       - 'scripts/validate-icon-ui.mjs'
       - 'index.html'
       - '.github/workflows/mobile-ui.yml'

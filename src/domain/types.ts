@@ -191,8 +191,6 @@ export const LIMITS = {
   storageWarnBytes: 3 * 1024 * 1024,
   storageMaxBytes: 4 * 1024 * 1024,
   backupMaxBytes: 20 * 1024 * 1024,
-  shareUrlMaxChars: 8000,
-  shareJsonMaxBytes: 64 * 1024,
   searchDebounceMs: 150,
 } as const;
 

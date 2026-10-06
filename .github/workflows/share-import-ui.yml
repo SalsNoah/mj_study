@@ -1,12 +1,22 @@
-name: Share import UI checks
+name: Retired problem sharing UI checks
 on:
   pull_request:
     paths:
-      - 'src/app/App.tsx'
-      - 'src/domain/share*'
+      - 'src/app/**'
+      - 'src/components/**'
       - 'src/features/share/**'
-      - 'src/features/detail/DetailPage.tsx'
+      - 'src/features/detail/**'
+      - 'src/features/editor/**'
+      - 'src/features/library/**'
+      - 'src/features/records/**'
+      - 'src/features/settings/**'
+      - 'src/storage/**'
+      - 'src/domain/**'
+      - 'src/test/fixtures/legacy-problem-share.json'
       - 'scripts/validate-share-import-ui.mjs'
+      - 'scripts/editor-ui-helpers.mjs'
+      - 'package.json'
+      - 'package-lock.json'
       - '.github/workflows/share-import-ui.yml'
 permissions:
   contents: read
@@ -23,7 +33,7 @@ jobs:
       - run: npm ci
       - run: npm run build
       - run: npx playwright install --with-deps chromium
-      - name: Exercise actual built share URLs and explicit import
+      - name: Verify retired legacy URLs, preserved data, and remaining mobile tools
         run: |
           npm run preview -- --host 127.0.0.1 --port 5178 --base /mj_study/ > /tmp/mahjong-share-preview.log 2>&1 &
           for i in {1..30}; do curl --silent --fail http://127.0.0.1:5178/mj_study/ > /dev/null && break; sleep 1; done
@@ -31,6 +41,6 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: share-import-screenshots
+          name: retired-problem-sharing-screenshots
           path: evidence/share-import/
           retention-days: 7

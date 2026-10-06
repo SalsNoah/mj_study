@@ -23,7 +23,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run typecheck
-      - run: npx vitest run src/features/unsavedChanges.test.tsx src/features/share/ShareImportFlow.test.tsx src/features/materials/MaterialsPage.test.tsx src/storage/repository.test.ts --maxWorkers=1
+      - run: npx vitest run src/features/unsavedChanges.test.tsx src/features/share/RetiredProblemShare.test.tsx src/features/materials/MaterialsPage.test.tsx src/storage/repository.test.ts --maxWorkers=1
       - run: npm run build
       - run: npx playwright install --with-deps chromium
       - name: Verify guarded navigation and accessible answer selection

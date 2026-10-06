@@ -1,0 +1,53 @@
+{
+  "description": "Frozen v1 problem-share URL created before retirement. Used only to prove old valid URLs remain inert.",
+  "hash": "#share=v1.TVG9SjRBEHyXjvf77tbzBzbWQBADRQzEoG-28QZnZ5bZWe_0uGBFBUEwEhMTUVBE_ElNfJjl9HwLu1c5TAq6uqnqrh7CHiRxBEEHQ5DAx-Xd-Pj14-p0Y22lrp7GF-df12cQgXJWERpKIdmCOGNmRqAjEOdSCnQE4kJKgY7ArMCcwMLBD2xHkHrsW7ZrC5-RSQvWFd55XLapVhicFw5mm3m2DzQIkAzBu9Kmm9ryJhCLYg9tulpmXfLNJQVh-NsOpWeneZ5ztouQtCPwWqueXg9a7bIHE65v19DuQmJLY1hCOU_cGQJhwaYzc-02TxWuDL1p1ac_Lev8tDUaRYC26JNfsthtIgu-JCaVojxQuqgLhb45-TcOGuQGLQbtJBT-Aac_PjnmB0zubiYPj3X1PLm-_7x9q6vLunqoqyM5DHcaienL6sP3-vBF9HhTr2jDG1brhZAXSatFA8xyQ_-Vy1qGdlDt_8u94_0yGH0D",
+  "title": "旧共有URLの問題",
+  "payload": {
+    "v": 1,
+    "title": "旧共有URLの問題",
+    "concealed": [
+      "1m",
+      "2m",
+      "3m",
+      "1p",
+      "2p",
+      "3p",
+      "1s",
+      "2s",
+      "3s",
+      "4s",
+      "5s",
+      "7z",
+      "7z"
+    ],
+    "drawn": "0s",
+    "melds": [],
+    "doraIndicators": [
+      "4z"
+    ],
+    "context": {
+      "roundWind": "1z",
+      "handNumber": 1,
+      "seatWind": "1z",
+      "turn": 6,
+      "honba": 0,
+      "riichiSticks": 0,
+      "ownRank": null,
+      "scores": {
+        "east": 25000,
+        "south": 25000,
+        "west": 25000,
+        "north": 25000
+      }
+    },
+    "answerEnabled": true,
+    "acceptedDiscards": [
+      "7z"
+    ],
+    "explanation": "旧URL内の解説は表示しない",
+    "tags": [
+      "旧共有タグ"
+    ],
+    "sourceUrl": "https://example.com/legacy-problem"
+  }
+}

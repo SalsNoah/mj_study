@@ -7,7 +7,6 @@ import { AppProvider } from '@/app/store';
 import { EditorPage } from '@/features/editor/EditorPage';
 import { DetailPage } from '@/features/detail/DetailPage';
 import { TestPage } from '@/features/test/TestPage';
-import { decodeSharePayload } from '@/domain/share';
 import { STORAGE_KEY, type Store } from '@/domain/types';
 import { UkeirePanel } from './UkeirePanel';
 import { analyzeHand } from '@/domain/ukeire';
@@ -53,7 +52,7 @@ function expectUncollapsed(element: Element) {
 }
 
 describe('ukeire UI and existing study flows (jsdom; not a layout/browser test)', () => {
-  it('updates on editing, saves unchanged fields, matches detail, preserves share and hides until answered', async () => {
+  it('updates on editing, saves unchanged fields, matches detail, keeps sharing retired and hides until answered', async () => {
     await act(async () => root.render(
       <AppProvider><MemoryRouter><Routes>
         <Route path="/" element={<EditorPage />} />
@@ -98,10 +97,8 @@ describe('ukeire UI and existing study flows (jsdom; not a layout/browser test)'
     await click(host.querySelector<HTMLElement>('.ukeire-expand')!);
     await click(host.querySelector<HTMLElement>('.ukeire-expand')!);
     expect(localStorage.getItem(STORAGE_KEY)).toBe(beforeAnalysisToggle);
-    await click(byText('共有URLを生成'));
-    const url = host.querySelector<HTMLTextAreaElement>('.share-box textarea')!.value;
-    const decoded = decodeSharePayload(url.split('#share=')[1]!);
-    expect(decoded.ok).toBe(true);
+    expect(host.textContent).not.toContain('共有URLを生成');
+    expect(host.querySelector('.share-box')).toBeNull();
     expect(localStorage.getItem(STORAGE_KEY)).toBe(beforeAnalysisToggle);
     await click(byText('確認した'));
     expect(store().study[0]!.confirmationCount).toBe(1);

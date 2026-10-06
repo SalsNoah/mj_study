@@ -2,7 +2,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { LocalStorageRepository, type SaveResult } from './repository';
 import { emptyContext, emptyStore, type Problem, type Store } from '@/domain/types';
 import { filterTestCandidates, isInTest } from '@/domain/quiz';
-import { DEFAULT_SHARE_OPTIONS, extractSharePayload } from '@/domain/share';
 
 const key = 'test-participation';
 let repo: LocalStorageRepository;
@@ -91,11 +90,12 @@ describe('test participation in a single problem save', () => {
     expect(duplicated.study.find((s) => s.problemId !== 'problem')?.inTest).toBe(true);
   });
 
-  it('shares no personal participation setting and excludes an answerless received problem', () => {
-    const payload = extractSharePayload(problem(), [], { ...DEFAULT_SHARE_OPTIONS, includeAnswerAndExplanation: false });
-    expect(payload).not.toHaveProperty('inTest');
-    expect(payload).not.toHaveProperty('study');
-    const imported = saved(repo.addFromShare(emptyStore(), payload));
+  it('keeps an existing answerless imported problem excluded from tests after backup restore', () => {
+    const original = emptyStore();
+    original.problems = [{ ...problem(), id: 'previously-imported', answerEnabled: false, acceptedDiscards: [] }];
+    original.study = [{ problemId: 'previously-imported', contentRevision: 0, confirmationCount: 0,
+      lastConfirmedAt: null, understanding: 'unrated', lastReviewedAt: null }];
+    const imported = saved(repo.importJson(emptyStore(), repo.exportJson(original), 'replace'));
     expect(isInTest(imported.study[0])).toBe(true);
     expect(imported.problems[0]?.answerEnabled).toBe(false);
     expect(filterTestCandidates(imported.problems, imported.study, [], { filters: ['random'], tagIds: [] })).toEqual([]);

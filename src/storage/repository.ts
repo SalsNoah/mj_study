@@ -15,8 +15,6 @@ import {
 import { createId, nowIso } from '../domain/ids';
 import { isContentRevisionChange, validateProblem, hasErrors } from '../domain/validate';
 import { normalizeTagKey, validateTagName, canAddTag } from '../domain/tags';
-import type { SharePayload } from '../domain/share';
-import { createMeld } from '../domain/melds';
 import { SampleCatalogStorage, validCatalogReceipts, type SampleRestoreResult } from './sampleCatalogStorage';
 import { canonicalJson } from '../data/sampleIdentity';
 import { applyAttemptToStudy, bumpDaily, dayKey, dayKeyFromIso, normalizeStore } from '../domain/records';
@@ -758,80 +756,6 @@ export class LocalStorageRepository {
       ...(current.materials !== undefined || backup.materials !== undefined ? { materials } : {}),
       ...(current.materialStudyEvents !== undefined || backup.materialStudyEvents !== undefined ? { materialStudyEvents } : {}),
     }, expectedRaw);
-  }
-
-  addFromShare(store: Store, payload: SharePayload): SaveResult {
-    const now = nowIso();
-    const tagIds: string[] = [];
-    let tags = [...store.tags];
-    if (payload.tags) {
-      for (const name of payload.tags) {
-        const key = normalizeTagKey(name);
-        let existing = tags.find((t) => normalizeTagKey(t.name) === key);
-        if (!existing) {
-          const v = validateTagName(name, tags);
-          if (!v.ok) continue;
-          if (tags.length >= LIMITS.tagsTotal) continue;
-          existing = { id: createId('tag'), name: v.name };
-          tags = [...tags, existing];
-        }
-        if (tagIds.length < LIMITS.tagsPerProblem) tagIds.push(existing.id);
-      }
-    }
-
-    const melds = [];
-    for (const m of payload.melds) {
-      const created = createMeld(m.type, m.tiles, m.from, m.calledIndex, m.addedIndex);
-      if (!created.ok) {
-        return { ok: false, reason: created.reason, code: 'validation' };
-      }
-      melds.push(created.meld);
-    }
-
-    const problem: Problem = {
-      id: createId('prob'),
-      title: payload.title,
-      concealed: payload.concealed,
-      drawn: payload.drawn,
-      melds,
-      doraIndicators: payload.doraIndicators,
-      answerEnabled: payload.answerEnabled ?? false,
-      acceptedDiscards: payload.acceptedDiscards ?? [],
-      explanation: payload.explanation ?? '',
-      privateMemo: '',
-      tagIds,
-      context: payload.context,
-      attachments: [],
-      sourceUrl: payload.sourceUrl ?? '',
-      createdAt: now,
-      updatedAt: now,
-    };
-
-    const issues = validateProblem(problem);
-    if (hasErrors(issues)) {
-      return {
-        ok: false,
-        reason: issues.filter((i) => i.level === 'error').map((i) => i.message).join(' / '),
-        code: 'validation',
-      };
-    }
-
-    return this.persist({
-      ...store,
-      tags,
-      problems: [...store.problems, problem],
-      study: [
-        ...store.study,
-        {
-          problemId: problem.id,
-          contentRevision: 0,
-          confirmationCount: 0,
-          lastConfirmedAt: null,
-          understanding: 'unrated',
-          lastReviewedAt: null,
-        },
-      ],
-    });
   }
 
   addProblems(store: Store, problems: Problem[], tagName?: string): SaveResult {
