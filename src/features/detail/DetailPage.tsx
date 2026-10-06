@@ -89,9 +89,8 @@ export function DetailPage() {
     const tags = problem.tagIds.map(getTagName);
     const payload = extractSharePayload(problem, tags, shareOpts);
     const encoded = encodeSharePayload(payload);
-    const origin = window.location.origin;
     const basePath = import.meta.env.BASE_URL || '/';
-    const url = buildShareUrl(origin, basePath, encoded);
+    const url = buildShareUrl(window.location.href, basePath, encoded);
     if (shareUrlTooLong(url)) {
       setShareMsg('共有URLが8000文字を超えました。解説を外すか短くしてください。');
       setShareUrl(null);

@@ -1,0 +1,36 @@
+name: Share import UI checks
+on:
+  pull_request:
+    paths:
+      - 'src/app/App.tsx'
+      - 'src/domain/share*'
+      - 'src/features/share/**'
+      - 'src/features/detail/DetailPage.tsx'
+      - 'scripts/validate-share-import-ui.mjs'
+      - '.github/workflows/share-import-ui.yml'
+permissions:
+  contents: read
+jobs:
+  share-import-ui:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - name: Exercise actual built share URLs and explicit import
+        run: |
+          npm run preview -- --host 127.0.0.1 --port 5178 --base /mj_study/ > /tmp/mahjong-share-preview.log 2>&1 &
+          for i in {1..30}; do curl --silent --fail http://127.0.0.1:5178/mj_study/ > /dev/null && break; sleep 1; done
+          node scripts/validate-share-import-ui.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: share-import-screenshots
+          path: evidence/share-import/
+          retention-days: 7
