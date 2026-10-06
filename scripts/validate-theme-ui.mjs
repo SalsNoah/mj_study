@@ -38,8 +38,8 @@ async function mainDisclosures(name) {
 
 try {
  const ctx=await open();await nav('設定');const original=await page.evaluate(()=>localStorage.getItem('mahjong-study:v1'));
- await expect(page.getByRole('radio')).toHaveCount(5);const moe=page.getByRole('radio',{name:/萌え/});await expect(moe).toBeEnabled();await expect(moe).toHaveAttribute('aria-checked','false');
- const labels={normal:'ノーマル',cool:'クール',cute:'キュート',dopa:'DOPA',moe:'萌え'};
+ await expect(page.getByRole('radio')).toHaveCount(5);const moe=page.getByRole('radio',{name:/MOE/});await expect(moe).toBeEnabled();await expect(moe).toHaveAttribute('aria-checked','false');
+ const labels={normal:'ノーマル',cool:'クール',cute:'キュート',dopa:'DOPA',moe:'MOE'};
  for(const theme of ['normal','cool','cute','dopa','moe']) {
   await page.getByRole('radio',{name:new RegExp(`^${labels[theme]}`)}).click();await page.reload();
   expect(await page.evaluate(()=>document.documentElement.dataset.theme)).toBe(theme);expect(await page.evaluate(()=>localStorage.getItem('mahjong-study:theme'))).toBe(theme);

@@ -372,8 +372,8 @@ try {
   const dopa = page.getByRole('radio', { name: /^DOPA/ });
   await representative('theme-option', dopa); await state('theme-option', 'selected', dopa);
   await expect(dopa).toHaveAttribute('aria-checked', 'true');
-  await expect(page.getByRole('radio', { name: /萌え/ })).toBeEnabled();
-  await expect(page.getByRole('radio', { name: /萌え/ })).toHaveAttribute('aria-checked', 'false');
+  await expect(page.getByRole('radio', { name: /MOE/ })).toBeEnabled();
+  await expect(page.getByRole('radio', { name: /MOE/ })).toHaveAttribute('aria-checked', 'false');
   await frame('theme-selected-and-unselected'); await go('/records');
   const recordTabs = page.locator('.view-tabs button'); await recordTabs.nth(1).click();
   await state('view-tabs', 'selected', recordTabs.nth(1), 'records-selected-tab'); await frame('records-selected-tab');
@@ -418,7 +418,7 @@ try {
 
   // PR21 made Moe available after this DOPA audit was prepared. Check theme isolation.
   await open('/settings');
-  await page.getByRole('radio', { name: /^萌え/ }).click();
+  await page.getByRole('radio', { name: /^MOE/ }).click();
   await go('/');
   const moeUndo = page.getByRole('button', { name: '戻す', exact: true });
   await expect(moeUndo).toBeDisabled();

@@ -1,0 +1,10 @@
+/* Mochiy Pop One, Fontsource 5.3.0 / Google Fonts v12.
+   Copyright 2020 The MochiyPop Project Authors. SIL OFL 1.1:
+   public/fonts/mochiy-pop-one/OFL.txt. The supplied Japanese WOFF2 is unchanged. */
+@font-face {
+  font-family: 'Mochiy Pop One';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url('/fonts/mochiy-pop-one/mochiy-pop-one-japanese-400-normal.woff2') format('woff2');
+}

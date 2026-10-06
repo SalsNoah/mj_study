@@ -1,0 +1,20 @@
+{
+  "family": "Mochiy Pop One",
+  "fontVersion": "2.000",
+  "weight": 400,
+  "upstream": "https://github.com/fontdasu/Mochiypop",
+  "googleFonts": "https://github.com/google/fonts/tree/main/ofl/mochiypopone",
+  "distribution": "@fontsource/mochiy-pop-one@5.3.0",
+  "distributionIntegrity": "sha512-WBI8UEfHsARWhPod0OJ+kswlR68KRhmV8uciQhb4m0bxmt4qpeq9yOh0MM9S9QzwQxjbQNRIjHEXh2yk5xldTw==",
+  "upstreamLicense": "https://github.com/google/fonts/blob/main/ofl/mochiypopone/OFL.txt",
+  "license": "SIL OFL 1.1",
+  "copyright": "Copyright 2020 The MochiyPop Project Authors (https://github.com/fontdasu/Mochiypop)",
+  "licenseFile": "public/fonts/mochiy-pop-one/OFL.txt",
+  "binaryFile": "public/fonts/mochiy-pop-one/mochiy-pop-one-japanese-400-normal.woff2",
+  "sha256": "f319ddf95355b5d4861510e7a3a345b58f52cdf41a7172cc3a315360353a030e",
+  "bytes": 992600,
+  "subset": "Fontsource supplied Japanese subset, including Latin/numerals; 6871 cmap entries in its paired WOFF. Shipped WOFF2 copied unchanged; no project subsetting.",
+  "conversionForEvidenceOnly": "Paired WOFF decoded to TTF using fontTools for local size comparison; that TTF is not shipped.",
+  "loading": "Locally served only, lazy CSS registration when Moe is used; missing glyphs use readable existing fallback.",
+  "checkedAt": "2026-10-06"
+}

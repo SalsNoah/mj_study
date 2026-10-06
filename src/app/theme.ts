@@ -5,7 +5,7 @@ export const THEMES: Array<{ id: ThemeId; name: string; desc: string }> = [
   { id: 'cool', name: 'クール', desc: 'ダーク' },
   { id: 'cute', name: 'キュート', desc: 'パステル' },
   { id: 'dopa', name: 'DOPA', desc: '虹色ゲーミング' },
-  { id: 'moe', name: '萌え', desc: 'ときめきハート' },
+  { id: 'moe', name: 'MOE', desc: 'ときめきハート' },
 ];
 
 /** 見た目は端末ごとの好みなので、問題データ（バックアップ対象）とは別のキーに置く。index.html の起動スクリプトも同じキーを読む */
@@ -35,7 +35,8 @@ export function loadTheme(): ThemeId {
 export function applyTheme(theme: ThemeId) {
   document.documentElement.dataset.theme = theme;
   document.querySelector('meta[name="theme-color"]')?.setAttribute('content', STATUS_BAR[theme]);
-  if (theme === 'cute' || theme === 'moe') void import('./cuteFont');
+  if (theme === 'cute') void import('./cuteFont');
+  if (theme === 'moe') void import('./moeFont').catch(() => undefined);
 }
 
 export function saveTheme(theme: ThemeId) {

@@ -66,7 +66,12 @@ it.each<[ThemeId, string]>([['normal','#1b4d3e'],['cool','#4cc9f0'],['cute','#cf
     expect(ctx.drawImage).toHaveBeenCalledTimes(3);
   }
   const font = printed[0]!.font;
-  expect(font).toContain(theme === 'cute' || theme === 'moe' ? 'Zen Maru Gothic' : 'IBM Plex Sans JP');
+  expect(font).toContain(theme === 'moe' ? 'Mochiy Pop One' : theme === 'cute' ? 'Zen Maru Gothic' : 'IBM Plex Sans JP');
+  if (theme === 'moe') {
+    expect(font).toMatch(/^400 /);
+    expect(printed.filter(item => /^[\d,]+$/.test(item.text)).every(item => item.font.includes('Zen Maru Gothic'))).toBe(true);
+    expect(printed.find(item => item.text === '累計は表示期間より前の記録を含みます')?.font).toContain('Zen Maru Gothic');
+  }
 });
 
 it('keeps the selected theme and its counts if packaged images fail', async () => {
