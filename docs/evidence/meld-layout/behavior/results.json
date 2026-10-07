@@ -1,0 +1,56 @@
+[
+  {
+    "width": 320,
+    "status": "pass",
+    "checks": [
+      "both insertion orders",
+      "delete/readd",
+      "undo",
+      "four mixed groups",
+      "chi internal order",
+      "save/reload",
+      "in-place pon promotion at four groups",
+      "source and ID retained",
+      "four physical copies",
+      "no-op save history retained",
+      "old schema array preserved",
+      "JSON backup equality"
+    ]
+  },
+  {
+    "width": 390,
+    "status": "pass",
+    "checks": [
+      "both insertion orders",
+      "delete/readd",
+      "undo",
+      "four mixed groups",
+      "chi internal order",
+      "save/reload",
+      "in-place pon promotion at four groups",
+      "source and ID retained",
+      "four physical copies",
+      "no-op save history retained",
+      "old schema array preserved",
+      "JSON backup equality"
+    ]
+  },
+  {
+    "width": 1440,
+    "status": "pass",
+    "checks": [
+      "both insertion orders",
+      "delete/readd",
+      "undo",
+      "four mixed groups",
+      "chi internal order",
+      "save/reload",
+      "in-place pon promotion at four groups",
+      "source and ID retained",
+      "four physical copies",
+      "no-op save history retained",
+      "old schema array preserved",
+      "JSON backup equality"
+    ]
+  }
+]

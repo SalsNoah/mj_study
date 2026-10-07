@@ -1,0 +1,89 @@
+
+> mahjong-study@1.0.0 test
+> vitest run
+
+
+ RUN  v3.2.7 /workspace/mj_study
+
+ ✓ src/domain/search.test.ts (26 tests) 257ms
+ ✓ src/features/editor/EditorScoreInput.test.tsx (14 tests) 1593ms
+ ✓ src/components/UkeirePanel.test.tsx (16 tests) 1422ms
+   ✓ ukeire UI and existing study flows (jsdom; not a layout/browser test) > updates on editing, saves unchanged fields, matches detail, keeps sharing retired and hides until answered  816ms
+ ✓ src/features/library/LibrarySampleCatalog.test.tsx (8 tests) 943ms
+ ✓ src/features/mobileNavigation.test.tsx (11 tests) 1000ms
+ ✓ src/features/unsavedChanges.test.tsx (25 tests) 3556ms
+   ✓ protects changed problem titles, traps focus, and restores the navigation link on Stay and Escape  423ms
+   ✓ does not prompt for unchanged values, view toggles, edit then revert, or after explicit save  317ms
+   ✓ protects Back and Forward with real hash history and stays on the editor after cancellation  393ms
+stderr | src/features/share/RetiredProblemShare.test.tsx > leaves a retired link inert and returns without touching existing data (#share=%E0%A4%A)
+The URL path "/share=%E0%A4%A" could not be decoded because it is a malformed URL segment. This is probably due to a bad percent encoding (URIError: URI malformed).
+
+ ✓ src/features/share/RetiredProblemShare.test.tsx (14 tests) 1171ms
+   ✓ keeps old links inert after return, repeated Back/Forward and an app remount  344ms
+ ✓ src/components/TileLimit.test.tsx (12 tests) 1224ms
+ ✓ src/features/materials/MaterialsPage.test.tsx (33 tests) 840ms
+ ✓ src/features/detail/DetailActions.test.tsx (9 tests) 744ms
+ ✓ src/features/test/SessionRetest.test.tsx (17 tests) 525ms
+ ✓ src/features/editor/EditorHeader.test.tsx (5 tests) 635ms
+ ✓ src/storage/sampleCatalogStorage.test.ts (53 tests) 522ms
+ ✓ src/features/editor/EditorAttachments.test.tsx (3 tests) 715ms
+ ✓ src/features/records/RecordsPage.test.tsx (9 tests) 620ms
+ ✓ src/features/answerVisibility.test.tsx (7 tests) 466ms
+ ✓ src/features/editor/EditorAnswerDefaults.test.tsx (10 tests) 700ms
+ ✓ src/features/editor/EditorDefaults.test.tsx (3 tests) 412ms
+ ✓ src/features/detail/DetailAttachments.test.tsx (3 tests) 271ms
+ ✓ src/features/records/RecordShareButton.test.tsx (27 tests) 262ms
+ ✓ src/features/import/TileSupplyImport.test.tsx (2 tests) 263ms
+ ✓ src/features/test/TestSetupControls.test.tsx (12 tests) 225ms
+ ✓ src/features/records/TagStudySummary.test.tsx (3 tests) 241ms
+ ✓ src/features/settings/SampleCatalogFlow.test.tsx (3 tests) 198ms
+ ✓ src/features/editor/EditorResponsive.test.tsx (2 tests) 110ms
+ ✓ src/features/settings/ThemeSettings.test.tsx (4 tests) 233ms
+ ✓ src/features/settings/SampleBulkControls.test.tsx (8 tests) 196ms
+ ✓ src/components/ProblemAttachments.test.tsx (8 tests) 121ms
+ ✓ src/components/HandView.test.tsx (16 tests) 87ms
+ ✓ src/storage/materialArchive.test.ts (23 tests) 109ms
+ ✓ src/domain/ukeire.test.ts (43 tests) 68ms
+ ✓ src/storage/materialsStorage.test.ts (33 tests) 96ms
+ ✓ src/storage/sampleHistoryImport.test.ts (63 tests) 90ms
+ ✓ src/storage/materialProvenance.test.ts (17 tests) 61ms
+ ✓ src/features/settings/SampleCatalogSettings.test.tsx (7 tests) 83ms
+ ✓ src/features/settings/SettingsLinks.test.tsx (1 test) 64ms
+ ✓ src/components/WanpaiDora.test.tsx (8 tests) 68ms
+ ✓ src/storage/initialMaterials.test.ts (12 tests) 44ms
+ ✓ src/features/records/renderRecordShare.test.ts (10 tests) 47ms
+ ✓ src/domain/unifiedHandCompatibility.test.ts (6 tests) 61ms
+ ✓ src/features/import/import.test.ts (17 tests) 43ms
+ ✓ src/app/theme.test.ts (14 tests) 23ms
+ ✓ src/domain/remaining.test.ts (18 tests) 35ms
+ ✓ src/components/useDecorativeMotion.test.tsx (3 tests) 36ms
+ ✓ src/storage/repository.test.ts (8 tests) 19ms
+ ✓ src/domain/recordSeries.test.ts (34 tests) 34ms
+ ✓ src/storage/testParticipation.test.ts (9 tests) 24ms
+ ✓ src/features/materials/materialList.test.ts (32 tests) 22ms
+ ✓ src/domain/sessionRetest.test.ts (7 tests) 11ms
+ ✓ src/domain/recordShare.test.ts (9 tests) 27ms
+ ✓ src/domain/records.test.ts (12 tests) 13ms
+ ✓ src/domain/materials.test.ts (39 tests) 12ms
+ ✓ src/domain/attachments.test.ts (12 tests) 10ms
+ ✓ src/export/compressImageFile.test.ts (3 tests) 9ms
+ ✓ src/domain/materialRecords.test.ts (6 tests) 9ms
+ ✓ src/domain/validate.test.ts (20 tests) 7ms
+ ✓ src/domain/domain.test.ts (11 tests) 7ms
+ ✓ src/domain/tileSupply.test.ts (2 tests) 5ms
+ ✓ src/domain/tagRecords.test.ts (7 tests) 6ms
+ ✓ src/domain/melds.test.ts (4 tests) 4ms
+ ✓ src/domain/testEligibility.test.ts (11 tests) 7ms
+ ✓ src/domain/scoreInput.test.ts (27 tests) 5ms
+ ✓ src/components/AppIcons.test.ts (6 tests) 5ms
+
+ Test Files  63 passed (63)
+      Tests  897 passed (897)
+   Start at  07:25:54
+   Duration  18.19s (transform 1.63s, setup 339ms, collect 5.10s, tests 20.72s, environment 17.24s, prepare 3.05s)
+
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+npm notice To update run: npm install -g npm@12.2.0
+npm notice

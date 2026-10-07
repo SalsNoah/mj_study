@@ -1,0 +1,3947 @@
+[
+  {
+    "name": "320-normal",
+    "viewport": 320,
+    "documentWidth": 320,
+    "groups": [
+      {
+        "label": "加槓",
+        "box": {
+          "x": 107.3125,
+          "y": 351.6875,
+          "width": 43.359375,
+          "height": 35.15625,
+          "bottom": 386.84375,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "21.6797px 17.5781px"
+        },
+        "tiles": [
+          {
+            "label": "一萬",
+            "x": 107.3125,
+            "y": 351.6875,
+            "width": 17.578125,
+            "height": 17.578125,
+            "bottom": 369.265625,
+            "flexBasis": "17.5909px",
+            "transform": "none",
+            "transformOrigin": "8.78906px 8.78906px"
+          },
+          {
+            "label": "一萬",
+            "x": 107.3125,
+            "y": 369.265625,
+            "width": 17.578125,
+            "height": 17.578125,
+            "bottom": 386.84375,
+            "flexBasis": "17.5909px",
+            "transform": "none",
+            "transformOrigin": "8.78906px 8.78906px"
+          },
+          {
+            "label": "一萬",
+            "x": 124.890625,
+            "y": 369.265625,
+            "width": 12.890625,
+            "height": 17.578125,
+            "bottom": 386.84375,
+            "flexBasis": "12.9px",
+            "transform": "none",
+            "transformOrigin": "6.44531px 8.78906px"
+          },
+          {
+            "label": "一萬",
+            "x": 137.78125,
+            "y": 369.265625,
+            "width": 12.890625,
+            "height": 17.578125,
+            "bottom": 386.84375,
+            "flexBasis": "12.9px",
+            "transform": "none",
+            "transformOrigin": "6.44531px 8.78906px"
+          }
+        ],
+        "stack": {
+          "x": 107.3125,
+          "y": 351.6875,
+          "width": 17.578125,
+          "height": 35.15625,
+          "bottom": 386.84375,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "8.78906px 17.5781px"
+        }
+      },
+      {
+        "label": "加槓",
+        "box": {
+          "x": 153.421875,
+          "y": 351.6875,
+          "width": 43.359375,
+          "height": 35.15625,
+          "bottom": 386.84375,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "21.6797px 17.5781px"
+        },
+        "tiles": [
+          {
+            "label": "二萬",
+            "x": 153.421875,
+            "y": 369.265625,
+            "width": 12.890625,
+            "height": 17.578125,
+            "bottom": 386.84375,
+            "flexBasis": "12.9px",
+            "transform": "none",
+            "transformOrigin": "6.44531px 8.78906px"
+          },
+          {
+            "label": "二萬",
+            "x": 166.3125,
+            "y": 351.6875,
+            "width": 17.578125,
+            "height": 17.578125,
+            "bottom": 369.265625,
+            "flexBasis": "17.5909px",
+            "transform": "none",
+            "transformOrigin": "8.78906px 8.78906px"
+          },
+          {
+            "label": "二萬",
+            "x": 166.3125,
+            "y": 369.265625,
+            "width": 17.578125,
+            "height": 17.578125,
+            "bottom": 386.84375,
+            "flexBasis": "17.5909px",
+            "transform": "none",
+            "transformOrigin": "8.78906px 8.78906px"
+          },
+          {
+            "label": "二萬",
+            "x": 183.890625,
+            "y": 369.265625,
+            "width": 12.890625,
+            "height": 17.578125,
+            "bottom": 386.84375,
+            "flexBasis": "12.9px",
+            "transform": "none",
+            "transformOrigin": "6.44531px 8.78906px"
+          }
+        ],
+        "stack": {
+          "x": 166.3125,
+          "y": 351.6875,
+          "width": 17.578125,
+          "height": 35.15625,
+          "bottom": 386.84375,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "8.78906px 17.5781px"
+        }
+      },
+      {
+        "label": "加槓",
+        "box": {
+          "x": 199.53125,
+          "y": 351.6875,
+          "width": 43.359375,
+          "height": 35.15625,
+          "bottom": 386.84375,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "21.6797px 17.5781px"
+        },
+        "tiles": [
+          {
+            "label": "三萬",
+            "x": 199.53125,
+            "y": 369.265625,
+            "width": 12.890625,
+            "height": 17.578125,
+            "bottom": 386.84375,
+            "flexBasis": "12.9px",
+            "transform": "none",
+            "transformOrigin": "6.44531px 8.78906px"
+          },
+          {
+            "label": "三萬",
+            "x": 212.421875,
+            "y": 369.265625,
+            "width": 12.890625,
+            "height": 17.578125,
+            "bottom": 386.84375,
+            "flexBasis": "12.9px",
+            "transform": "none",
+            "transformOrigin": "6.44531px 8.78906px"
+          },
+          {
+            "label": "三萬",
+            "x": 225.3125,
+            "y": 351.6875,
+            "width": 17.578125,
+            "height": 17.578125,
+            "bottom": 369.265625,
+            "flexBasis": "17.5909px",
+            "transform": "none",
+            "transformOrigin": "8.78906px 8.78906px"
+          },
+          {
+            "label": "三萬",
+            "x": 225.3125,
+            "y": 369.265625,
+            "width": 17.578125,
+            "height": 17.578125,
+            "bottom": 386.84375,
+            "flexBasis": "17.5909px",
+            "transform": "none",
+            "transformOrigin": "8.78906px 8.78906px"
+          }
+        ],
+        "stack": {
+          "x": 225.3125,
+          "y": 351.6875,
+          "width": 17.578125,
+          "height": 35.15625,
+          "bottom": 386.84375,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "8.78906px 17.5781px"
+        }
+      },
+      {
+        "label": "チー",
+        "box": {
+          "x": 245.640625,
+          "y": 369.265625,
+          "width": 43.359375,
+          "height": 17.578125,
+          "bottom": 386.84375,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "21.6797px 8.78906px"
+        },
+        "tiles": [
+          {
+            "label": "四筒",
+            "x": 245.640625,
+            "y": 373.953125,
+            "width": 17.578125,
+            "height": 12.890625,
+            "bottom": 386.84375,
+            "flexBasis": "17.5909px",
+            "transform": "none",
+            "transformOrigin": "8.78906px 6.44531px"
+          },
+          {
+            "label": "五筒",
+            "x": 263.21875,
+            "y": 369.265625,
+            "width": 12.890625,
+            "height": 17.578125,
+            "bottom": 386.84375,
+            "flexBasis": "12.9px",
+            "transform": "none",
+            "transformOrigin": "6.44531px 8.78906px"
+          },
+          {
+            "label": "六筒",
+            "x": 276.109375,
+            "y": 369.265625,
+            "width": 12.890625,
+            "height": 17.578125,
+            "bottom": 386.84375,
+            "flexBasis": "12.9px",
+            "transform": "none",
+            "transformOrigin": "6.44531px 8.78906px"
+          }
+        ],
+        "stack": null
+      }
+    ]
+  },
+  {
+    "name": "320-cool",
+    "viewport": 320,
+    "documentWidth": 320,
+    "groups": [
+      {
+        "label": "加槓",
+        "box": {
+          "x": 107.3125,
+          "y": 351.6875,
+          "width": 43.359375,
+          "height": 35.15625,
+          "bottom": 386.84375,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "21.6797px 17.5781px"
+        },
+        "tiles": [
+          {
+            "label": "一萬",
+            "x": 107.3125,
+            "y": 351.6875,
+            "width": 17.578125,
+            "height": 17.578125,
+            "bottom": 369.265625,
+            "flexBasis": "17.5909px",
+            "transform": "none",
+            "transformOrigin": "8.78906px 8.78906px"
+          },
+          {
+            "label": "一萬",
+            "x": 107.3125,
+            "y": 369.265625,
+            "width": 17.578125,
+            "height": 17.578125,
+            "bottom": 386.84375,
+            "flexBasis": "17.5909px",
+            "transform": "none",
+            "transformOrigin": "8.78906px 8.78906px"
+          },
+          {
+            "label": "一萬",
+            "x": 124.890625,
+            "y": 369.265625,
+            "width": 12.890625,
+            "height": 17.578125,
+            "bottom": 386.84375,
+            "flexBasis": "12.9px",
+            "transform": "none",
+            "transformOrigin": "6.44531px 8.78906px"
+          },
+          {
+            "label": "一萬",
+            "x": 137.78125,
+            "y": 369.265625,
+            "width": 12.890625,
+            "height": 17.578125,
+            "bottom": 386.84375,
+            "flexBasis": "12.9px",
+            "transform": "none",
+            "transformOrigin": "6.44531px 8.78906px"
+          }
+        ],
+        "stack": {
+          "x": 107.3125,
+          "y": 351.6875,
+          "width": 17.578125,
+          "height": 35.15625,
+          "bottom": 386.84375,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "8.78906px 17.5781px"
+        }
+      },
+      {
+        "label": "加槓",
+        "box": {
+          "x": 153.421875,
+          "y": 351.6875,
+          "width": 43.359375,
+          "height": 35.15625,
+          "bottom": 386.84375,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "21.6797px 17.5781px"
+        },
+        "tiles": [
+          {
+            "label": "二萬",
+            "x": 153.421875,
+            "y": 369.265625,
+            "width": 12.890625,
+            "height": 17.578125,
+            "bottom": 386.84375,
+            "flexBasis": "12.9px",
+            "transform": "none",
+            "transformOrigin": "6.44531px 8.78906px"
+          },
+          {
+            "label": "二萬",
+            "x": 166.3125,
+            "y": 351.6875,
+            "width": 17.578125,
+            "height": 17.578125,
+            "bottom": 369.265625,
+            "flexBasis": "17.5909px",
+            "transform": "none",
+            "transformOrigin": "8.78906px 8.78906px"
+          },
+          {
+            "label": "二萬",
+            "x": 166.3125,
+            "y": 369.265625,
+            "width": 17.578125,
+            "height": 17.578125,
+            "bottom": 386.84375,
+            "flexBasis": "17.5909px",
+            "transform": "none",
+            "transformOrigin": "8.78906px 8.78906px"
+          },
+          {
+            "label": "二萬",
+            "x": 183.890625,
+            "y": 369.265625,
+            "width": 12.890625,
+            "height": 17.578125,
+            "bottom": 386.84375,
+            "flexBasis": "12.9px",
+            "transform": "none",
+            "transformOrigin": "6.44531px 8.78906px"
+          }
+        ],
+        "stack": {
+          "x": 166.3125,
+          "y": 351.6875,
+          "width": 17.578125,
+          "height": 35.15625,
+          "bottom": 386.84375,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "8.78906px 17.5781px"
+        }
+      },
+      {
+        "label": "加槓",
+        "box": {
+          "x": 199.53125,
+          "y": 351.6875,
+          "width": 43.359375,
+          "height": 35.15625,
+          "bottom": 386.84375,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "21.6797px 17.5781px"
+        },
+        "tiles": [
+          {
+            "label": "三萬",
+            "x": 199.53125,
+            "y": 369.265625,
+            "width": 12.890625,
+            "height": 17.578125,
+            "bottom": 386.84375,
+            "flexBasis": "12.9px",
+            "transform": "none",
+            "transformOrigin": "6.44531px 8.78906px"
+          },
+          {
+            "label": "三萬",
+            "x": 212.421875,
+            "y": 369.265625,
+            "width": 12.890625,
+            "height": 17.578125,
+            "bottom": 386.84375,
+            "flexBasis": "12.9px",
+            "transform": "none",
+            "transformOrigin": "6.44531px 8.78906px"
+          },
+          {
+            "label": "三萬",
+            "x": 225.3125,
+            "y": 351.6875,
+            "width": 17.578125,
+            "height": 17.578125,
+            "bottom": 369.265625,
+            "flexBasis": "17.5909px",
+            "transform": "none",
+            "transformOrigin": "8.78906px 8.78906px"
+          },
+          {
+            "label": "三萬",
+            "x": 225.3125,
+            "y": 369.265625,
+            "width": 17.578125,
+            "height": 17.578125,
+            "bottom": 386.84375,
+            "flexBasis": "17.5909px",
+            "transform": "none",
+            "transformOrigin": "8.78906px 8.78906px"
+          }
+        ],
+        "stack": {
+          "x": 225.3125,
+          "y": 351.6875,
+          "width": 17.578125,
+          "height": 35.15625,
+          "bottom": 386.84375,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "8.78906px 17.5781px"
+        }
+      },
+      {
+        "label": "チー",
+        "box": {
+          "x": 245.640625,
+          "y": 369.265625,
+          "width": 43.359375,
+          "height": 17.578125,
+          "bottom": 386.84375,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "21.6797px 8.78906px"
+        },
+        "tiles": [
+          {
+            "label": "四筒",
+            "x": 245.640625,
+            "y": 373.953125,
+            "width": 17.578125,
+            "height": 12.890625,
+            "bottom": 386.84375,
+            "flexBasis": "17.5909px",
+            "transform": "none",
+            "transformOrigin": "8.78906px 6.44531px"
+          },
+          {
+            "label": "五筒",
+            "x": 263.21875,
+            "y": 369.265625,
+            "width": 12.890625,
+            "height": 17.578125,
+            "bottom": 386.84375,
+            "flexBasis": "12.9px",
+            "transform": "none",
+            "transformOrigin": "6.44531px 8.78906px"
+          },
+          {
+            "label": "六筒",
+            "x": 276.109375,
+            "y": 369.265625,
+            "width": 12.890625,
+            "height": 17.578125,
+            "bottom": 386.84375,
+            "flexBasis": "12.9px",
+            "transform": "none",
+            "transformOrigin": "6.44531px 8.78906px"
+          }
+        ],
+        "stack": null
+      }
+    ]
+  },
+  {
+    "name": "320-cute",
+    "viewport": 320,
+    "documentWidth": 320,
+    "groups": [
+      {
+        "label": "加槓",
+        "box": {
+          "x": 107.3125,
+          "y": 351.6875,
+          "width": 43.359375,
+          "height": 35.15625,
+          "bottom": 386.84375,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "21.6797px 17.5781px"
+        },
+        "tiles": [
+          {
+            "label": "一萬",
+            "x": 107.3125,
+            "y": 351.6875,
+            "width": 17.578125,
+            "height": 17.578125,
+            "bottom": 369.265625,
+            "flexBasis": "17.5909px",
+            "transform": "none",
+            "transformOrigin": "8.78906px 8.78906px"
+          },
+          {
+            "label": "一萬",
+            "x": 107.3125,
+            "y": 369.265625,
+            "width": 17.578125,
+            "height": 17.578125,
+            "bottom": 386.84375,
+            "flexBasis": "17.5909px",
+            "transform": "none",
+            "transformOrigin": "8.78906px 8.78906px"
+          },
+          {
+            "label": "一萬",
+            "x": 124.890625,
+            "y": 369.265625,
+            "width": 12.890625,
+            "height": 17.578125,
+            "bottom": 386.84375,
+            "flexBasis": "12.9px",
+            "transform": "none",
+            "transformOrigin": "6.44531px 8.78906px"
+          },
+          {
+            "label": "一萬",
+            "x": 137.78125,
+            "y": 369.265625,
+            "width": 12.890625,
+            "height": 17.578125,
+            "bottom": 386.84375,
+            "flexBasis": "12.9px",
+            "transform": "none",
+            "transformOrigin": "6.44531px 8.78906px"
+          }
+        ],
+        "stack": {
+          "x": 107.3125,
+          "y": 351.6875,
+          "width": 17.578125,
+          "height": 35.15625,
+          "bottom": 386.84375,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "8.78906px 17.5781px"
+        }
+      },
+      {
+        "label": "加槓",
+        "box": {
+          "x": 153.421875,
+          "y": 351.6875,
+          "width": 43.359375,
+          "height": 35.15625,
+          "bottom": 386.84375,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "21.6797px 17.5781px"
+        },
+        "tiles": [
+          {
+            "label": "二萬",
+            "x": 153.421875,
+            "y": 369.265625,
+            "width": 12.890625,
+            "height": 17.578125,
+            "bottom": 386.84375,
+            "flexBasis": "12.9px",
+            "transform": "none",
+            "transformOrigin": "6.44531px 8.78906px"
+          },
+          {
+            "label": "二萬",
+            "x": 166.3125,
+            "y": 351.6875,
+            "width": 17.578125,
+            "height": 17.578125,
+            "bottom": 369.265625,
+            "flexBasis": "17.5909px",
+            "transform": "none",
+            "transformOrigin": "8.78906px 8.78906px"
+          },
+          {
+            "label": "二萬",
+            "x": 166.3125,
+            "y": 369.265625,
+            "width": 17.578125,
+            "height": 17.578125,
+            "bottom": 386.84375,
+            "flexBasis": "17.5909px",
+            "transform": "none",
+            "transformOrigin": "8.78906px 8.78906px"
+          },
+          {
+            "label": "二萬",
+            "x": 183.890625,
+            "y": 369.265625,
+            "width": 12.890625,
+            "height": 17.578125,
+            "bottom": 386.84375,
+            "flexBasis": "12.9px",
+            "transform": "none",
+            "transformOrigin": "6.44531px 8.78906px"
+          }
+        ],
+        "stack": {
+          "x": 166.3125,
+          "y": 351.6875,
+          "width": 17.578125,
+          "height": 35.15625,
+          "bottom": 386.84375,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "8.78906px 17.5781px"
+        }
+      },
+      {
+        "label": "加槓",
+        "box": {
+          "x": 199.53125,
+          "y": 351.6875,
+          "width": 43.359375,
+          "height": 35.15625,
+          "bottom": 386.84375,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "21.6797px 17.5781px"
+        },
+        "tiles": [
+          {
+            "label": "三萬",
+            "x": 199.53125,
+            "y": 369.265625,
+            "width": 12.890625,
+            "height": 17.578125,
+            "bottom": 386.84375,
+            "flexBasis": "12.9px",
+            "transform": "none",
+            "transformOrigin": "6.44531px 8.78906px"
+          },
+          {
+            "label": "三萬",
+            "x": 212.421875,
+            "y": 369.265625,
+            "width": 12.890625,
+            "height": 17.578125,
+            "bottom": 386.84375,
+            "flexBasis": "12.9px",
+            "transform": "none",
+            "transformOrigin": "6.44531px 8.78906px"
+          },
+          {
+            "label": "三萬",
+            "x": 225.3125,
+            "y": 351.6875,
+            "width": 17.578125,
+            "height": 17.578125,
+            "bottom": 369.265625,
+            "flexBasis": "17.5909px",
+            "transform": "none",
+            "transformOrigin": "8.78906px 8.78906px"
+          },
+          {
+            "label": "三萬",
+            "x": 225.3125,
+            "y": 369.265625,
+            "width": 17.578125,
+            "height": 17.578125,
+            "bottom": 386.84375,
+            "flexBasis": "17.5909px",
+            "transform": "none",
+            "transformOrigin": "8.78906px 8.78906px"
+          }
+        ],
+        "stack": {
+          "x": 225.3125,
+          "y": 351.6875,
+          "width": 17.578125,
+          "height": 35.15625,
+          "bottom": 386.84375,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "8.78906px 17.5781px"
+        }
+      },
+      {
+        "label": "チー",
+        "box": {
+          "x": 245.640625,
+          "y": 369.265625,
+          "width": 43.359375,
+          "height": 17.578125,
+          "bottom": 386.84375,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "21.6797px 8.78906px"
+        },
+        "tiles": [
+          {
+            "label": "四筒",
+            "x": 245.640625,
+            "y": 373.953125,
+            "width": 17.578125,
+            "height": 12.890625,
+            "bottom": 386.84375,
+            "flexBasis": "17.5909px",
+            "transform": "none",
+            "transformOrigin": "8.78906px 6.44531px"
+          },
+          {
+            "label": "五筒",
+            "x": 263.21875,
+            "y": 369.265625,
+            "width": 12.890625,
+            "height": 17.578125,
+            "bottom": 386.84375,
+            "flexBasis": "12.9px",
+            "transform": "none",
+            "transformOrigin": "6.44531px 8.78906px"
+          },
+          {
+            "label": "六筒",
+            "x": 276.109375,
+            "y": 369.265625,
+            "width": 12.890625,
+            "height": 17.578125,
+            "bottom": 386.84375,
+            "flexBasis": "12.9px",
+            "transform": "none",
+            "transformOrigin": "6.44531px 8.78906px"
+          }
+        ],
+        "stack": null
+      }
+    ]
+  },
+  {
+    "name": "320-dopa",
+    "viewport": 320,
+    "documentWidth": 320,
+    "groups": [
+      {
+        "label": "加槓",
+        "box": {
+          "x": 107.609375,
+          "y": 352.6875,
+          "width": 43.046875,
+          "height": 34.90625,
+          "bottom": 387.59375,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "21.5234px 17.4531px"
+        },
+        "tiles": [
+          {
+            "label": "一萬",
+            "x": 107.609375,
+            "y": 352.6875,
+            "width": 17.453125,
+            "height": 17.453125,
+            "bottom": 370.140625,
+            "flexBasis": "17.4545px",
+            "transform": "none",
+            "transformOrigin": "8.72656px 8.72656px"
+          },
+          {
+            "label": "一萬",
+            "x": 107.609375,
+            "y": 370.140625,
+            "width": 17.453125,
+            "height": 17.453125,
+            "bottom": 387.59375,
+            "flexBasis": "17.4545px",
+            "transform": "none",
+            "transformOrigin": "8.72656px 8.72656px"
+          },
+          {
+            "label": "一萬",
+            "x": 125.0625,
+            "y": 370.15625,
+            "width": 12.796875,
+            "height": 17.4375,
+            "bottom": 387.59375,
+            "flexBasis": "12.8px",
+            "transform": "none",
+            "transformOrigin": "6.39844px 8.71875px"
+          },
+          {
+            "label": "一萬",
+            "x": 137.859375,
+            "y": 370.15625,
+            "width": 12.796875,
+            "height": 17.4375,
+            "bottom": 387.59375,
+            "flexBasis": "12.8px",
+            "transform": "none",
+            "transformOrigin": "6.39844px 8.71875px"
+          }
+        ],
+        "stack": {
+          "x": 107.609375,
+          "y": 352.6875,
+          "width": 17.453125,
+          "height": 34.90625,
+          "bottom": 387.59375,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "8.72656px 17.4531px"
+        }
+      },
+      {
+        "label": "加槓",
+        "box": {
+          "x": 153.390625,
+          "y": 352.6875,
+          "width": 43.046875,
+          "height": 34.90625,
+          "bottom": 387.59375,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "21.5234px 17.4531px"
+        },
+        "tiles": [
+          {
+            "label": "二萬",
+            "x": 153.390625,
+            "y": 370.15625,
+            "width": 12.796875,
+            "height": 17.4375,
+            "bottom": 387.59375,
+            "flexBasis": "12.8px",
+            "transform": "none",
+            "transformOrigin": "6.39844px 8.71875px"
+          },
+          {
+            "label": "二萬",
+            "x": 166.1875,
+            "y": 352.6875,
+            "width": 17.453125,
+            "height": 17.453125,
+            "bottom": 370.140625,
+            "flexBasis": "17.4545px",
+            "transform": "none",
+            "transformOrigin": "8.72656px 8.72656px"
+          },
+          {
+            "label": "二萬",
+            "x": 166.1875,
+            "y": 370.140625,
+            "width": 17.453125,
+            "height": 17.453125,
+            "bottom": 387.59375,
+            "flexBasis": "17.4545px",
+            "transform": "none",
+            "transformOrigin": "8.72656px 8.72656px"
+          },
+          {
+            "label": "二萬",
+            "x": 183.640625,
+            "y": 370.15625,
+            "width": 12.796875,
+            "height": 17.4375,
+            "bottom": 387.59375,
+            "flexBasis": "12.8px",
+            "transform": "none",
+            "transformOrigin": "6.39844px 8.71875px"
+          }
+        ],
+        "stack": {
+          "x": 166.1875,
+          "y": 352.6875,
+          "width": 17.453125,
+          "height": 34.90625,
+          "bottom": 387.59375,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "8.72656px 17.4531px"
+        }
+      },
+      {
+        "label": "加槓",
+        "box": {
+          "x": 199.171875,
+          "y": 352.6875,
+          "width": 43.046875,
+          "height": 34.90625,
+          "bottom": 387.59375,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "21.5234px 17.4531px"
+        },
+        "tiles": [
+          {
+            "label": "三萬",
+            "x": 199.171875,
+            "y": 370.15625,
+            "width": 12.796875,
+            "height": 17.4375,
+            "bottom": 387.59375,
+            "flexBasis": "12.8px",
+            "transform": "none",
+            "transformOrigin": "6.39844px 8.71875px"
+          },
+          {
+            "label": "三萬",
+            "x": 211.96875,
+            "y": 370.15625,
+            "width": 12.796875,
+            "height": 17.4375,
+            "bottom": 387.59375,
+            "flexBasis": "12.8px",
+            "transform": "none",
+            "transformOrigin": "6.39844px 8.71875px"
+          },
+          {
+            "label": "三萬",
+            "x": 224.765625,
+            "y": 352.6875,
+            "width": 17.453125,
+            "height": 17.453125,
+            "bottom": 370.140625,
+            "flexBasis": "17.4545px",
+            "transform": "none",
+            "transformOrigin": "8.72656px 8.72656px"
+          },
+          {
+            "label": "三萬",
+            "x": 224.765625,
+            "y": 370.140625,
+            "width": 17.453125,
+            "height": 17.453125,
+            "bottom": 387.59375,
+            "flexBasis": "17.4545px",
+            "transform": "none",
+            "transformOrigin": "8.72656px 8.72656px"
+          }
+        ],
+        "stack": {
+          "x": 224.765625,
+          "y": 352.6875,
+          "width": 17.453125,
+          "height": 34.90625,
+          "bottom": 387.59375,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "8.72656px 17.4531px"
+        }
+      },
+      {
+        "label": "チー",
+        "box": {
+          "x": 244.953125,
+          "y": 370.15625,
+          "width": 43.046875,
+          "height": 17.4375,
+          "bottom": 387.59375,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "21.5234px 8.71875px"
+        },
+        "tiles": [
+          {
+            "label": "四筒",
+            "x": 244.953125,
+            "y": 374.796875,
+            "width": 17.453125,
+            "height": 12.796875,
+            "bottom": 387.59375,
+            "flexBasis": "17.4545px",
+            "transform": "none",
+            "transformOrigin": "8.72656px 6.39844px"
+          },
+          {
+            "label": "五筒",
+            "x": 262.40625,
+            "y": 370.15625,
+            "width": 12.796875,
+            "height": 17.4375,
+            "bottom": 387.59375,
+            "flexBasis": "12.8px",
+            "transform": "none",
+            "transformOrigin": "6.39844px 8.71875px"
+          },
+          {
+            "label": "六筒",
+            "x": 275.203125,
+            "y": 370.15625,
+            "width": 12.796875,
+            "height": 17.4375,
+            "bottom": 387.59375,
+            "flexBasis": "12.8px",
+            "transform": "none",
+            "transformOrigin": "6.39844px 8.71875px"
+          }
+        ],
+        "stack": null
+      }
+    ]
+  },
+  {
+    "name": "320-moe",
+    "viewport": 320,
+    "documentWidth": 320,
+    "groups": [
+      {
+        "label": "加槓",
+        "box": {
+          "x": 107.3125,
+          "y": 351.6875,
+          "width": 43.359375,
+          "height": 35.15625,
+          "bottom": 386.84375,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "21.6797px 17.5781px"
+        },
+        "tiles": [
+          {
+            "label": "一萬",
+            "x": 107.3125,
+            "y": 351.6875,
+            "width": 17.578125,
+            "height": 17.578125,
+            "bottom": 369.265625,
+            "flexBasis": "17.5909px",
+            "transform": "none",
+            "transformOrigin": "8.78906px 8.78906px"
+          },
+          {
+            "label": "一萬",
+            "x": 107.3125,
+            "y": 369.265625,
+            "width": 17.578125,
+            "height": 17.578125,
+            "bottom": 386.84375,
+            "flexBasis": "17.5909px",
+            "transform": "none",
+            "transformOrigin": "8.78906px 8.78906px"
+          },
+          {
+            "label": "一萬",
+            "x": 124.890625,
+            "y": 369.265625,
+            "width": 12.890625,
+            "height": 17.578125,
+            "bottom": 386.84375,
+            "flexBasis": "12.9px",
+            "transform": "none",
+            "transformOrigin": "6.44531px 8.78906px"
+          },
+          {
+            "label": "一萬",
+            "x": 137.78125,
+            "y": 369.265625,
+            "width": 12.890625,
+            "height": 17.578125,
+            "bottom": 386.84375,
+            "flexBasis": "12.9px",
+            "transform": "none",
+            "transformOrigin": "6.44531px 8.78906px"
+          }
+        ],
+        "stack": {
+          "x": 107.3125,
+          "y": 351.6875,
+          "width": 17.578125,
+          "height": 35.15625,
+          "bottom": 386.84375,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "8.78906px 17.5781px"
+        }
+      },
+      {
+        "label": "加槓",
+        "box": {
+          "x": 153.421875,
+          "y": 351.6875,
+          "width": 43.359375,
+          "height": 35.15625,
+          "bottom": 386.84375,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "21.6797px 17.5781px"
+        },
+        "tiles": [
+          {
+            "label": "二萬",
+            "x": 153.421875,
+            "y": 369.265625,
+            "width": 12.890625,
+            "height": 17.578125,
+            "bottom": 386.84375,
+            "flexBasis": "12.9px",
+            "transform": "none",
+            "transformOrigin": "6.44531px 8.78906px"
+          },
+          {
+            "label": "二萬",
+            "x": 166.3125,
+            "y": 351.6875,
+            "width": 17.578125,
+            "height": 17.578125,
+            "bottom": 369.265625,
+            "flexBasis": "17.5909px",
+            "transform": "none",
+            "transformOrigin": "8.78906px 8.78906px"
+          },
+          {
+            "label": "二萬",
+            "x": 166.3125,
+            "y": 369.265625,
+            "width": 17.578125,
+            "height": 17.578125,
+            "bottom": 386.84375,
+            "flexBasis": "17.5909px",
+            "transform": "none",
+            "transformOrigin": "8.78906px 8.78906px"
+          },
+          {
+            "label": "二萬",
+            "x": 183.890625,
+            "y": 369.265625,
+            "width": 12.890625,
+            "height": 17.578125,
+            "bottom": 386.84375,
+            "flexBasis": "12.9px",
+            "transform": "none",
+            "transformOrigin": "6.44531px 8.78906px"
+          }
+        ],
+        "stack": {
+          "x": 166.3125,
+          "y": 351.6875,
+          "width": 17.578125,
+          "height": 35.15625,
+          "bottom": 386.84375,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "8.78906px 17.5781px"
+        }
+      },
+      {
+        "label": "加槓",
+        "box": {
+          "x": 199.53125,
+          "y": 351.6875,
+          "width": 43.359375,
+          "height": 35.15625,
+          "bottom": 386.84375,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "21.6797px 17.5781px"
+        },
+        "tiles": [
+          {
+            "label": "三萬",
+            "x": 199.53125,
+            "y": 369.265625,
+            "width": 12.890625,
+            "height": 17.578125,
+            "bottom": 386.84375,
+            "flexBasis": "12.9px",
+            "transform": "none",
+            "transformOrigin": "6.44531px 8.78906px"
+          },
+          {
+            "label": "三萬",
+            "x": 212.421875,
+            "y": 369.265625,
+            "width": 12.890625,
+            "height": 17.578125,
+            "bottom": 386.84375,
+            "flexBasis": "12.9px",
+            "transform": "none",
+            "transformOrigin": "6.44531px 8.78906px"
+          },
+          {
+            "label": "三萬",
+            "x": 225.3125,
+            "y": 351.6875,
+            "width": 17.578125,
+            "height": 17.578125,
+            "bottom": 369.265625,
+            "flexBasis": "17.5909px",
+            "transform": "none",
+            "transformOrigin": "8.78906px 8.78906px"
+          },
+          {
+            "label": "三萬",
+            "x": 225.3125,
+            "y": 369.265625,
+            "width": 17.578125,
+            "height": 17.578125,
+            "bottom": 386.84375,
+            "flexBasis": "17.5909px",
+            "transform": "none",
+            "transformOrigin": "8.78906px 8.78906px"
+          }
+        ],
+        "stack": {
+          "x": 225.3125,
+          "y": 351.6875,
+          "width": 17.578125,
+          "height": 35.15625,
+          "bottom": 386.84375,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "8.78906px 17.5781px"
+        }
+      },
+      {
+        "label": "チー",
+        "box": {
+          "x": 245.640625,
+          "y": 369.265625,
+          "width": 43.359375,
+          "height": 17.578125,
+          "bottom": 386.84375,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "21.6797px 8.78906px"
+        },
+        "tiles": [
+          {
+            "label": "四筒",
+            "x": 245.640625,
+            "y": 373.953125,
+            "width": 17.578125,
+            "height": 12.890625,
+            "bottom": 386.84375,
+            "flexBasis": "17.5909px",
+            "transform": "none",
+            "transformOrigin": "8.78906px 6.44531px"
+          },
+          {
+            "label": "五筒",
+            "x": 263.21875,
+            "y": 369.265625,
+            "width": 12.890625,
+            "height": 17.578125,
+            "bottom": 386.84375,
+            "flexBasis": "12.9px",
+            "transform": "none",
+            "transformOrigin": "6.44531px 8.78906px"
+          },
+          {
+            "label": "六筒",
+            "x": 276.109375,
+            "y": 369.265625,
+            "width": 12.890625,
+            "height": 17.578125,
+            "bottom": 386.84375,
+            "flexBasis": "12.9px",
+            "transform": "none",
+            "transformOrigin": "6.44531px 8.78906px"
+          }
+        ],
+        "stack": null
+      }
+    ]
+  },
+  {
+    "name": "390-normal",
+    "viewport": 390,
+    "documentWidth": 390,
+    "groups": [
+      {
+        "label": "加槓",
+        "box": {
+          "x": 127.9375,
+          "y": 261.9375,
+          "width": 55.140625,
+          "height": 44.71875,
+          "bottom": 306.65625,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "27.5703px 22.3594px"
+        },
+        "tiles": [
+          {
+            "label": "一萬",
+            "x": 127.9375,
+            "y": 261.9375,
+            "width": 22.359375,
+            "height": 22.359375,
+            "bottom": 284.296875,
+            "flexBasis": "22.3636px",
+            "transform": "none",
+            "transformOrigin": "11.1797px 11.1797px"
+          },
+          {
+            "label": "一萬",
+            "x": 127.9375,
+            "y": 284.296875,
+            "width": 22.359375,
+            "height": 22.359375,
+            "bottom": 306.65625,
+            "flexBasis": "22.3636px",
+            "transform": "none",
+            "transformOrigin": "11.1797px 11.1797px"
+          },
+          {
+            "label": "一萬",
+            "x": 150.296875,
+            "y": 284.3125,
+            "width": 16.390625,
+            "height": 22.34375,
+            "bottom": 306.65625,
+            "flexBasis": "16.4px",
+            "transform": "none",
+            "transformOrigin": "8.19531px 11.1719px"
+          },
+          {
+            "label": "一萬",
+            "x": 166.6875,
+            "y": 284.3125,
+            "width": 16.390625,
+            "height": 22.34375,
+            "bottom": 306.65625,
+            "flexBasis": "16.4px",
+            "transform": "none",
+            "transformOrigin": "8.19531px 11.1719px"
+          }
+        ],
+        "stack": {
+          "x": 127.9375,
+          "y": 261.9375,
+          "width": 22.359375,
+          "height": 44.71875,
+          "bottom": 306.65625,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "11.1797px 22.3594px"
+        }
+      },
+      {
+        "label": "加槓",
+        "box": {
+          "x": 186.578125,
+          "y": 261.9375,
+          "width": 55.140625,
+          "height": 44.71875,
+          "bottom": 306.65625,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "27.5703px 22.3594px"
+        },
+        "tiles": [
+          {
+            "label": "二萬",
+            "x": 186.578125,
+            "y": 284.3125,
+            "width": 16.390625,
+            "height": 22.34375,
+            "bottom": 306.65625,
+            "flexBasis": "16.4px",
+            "transform": "none",
+            "transformOrigin": "8.19531px 11.1719px"
+          },
+          {
+            "label": "二萬",
+            "x": 202.96875,
+            "y": 261.9375,
+            "width": 22.359375,
+            "height": 22.359375,
+            "bottom": 284.296875,
+            "flexBasis": "22.3636px",
+            "transform": "none",
+            "transformOrigin": "11.1797px 11.1797px"
+          },
+          {
+            "label": "二萬",
+            "x": 202.96875,
+            "y": 284.296875,
+            "width": 22.359375,
+            "height": 22.359375,
+            "bottom": 306.65625,
+            "flexBasis": "22.3636px",
+            "transform": "none",
+            "transformOrigin": "11.1797px 11.1797px"
+          },
+          {
+            "label": "二萬",
+            "x": 225.328125,
+            "y": 284.3125,
+            "width": 16.390625,
+            "height": 22.34375,
+            "bottom": 306.65625,
+            "flexBasis": "16.4px",
+            "transform": "none",
+            "transformOrigin": "8.19531px 11.1719px"
+          }
+        ],
+        "stack": {
+          "x": 202.96875,
+          "y": 261.9375,
+          "width": 22.359375,
+          "height": 44.71875,
+          "bottom": 306.65625,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "11.1797px 22.3594px"
+        }
+      },
+      {
+        "label": "加槓",
+        "box": {
+          "x": 245.21875,
+          "y": 261.9375,
+          "width": 55.140625,
+          "height": 44.71875,
+          "bottom": 306.65625,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "27.5703px 22.3594px"
+        },
+        "tiles": [
+          {
+            "label": "三萬",
+            "x": 245.21875,
+            "y": 284.3125,
+            "width": 16.390625,
+            "height": 22.34375,
+            "bottom": 306.65625,
+            "flexBasis": "16.4px",
+            "transform": "none",
+            "transformOrigin": "8.19531px 11.1719px"
+          },
+          {
+            "label": "三萬",
+            "x": 261.609375,
+            "y": 284.3125,
+            "width": 16.390625,
+            "height": 22.34375,
+            "bottom": 306.65625,
+            "flexBasis": "16.4px",
+            "transform": "none",
+            "transformOrigin": "8.19531px 11.1719px"
+          },
+          {
+            "label": "三萬",
+            "x": 278,
+            "y": 261.9375,
+            "width": 22.359375,
+            "height": 22.359375,
+            "bottom": 284.296875,
+            "flexBasis": "22.3636px",
+            "transform": "none",
+            "transformOrigin": "11.1797px 11.1797px"
+          },
+          {
+            "label": "三萬",
+            "x": 278,
+            "y": 284.296875,
+            "width": 22.359375,
+            "height": 22.359375,
+            "bottom": 306.65625,
+            "flexBasis": "22.3636px",
+            "transform": "none",
+            "transformOrigin": "11.1797px 11.1797px"
+          }
+        ],
+        "stack": {
+          "x": 278,
+          "y": 261.9375,
+          "width": 22.359375,
+          "height": 44.71875,
+          "bottom": 306.65625,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "11.1797px 22.3594px"
+        }
+      },
+      {
+        "label": "チー",
+        "box": {
+          "x": 303.859375,
+          "y": 284.3125,
+          "width": 55.140625,
+          "height": 22.34375,
+          "bottom": 306.65625,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "27.5703px 11.1719px"
+        },
+        "tiles": [
+          {
+            "label": "四筒",
+            "x": 303.859375,
+            "y": 290.265625,
+            "width": 22.359375,
+            "height": 16.390625,
+            "bottom": 306.65625,
+            "flexBasis": "22.3636px",
+            "transform": "none",
+            "transformOrigin": "11.1797px 8.19531px"
+          },
+          {
+            "label": "五筒",
+            "x": 326.21875,
+            "y": 284.3125,
+            "width": 16.390625,
+            "height": 22.34375,
+            "bottom": 306.65625,
+            "flexBasis": "16.4px",
+            "transform": "none",
+            "transformOrigin": "8.19531px 11.1719px"
+          },
+          {
+            "label": "六筒",
+            "x": 342.609375,
+            "y": 284.3125,
+            "width": 16.390625,
+            "height": 22.34375,
+            "bottom": 306.65625,
+            "flexBasis": "16.4px",
+            "transform": "none",
+            "transformOrigin": "8.19531px 11.1719px"
+          }
+        ],
+        "stack": null
+      }
+    ]
+  },
+  {
+    "name": "390-cool",
+    "viewport": 390,
+    "documentWidth": 390,
+    "groups": [
+      {
+        "label": "加槓",
+        "box": {
+          "x": 127.9375,
+          "y": 261.9375,
+          "width": 55.140625,
+          "height": 44.71875,
+          "bottom": 306.65625,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "27.5703px 22.3594px"
+        },
+        "tiles": [
+          {
+            "label": "一萬",
+            "x": 127.9375,
+            "y": 261.9375,
+            "width": 22.359375,
+            "height": 22.359375,
+            "bottom": 284.296875,
+            "flexBasis": "22.3636px",
+            "transform": "none",
+            "transformOrigin": "11.1797px 11.1797px"
+          },
+          {
+            "label": "一萬",
+            "x": 127.9375,
+            "y": 284.296875,
+            "width": 22.359375,
+            "height": 22.359375,
+            "bottom": 306.65625,
+            "flexBasis": "22.3636px",
+            "transform": "none",
+            "transformOrigin": "11.1797px 11.1797px"
+          },
+          {
+            "label": "一萬",
+            "x": 150.296875,
+            "y": 284.3125,
+            "width": 16.390625,
+            "height": 22.34375,
+            "bottom": 306.65625,
+            "flexBasis": "16.4px",
+            "transform": "none",
+            "transformOrigin": "8.19531px 11.1719px"
+          },
+          {
+            "label": "一萬",
+            "x": 166.6875,
+            "y": 284.3125,
+            "width": 16.390625,
+            "height": 22.34375,
+            "bottom": 306.65625,
+            "flexBasis": "16.4px",
+            "transform": "none",
+            "transformOrigin": "8.19531px 11.1719px"
+          }
+        ],
+        "stack": {
+          "x": 127.9375,
+          "y": 261.9375,
+          "width": 22.359375,
+          "height": 44.71875,
+          "bottom": 306.65625,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "11.1797px 22.3594px"
+        }
+      },
+      {
+        "label": "加槓",
+        "box": {
+          "x": 186.578125,
+          "y": 261.9375,
+          "width": 55.140625,
+          "height": 44.71875,
+          "bottom": 306.65625,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "27.5703px 22.3594px"
+        },
+        "tiles": [
+          {
+            "label": "二萬",
+            "x": 186.578125,
+            "y": 284.3125,
+            "width": 16.390625,
+            "height": 22.34375,
+            "bottom": 306.65625,
+            "flexBasis": "16.4px",
+            "transform": "none",
+            "transformOrigin": "8.19531px 11.1719px"
+          },
+          {
+            "label": "二萬",
+            "x": 202.96875,
+            "y": 261.9375,
+            "width": 22.359375,
+            "height": 22.359375,
+            "bottom": 284.296875,
+            "flexBasis": "22.3636px",
+            "transform": "none",
+            "transformOrigin": "11.1797px 11.1797px"
+          },
+          {
+            "label": "二萬",
+            "x": 202.96875,
+            "y": 284.296875,
+            "width": 22.359375,
+            "height": 22.359375,
+            "bottom": 306.65625,
+            "flexBasis": "22.3636px",
+            "transform": "none",
+            "transformOrigin": "11.1797px 11.1797px"
+          },
+          {
+            "label": "二萬",
+            "x": 225.328125,
+            "y": 284.3125,
+            "width": 16.390625,
+            "height": 22.34375,
+            "bottom": 306.65625,
+            "flexBasis": "16.4px",
+            "transform": "none",
+            "transformOrigin": "8.19531px 11.1719px"
+          }
+        ],
+        "stack": {
+          "x": 202.96875,
+          "y": 261.9375,
+          "width": 22.359375,
+          "height": 44.71875,
+          "bottom": 306.65625,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "11.1797px 22.3594px"
+        }
+      },
+      {
+        "label": "加槓",
+        "box": {
+          "x": 245.21875,
+          "y": 261.9375,
+          "width": 55.140625,
+          "height": 44.71875,
+          "bottom": 306.65625,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "27.5703px 22.3594px"
+        },
+        "tiles": [
+          {
+            "label": "三萬",
+            "x": 245.21875,
+            "y": 284.3125,
+            "width": 16.390625,
+            "height": 22.34375,
+            "bottom": 306.65625,
+            "flexBasis": "16.4px",
+            "transform": "none",
+            "transformOrigin": "8.19531px 11.1719px"
+          },
+          {
+            "label": "三萬",
+            "x": 261.609375,
+            "y": 284.3125,
+            "width": 16.390625,
+            "height": 22.34375,
+            "bottom": 306.65625,
+            "flexBasis": "16.4px",
+            "transform": "none",
+            "transformOrigin": "8.19531px 11.1719px"
+          },
+          {
+            "label": "三萬",
+            "x": 278,
+            "y": 261.9375,
+            "width": 22.359375,
+            "height": 22.359375,
+            "bottom": 284.296875,
+            "flexBasis": "22.3636px",
+            "transform": "none",
+            "transformOrigin": "11.1797px 11.1797px"
+          },
+          {
+            "label": "三萬",
+            "x": 278,
+            "y": 284.296875,
+            "width": 22.359375,
+            "height": 22.359375,
+            "bottom": 306.65625,
+            "flexBasis": "22.3636px",
+            "transform": "none",
+            "transformOrigin": "11.1797px 11.1797px"
+          }
+        ],
+        "stack": {
+          "x": 278,
+          "y": 261.9375,
+          "width": 22.359375,
+          "height": 44.71875,
+          "bottom": 306.65625,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "11.1797px 22.3594px"
+        }
+      },
+      {
+        "label": "チー",
+        "box": {
+          "x": 303.859375,
+          "y": 284.3125,
+          "width": 55.140625,
+          "height": 22.34375,
+          "bottom": 306.65625,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "27.5703px 11.1719px"
+        },
+        "tiles": [
+          {
+            "label": "四筒",
+            "x": 303.859375,
+            "y": 290.265625,
+            "width": 22.359375,
+            "height": 16.390625,
+            "bottom": 306.65625,
+            "flexBasis": "22.3636px",
+            "transform": "none",
+            "transformOrigin": "11.1797px 8.19531px"
+          },
+          {
+            "label": "五筒",
+            "x": 326.21875,
+            "y": 284.3125,
+            "width": 16.390625,
+            "height": 22.34375,
+            "bottom": 306.65625,
+            "flexBasis": "16.4px",
+            "transform": "none",
+            "transformOrigin": "8.19531px 11.1719px"
+          },
+          {
+            "label": "六筒",
+            "x": 342.609375,
+            "y": 284.3125,
+            "width": 16.390625,
+            "height": 22.34375,
+            "bottom": 306.65625,
+            "flexBasis": "16.4px",
+            "transform": "none",
+            "transformOrigin": "8.19531px 11.1719px"
+          }
+        ],
+        "stack": null
+      }
+    ]
+  },
+  {
+    "name": "390-cute",
+    "viewport": 390,
+    "documentWidth": 390,
+    "groups": [
+      {
+        "label": "加槓",
+        "box": {
+          "x": 127.9375,
+          "y": 261.9375,
+          "width": 55.140625,
+          "height": 44.71875,
+          "bottom": 306.65625,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "27.5703px 22.3594px"
+        },
+        "tiles": [
+          {
+            "label": "一萬",
+            "x": 127.9375,
+            "y": 261.9375,
+            "width": 22.359375,
+            "height": 22.359375,
+            "bottom": 284.296875,
+            "flexBasis": "22.3636px",
+            "transform": "none",
+            "transformOrigin": "11.1797px 11.1797px"
+          },
+          {
+            "label": "一萬",
+            "x": 127.9375,
+            "y": 284.296875,
+            "width": 22.359375,
+            "height": 22.359375,
+            "bottom": 306.65625,
+            "flexBasis": "22.3636px",
+            "transform": "none",
+            "transformOrigin": "11.1797px 11.1797px"
+          },
+          {
+            "label": "一萬",
+            "x": 150.296875,
+            "y": 284.3125,
+            "width": 16.390625,
+            "height": 22.34375,
+            "bottom": 306.65625,
+            "flexBasis": "16.4px",
+            "transform": "none",
+            "transformOrigin": "8.19531px 11.1719px"
+          },
+          {
+            "label": "一萬",
+            "x": 166.6875,
+            "y": 284.3125,
+            "width": 16.390625,
+            "height": 22.34375,
+            "bottom": 306.65625,
+            "flexBasis": "16.4px",
+            "transform": "none",
+            "transformOrigin": "8.19531px 11.1719px"
+          }
+        ],
+        "stack": {
+          "x": 127.9375,
+          "y": 261.9375,
+          "width": 22.359375,
+          "height": 44.71875,
+          "bottom": 306.65625,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "11.1797px 22.3594px"
+        }
+      },
+      {
+        "label": "加槓",
+        "box": {
+          "x": 186.578125,
+          "y": 261.9375,
+          "width": 55.140625,
+          "height": 44.71875,
+          "bottom": 306.65625,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "27.5703px 22.3594px"
+        },
+        "tiles": [
+          {
+            "label": "二萬",
+            "x": 186.578125,
+            "y": 284.3125,
+            "width": 16.390625,
+            "height": 22.34375,
+            "bottom": 306.65625,
+            "flexBasis": "16.4px",
+            "transform": "none",
+            "transformOrigin": "8.19531px 11.1719px"
+          },
+          {
+            "label": "二萬",
+            "x": 202.96875,
+            "y": 261.9375,
+            "width": 22.359375,
+            "height": 22.359375,
+            "bottom": 284.296875,
+            "flexBasis": "22.3636px",
+            "transform": "none",
+            "transformOrigin": "11.1797px 11.1797px"
+          },
+          {
+            "label": "二萬",
+            "x": 202.96875,
+            "y": 284.296875,
+            "width": 22.359375,
+            "height": 22.359375,
+            "bottom": 306.65625,
+            "flexBasis": "22.3636px",
+            "transform": "none",
+            "transformOrigin": "11.1797px 11.1797px"
+          },
+          {
+            "label": "二萬",
+            "x": 225.328125,
+            "y": 284.3125,
+            "width": 16.390625,
+            "height": 22.34375,
+            "bottom": 306.65625,
+            "flexBasis": "16.4px",
+            "transform": "none",
+            "transformOrigin": "8.19531px 11.1719px"
+          }
+        ],
+        "stack": {
+          "x": 202.96875,
+          "y": 261.9375,
+          "width": 22.359375,
+          "height": 44.71875,
+          "bottom": 306.65625,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "11.1797px 22.3594px"
+        }
+      },
+      {
+        "label": "加槓",
+        "box": {
+          "x": 245.21875,
+          "y": 261.9375,
+          "width": 55.140625,
+          "height": 44.71875,
+          "bottom": 306.65625,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "27.5703px 22.3594px"
+        },
+        "tiles": [
+          {
+            "label": "三萬",
+            "x": 245.21875,
+            "y": 284.3125,
+            "width": 16.390625,
+            "height": 22.34375,
+            "bottom": 306.65625,
+            "flexBasis": "16.4px",
+            "transform": "none",
+            "transformOrigin": "8.19531px 11.1719px"
+          },
+          {
+            "label": "三萬",
+            "x": 261.609375,
+            "y": 284.3125,
+            "width": 16.390625,
+            "height": 22.34375,
+            "bottom": 306.65625,
+            "flexBasis": "16.4px",
+            "transform": "none",
+            "transformOrigin": "8.19531px 11.1719px"
+          },
+          {
+            "label": "三萬",
+            "x": 278,
+            "y": 261.9375,
+            "width": 22.359375,
+            "height": 22.359375,
+            "bottom": 284.296875,
+            "flexBasis": "22.3636px",
+            "transform": "none",
+            "transformOrigin": "11.1797px 11.1797px"
+          },
+          {
+            "label": "三萬",
+            "x": 278,
+            "y": 284.296875,
+            "width": 22.359375,
+            "height": 22.359375,
+            "bottom": 306.65625,
+            "flexBasis": "22.3636px",
+            "transform": "none",
+            "transformOrigin": "11.1797px 11.1797px"
+          }
+        ],
+        "stack": {
+          "x": 278,
+          "y": 261.9375,
+          "width": 22.359375,
+          "height": 44.71875,
+          "bottom": 306.65625,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "11.1797px 22.3594px"
+        }
+      },
+      {
+        "label": "チー",
+        "box": {
+          "x": 303.859375,
+          "y": 284.3125,
+          "width": 55.140625,
+          "height": 22.34375,
+          "bottom": 306.65625,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "27.5703px 11.1719px"
+        },
+        "tiles": [
+          {
+            "label": "四筒",
+            "x": 303.859375,
+            "y": 290.265625,
+            "width": 22.359375,
+            "height": 16.390625,
+            "bottom": 306.65625,
+            "flexBasis": "22.3636px",
+            "transform": "none",
+            "transformOrigin": "11.1797px 8.19531px"
+          },
+          {
+            "label": "五筒",
+            "x": 326.21875,
+            "y": 284.3125,
+            "width": 16.390625,
+            "height": 22.34375,
+            "bottom": 306.65625,
+            "flexBasis": "16.4px",
+            "transform": "none",
+            "transformOrigin": "8.19531px 11.1719px"
+          },
+          {
+            "label": "六筒",
+            "x": 342.609375,
+            "y": 284.3125,
+            "width": 16.390625,
+            "height": 22.34375,
+            "bottom": 306.65625,
+            "flexBasis": "16.4px",
+            "transform": "none",
+            "transformOrigin": "8.19531px 11.1719px"
+          }
+        ],
+        "stack": null
+      }
+    ]
+  },
+  {
+    "name": "390-dopa",
+    "viewport": 390,
+    "documentWidth": 390,
+    "groups": [
+      {
+        "label": "加槓",
+        "box": {
+          "x": 128.296875,
+          "y": 262.734375,
+          "width": 54.8125,
+          "height": 44.4375,
+          "bottom": 307.171875,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "27.4062px 22.2188px"
+        },
+        "tiles": [
+          {
+            "label": "一萬",
+            "x": 128.296875,
+            "y": 262.734375,
+            "width": 22.21875,
+            "height": 22.21875,
+            "bottom": 284.953125,
+            "flexBasis": "22.2273px",
+            "transform": "none",
+            "transformOrigin": "11.1094px 11.1094px"
+          },
+          {
+            "label": "一萬",
+            "x": 128.296875,
+            "y": 284.953125,
+            "width": 22.21875,
+            "height": 22.21875,
+            "bottom": 307.171875,
+            "flexBasis": "22.2273px",
+            "transform": "none",
+            "transformOrigin": "11.1094px 11.1094px"
+          },
+          {
+            "label": "一萬",
+            "x": 150.515625,
+            "y": 284.953125,
+            "width": 16.296875,
+            "height": 22.21875,
+            "bottom": 307.171875,
+            "flexBasis": "16.3px",
+            "transform": "none",
+            "transformOrigin": "8.14844px 11.1094px"
+          },
+          {
+            "label": "一萬",
+            "x": 166.8125,
+            "y": 284.953125,
+            "width": 16.296875,
+            "height": 22.21875,
+            "bottom": 307.171875,
+            "flexBasis": "16.3px",
+            "transform": "none",
+            "transformOrigin": "8.14844px 11.1094px"
+          }
+        ],
+        "stack": {
+          "x": 128.296875,
+          "y": 262.734375,
+          "width": 22.21875,
+          "height": 44.4375,
+          "bottom": 307.171875,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "11.1094px 22.2188px"
+        }
+      },
+      {
+        "label": "加槓",
+        "box": {
+          "x": 186.59375,
+          "y": 262.734375,
+          "width": 54.8125,
+          "height": 44.4375,
+          "bottom": 307.171875,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "27.4062px 22.2188px"
+        },
+        "tiles": [
+          {
+            "label": "二萬",
+            "x": 186.59375,
+            "y": 284.953125,
+            "width": 16.296875,
+            "height": 22.21875,
+            "bottom": 307.171875,
+            "flexBasis": "16.3px",
+            "transform": "none",
+            "transformOrigin": "8.14844px 11.1094px"
+          },
+          {
+            "label": "二萬",
+            "x": 202.890625,
+            "y": 262.734375,
+            "width": 22.21875,
+            "height": 22.21875,
+            "bottom": 284.953125,
+            "flexBasis": "22.2273px",
+            "transform": "none",
+            "transformOrigin": "11.1094px 11.1094px"
+          },
+          {
+            "label": "二萬",
+            "x": 202.890625,
+            "y": 284.953125,
+            "width": 22.21875,
+            "height": 22.21875,
+            "bottom": 307.171875,
+            "flexBasis": "22.2273px",
+            "transform": "none",
+            "transformOrigin": "11.1094px 11.1094px"
+          },
+          {
+            "label": "二萬",
+            "x": 225.109375,
+            "y": 284.953125,
+            "width": 16.296875,
+            "height": 22.21875,
+            "bottom": 307.171875,
+            "flexBasis": "16.3px",
+            "transform": "none",
+            "transformOrigin": "8.14844px 11.1094px"
+          }
+        ],
+        "stack": {
+          "x": 202.890625,
+          "y": 262.734375,
+          "width": 22.21875,
+          "height": 44.4375,
+          "bottom": 307.171875,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "11.1094px 22.2188px"
+        }
+      },
+      {
+        "label": "加槓",
+        "box": {
+          "x": 244.890625,
+          "y": 262.734375,
+          "width": 54.8125,
+          "height": 44.4375,
+          "bottom": 307.171875,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "27.4062px 22.2188px"
+        },
+        "tiles": [
+          {
+            "label": "三萬",
+            "x": 244.890625,
+            "y": 284.953125,
+            "width": 16.296875,
+            "height": 22.21875,
+            "bottom": 307.171875,
+            "flexBasis": "16.3px",
+            "transform": "none",
+            "transformOrigin": "8.14844px 11.1094px"
+          },
+          {
+            "label": "三萬",
+            "x": 261.1875,
+            "y": 284.953125,
+            "width": 16.296875,
+            "height": 22.21875,
+            "bottom": 307.171875,
+            "flexBasis": "16.3px",
+            "transform": "none",
+            "transformOrigin": "8.14844px 11.1094px"
+          },
+          {
+            "label": "三萬",
+            "x": 277.484375,
+            "y": 262.734375,
+            "width": 22.21875,
+            "height": 22.21875,
+            "bottom": 284.953125,
+            "flexBasis": "22.2273px",
+            "transform": "none",
+            "transformOrigin": "11.1094px 11.1094px"
+          },
+          {
+            "label": "三萬",
+            "x": 277.484375,
+            "y": 284.953125,
+            "width": 22.21875,
+            "height": 22.21875,
+            "bottom": 307.171875,
+            "flexBasis": "22.2273px",
+            "transform": "none",
+            "transformOrigin": "11.1094px 11.1094px"
+          }
+        ],
+        "stack": {
+          "x": 277.484375,
+          "y": 262.734375,
+          "width": 22.21875,
+          "height": 44.4375,
+          "bottom": 307.171875,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "11.1094px 22.2188px"
+        }
+      },
+      {
+        "label": "チー",
+        "box": {
+          "x": 303.1875,
+          "y": 284.953125,
+          "width": 54.8125,
+          "height": 22.21875,
+          "bottom": 307.171875,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "27.4062px 11.1094px"
+        },
+        "tiles": [
+          {
+            "label": "四筒",
+            "x": 303.1875,
+            "y": 290.890625,
+            "width": 22.21875,
+            "height": 16.28125,
+            "bottom": 307.171875,
+            "flexBasis": "22.2273px",
+            "transform": "none",
+            "transformOrigin": "11.1094px 8.14062px"
+          },
+          {
+            "label": "五筒",
+            "x": 325.40625,
+            "y": 284.953125,
+            "width": 16.296875,
+            "height": 22.21875,
+            "bottom": 307.171875,
+            "flexBasis": "16.3px",
+            "transform": "none",
+            "transformOrigin": "8.14844px 11.1094px"
+          },
+          {
+            "label": "六筒",
+            "x": 341.703125,
+            "y": 284.953125,
+            "width": 16.296875,
+            "height": 22.21875,
+            "bottom": 307.171875,
+            "flexBasis": "16.3px",
+            "transform": "none",
+            "transformOrigin": "8.14844px 11.1094px"
+          }
+        ],
+        "stack": null
+      }
+    ]
+  },
+  {
+    "name": "390-moe",
+    "viewport": 390,
+    "documentWidth": 390,
+    "groups": [
+      {
+        "label": "加槓",
+        "box": {
+          "x": 127.9375,
+          "y": 261.9375,
+          "width": 55.140625,
+          "height": 44.71875,
+          "bottom": 306.65625,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "27.5703px 22.3594px"
+        },
+        "tiles": [
+          {
+            "label": "一萬",
+            "x": 127.9375,
+            "y": 261.9375,
+            "width": 22.359375,
+            "height": 22.359375,
+            "bottom": 284.296875,
+            "flexBasis": "22.3636px",
+            "transform": "none",
+            "transformOrigin": "11.1797px 11.1797px"
+          },
+          {
+            "label": "一萬",
+            "x": 127.9375,
+            "y": 284.296875,
+            "width": 22.359375,
+            "height": 22.359375,
+            "bottom": 306.65625,
+            "flexBasis": "22.3636px",
+            "transform": "none",
+            "transformOrigin": "11.1797px 11.1797px"
+          },
+          {
+            "label": "一萬",
+            "x": 150.296875,
+            "y": 284.3125,
+            "width": 16.390625,
+            "height": 22.34375,
+            "bottom": 306.65625,
+            "flexBasis": "16.4px",
+            "transform": "none",
+            "transformOrigin": "8.19531px 11.1719px"
+          },
+          {
+            "label": "一萬",
+            "x": 166.6875,
+            "y": 284.3125,
+            "width": 16.390625,
+            "height": 22.34375,
+            "bottom": 306.65625,
+            "flexBasis": "16.4px",
+            "transform": "none",
+            "transformOrigin": "8.19531px 11.1719px"
+          }
+        ],
+        "stack": {
+          "x": 127.9375,
+          "y": 261.9375,
+          "width": 22.359375,
+          "height": 44.71875,
+          "bottom": 306.65625,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "11.1797px 22.3594px"
+        }
+      },
+      {
+        "label": "加槓",
+        "box": {
+          "x": 186.578125,
+          "y": 261.9375,
+          "width": 55.140625,
+          "height": 44.71875,
+          "bottom": 306.65625,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "27.5703px 22.3594px"
+        },
+        "tiles": [
+          {
+            "label": "二萬",
+            "x": 186.578125,
+            "y": 284.3125,
+            "width": 16.390625,
+            "height": 22.34375,
+            "bottom": 306.65625,
+            "flexBasis": "16.4px",
+            "transform": "none",
+            "transformOrigin": "8.19531px 11.1719px"
+          },
+          {
+            "label": "二萬",
+            "x": 202.96875,
+            "y": 261.9375,
+            "width": 22.359375,
+            "height": 22.359375,
+            "bottom": 284.296875,
+            "flexBasis": "22.3636px",
+            "transform": "none",
+            "transformOrigin": "11.1797px 11.1797px"
+          },
+          {
+            "label": "二萬",
+            "x": 202.96875,
+            "y": 284.296875,
+            "width": 22.359375,
+            "height": 22.359375,
+            "bottom": 306.65625,
+            "flexBasis": "22.3636px",
+            "transform": "none",
+            "transformOrigin": "11.1797px 11.1797px"
+          },
+          {
+            "label": "二萬",
+            "x": 225.328125,
+            "y": 284.3125,
+            "width": 16.390625,
+            "height": 22.34375,
+            "bottom": 306.65625,
+            "flexBasis": "16.4px",
+            "transform": "none",
+            "transformOrigin": "8.19531px 11.1719px"
+          }
+        ],
+        "stack": {
+          "x": 202.96875,
+          "y": 261.9375,
+          "width": 22.359375,
+          "height": 44.71875,
+          "bottom": 306.65625,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "11.1797px 22.3594px"
+        }
+      },
+      {
+        "label": "加槓",
+        "box": {
+          "x": 245.21875,
+          "y": 261.9375,
+          "width": 55.140625,
+          "height": 44.71875,
+          "bottom": 306.65625,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "27.5703px 22.3594px"
+        },
+        "tiles": [
+          {
+            "label": "三萬",
+            "x": 245.21875,
+            "y": 284.3125,
+            "width": 16.390625,
+            "height": 22.34375,
+            "bottom": 306.65625,
+            "flexBasis": "16.4px",
+            "transform": "none",
+            "transformOrigin": "8.19531px 11.1719px"
+          },
+          {
+            "label": "三萬",
+            "x": 261.609375,
+            "y": 284.3125,
+            "width": 16.390625,
+            "height": 22.34375,
+            "bottom": 306.65625,
+            "flexBasis": "16.4px",
+            "transform": "none",
+            "transformOrigin": "8.19531px 11.1719px"
+          },
+          {
+            "label": "三萬",
+            "x": 278,
+            "y": 261.9375,
+            "width": 22.359375,
+            "height": 22.359375,
+            "bottom": 284.296875,
+            "flexBasis": "22.3636px",
+            "transform": "none",
+            "transformOrigin": "11.1797px 11.1797px"
+          },
+          {
+            "label": "三萬",
+            "x": 278,
+            "y": 284.296875,
+            "width": 22.359375,
+            "height": 22.359375,
+            "bottom": 306.65625,
+            "flexBasis": "22.3636px",
+            "transform": "none",
+            "transformOrigin": "11.1797px 11.1797px"
+          }
+        ],
+        "stack": {
+          "x": 278,
+          "y": 261.9375,
+          "width": 22.359375,
+          "height": 44.71875,
+          "bottom": 306.65625,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "11.1797px 22.3594px"
+        }
+      },
+      {
+        "label": "チー",
+        "box": {
+          "x": 303.859375,
+          "y": 284.3125,
+          "width": 55.140625,
+          "height": 22.34375,
+          "bottom": 306.65625,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "27.5703px 11.1719px"
+        },
+        "tiles": [
+          {
+            "label": "四筒",
+            "x": 303.859375,
+            "y": 290.265625,
+            "width": 22.359375,
+            "height": 16.390625,
+            "bottom": 306.65625,
+            "flexBasis": "22.3636px",
+            "transform": "none",
+            "transformOrigin": "11.1797px 8.19531px"
+          },
+          {
+            "label": "五筒",
+            "x": 326.21875,
+            "y": 284.3125,
+            "width": 16.390625,
+            "height": 22.34375,
+            "bottom": 306.65625,
+            "flexBasis": "16.4px",
+            "transform": "none",
+            "transformOrigin": "8.19531px 11.1719px"
+          },
+          {
+            "label": "六筒",
+            "x": 342.609375,
+            "y": 284.3125,
+            "width": 16.390625,
+            "height": 22.34375,
+            "bottom": 306.65625,
+            "flexBasis": "16.4px",
+            "transform": "none",
+            "transformOrigin": "8.19531px 11.1719px"
+          }
+        ],
+        "stack": null
+      }
+    ]
+  },
+  {
+    "name": "1440-normal",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "groups": [
+      {
+        "label": "加槓",
+        "box": {
+          "x": 296.3125,
+          "y": 409.328125,
+          "width": 94.171875,
+          "height": 76.34375,
+          "bottom": 485.671875,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "47.0859px 38.1719px"
+        },
+        "tiles": [
+          {
+            "label": "一萬",
+            "x": 296.3125,
+            "y": 409.328125,
+            "width": 38.171875,
+            "height": 38.171875,
+            "bottom": 447.5,
+            "flexBasis": "38.1818px",
+            "transform": "none",
+            "transformOrigin": "19.0859px 19.0859px"
+          },
+          {
+            "label": "一萬",
+            "x": 296.3125,
+            "y": 447.5,
+            "width": 38.171875,
+            "height": 38.171875,
+            "bottom": 485.671875,
+            "flexBasis": "38.1818px",
+            "transform": "none",
+            "transformOrigin": "19.0859px 19.0859px"
+          },
+          {
+            "label": "一萬",
+            "x": 334.484375,
+            "y": 447.5,
+            "width": 28,
+            "height": 38.171875,
+            "bottom": 485.671875,
+            "flexBasis": "28px",
+            "transform": "none",
+            "transformOrigin": "14px 19.0859px"
+          },
+          {
+            "label": "一萬",
+            "x": 362.484375,
+            "y": 447.5,
+            "width": 28,
+            "height": 38.171875,
+            "bottom": 485.671875,
+            "flexBasis": "28px",
+            "transform": "none",
+            "transformOrigin": "14px 19.0859px"
+          }
+        ],
+        "stack": {
+          "x": 296.3125,
+          "y": 409.328125,
+          "width": 38.171875,
+          "height": 76.34375,
+          "bottom": 485.671875,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "19.0859px 38.1719px"
+        }
+      },
+      {
+        "label": "加槓",
+        "box": {
+          "x": 396.484375,
+          "y": 409.328125,
+          "width": 94.171875,
+          "height": 76.34375,
+          "bottom": 485.671875,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "47.0859px 38.1719px"
+        },
+        "tiles": [
+          {
+            "label": "二萬",
+            "x": 396.484375,
+            "y": 447.5,
+            "width": 28,
+            "height": 38.171875,
+            "bottom": 485.671875,
+            "flexBasis": "28px",
+            "transform": "none",
+            "transformOrigin": "14px 19.0859px"
+          },
+          {
+            "label": "二萬",
+            "x": 424.484375,
+            "y": 409.328125,
+            "width": 38.171875,
+            "height": 38.171875,
+            "bottom": 447.5,
+            "flexBasis": "38.1818px",
+            "transform": "none",
+            "transformOrigin": "19.0859px 19.0859px"
+          },
+          {
+            "label": "二萬",
+            "x": 424.484375,
+            "y": 447.5,
+            "width": 38.171875,
+            "height": 38.171875,
+            "bottom": 485.671875,
+            "flexBasis": "38.1818px",
+            "transform": "none",
+            "transformOrigin": "19.0859px 19.0859px"
+          },
+          {
+            "label": "二萬",
+            "x": 462.65625,
+            "y": 447.5,
+            "width": 28,
+            "height": 38.171875,
+            "bottom": 485.671875,
+            "flexBasis": "28px",
+            "transform": "none",
+            "transformOrigin": "14px 19.0859px"
+          }
+        ],
+        "stack": {
+          "x": 424.484375,
+          "y": 409.328125,
+          "width": 38.171875,
+          "height": 76.34375,
+          "bottom": 485.671875,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "19.0859px 38.1719px"
+        }
+      },
+      {
+        "label": "加槓",
+        "box": {
+          "x": 496.65625,
+          "y": 409.328125,
+          "width": 94.171875,
+          "height": 76.34375,
+          "bottom": 485.671875,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "47.0859px 38.1719px"
+        },
+        "tiles": [
+          {
+            "label": "三萬",
+            "x": 496.65625,
+            "y": 447.5,
+            "width": 28,
+            "height": 38.171875,
+            "bottom": 485.671875,
+            "flexBasis": "28px",
+            "transform": "none",
+            "transformOrigin": "14px 19.0859px"
+          },
+          {
+            "label": "三萬",
+            "x": 524.65625,
+            "y": 447.5,
+            "width": 28,
+            "height": 38.171875,
+            "bottom": 485.671875,
+            "flexBasis": "28px",
+            "transform": "none",
+            "transformOrigin": "14px 19.0859px"
+          },
+          {
+            "label": "三萬",
+            "x": 552.65625,
+            "y": 409.328125,
+            "width": 38.171875,
+            "height": 38.171875,
+            "bottom": 447.5,
+            "flexBasis": "38.1818px",
+            "transform": "none",
+            "transformOrigin": "19.0859px 19.0859px"
+          },
+          {
+            "label": "三萬",
+            "x": 552.65625,
+            "y": 447.5,
+            "width": 38.171875,
+            "height": 38.171875,
+            "bottom": 485.671875,
+            "flexBasis": "38.1818px",
+            "transform": "none",
+            "transformOrigin": "19.0859px 19.0859px"
+          }
+        ],
+        "stack": {
+          "x": 552.65625,
+          "y": 409.328125,
+          "width": 38.171875,
+          "height": 76.34375,
+          "bottom": 485.671875,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "19.0859px 38.1719px"
+        }
+      },
+      {
+        "label": "チー",
+        "box": {
+          "x": 596.828125,
+          "y": 447.5,
+          "width": 94.171875,
+          "height": 38.171875,
+          "bottom": 485.671875,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "47.0859px 19.0859px"
+        },
+        "tiles": [
+          {
+            "label": "四筒",
+            "x": 596.828125,
+            "y": 457.6875,
+            "width": 38.171875,
+            "height": 27.984375,
+            "bottom": 485.671875,
+            "flexBasis": "38.1818px",
+            "transform": "none",
+            "transformOrigin": "19.0859px 13.9922px"
+          },
+          {
+            "label": "五筒",
+            "x": 635,
+            "y": 447.5,
+            "width": 28,
+            "height": 38.171875,
+            "bottom": 485.671875,
+            "flexBasis": "28px",
+            "transform": "none",
+            "transformOrigin": "14px 19.0859px"
+          },
+          {
+            "label": "六筒",
+            "x": 663,
+            "y": 447.5,
+            "width": 28,
+            "height": 38.171875,
+            "bottom": 485.671875,
+            "flexBasis": "28px",
+            "transform": "none",
+            "transformOrigin": "14px 19.0859px"
+          }
+        ],
+        "stack": null
+      }
+    ]
+  },
+  {
+    "name": "1440-cool",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "groups": [
+      {
+        "label": "加槓",
+        "box": {
+          "x": 296.3125,
+          "y": 409.328125,
+          "width": 94.171875,
+          "height": 76.34375,
+          "bottom": 485.671875,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "47.0859px 38.1719px"
+        },
+        "tiles": [
+          {
+            "label": "一萬",
+            "x": 296.3125,
+            "y": 409.328125,
+            "width": 38.171875,
+            "height": 38.171875,
+            "bottom": 447.5,
+            "flexBasis": "38.1818px",
+            "transform": "none",
+            "transformOrigin": "19.0859px 19.0859px"
+          },
+          {
+            "label": "一萬",
+            "x": 296.3125,
+            "y": 447.5,
+            "width": 38.171875,
+            "height": 38.171875,
+            "bottom": 485.671875,
+            "flexBasis": "38.1818px",
+            "transform": "none",
+            "transformOrigin": "19.0859px 19.0859px"
+          },
+          {
+            "label": "一萬",
+            "x": 334.484375,
+            "y": 447.5,
+            "width": 28,
+            "height": 38.171875,
+            "bottom": 485.671875,
+            "flexBasis": "28px",
+            "transform": "none",
+            "transformOrigin": "14px 19.0859px"
+          },
+          {
+            "label": "一萬",
+            "x": 362.484375,
+            "y": 447.5,
+            "width": 28,
+            "height": 38.171875,
+            "bottom": 485.671875,
+            "flexBasis": "28px",
+            "transform": "none",
+            "transformOrigin": "14px 19.0859px"
+          }
+        ],
+        "stack": {
+          "x": 296.3125,
+          "y": 409.328125,
+          "width": 38.171875,
+          "height": 76.34375,
+          "bottom": 485.671875,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "19.0859px 38.1719px"
+        }
+      },
+      {
+        "label": "加槓",
+        "box": {
+          "x": 396.484375,
+          "y": 409.328125,
+          "width": 94.171875,
+          "height": 76.34375,
+          "bottom": 485.671875,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "47.0859px 38.1719px"
+        },
+        "tiles": [
+          {
+            "label": "二萬",
+            "x": 396.484375,
+            "y": 447.5,
+            "width": 28,
+            "height": 38.171875,
+            "bottom": 485.671875,
+            "flexBasis": "28px",
+            "transform": "none",
+            "transformOrigin": "14px 19.0859px"
+          },
+          {
+            "label": "二萬",
+            "x": 424.484375,
+            "y": 409.328125,
+            "width": 38.171875,
+            "height": 38.171875,
+            "bottom": 447.5,
+            "flexBasis": "38.1818px",
+            "transform": "none",
+            "transformOrigin": "19.0859px 19.0859px"
+          },
+          {
+            "label": "二萬",
+            "x": 424.484375,
+            "y": 447.5,
+            "width": 38.171875,
+            "height": 38.171875,
+            "bottom": 485.671875,
+            "flexBasis": "38.1818px",
+            "transform": "none",
+            "transformOrigin": "19.0859px 19.0859px"
+          },
+          {
+            "label": "二萬",
+            "x": 462.65625,
+            "y": 447.5,
+            "width": 28,
+            "height": 38.171875,
+            "bottom": 485.671875,
+            "flexBasis": "28px",
+            "transform": "none",
+            "transformOrigin": "14px 19.0859px"
+          }
+        ],
+        "stack": {
+          "x": 424.484375,
+          "y": 409.328125,
+          "width": 38.171875,
+          "height": 76.34375,
+          "bottom": 485.671875,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "19.0859px 38.1719px"
+        }
+      },
+      {
+        "label": "加槓",
+        "box": {
+          "x": 496.65625,
+          "y": 409.328125,
+          "width": 94.171875,
+          "height": 76.34375,
+          "bottom": 485.671875,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "47.0859px 38.1719px"
+        },
+        "tiles": [
+          {
+            "label": "三萬",
+            "x": 496.65625,
+            "y": 447.5,
+            "width": 28,
+            "height": 38.171875,
+            "bottom": 485.671875,
+            "flexBasis": "28px",
+            "transform": "none",
+            "transformOrigin": "14px 19.0859px"
+          },
+          {
+            "label": "三萬",
+            "x": 524.65625,
+            "y": 447.5,
+            "width": 28,
+            "height": 38.171875,
+            "bottom": 485.671875,
+            "flexBasis": "28px",
+            "transform": "none",
+            "transformOrigin": "14px 19.0859px"
+          },
+          {
+            "label": "三萬",
+            "x": 552.65625,
+            "y": 409.328125,
+            "width": 38.171875,
+            "height": 38.171875,
+            "bottom": 447.5,
+            "flexBasis": "38.1818px",
+            "transform": "none",
+            "transformOrigin": "19.0859px 19.0859px"
+          },
+          {
+            "label": "三萬",
+            "x": 552.65625,
+            "y": 447.5,
+            "width": 38.171875,
+            "height": 38.171875,
+            "bottom": 485.671875,
+            "flexBasis": "38.1818px",
+            "transform": "none",
+            "transformOrigin": "19.0859px 19.0859px"
+          }
+        ],
+        "stack": {
+          "x": 552.65625,
+          "y": 409.328125,
+          "width": 38.171875,
+          "height": 76.34375,
+          "bottom": 485.671875,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "19.0859px 38.1719px"
+        }
+      },
+      {
+        "label": "チー",
+        "box": {
+          "x": 596.828125,
+          "y": 447.5,
+          "width": 94.171875,
+          "height": 38.171875,
+          "bottom": 485.671875,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "47.0859px 19.0859px"
+        },
+        "tiles": [
+          {
+            "label": "四筒",
+            "x": 596.828125,
+            "y": 457.6875,
+            "width": 38.171875,
+            "height": 27.984375,
+            "bottom": 485.671875,
+            "flexBasis": "38.1818px",
+            "transform": "none",
+            "transformOrigin": "19.0859px 13.9922px"
+          },
+          {
+            "label": "五筒",
+            "x": 635,
+            "y": 447.5,
+            "width": 28,
+            "height": 38.171875,
+            "bottom": 485.671875,
+            "flexBasis": "28px",
+            "transform": "none",
+            "transformOrigin": "14px 19.0859px"
+          },
+          {
+            "label": "六筒",
+            "x": 663,
+            "y": 447.5,
+            "width": 28,
+            "height": 38.171875,
+            "bottom": 485.671875,
+            "flexBasis": "28px",
+            "transform": "none",
+            "transformOrigin": "14px 19.0859px"
+          }
+        ],
+        "stack": null
+      }
+    ]
+  },
+  {
+    "name": "1440-cute",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "groups": [
+      {
+        "label": "加槓",
+        "box": {
+          "x": 296.3125,
+          "y": 409.328125,
+          "width": 94.171875,
+          "height": 76.34375,
+          "bottom": 485.671875,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "47.0859px 38.1719px"
+        },
+        "tiles": [
+          {
+            "label": "一萬",
+            "x": 296.3125,
+            "y": 409.328125,
+            "width": 38.171875,
+            "height": 38.171875,
+            "bottom": 447.5,
+            "flexBasis": "38.1818px",
+            "transform": "none",
+            "transformOrigin": "19.0859px 19.0859px"
+          },
+          {
+            "label": "一萬",
+            "x": 296.3125,
+            "y": 447.5,
+            "width": 38.171875,
+            "height": 38.171875,
+            "bottom": 485.671875,
+            "flexBasis": "38.1818px",
+            "transform": "none",
+            "transformOrigin": "19.0859px 19.0859px"
+          },
+          {
+            "label": "一萬",
+            "x": 334.484375,
+            "y": 447.5,
+            "width": 28,
+            "height": 38.171875,
+            "bottom": 485.671875,
+            "flexBasis": "28px",
+            "transform": "none",
+            "transformOrigin": "14px 19.0859px"
+          },
+          {
+            "label": "一萬",
+            "x": 362.484375,
+            "y": 447.5,
+            "width": 28,
+            "height": 38.171875,
+            "bottom": 485.671875,
+            "flexBasis": "28px",
+            "transform": "none",
+            "transformOrigin": "14px 19.0859px"
+          }
+        ],
+        "stack": {
+          "x": 296.3125,
+          "y": 409.328125,
+          "width": 38.171875,
+          "height": 76.34375,
+          "bottom": 485.671875,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "19.0859px 38.1719px"
+        }
+      },
+      {
+        "label": "加槓",
+        "box": {
+          "x": 396.484375,
+          "y": 409.328125,
+          "width": 94.171875,
+          "height": 76.34375,
+          "bottom": 485.671875,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "47.0859px 38.1719px"
+        },
+        "tiles": [
+          {
+            "label": "二萬",
+            "x": 396.484375,
+            "y": 447.5,
+            "width": 28,
+            "height": 38.171875,
+            "bottom": 485.671875,
+            "flexBasis": "28px",
+            "transform": "none",
+            "transformOrigin": "14px 19.0859px"
+          },
+          {
+            "label": "二萬",
+            "x": 424.484375,
+            "y": 409.328125,
+            "width": 38.171875,
+            "height": 38.171875,
+            "bottom": 447.5,
+            "flexBasis": "38.1818px",
+            "transform": "none",
+            "transformOrigin": "19.0859px 19.0859px"
+          },
+          {
+            "label": "二萬",
+            "x": 424.484375,
+            "y": 447.5,
+            "width": 38.171875,
+            "height": 38.171875,
+            "bottom": 485.671875,
+            "flexBasis": "38.1818px",
+            "transform": "none",
+            "transformOrigin": "19.0859px 19.0859px"
+          },
+          {
+            "label": "二萬",
+            "x": 462.65625,
+            "y": 447.5,
+            "width": 28,
+            "height": 38.171875,
+            "bottom": 485.671875,
+            "flexBasis": "28px",
+            "transform": "none",
+            "transformOrigin": "14px 19.0859px"
+          }
+        ],
+        "stack": {
+          "x": 424.484375,
+          "y": 409.328125,
+          "width": 38.171875,
+          "height": 76.34375,
+          "bottom": 485.671875,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "19.0859px 38.1719px"
+        }
+      },
+      {
+        "label": "加槓",
+        "box": {
+          "x": 496.65625,
+          "y": 409.328125,
+          "width": 94.171875,
+          "height": 76.34375,
+          "bottom": 485.671875,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "47.0859px 38.1719px"
+        },
+        "tiles": [
+          {
+            "label": "三萬",
+            "x": 496.65625,
+            "y": 447.5,
+            "width": 28,
+            "height": 38.171875,
+            "bottom": 485.671875,
+            "flexBasis": "28px",
+            "transform": "none",
+            "transformOrigin": "14px 19.0859px"
+          },
+          {
+            "label": "三萬",
+            "x": 524.65625,
+            "y": 447.5,
+            "width": 28,
+            "height": 38.171875,
+            "bottom": 485.671875,
+            "flexBasis": "28px",
+            "transform": "none",
+            "transformOrigin": "14px 19.0859px"
+          },
+          {
+            "label": "三萬",
+            "x": 552.65625,
+            "y": 409.328125,
+            "width": 38.171875,
+            "height": 38.171875,
+            "bottom": 447.5,
+            "flexBasis": "38.1818px",
+            "transform": "none",
+            "transformOrigin": "19.0859px 19.0859px"
+          },
+          {
+            "label": "三萬",
+            "x": 552.65625,
+            "y": 447.5,
+            "width": 38.171875,
+            "height": 38.171875,
+            "bottom": 485.671875,
+            "flexBasis": "38.1818px",
+            "transform": "none",
+            "transformOrigin": "19.0859px 19.0859px"
+          }
+        ],
+        "stack": {
+          "x": 552.65625,
+          "y": 409.328125,
+          "width": 38.171875,
+          "height": 76.34375,
+          "bottom": 485.671875,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "19.0859px 38.1719px"
+        }
+      },
+      {
+        "label": "チー",
+        "box": {
+          "x": 596.828125,
+          "y": 447.5,
+          "width": 94.171875,
+          "height": 38.171875,
+          "bottom": 485.671875,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "47.0859px 19.0859px"
+        },
+        "tiles": [
+          {
+            "label": "四筒",
+            "x": 596.828125,
+            "y": 457.6875,
+            "width": 38.171875,
+            "height": 27.984375,
+            "bottom": 485.671875,
+            "flexBasis": "38.1818px",
+            "transform": "none",
+            "transformOrigin": "19.0859px 13.9922px"
+          },
+          {
+            "label": "五筒",
+            "x": 635,
+            "y": 447.5,
+            "width": 28,
+            "height": 38.171875,
+            "bottom": 485.671875,
+            "flexBasis": "28px",
+            "transform": "none",
+            "transformOrigin": "14px 19.0859px"
+          },
+          {
+            "label": "六筒",
+            "x": 663,
+            "y": 447.5,
+            "width": 28,
+            "height": 38.171875,
+            "bottom": 485.671875,
+            "flexBasis": "28px",
+            "transform": "none",
+            "transformOrigin": "14px 19.0859px"
+          }
+        ],
+        "stack": null
+      }
+    ]
+  },
+  {
+    "name": "1440-dopa",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "groups": [
+      {
+        "label": "加槓",
+        "box": {
+          "x": 295.3125,
+          "y": 410.328125,
+          "width": 94.171875,
+          "height": 76.34375,
+          "bottom": 486.671875,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "47.0859px 38.1719px"
+        },
+        "tiles": [
+          {
+            "label": "一萬",
+            "x": 295.3125,
+            "y": 410.328125,
+            "width": 38.171875,
+            "height": 38.171875,
+            "bottom": 448.5,
+            "flexBasis": "38.1818px",
+            "transform": "none",
+            "transformOrigin": "19.0859px 19.0859px"
+          },
+          {
+            "label": "一萬",
+            "x": 295.3125,
+            "y": 448.5,
+            "width": 38.171875,
+            "height": 38.171875,
+            "bottom": 486.671875,
+            "flexBasis": "38.1818px",
+            "transform": "none",
+            "transformOrigin": "19.0859px 19.0859px"
+          },
+          {
+            "label": "一萬",
+            "x": 333.484375,
+            "y": 448.5,
+            "width": 28,
+            "height": 38.171875,
+            "bottom": 486.671875,
+            "flexBasis": "28px",
+            "transform": "none",
+            "transformOrigin": "14px 19.0859px"
+          },
+          {
+            "label": "一萬",
+            "x": 361.484375,
+            "y": 448.5,
+            "width": 28,
+            "height": 38.171875,
+            "bottom": 486.671875,
+            "flexBasis": "28px",
+            "transform": "none",
+            "transformOrigin": "14px 19.0859px"
+          }
+        ],
+        "stack": {
+          "x": 295.3125,
+          "y": 410.328125,
+          "width": 38.171875,
+          "height": 76.34375,
+          "bottom": 486.671875,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "19.0859px 38.1719px"
+        }
+      },
+      {
+        "label": "加槓",
+        "box": {
+          "x": 395.484375,
+          "y": 410.328125,
+          "width": 94.171875,
+          "height": 76.34375,
+          "bottom": 486.671875,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "47.0859px 38.1719px"
+        },
+        "tiles": [
+          {
+            "label": "二萬",
+            "x": 395.484375,
+            "y": 448.5,
+            "width": 28,
+            "height": 38.171875,
+            "bottom": 486.671875,
+            "flexBasis": "28px",
+            "transform": "none",
+            "transformOrigin": "14px 19.0859px"
+          },
+          {
+            "label": "二萬",
+            "x": 423.484375,
+            "y": 410.328125,
+            "width": 38.171875,
+            "height": 38.171875,
+            "bottom": 448.5,
+            "flexBasis": "38.1818px",
+            "transform": "none",
+            "transformOrigin": "19.0859px 19.0859px"
+          },
+          {
+            "label": "二萬",
+            "x": 423.484375,
+            "y": 448.5,
+            "width": 38.171875,
+            "height": 38.171875,
+            "bottom": 486.671875,
+            "flexBasis": "38.1818px",
+            "transform": "none",
+            "transformOrigin": "19.0859px 19.0859px"
+          },
+          {
+            "label": "二萬",
+            "x": 461.65625,
+            "y": 448.5,
+            "width": 28,
+            "height": 38.171875,
+            "bottom": 486.671875,
+            "flexBasis": "28px",
+            "transform": "none",
+            "transformOrigin": "14px 19.0859px"
+          }
+        ],
+        "stack": {
+          "x": 423.484375,
+          "y": 410.328125,
+          "width": 38.171875,
+          "height": 76.34375,
+          "bottom": 486.671875,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "19.0859px 38.1719px"
+        }
+      },
+      {
+        "label": "加槓",
+        "box": {
+          "x": 495.65625,
+          "y": 410.328125,
+          "width": 94.171875,
+          "height": 76.34375,
+          "bottom": 486.671875,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "47.0859px 38.1719px"
+        },
+        "tiles": [
+          {
+            "label": "三萬",
+            "x": 495.65625,
+            "y": 448.5,
+            "width": 28,
+            "height": 38.171875,
+            "bottom": 486.671875,
+            "flexBasis": "28px",
+            "transform": "none",
+            "transformOrigin": "14px 19.0859px"
+          },
+          {
+            "label": "三萬",
+            "x": 523.65625,
+            "y": 448.5,
+            "width": 28,
+            "height": 38.171875,
+            "bottom": 486.671875,
+            "flexBasis": "28px",
+            "transform": "none",
+            "transformOrigin": "14px 19.0859px"
+          },
+          {
+            "label": "三萬",
+            "x": 551.65625,
+            "y": 410.328125,
+            "width": 38.171875,
+            "height": 38.171875,
+            "bottom": 448.5,
+            "flexBasis": "38.1818px",
+            "transform": "none",
+            "transformOrigin": "19.0859px 19.0859px"
+          },
+          {
+            "label": "三萬",
+            "x": 551.65625,
+            "y": 448.5,
+            "width": 38.171875,
+            "height": 38.171875,
+            "bottom": 486.671875,
+            "flexBasis": "38.1818px",
+            "transform": "none",
+            "transformOrigin": "19.0859px 19.0859px"
+          }
+        ],
+        "stack": {
+          "x": 551.65625,
+          "y": 410.328125,
+          "width": 38.171875,
+          "height": 76.34375,
+          "bottom": 486.671875,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "19.0859px 38.1719px"
+        }
+      },
+      {
+        "label": "チー",
+        "box": {
+          "x": 595.828125,
+          "y": 448.5,
+          "width": 94.171875,
+          "height": 38.171875,
+          "bottom": 486.671875,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "47.0859px 19.0859px"
+        },
+        "tiles": [
+          {
+            "label": "四筒",
+            "x": 595.828125,
+            "y": 458.6875,
+            "width": 38.171875,
+            "height": 27.984375,
+            "bottom": 486.671875,
+            "flexBasis": "38.1818px",
+            "transform": "none",
+            "transformOrigin": "19.0859px 13.9922px"
+          },
+          {
+            "label": "五筒",
+            "x": 634,
+            "y": 448.5,
+            "width": 28,
+            "height": 38.171875,
+            "bottom": 486.671875,
+            "flexBasis": "28px",
+            "transform": "none",
+            "transformOrigin": "14px 19.0859px"
+          },
+          {
+            "label": "六筒",
+            "x": 662,
+            "y": 448.5,
+            "width": 28,
+            "height": 38.171875,
+            "bottom": 486.671875,
+            "flexBasis": "28px",
+            "transform": "none",
+            "transformOrigin": "14px 19.0859px"
+          }
+        ],
+        "stack": null
+      }
+    ]
+  },
+  {
+    "name": "1440-moe",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "groups": [
+      {
+        "label": "加槓",
+        "box": {
+          "x": 296.3125,
+          "y": 409.328125,
+          "width": 94.171875,
+          "height": 76.34375,
+          "bottom": 485.671875,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "47.0859px 38.1719px"
+        },
+        "tiles": [
+          {
+            "label": "一萬",
+            "x": 296.3125,
+            "y": 409.328125,
+            "width": 38.171875,
+            "height": 38.171875,
+            "bottom": 447.5,
+            "flexBasis": "38.1818px",
+            "transform": "none",
+            "transformOrigin": "19.0859px 19.0859px"
+          },
+          {
+            "label": "一萬",
+            "x": 296.3125,
+            "y": 447.5,
+            "width": 38.171875,
+            "height": 38.171875,
+            "bottom": 485.671875,
+            "flexBasis": "38.1818px",
+            "transform": "none",
+            "transformOrigin": "19.0859px 19.0859px"
+          },
+          {
+            "label": "一萬",
+            "x": 334.484375,
+            "y": 447.5,
+            "width": 28,
+            "height": 38.171875,
+            "bottom": 485.671875,
+            "flexBasis": "28px",
+            "transform": "none",
+            "transformOrigin": "14px 19.0859px"
+          },
+          {
+            "label": "一萬",
+            "x": 362.484375,
+            "y": 447.5,
+            "width": 28,
+            "height": 38.171875,
+            "bottom": 485.671875,
+            "flexBasis": "28px",
+            "transform": "none",
+            "transformOrigin": "14px 19.0859px"
+          }
+        ],
+        "stack": {
+          "x": 296.3125,
+          "y": 409.328125,
+          "width": 38.171875,
+          "height": 76.34375,
+          "bottom": 485.671875,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "19.0859px 38.1719px"
+        }
+      },
+      {
+        "label": "加槓",
+        "box": {
+          "x": 396.484375,
+          "y": 409.328125,
+          "width": 94.171875,
+          "height": 76.34375,
+          "bottom": 485.671875,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "47.0859px 38.1719px"
+        },
+        "tiles": [
+          {
+            "label": "二萬",
+            "x": 396.484375,
+            "y": 447.5,
+            "width": 28,
+            "height": 38.171875,
+            "bottom": 485.671875,
+            "flexBasis": "28px",
+            "transform": "none",
+            "transformOrigin": "14px 19.0859px"
+          },
+          {
+            "label": "二萬",
+            "x": 424.484375,
+            "y": 409.328125,
+            "width": 38.171875,
+            "height": 38.171875,
+            "bottom": 447.5,
+            "flexBasis": "38.1818px",
+            "transform": "none",
+            "transformOrigin": "19.0859px 19.0859px"
+          },
+          {
+            "label": "二萬",
+            "x": 424.484375,
+            "y": 447.5,
+            "width": 38.171875,
+            "height": 38.171875,
+            "bottom": 485.671875,
+            "flexBasis": "38.1818px",
+            "transform": "none",
+            "transformOrigin": "19.0859px 19.0859px"
+          },
+          {
+            "label": "二萬",
+            "x": 462.65625,
+            "y": 447.5,
+            "width": 28,
+            "height": 38.171875,
+            "bottom": 485.671875,
+            "flexBasis": "28px",
+            "transform": "none",
+            "transformOrigin": "14px 19.0859px"
+          }
+        ],
+        "stack": {
+          "x": 424.484375,
+          "y": 409.328125,
+          "width": 38.171875,
+          "height": 76.34375,
+          "bottom": 485.671875,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "19.0859px 38.1719px"
+        }
+      },
+      {
+        "label": "加槓",
+        "box": {
+          "x": 496.65625,
+          "y": 409.328125,
+          "width": 94.171875,
+          "height": 76.34375,
+          "bottom": 485.671875,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "47.0859px 38.1719px"
+        },
+        "tiles": [
+          {
+            "label": "三萬",
+            "x": 496.65625,
+            "y": 447.5,
+            "width": 28,
+            "height": 38.171875,
+            "bottom": 485.671875,
+            "flexBasis": "28px",
+            "transform": "none",
+            "transformOrigin": "14px 19.0859px"
+          },
+          {
+            "label": "三萬",
+            "x": 524.65625,
+            "y": 447.5,
+            "width": 28,
+            "height": 38.171875,
+            "bottom": 485.671875,
+            "flexBasis": "28px",
+            "transform": "none",
+            "transformOrigin": "14px 19.0859px"
+          },
+          {
+            "label": "三萬",
+            "x": 552.65625,
+            "y": 409.328125,
+            "width": 38.171875,
+            "height": 38.171875,
+            "bottom": 447.5,
+            "flexBasis": "38.1818px",
+            "transform": "none",
+            "transformOrigin": "19.0859px 19.0859px"
+          },
+          {
+            "label": "三萬",
+            "x": 552.65625,
+            "y": 447.5,
+            "width": 38.171875,
+            "height": 38.171875,
+            "bottom": 485.671875,
+            "flexBasis": "38.1818px",
+            "transform": "none",
+            "transformOrigin": "19.0859px 19.0859px"
+          }
+        ],
+        "stack": {
+          "x": 552.65625,
+          "y": 409.328125,
+          "width": 38.171875,
+          "height": 76.34375,
+          "bottom": 485.671875,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "19.0859px 38.1719px"
+        }
+      },
+      {
+        "label": "チー",
+        "box": {
+          "x": 596.828125,
+          "y": 447.5,
+          "width": 94.171875,
+          "height": 38.171875,
+          "bottom": 485.671875,
+          "flexBasis": "auto",
+          "transform": "none",
+          "transformOrigin": "47.0859px 19.0859px"
+        },
+        "tiles": [
+          {
+            "label": "四筒",
+            "x": 596.828125,
+            "y": 457.6875,
+            "width": 38.171875,
+            "height": 27.984375,
+            "bottom": 485.671875,
+            "flexBasis": "38.1818px",
+            "transform": "none",
+            "transformOrigin": "19.0859px 13.9922px"
+          },
+          {
+            "label": "五筒",
+            "x": 635,
+            "y": 447.5,
+            "width": 28,
+            "height": 38.171875,
+            "bottom": 485.671875,
+            "flexBasis": "28px",
+            "transform": "none",
+            "transformOrigin": "14px 19.0859px"
+          },
+          {
+            "label": "六筒",
+            "x": 663,
+            "y": 447.5,
+            "width": 28,
+            "height": 38.171875,
+            "bottom": 485.671875,
+            "flexBasis": "28px",
+            "transform": "none",
+            "transformOrigin": "14px 19.0859px"
+          }
+        ],
+        "stack": null
+      }
+    ]
+  }
+]

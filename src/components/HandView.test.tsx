@@ -98,3 +98,18 @@ describe.each([true, false])('unified hand (tight=%s)', (tight) => {
     expect(onSelectDrawn).toHaveBeenCalledTimes(1);
   });
 });
+
+it.each([true, false])('shows earliest meld on the right without mutating legacy arrays or inner tile order (tight=%s)', async (tight) => {
+  const chi: Meld = { id: 'chi', type: 'chi', tiles: ['4s', '5s', '6s'], from: 'left', calledIndex: 0, addedIndex: null };
+  const melds = [pon, chi];
+  const before = structuredClone(melds);
+  const remove = vi.fn();
+  await act(async () => root.render(<HandView concealed={[]} drawn={null} melds={melds} tight={tight} onRemoveMeld={remove} />));
+  const groups = [...host.querySelectorAll('.meld-view')];
+  expect(groups.map((g) => g.getAttribute('aria-label'))).toEqual(['チー', 'ポン']);
+  expect([...groups[0]!.querySelectorAll('.tile-face')].map((t) => t.getAttribute('aria-label'))).toEqual(chi.tiles.map(tileLabel));
+  expect([...groups[1]!.querySelectorAll('.tile-face')].map((t) => t.getAttribute('aria-label'))).toEqual(pon.tiles.map(tileLabel));
+  await act(async () => host.querySelector<HTMLButtonElement>('.meld-btn')!.click());
+  expect(remove).toHaveBeenCalledWith('chi');
+  expect(melds).toEqual(before);
+});
