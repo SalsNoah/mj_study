@@ -1,0 +1,36 @@
+
+> mahjong-study@1.0.0 test
+> vitest run --run src/features/mobileNavigation.test.tsx src/features/unsavedChanges.test.tsx src/features/materials/MaterialsPage.test.tsx src/features/materials/materialSort.test.ts
+
+
+ RUN  v3.2.7 /workspace/mj_study
+
+ ✓ src/features/materials/MaterialsPage.test.tsx (41 tests) 3066ms
+   ✓ confirms one titled archive with preserved history, traps and returns focus, then restores after reload  306ms
+ ✓ src/features/mobileNavigation.test.tsx (11 tests) 3133ms
+   ✓ keeps conditions above the full palette and preserves drafts while opening optional notes  959ms
+   ✓ opens optional notes for answer errors while conditions always stay directly available  507ms
+   ✓ opens detail notes first and retains remaining adjustments and all-candidate expansion across tabs  538ms
+   ✓ hides answer information before answering and retains answer-tab adjustments without duplicate attempts  311ms
+ ✓ src/features/materials/materialSort.test.ts (9 tests) 12ms
+ ✓ src/features/unsavedChanges.test.tsx (25 tests) 9088ms
+   ✓ protects changed problem titles, traps focus, and restores the navigation link on Stay and Escape  1892ms
+   ✓ discards only after confirmation and reopens the saved original, with no unload warning left behind  1153ms
+   ✓ saves once to the requested destination and preserves problem study and attempt counts  643ms
+   ✓ does not prompt for unchanged values, view toggles, edit then revert, or after explicit save  633ms
+   ✓ preserves invalid score and cancels pending navigation when Save fails validation  378ms
+   ✓ protects Back and Forward with real hash history and stays on the editor after cancellation  899ms
+   ✓ warns during image preparation, disables Save, and ignores a late completion after discard  303ms
+   ✓ keeps a problem draft blocked after explicitly reloading a newer store in the same tab  410ms
+   ✓ keeps drafts on same-page query and fragment updates and guards the next page change  402ms
+
+ Test Files  4 passed (4)
+      Tests  86 passed (86)
+   Start at  10:33:02
+   Duration  11.48s (transform 1.57s, setup 67ms, collect 3.22s, tests 15.30s, environment 2.54s, prepare 523ms)
+
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+npm notice To update run: npm install -g npm@12.2.0
+npm notice
