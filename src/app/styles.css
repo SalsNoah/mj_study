@@ -150,6 +150,13 @@ body {
   overflow-wrap: break-word;
 }
 
+/* Keep the mobile fixed navigation out of the viewport's boundary bounce.
+   Retain document scrolling for route restoration, focus and the keyboard.
+   Vertical pull-to-refresh is also suppressed; horizontal gestures stay native. */
+@media (max-width: 1099px) {
+  html, body { overscroll-behavior-y: none; }
+}
+
 a { color: var(--accent); }
 button, input, select, textarea {
   font: inherit;

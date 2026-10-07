@@ -1,0 +1,326 @@
+[
+  {
+    "width": 320,
+    "phase": "before",
+    "initial": {
+      "scrollingElement": "HTML",
+      "scrollY": 1895,
+      "viewport": 844,
+      "visualHeight": 844,
+      "navTop": 783,
+      "navBottom": 844,
+      "overscroll": "auto",
+      "safe": "8px",
+      "width": 320
+    },
+    "pulled": {
+      "scrollingElement": "HTML",
+      "scrollY": 1895,
+      "viewport": 844,
+      "visualHeight": 844,
+      "navTop": 783,
+      "navBottom": 844,
+      "overscroll": "auto",
+      "safe": "8px",
+      "width": 320
+    },
+    "scope": "Chromium synthetic gestures; native iOS bounce not reproduced"
+  },
+  {
+    "width": 320,
+    "phase": "after",
+    "initial": {
+      "scrollingElement": "HTML",
+      "scrollY": 1895,
+      "viewport": 844,
+      "visualHeight": 844,
+      "navTop": 783,
+      "navBottom": 844,
+      "overscroll": "none",
+      "safe": "8px",
+      "width": 320
+    },
+    "pulled": {
+      "scrollingElement": "HTML",
+      "scrollY": 1895,
+      "viewport": 844,
+      "visualHeight": 844,
+      "navTop": 783,
+      "navBottom": 844,
+      "overscroll": "none",
+      "safe": "8px",
+      "width": 320
+    },
+    "scope": "Chromium synthetic gestures; native iOS bounce not reproduced"
+  },
+  {
+    "width": 320,
+    "scenario": "standalone CSS media + 34px simulated safe area; no installed PWA or real keyboard",
+    "standalone": false,
+    "geometry": {
+      "scrollingElement": "HTML",
+      "scrollY": 1929,
+      "viewport": 844,
+      "visualHeight": 844,
+      "navTop": 749,
+      "navBottom": 844,
+      "overscroll": "none",
+      "safe": "42px",
+      "width": 320
+    }
+  },
+  {
+    "width": 320,
+    "scenario": "editor bottom",
+    "geometry": {
+      "scrollingElement": "HTML",
+      "scrollY": 707,
+      "viewport": 844,
+      "visualHeight": 844,
+      "navTop": 749,
+      "navBottom": 844,
+      "overscroll": "none",
+      "safe": "42px",
+      "width": 320
+    }
+  },
+  {
+    "width": 390,
+    "phase": "before",
+    "initial": {
+      "scrollingElement": "HTML",
+      "scrollY": 1842,
+      "viewport": 844,
+      "visualHeight": 844,
+      "navTop": 783,
+      "navBottom": 844,
+      "overscroll": "auto",
+      "safe": "8px",
+      "width": 390
+    },
+    "pulled": {
+      "scrollingElement": "HTML",
+      "scrollY": 1842,
+      "viewport": 844,
+      "visualHeight": 844,
+      "navTop": 783,
+      "navBottom": 844,
+      "overscroll": "auto",
+      "safe": "8px",
+      "width": 390
+    },
+    "scope": "Chromium synthetic gestures; native iOS bounce not reproduced"
+  },
+  {
+    "width": 390,
+    "phase": "after",
+    "initial": {
+      "scrollingElement": "HTML",
+      "scrollY": 1842,
+      "viewport": 844,
+      "visualHeight": 844,
+      "navTop": 783,
+      "navBottom": 844,
+      "overscroll": "none",
+      "safe": "8px",
+      "width": 390
+    },
+    "pulled": {
+      "scrollingElement": "HTML",
+      "scrollY": 1842,
+      "viewport": 844,
+      "visualHeight": 844,
+      "navTop": 783,
+      "navBottom": 844,
+      "overscroll": "none",
+      "safe": "8px",
+      "width": 390
+    },
+    "scope": "Chromium synthetic gestures; native iOS bounce not reproduced"
+  },
+  {
+    "width": 390,
+    "scenario": "standalone CSS media + 34px simulated safe area; no installed PWA or real keyboard",
+    "standalone": false,
+    "geometry": {
+      "scrollingElement": "HTML",
+      "scrollY": 1876,
+      "viewport": 844,
+      "visualHeight": 844,
+      "navTop": 749,
+      "navBottom": 844,
+      "overscroll": "none",
+      "safe": "42px",
+      "width": 390
+    }
+  },
+  {
+    "width": 390,
+    "scenario": "editor bottom",
+    "geometry": {
+      "scrollingElement": "HTML",
+      "scrollY": 612,
+      "viewport": 844,
+      "visualHeight": 844,
+      "navTop": 749,
+      "navBottom": 844,
+      "overscroll": "none",
+      "safe": "42px",
+      "width": 390
+    }
+  },
+  {
+    "width": 844,
+    "phase": "before",
+    "initial": {
+      "scrollingElement": "HTML",
+      "scrollY": 1275,
+      "viewport": 390,
+      "visualHeight": 390,
+      "navTop": 329,
+      "navBottom": 390,
+      "overscroll": "auto",
+      "safe": "8px",
+      "width": 844
+    },
+    "pulled": {
+      "scrollingElement": "HTML",
+      "scrollY": 1275,
+      "viewport": 390,
+      "visualHeight": 390,
+      "navTop": 329,
+      "navBottom": 390,
+      "overscroll": "auto",
+      "safe": "8px",
+      "width": 844
+    },
+    "scope": "Chromium synthetic gestures; native iOS bounce not reproduced"
+  },
+  {
+    "width": 844,
+    "phase": "after",
+    "initial": {
+      "scrollingElement": "HTML",
+      "scrollY": 1275,
+      "viewport": 390,
+      "visualHeight": 390,
+      "navTop": 329,
+      "navBottom": 390,
+      "overscroll": "none",
+      "safe": "8px",
+      "width": 844
+    },
+    "pulled": {
+      "scrollingElement": "HTML",
+      "scrollY": 1275,
+      "viewport": 390,
+      "visualHeight": 390,
+      "navTop": 329,
+      "navBottom": 390,
+      "overscroll": "none",
+      "safe": "8px",
+      "width": 844
+    },
+    "scope": "Chromium synthetic gestures; native iOS bounce not reproduced"
+  },
+  {
+    "width": 844,
+    "scenario": "standalone CSS media + 34px simulated safe area; no installed PWA or real keyboard",
+    "standalone": false,
+    "geometry": {
+      "scrollingElement": "HTML",
+      "scrollY": 1309,
+      "viewport": 390,
+      "visualHeight": 390,
+      "navTop": 295,
+      "navBottom": 390,
+      "overscroll": "none",
+      "safe": "42px",
+      "width": 844
+    }
+  },
+  {
+    "width": 844,
+    "scenario": "editor bottom",
+    "geometry": {
+      "scrollingElement": "HTML",
+      "scrollY": 1377,
+      "viewport": 390,
+      "visualHeight": 390,
+      "navTop": 295,
+      "navBottom": 390,
+      "overscroll": "none",
+      "safe": "42px",
+      "width": 844
+    }
+  },
+  {
+    "width": 1440,
+    "phase": "before",
+    "initial": {
+      "scrollingElement": "HTML",
+      "scrollY": 781,
+      "viewport": 900,
+      "visualHeight": 900,
+      "navTop": 8,
+      "navBottom": 66,
+      "overscroll": "auto",
+      "safe": "6px",
+      "width": 1440
+    },
+    "pulled": {
+      "scrollingElement": "HTML",
+      "scrollY": 781,
+      "viewport": 900,
+      "visualHeight": 900,
+      "navTop": 8,
+      "navBottom": 66,
+      "overscroll": "auto",
+      "safe": "6px",
+      "width": 1440
+    },
+    "scope": "Chromium synthetic gestures; native iOS bounce not reproduced"
+  },
+  {
+    "width": 1440,
+    "phase": "after",
+    "initial": {
+      "scrollingElement": "HTML",
+      "scrollY": 781,
+      "viewport": 900,
+      "visualHeight": 900,
+      "navTop": 8,
+      "navBottom": 66,
+      "overscroll": "auto",
+      "safe": "6px",
+      "width": 1440
+    },
+    "pulled": {
+      "scrollingElement": "HTML",
+      "scrollY": 781,
+      "viewport": 900,
+      "visualHeight": 900,
+      "navTop": 8,
+      "navBottom": 66,
+      "overscroll": "auto",
+      "safe": "6px",
+      "width": 1440
+    },
+    "scope": "Chromium synthetic gestures; native iOS bounce not reproduced"
+  },
+  {
+    "width": 1440,
+    "scenario": "editor bottom",
+    "geometry": {
+      "scrollingElement": "HTML",
+      "scrollY": 90,
+      "viewport": 900,
+      "visualHeight": 900,
+      "navTop": 8,
+      "navBottom": 66,
+      "overscroll": "auto",
+      "safe": "6px",
+      "width": 1440
+    }
+  }
+]

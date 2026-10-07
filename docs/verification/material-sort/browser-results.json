@@ -1,0 +1,62 @@
+[
+  {
+    "width": 320,
+    "status": "pass",
+    "checks": [
+      "six permutations",
+      "numeric 2 vs 10",
+      "timezone comparison",
+      "never studied last both directions",
+      "stable ties",
+      "no sort persistence",
+      "keyboard",
+      "study freezes until refresh",
+      "search",
+      "archive/restore",
+      "undo",
+      "comments/history preserved",
+      "no overflow",
+      "last card reachable"
+    ]
+  },
+  {
+    "width": 390,
+    "status": "pass",
+    "checks": [
+      "six permutations",
+      "numeric 2 vs 10",
+      "timezone comparison",
+      "never studied last both directions",
+      "stable ties",
+      "no sort persistence",
+      "keyboard",
+      "study freezes until refresh",
+      "search",
+      "archive/restore",
+      "undo",
+      "comments/history preserved",
+      "no overflow",
+      "last card reachable"
+    ]
+  },
+  {
+    "width": 1440,
+    "status": "pass",
+    "checks": [
+      "six permutations",
+      "numeric 2 vs 10",
+      "timezone comparison",
+      "never studied last both directions",
+      "stable ties",
+      "no sort persistence",
+      "keyboard",
+      "study freezes until refresh",
+      "search",
+      "archive/restore",
+      "undo",
+      "comments/history preserved",
+      "no overflow",
+      "last card reachable"
+    ]
+  }
+]

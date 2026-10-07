@@ -613,6 +613,7 @@ it('stays on the list, clears search only on success, and allows a fresh next re
   expect(host.querySelector('.material-card h2')!.textContent).toBe('新しい教材');
   expect(persisted().materials).toHaveLength(2); expect(persisted().materialStudyEvents).toHaveLength(0);
   await click(button('教材を追加')); expect(field('URL').value).toBe(''); expect(field('タイトル（任意）').value).toBe('');
+  vi.setSystemTime(new Date('2026-10-05T04:00:01.000Z'));
   await input(field('URL'), 'https://example.com/second'); await input(field('タイトル（任意）'), '次の教材'); await click(button('登録する'));
   expect(persisted().materials).toHaveLength(3); expect(new Set(persisted().materials!.map(m => m.id)).size).toBe(3);
   expect(host.querySelector('.material-card h2')!.textContent).toBe('次の教材');
@@ -643,4 +644,32 @@ it('ignores a late YouTube response after saving and starting another draft',asy
   expect(host.querySelector('h1')!.textContent).toBe('学習教材');expect(persisted().materials![0]!.title).toBe('youtu.be');
   await click(button('教材を追加'));await input(field('URL'),'https://note.com/new');await input(field('タイトル（任意）'),'新しい入力');
   await act(async()=>resolve({ok:true,json:async()=>({title:'古い応答'})}));expect(field('タイトル（任意）').value).toBe('新しい入力');expect(persisted().materials![0]!.title).toBe('youtu.be');expect(persisted().materialStudyEvents).toHaveLength(0);
+});
+
+async function selectSort(index: number, value: string) {
+  const select = host.querySelectorAll<HTMLSelectElement>('.material-sort select')[index]!;
+  await act(async () => {
+    Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value')!.set!.call(select, value);
+    select.dispatchEvent(new Event('change', { bubbles: true }));
+  });
+}
+const cardTitles = () => [...host.querySelectorAll('.material-card h2')].map(e => e.textContent);
+
+it('sort controls never persist data, preserve study-click position, and explicitly refresh counts', async () => {
+  const a = material('a', { title: 'A', url: 'https://example.com/a' });
+  const b = material('b', { title: 'B', url: 'https://example.com/b', updatedAt: '2026-10-02T00:00:00Z' });
+  seed([a,b]); await mount(); const before = localStorage.getItem(STORAGE_KEY);
+  expect(cardTitles()).toEqual(['B','A']);
+  await selectSort(0,'studyCount'); await selectSort(1,'asc');
+  expect(cardTitles()).toEqual(['A','B']); expect(localStorage.getItem(STORAGE_KEY)).toBe(before);
+  await click(button('学習した',host.querySelector('.material-card')!));
+  expect(cardTitles()).toEqual(['A','B']); const studied = localStorage.getItem(STORAGE_KEY);
+  await click(button('並べ直す')); expect(cardTitles()).toEqual(['B','A']);
+  expect(localStorage.getItem(STORAGE_KEY)).toBe(studied);
+  await selectSort(0,'lastStudiedAt'); expect(cardTitles()).toEqual(['A','B']);
+  await selectSort(1,'desc'); expect(cardTitles()).toEqual(['A','B']);
+  await input(host.querySelector<HTMLInputElement>('input[type="search"]')!,'B');
+  expect(cardTitles()).toEqual(['B']); await selectSort(0,'updatedAt');
+  await input(host.querySelector<HTMLInputElement>('input[type="search"]')!,'');
+  expect(cardTitles()).toEqual(['A','B']); expect(localStorage.getItem(STORAGE_KEY)).toBe(studied);
 });
