@@ -13,6 +13,7 @@ import {
   type Tag,
 } from '../domain/types';
 import { createId, nowIso } from '../domain/ids';
+import { createInitialStore } from '../data/initialMaterials';
 import { isContentRevisionChange, validateProblem, hasErrors } from '../domain/validate';
 import { normalizeTagKey, validateTagName, canAddTag } from '../domain/tags';
 import { SampleCatalogStorage, validCatalogReceipts, type SampleRestoreResult } from './sampleCatalogStorage';
@@ -182,7 +183,8 @@ export class LocalStorageRepository {
       return { ok: false, reason: 'localStorage にアクセスできません', code: 'access' };
     }
     if (raw == null) {
-      const store = emptyStore();
+      // Do not seed saved empty stores, imports, explicit resets or error recovery.
+      const store = createInitialStore();
       this.memoryRevision = store.revision;
       return { ok: true, store };
     }

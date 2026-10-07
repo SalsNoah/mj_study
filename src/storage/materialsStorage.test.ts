@@ -46,7 +46,8 @@ function withQuestion(): Store {
 beforeEach(() => {
   vi.useFakeTimers();
   vi.setSystemTime(new Date(NOW));
-  data = new Map();
+  // Existing-user fixture; first-use defaults are covered in initialMaterials.test.ts.
+  data = new Map([[KEY, JSON.stringify(emptyStore())]]);
   vi.stubGlobal('localStorage', {
     getItem: vi.fn((key: string) => data.get(key) ?? null),
     setItem: vi.fn((key: string, value: string) => { data.set(key, value); }),
