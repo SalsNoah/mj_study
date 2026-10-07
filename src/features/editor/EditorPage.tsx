@@ -13,7 +13,7 @@ import { useUkeireSession } from '@/components/useUkeireSession';
 import { WanpaiDora } from '@/components/WanpaiDora';
 import { contextSummary } from '@/domain/context';
 import { createId, nowIso } from '@/domain/ids';
-import { buildMeldFromTile } from '@/domain/melds';
+import { buildMeldFromTile, ponForAddedKan } from '@/domain/melds';
 import { allTiles } from '@/domain/tiles';
 import { tileAdditionIssue, tileSupplyIssues } from '@/domain/tileSupply';
 import { maybeSortConcealed } from '@/domain/sort';
@@ -162,7 +162,9 @@ function ProblemEditor() {
       if (target === 'concealed' && concealed.length >= handMax) reason = `手牌はこの副露構成では最大${handMax}枚です。先に手牌を減らしてください。`;
       else if (target === 'dora' && doraIndicators.length >= LIMITS.doraMax) reason = 'ドラ表示牌は最大5枚です。先に表示牌を減らしてください。';
       else if (target === 'meld') {
-        if (melds.length >= LIMITS.meldsMax) reason = '副露は最大4組です。';
+        const pon = meldType === 'addedKan' ? ponForAddedKan(melds, code) : undefined;
+        if (pon) reason = tileAdditionIssue(knownTiles, [code]);
+        else if (melds.length >= LIMITS.meldsMax) reason = '副露は最大4組です。';
         else if (concealed.length > handTileMax(melds.length + 1)) reason = `先に手牌を${concealed.length - handTileMax(melds.length + 1)}枚減らしてください。`;
         else {
           const candidate = buildMeldFromTile(meldType, code, meldFrom);
@@ -172,7 +174,7 @@ function ProblemEditor() {
       if (reason) reasons[code] = reason;
     }
     return reasons;
-  }, [knownTiles, concealed.length, handMax, doraIndicators.length, melds.length, target, meldType, meldFrom]);
+  }, [knownTiles, concealed.length, handMax, doraIndicators.length, melds, target, meldType, meldFrom]);
 
 
   const pushHistory = (undo: () => void) => {
@@ -203,6 +205,18 @@ function ProblemEditor() {
   };
 
   const addMeld = (code: TileCode) => {
+    const pon = meldType === 'addedKan' ? ponForAddedKan(melds, code) : undefined;
+    if (pon) {
+      const supplyError = tileAdditionIssue(knownTiles, [code]);
+      if (supplyError) { setError(supplyError); return; }
+      const prev = melds;
+      setMelds(melds.map((meld) => meld.id === pon.id
+        ? { ...meld, type: 'addedKan', tiles: [...meld.tiles, code], addedIndex: meld.calledIndex }
+        : meld));
+      pushHistory(() => setMelds(prev));
+      setError(null);
+      return;
+    }
     if (melds.length >= LIMITS.meldsMax) {
       setError('副露は最大4組です');
       return;
@@ -644,7 +658,9 @@ function ProblemEditor() {
               </div>
             )}
             <span className="meld-bar__hint">
-              {melds.length >= LIMITS.meldsMax
+              {meldType === 'addedKan' && melds.some((meld) => meld.type === 'pon')
+                ? 'ポンと同じ牌で加槓（元の位置・取得元を保持）'
+                : melds.length >= LIMITS.meldsMax
                 ? '副露は4組までです'
                 : concealed.length > handTileMax(melds.length + 1)
                   ? `手牌をあと${concealed.length - handTileMax(melds.length + 1)}枚減らすと追加できます`

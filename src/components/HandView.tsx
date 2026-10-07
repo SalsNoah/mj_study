@@ -120,7 +120,9 @@ export function HandView({
     />
   );
 
-  const meldList = melds.map((m) =>
+  // Stored array order is insertion order; the earliest call belongs on the right.
+  // Reverse a copy so saved hands (including legacy arrays) stay untouched.
+  const meldList = [...melds].reverse().map((m) =>
     onRemoveMeld ? (
       <button
         key={m.id}

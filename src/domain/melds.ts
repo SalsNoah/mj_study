@@ -164,3 +164,9 @@ export function meldHasExtraRed(tiles: readonly TileCode[]): boolean {
   const reds = tiles.filter(isRed);
   return reds.length > 1;
 }
+
+/** Upgrade only a matching existing pon; retain its ID, source and array position. */
+export function ponForAddedKan(melds: readonly Meld[], code: TileCode): Meld | undefined {
+  return melds.find((meld) => meld.type === 'pon' && meld.tiles.length === 3 &&
+    meld.tiles.every((tile) => canonicalForMeld(tile) === canonicalForMeld(code)));
+}

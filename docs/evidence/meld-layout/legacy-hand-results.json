@@ -1,0 +1,111 @@
+{
+  "revision": {
+    "commit": "6dc0593e897370355182758e7334a8c7e52cf785",
+    "tree": "2d3fafdedd0cbdadafd3e356668499c371f598f0"
+  },
+  "results": [
+    {
+      "name": "title-preserves-record-320-150-understood",
+      "width": 320,
+      "documentWidth": 320
+    },
+    {
+      "name": "real-content-revises-record-320-150-understood",
+      "width": 320,
+      "documentWidth": 320
+    },
+    {
+      "name": "save-reload-backup-real-change-320-150-understood",
+      "status": "pass",
+      "titleRevision": 4,
+      "realRevision": 5,
+      "historyUnchanged": true
+    },
+    {
+      "name": "title-preserves-record-320-150-uncertain",
+      "width": 320,
+      "documentWidth": 320
+    },
+    {
+      "name": "real-content-revises-record-320-150-uncertain",
+      "width": 320,
+      "documentWidth": 320
+    },
+    {
+      "name": "save-reload-backup-real-change-320-150-uncertain",
+      "status": "pass",
+      "titleRevision": 4,
+      "realRevision": 5,
+      "historyUnchanged": true
+    },
+    {
+      "name": "title-preserves-record-390-100-understood",
+      "width": 390,
+      "documentWidth": 390
+    },
+    {
+      "name": "real-content-revises-record-390-100-understood",
+      "width": 390,
+      "documentWidth": 390
+    },
+    {
+      "name": "save-reload-backup-real-change-390-100-understood",
+      "status": "pass",
+      "titleRevision": 4,
+      "realRevision": 5,
+      "historyUnchanged": true
+    },
+    {
+      "name": "title-preserves-record-390-100-uncertain",
+      "width": 390,
+      "documentWidth": 390
+    },
+    {
+      "name": "real-content-revises-record-390-100-uncertain",
+      "width": 390,
+      "documentWidth": 390
+    },
+    {
+      "name": "save-reload-backup-real-change-390-100-uncertain",
+      "status": "pass",
+      "titleRevision": 4,
+      "realRevision": 5,
+      "historyUnchanged": true
+    },
+    {
+      "name": "title-preserves-record-1440-100-understood",
+      "width": 1440,
+      "documentWidth": 1440
+    },
+    {
+      "name": "real-content-revises-record-1440-100-understood",
+      "width": 1440,
+      "documentWidth": 1440
+    },
+    {
+      "name": "save-reload-backup-real-change-1440-100-understood",
+      "status": "pass",
+      "titleRevision": 4,
+      "realRevision": 5,
+      "historyUnchanged": true
+    },
+    {
+      "name": "title-preserves-record-1440-100-uncertain",
+      "width": 1440,
+      "documentWidth": 1440
+    },
+    {
+      "name": "real-content-revises-record-1440-100-uncertain",
+      "width": 1440,
+      "documentWidth": 1440
+    },
+    {
+      "name": "save-reload-backup-real-change-1440-100-uncertain",
+      "status": "pass",
+      "titleRevision": 4,
+      "realRevision": 5,
+      "historyUnchanged": true
+    }
+  ],
+  "errors": []
+}

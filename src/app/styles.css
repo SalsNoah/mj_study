@@ -559,6 +559,11 @@ a.btn-primary { color: var(--on-accent); }
   width: calc(var(--meld-tile-w) * 90 / 66) !important;
   aspect-ratio: 90 / 66;
 }
+/* A column uses flex-basis as HEIGHT: do not reuse the row tile width here. */
+.hand-melds .meld-view__stack > .tile-face {
+  flex: none;
+  height: var(--meld-tile-w) !important;
+}
 .meld-btn {
   appearance: none;
   display: inline-flex;
@@ -1189,7 +1194,7 @@ a.btn-primary { color: var(--on-accent); }
   align-items: flex-end;
   gap: 3px;
 }
-.hand-view__melds { display: flex; flex-wrap: wrap; gap: 8px; }
+.hand-view__melds { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: flex-end; gap: 8px; }
 .meld-view { display: flex; align-items: flex-end; gap: 2px; }
 .meld-view__stack { display: inline-flex; flex-direction: column; }
 

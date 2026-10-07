@@ -43,3 +43,27 @@ it('does not trim imported oversized hand on initial load or single removal',asy
 
 it.each(['明槓子','暗槓子','加槓子'])('%s counts four physical copies for input blocking',async(tab)=>{await mount();await click(tile('一萬'));await click(button(tab));expect(tile('一萬').disabled).toBe(true);expect(tile('二萬').disabled).toBe(false);await click(tile('二萬'));await click(button('手牌'));expect(tile('二萬').disabled).toBe(true);await click(button('戻す'));expect(tile('二萬').disabled).toBe(false);});
 it('editing includes an existing drawn tile and preserves invalid data until the user removes it',async()=>{const s=emptyStore();s.problems=[{id:'old',title:'old',concealed:['5m','5m','5m'],drawn:'0m',melds:[],doraIndicators:[],answerEnabled:false,acceptedDiscards:[],explanation:'',privateMemo:'',tagIds:[],context:emptyContext(),attachments:[],sourceUrl:'',createdAt:'2026-10-04T00:00:00Z',updatedAt:'2026-10-04T00:00:00Z'}];localStorage.setItem(STORAGE_KEY,JSON.stringify(s));await act(async()=>root.render(<AppProvider><MemoryRouter initialEntries={['/edit/old']}><Routes><Route path="/edit/:id" element={<EditorPage/>}/></Routes></MemoryRouter></AppProvider>));expect(host.querySelectorAll('.hand-strip .tile-btn')).toHaveLength(4);expect(tile('五萬').disabled).toBe(true);expect(tile('赤五萬').disabled).toBe(true);expect(JSON.parse(localStorage.getItem(STORAGE_KEY)!).problems[0].drawn).toBe('0m');});
+
+it('upgrades a pon in place at four melds, preserves source/red tiles, and undo restores the pon',async()=>{
+ const melds = [
+  {id:'first',type:'chi' as const,tiles:['1s','2s','3s'] as const,from:'left' as const,calledIndex:0,addedIndex:null},
+  {id:'pon',type:'pon' as const,tiles:['5m','0m','5m'] as const,from:'right' as const,calledIndex:2,addedIndex:null},
+  {id:'third',type:'openKan' as const,tiles:['1p','1p','1p','1p'] as const,from:'opposite' as const,calledIndex:1,addedIndex:null},
+  {id:'fourth',type:'closedKan' as const,tiles:['7z','7z','7z','7z'] as const,from:null,calledIndex:null,addedIndex:null},
+ ].map(m=>({...m,tiles:[...m.tiles]}));
+ putImportDraft({concealed:['2z','2z'],melds,doraIndicators:[],context:emptyContext()});
+ await mount();await click(button('加槓子'));
+ expect(tile('五萬').disabled).toBe(false);expect(tile('赤五萬').disabled).toBe(true);expect(tile('九萬').disabled).toBe(true);
+ await click(tile('五萬'));expect(host.querySelectorAll('.meld-btn')).toHaveLength(4);
+ expect([...host.querySelectorAll('.meld-btn .meld-view')].map(m=>m.getAttribute('aria-label'))).toEqual(['暗槓','明槓','加槓','チー']);
+ expect(tile('五萬').disabled).toBe(true);
+ await click(button('戻す'));expect(tile('五萬').disabled).toBe(false);
+ expect([...host.querySelectorAll('.meld-btn .meld-view')].map(m=>m.getAttribute('aria-label'))).toEqual(['暗槓','明槓','ポン','チー']);
+ await click(tile('五萬'));await click(button('保存'));
+ const saved=JSON.parse(localStorage.getItem(STORAGE_KEY)!).problems[0];
+ expect(saved.melds).toEqual(melds.map(m=>m.id==='pon'?{...m,type:'addedKan',tiles:[...m.tiles,'5m'],addedIndex:2}:m));
+ expect(saved.concealed).toEqual(['2z','2z']);
+});
+it('does not upgrade a pon when the fourth tile is already in hand or dora',async()=>{
+ await mount();await click(button('明刻子'));await click(tile('中'));await click(button('ドラ表示牌'));await click(tile('中'));await click(button('加槓子'));expect(tile('中').disabled).toBe(true);
+});

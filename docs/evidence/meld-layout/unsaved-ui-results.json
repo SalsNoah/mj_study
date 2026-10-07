@@ -1,0 +1,1495 @@
+{
+  "status": "pass",
+  "revision": {
+    "commit": "6dc0593e897370355182758e7334a8c7e52cf785",
+    "tree": "2d3fafdedd0cbdadafd3e356668499c371f598f0"
+  },
+  "results": [
+    {
+      "name": "editor-material-stay-discard-save-back-reload-validation",
+      "status": "pass",
+      "noStudyEventsOnSave": true,
+      "actualReloadPrompt": "beforeunload"
+    },
+    {
+      "name": "cross-tab-material-removal-keeps-draft-after-reload",
+      "status": "pass"
+    },
+    {
+      "name": "native-forward-stay-and-save",
+      "status": "pass"
+    },
+    {
+      "name": "editor-normal-390-text100",
+      "status": "pass",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "documentWidth": 390,
+      "dialog": {
+        "x": 16,
+        "y": 311.5,
+        "width": 358,
+        "height": 221,
+        "right": 374,
+        "bottom": 532.5
+      },
+      "buttons": [
+        {
+          "label": "この画面に残る",
+          "x": 61.609375,
+          "y": 415.5,
+          "width": 142.015625,
+          "height": 44,
+          "right": 203.625,
+          "bottom": 459.5,
+          "hit": true
+        },
+        {
+          "label": "保存せずに移動",
+          "x": 211.625,
+          "y": 415.5,
+          "width": 141.375,
+          "height": 44,
+          "right": 353,
+          "bottom": 459.5,
+          "hit": true
+        },
+        {
+          "label": "保存して移動",
+          "x": 227.953125,
+          "y": 467.5,
+          "width": 125.046875,
+          "height": 44,
+          "right": 353,
+          "bottom": 511.5,
+          "hit": true
+        }
+      ]
+    },
+    {
+      "name": "material-normal-390-text100",
+      "status": "pass",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "documentWidth": 390,
+      "dialog": {
+        "x": 16,
+        "y": 311.5,
+        "width": 358,
+        "height": 221,
+        "right": 374,
+        "bottom": 532.5
+      },
+      "buttons": [
+        {
+          "label": "この画面に残る",
+          "x": 61.609375,
+          "y": 415.5,
+          "width": 142.015625,
+          "height": 44,
+          "right": 203.625,
+          "bottom": 459.5,
+          "hit": true
+        },
+        {
+          "label": "保存せずに移動",
+          "x": 211.625,
+          "y": 415.5,
+          "width": 141.375,
+          "height": 44,
+          "right": 353,
+          "bottom": 459.5,
+          "hit": true
+        },
+        {
+          "label": "保存して移動",
+          "x": 227.953125,
+          "y": 467.5,
+          "width": 125.046875,
+          "height": 44,
+          "right": 353,
+          "bottom": 511.5,
+          "hit": true
+        }
+      ]
+    },
+    {
+      "name": "editor-normal-320-text150",
+      "status": "pass",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "documentWidth": 320,
+      "dialog": {
+        "x": 16,
+        "y": 234.5,
+        "width": 288,
+        "height": 375,
+        "right": 304,
+        "bottom": 609.5
+      },
+      "buttons": [
+        {
+          "label": "この画面に残る",
+          "x": 85,
+          "y": 440.5,
+          "width": 198,
+          "height": 44,
+          "right": 283,
+          "bottom": 484.5,
+          "hit": true
+        },
+        {
+          "label": "保存せずに移動",
+          "x": 85.953125,
+          "y": 492.5,
+          "width": 197.046875,
+          "height": 44,
+          "right": 283,
+          "bottom": 536.5,
+          "hit": true
+        },
+        {
+          "label": "保存して移動",
+          "x": 110.4375,
+          "y": 544.5,
+          "width": 172.5625,
+          "height": 44,
+          "right": 283,
+          "bottom": 588.5,
+          "hit": true
+        }
+      ]
+    },
+    {
+      "name": "material-normal-320-text150",
+      "status": "pass",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "documentWidth": 320,
+      "dialog": {
+        "x": 16,
+        "y": 234.5,
+        "width": 288,
+        "height": 375,
+        "right": 304,
+        "bottom": 609.5
+      },
+      "buttons": [
+        {
+          "label": "この画面に残る",
+          "x": 85,
+          "y": 440.5,
+          "width": 198,
+          "height": 44,
+          "right": 283,
+          "bottom": 484.5,
+          "hit": true
+        },
+        {
+          "label": "保存せずに移動",
+          "x": 85.953125,
+          "y": 492.5,
+          "width": 197.046875,
+          "height": 44,
+          "right": 283,
+          "bottom": 536.5,
+          "hit": true
+        },
+        {
+          "label": "保存して移動",
+          "x": 110.4375,
+          "y": 544.5,
+          "width": 172.5625,
+          "height": 44,
+          "right": 283,
+          "bottom": 588.5,
+          "hit": true
+        }
+      ]
+    },
+    {
+      "name": "editor-normal-1440-text100",
+      "status": "pass",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "documentWidth": 1440,
+      "dialog": {
+        "x": 520,
+        "y": 339.5,
+        "width": 400,
+        "height": 221,
+        "right": 920,
+        "bottom": 560.5
+      },
+      "buttons": [
+        {
+          "label": "この画面に残る",
+          "x": 607.609375,
+          "y": 443.5,
+          "width": 142.015625,
+          "height": 44,
+          "right": 749.625,
+          "bottom": 487.5,
+          "hit": true
+        },
+        {
+          "label": "保存せずに移動",
+          "x": 757.625,
+          "y": 443.5,
+          "width": 141.375,
+          "height": 44,
+          "right": 899,
+          "bottom": 487.5,
+          "hit": true
+        },
+        {
+          "label": "保存して移動",
+          "x": 773.953125,
+          "y": 495.5,
+          "width": 125.046875,
+          "height": 44,
+          "right": 899,
+          "bottom": 539.5,
+          "hit": true
+        }
+      ]
+    },
+    {
+      "name": "material-normal-1440-text100",
+      "status": "pass",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "documentWidth": 1440,
+      "dialog": {
+        "x": 520,
+        "y": 339.5,
+        "width": 400,
+        "height": 221,
+        "right": 920,
+        "bottom": 560.5
+      },
+      "buttons": [
+        {
+          "label": "この画面に残る",
+          "x": 607.609375,
+          "y": 443.5,
+          "width": 142.015625,
+          "height": 44,
+          "right": 749.625,
+          "bottom": 487.5,
+          "hit": true
+        },
+        {
+          "label": "保存せずに移動",
+          "x": 757.625,
+          "y": 443.5,
+          "width": 141.375,
+          "height": 44,
+          "right": 899,
+          "bottom": 487.5,
+          "hit": true
+        },
+        {
+          "label": "保存して移動",
+          "x": 773.953125,
+          "y": 495.5,
+          "width": 125.046875,
+          "height": 44,
+          "right": 899,
+          "bottom": 539.5,
+          "hit": true
+        }
+      ]
+    },
+    {
+      "name": "editor-cool-390-text100",
+      "status": "pass",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "documentWidth": 390,
+      "dialog": {
+        "x": 16,
+        "y": 311.5,
+        "width": 358,
+        "height": 221,
+        "right": 374,
+        "bottom": 532.5
+      },
+      "buttons": [
+        {
+          "label": "この画面に残る",
+          "x": 61.609375,
+          "y": 415.5,
+          "width": 142.015625,
+          "height": 44,
+          "right": 203.625,
+          "bottom": 459.5,
+          "hit": true
+        },
+        {
+          "label": "保存せずに移動",
+          "x": 211.625,
+          "y": 415.5,
+          "width": 141.375,
+          "height": 44,
+          "right": 353,
+          "bottom": 459.5,
+          "hit": true
+        },
+        {
+          "label": "保存して移動",
+          "x": 227.953125,
+          "y": 467.5,
+          "width": 125.046875,
+          "height": 44,
+          "right": 353,
+          "bottom": 511.5,
+          "hit": true
+        }
+      ]
+    },
+    {
+      "name": "material-cool-390-text100",
+      "status": "pass",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "documentWidth": 390,
+      "dialog": {
+        "x": 16,
+        "y": 311.5,
+        "width": 358,
+        "height": 221,
+        "right": 374,
+        "bottom": 532.5
+      },
+      "buttons": [
+        {
+          "label": "この画面に残る",
+          "x": 61.609375,
+          "y": 415.5,
+          "width": 142.015625,
+          "height": 44,
+          "right": 203.625,
+          "bottom": 459.5,
+          "hit": true
+        },
+        {
+          "label": "保存せずに移動",
+          "x": 211.625,
+          "y": 415.5,
+          "width": 141.375,
+          "height": 44,
+          "right": 353,
+          "bottom": 459.5,
+          "hit": true
+        },
+        {
+          "label": "保存して移動",
+          "x": 227.953125,
+          "y": 467.5,
+          "width": 125.046875,
+          "height": 44,
+          "right": 353,
+          "bottom": 511.5,
+          "hit": true
+        }
+      ]
+    },
+    {
+      "name": "editor-cool-320-text150",
+      "status": "pass",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "documentWidth": 320,
+      "dialog": {
+        "x": 16,
+        "y": 234.5,
+        "width": 288,
+        "height": 375,
+        "right": 304,
+        "bottom": 609.5
+      },
+      "buttons": [
+        {
+          "label": "この画面に残る",
+          "x": 85,
+          "y": 440.5,
+          "width": 198,
+          "height": 44,
+          "right": 283,
+          "bottom": 484.5,
+          "hit": true
+        },
+        {
+          "label": "保存せずに移動",
+          "x": 85.953125,
+          "y": 492.5,
+          "width": 197.046875,
+          "height": 44,
+          "right": 283,
+          "bottom": 536.5,
+          "hit": true
+        },
+        {
+          "label": "保存して移動",
+          "x": 110.4375,
+          "y": 544.5,
+          "width": 172.5625,
+          "height": 44,
+          "right": 283,
+          "bottom": 588.5,
+          "hit": true
+        }
+      ]
+    },
+    {
+      "name": "material-cool-320-text150",
+      "status": "pass",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "documentWidth": 320,
+      "dialog": {
+        "x": 16,
+        "y": 234.5,
+        "width": 288,
+        "height": 375,
+        "right": 304,
+        "bottom": 609.5
+      },
+      "buttons": [
+        {
+          "label": "この画面に残る",
+          "x": 85,
+          "y": 440.5,
+          "width": 198,
+          "height": 44,
+          "right": 283,
+          "bottom": 484.5,
+          "hit": true
+        },
+        {
+          "label": "保存せずに移動",
+          "x": 85.953125,
+          "y": 492.5,
+          "width": 197.046875,
+          "height": 44,
+          "right": 283,
+          "bottom": 536.5,
+          "hit": true
+        },
+        {
+          "label": "保存して移動",
+          "x": 110.4375,
+          "y": 544.5,
+          "width": 172.5625,
+          "height": 44,
+          "right": 283,
+          "bottom": 588.5,
+          "hit": true
+        }
+      ]
+    },
+    {
+      "name": "editor-cool-1440-text100",
+      "status": "pass",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "documentWidth": 1440,
+      "dialog": {
+        "x": 520,
+        "y": 339.5,
+        "width": 400,
+        "height": 221,
+        "right": 920,
+        "bottom": 560.5
+      },
+      "buttons": [
+        {
+          "label": "この画面に残る",
+          "x": 607.609375,
+          "y": 443.5,
+          "width": 142.015625,
+          "height": 44,
+          "right": 749.625,
+          "bottom": 487.5,
+          "hit": true
+        },
+        {
+          "label": "保存せずに移動",
+          "x": 757.625,
+          "y": 443.5,
+          "width": 141.375,
+          "height": 44,
+          "right": 899,
+          "bottom": 487.5,
+          "hit": true
+        },
+        {
+          "label": "保存して移動",
+          "x": 773.953125,
+          "y": 495.5,
+          "width": 125.046875,
+          "height": 44,
+          "right": 899,
+          "bottom": 539.5,
+          "hit": true
+        }
+      ]
+    },
+    {
+      "name": "material-cool-1440-text100",
+      "status": "pass",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "documentWidth": 1440,
+      "dialog": {
+        "x": 520,
+        "y": 339.5,
+        "width": 400,
+        "height": 221,
+        "right": 920,
+        "bottom": 560.5
+      },
+      "buttons": [
+        {
+          "label": "この画面に残る",
+          "x": 607.609375,
+          "y": 443.5,
+          "width": 142.015625,
+          "height": 44,
+          "right": 749.625,
+          "bottom": 487.5,
+          "hit": true
+        },
+        {
+          "label": "保存せずに移動",
+          "x": 757.625,
+          "y": 443.5,
+          "width": 141.375,
+          "height": 44,
+          "right": 899,
+          "bottom": 487.5,
+          "hit": true
+        },
+        {
+          "label": "保存して移動",
+          "x": 773.953125,
+          "y": 495.5,
+          "width": 125.046875,
+          "height": 44,
+          "right": 899,
+          "bottom": 539.5,
+          "hit": true
+        }
+      ]
+    },
+    {
+      "name": "editor-cute-390-text100",
+      "status": "pass",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "documentWidth": 390,
+      "dialog": {
+        "x": 16,
+        "y": 311.5,
+        "width": 358,
+        "height": 221,
+        "right": 374,
+        "bottom": 532.5
+      },
+      "buttons": [
+        {
+          "label": "この画面に残る",
+          "x": 60.96875,
+          "y": 415.5,
+          "width": 142.015625,
+          "height": 44,
+          "right": 202.984375,
+          "bottom": 459.5,
+          "hit": true
+        },
+        {
+          "label": "保存せずに移動",
+          "x": 210.984375,
+          "y": 415.5,
+          "width": 142.015625,
+          "height": 44,
+          "right": 353,
+          "bottom": 459.5,
+          "hit": true
+        },
+        {
+          "label": "保存して移動",
+          "x": 226.984375,
+          "y": 467.5,
+          "width": 126.015625,
+          "height": 44,
+          "right": 353,
+          "bottom": 511.5,
+          "hit": true
+        }
+      ]
+    },
+    {
+      "name": "material-cute-390-text100",
+      "status": "pass",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "documentWidth": 390,
+      "dialog": {
+        "x": 16,
+        "y": 311.5,
+        "width": 358,
+        "height": 221,
+        "right": 374,
+        "bottom": 532.5
+      },
+      "buttons": [
+        {
+          "label": "この画面に残る",
+          "x": 60.96875,
+          "y": 415.5,
+          "width": 142.015625,
+          "height": 44,
+          "right": 202.984375,
+          "bottom": 459.5,
+          "hit": true
+        },
+        {
+          "label": "保存せずに移動",
+          "x": 210.984375,
+          "y": 415.5,
+          "width": 142.015625,
+          "height": 44,
+          "right": 353,
+          "bottom": 459.5,
+          "hit": true
+        },
+        {
+          "label": "保存して移動",
+          "x": 226.984375,
+          "y": 467.5,
+          "width": 126.015625,
+          "height": 44,
+          "right": 353,
+          "bottom": 511.5,
+          "hit": true
+        }
+      ]
+    },
+    {
+      "name": "editor-cute-320-text150",
+      "status": "pass",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "documentWidth": 320,
+      "dialog": {
+        "x": 16,
+        "y": 234.5,
+        "width": 288,
+        "height": 375,
+        "right": 304,
+        "bottom": 609.5
+      },
+      "buttons": [
+        {
+          "label": "この画面に残る",
+          "x": 85,
+          "y": 440.5,
+          "width": 198,
+          "height": 44,
+          "right": 283,
+          "bottom": 484.5,
+          "hit": true
+        },
+        {
+          "label": "保存せずに移動",
+          "x": 85,
+          "y": 492.5,
+          "width": 198,
+          "height": 44,
+          "right": 283,
+          "bottom": 536.5,
+          "hit": true
+        },
+        {
+          "label": "保存して移動",
+          "x": 109,
+          "y": 544.5,
+          "width": 174,
+          "height": 44,
+          "right": 283,
+          "bottom": 588.5,
+          "hit": true
+        }
+      ]
+    },
+    {
+      "name": "material-cute-320-text150",
+      "status": "pass",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "documentWidth": 320,
+      "dialog": {
+        "x": 16,
+        "y": 234.5,
+        "width": 288,
+        "height": 375,
+        "right": 304,
+        "bottom": 609.5
+      },
+      "buttons": [
+        {
+          "label": "この画面に残る",
+          "x": 85,
+          "y": 440.5,
+          "width": 198,
+          "height": 44,
+          "right": 283,
+          "bottom": 484.5,
+          "hit": true
+        },
+        {
+          "label": "保存せずに移動",
+          "x": 85,
+          "y": 492.5,
+          "width": 198,
+          "height": 44,
+          "right": 283,
+          "bottom": 536.5,
+          "hit": true
+        },
+        {
+          "label": "保存して移動",
+          "x": 109,
+          "y": 544.5,
+          "width": 174,
+          "height": 44,
+          "right": 283,
+          "bottom": 588.5,
+          "hit": true
+        }
+      ]
+    },
+    {
+      "name": "editor-cute-1440-text100",
+      "status": "pass",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "documentWidth": 1440,
+      "dialog": {
+        "x": 520,
+        "y": 339.5,
+        "width": 400,
+        "height": 221,
+        "right": 920,
+        "bottom": 560.5
+      },
+      "buttons": [
+        {
+          "label": "この画面に残る",
+          "x": 606.96875,
+          "y": 443.5,
+          "width": 142.015625,
+          "height": 44,
+          "right": 748.984375,
+          "bottom": 487.5,
+          "hit": true
+        },
+        {
+          "label": "保存せずに移動",
+          "x": 756.984375,
+          "y": 443.5,
+          "width": 142.015625,
+          "height": 44,
+          "right": 899,
+          "bottom": 487.5,
+          "hit": true
+        },
+        {
+          "label": "保存して移動",
+          "x": 772.984375,
+          "y": 495.5,
+          "width": 126.015625,
+          "height": 44,
+          "right": 899,
+          "bottom": 539.5,
+          "hit": true
+        }
+      ]
+    },
+    {
+      "name": "material-cute-1440-text100",
+      "status": "pass",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "documentWidth": 1440,
+      "dialog": {
+        "x": 520,
+        "y": 339.5,
+        "width": 400,
+        "height": 221,
+        "right": 920,
+        "bottom": 560.5
+      },
+      "buttons": [
+        {
+          "label": "この画面に残る",
+          "x": 606.96875,
+          "y": 443.5,
+          "width": 142.015625,
+          "height": 44,
+          "right": 748.984375,
+          "bottom": 487.5,
+          "hit": true
+        },
+        {
+          "label": "保存せずに移動",
+          "x": 756.984375,
+          "y": 443.5,
+          "width": 142.015625,
+          "height": 44,
+          "right": 899,
+          "bottom": 487.5,
+          "hit": true
+        },
+        {
+          "label": "保存して移動",
+          "x": 772.984375,
+          "y": 495.5,
+          "width": 126.015625,
+          "height": 44,
+          "right": 899,
+          "bottom": 539.5,
+          "hit": true
+        }
+      ]
+    },
+    {
+      "name": "editor-dopa-390-text100",
+      "status": "pass",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "documentWidth": 390,
+      "dialog": {
+        "x": 16,
+        "y": 311.5,
+        "width": 358,
+        "height": 221,
+        "right": 374,
+        "bottom": 532.5
+      },
+      "buttons": [
+        {
+          "label": "この画面に残る",
+          "x": 61.609375,
+          "y": 415.5,
+          "width": 142.015625,
+          "height": 44,
+          "right": 203.625,
+          "bottom": 459.5,
+          "hit": true
+        },
+        {
+          "label": "保存せずに移動",
+          "x": 211.625,
+          "y": 415.5,
+          "width": 141.375,
+          "height": 44,
+          "right": 353,
+          "bottom": 459.5,
+          "hit": true
+        },
+        {
+          "label": "保存して移動",
+          "x": 227.953125,
+          "y": 467.5,
+          "width": 125.046875,
+          "height": 44,
+          "right": 353,
+          "bottom": 511.5,
+          "hit": true
+        }
+      ]
+    },
+    {
+      "name": "material-dopa-390-text100",
+      "status": "pass",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "documentWidth": 390,
+      "dialog": {
+        "x": 16,
+        "y": 311.5,
+        "width": 358,
+        "height": 221,
+        "right": 374,
+        "bottom": 532.5
+      },
+      "buttons": [
+        {
+          "label": "この画面に残る",
+          "x": 61.609375,
+          "y": 415.5,
+          "width": 142.015625,
+          "height": 44,
+          "right": 203.625,
+          "bottom": 459.5,
+          "hit": true
+        },
+        {
+          "label": "保存せずに移動",
+          "x": 211.625,
+          "y": 415.5,
+          "width": 141.375,
+          "height": 44,
+          "right": 353,
+          "bottom": 459.5,
+          "hit": true
+        },
+        {
+          "label": "保存して移動",
+          "x": 227.953125,
+          "y": 467.5,
+          "width": 125.046875,
+          "height": 44,
+          "right": 353,
+          "bottom": 511.5,
+          "hit": true
+        }
+      ]
+    },
+    {
+      "name": "editor-dopa-320-text150",
+      "status": "pass",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "documentWidth": 320,
+      "dialog": {
+        "x": 16,
+        "y": 234.5,
+        "width": 288,
+        "height": 375,
+        "right": 304,
+        "bottom": 609.5
+      },
+      "buttons": [
+        {
+          "label": "この画面に残る",
+          "x": 85,
+          "y": 440.5,
+          "width": 198,
+          "height": 44,
+          "right": 283,
+          "bottom": 484.5,
+          "hit": true
+        },
+        {
+          "label": "保存せずに移動",
+          "x": 85.953125,
+          "y": 492.5,
+          "width": 197.046875,
+          "height": 44,
+          "right": 283,
+          "bottom": 536.5,
+          "hit": true
+        },
+        {
+          "label": "保存して移動",
+          "x": 110.4375,
+          "y": 544.5,
+          "width": 172.5625,
+          "height": 44,
+          "right": 283,
+          "bottom": 588.5,
+          "hit": true
+        }
+      ]
+    },
+    {
+      "name": "material-dopa-320-text150",
+      "status": "pass",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "documentWidth": 320,
+      "dialog": {
+        "x": 16,
+        "y": 234.5,
+        "width": 288,
+        "height": 375,
+        "right": 304,
+        "bottom": 609.5
+      },
+      "buttons": [
+        {
+          "label": "この画面に残る",
+          "x": 85,
+          "y": 440.5,
+          "width": 198,
+          "height": 44,
+          "right": 283,
+          "bottom": 484.5,
+          "hit": true
+        },
+        {
+          "label": "保存せずに移動",
+          "x": 85.953125,
+          "y": 492.5,
+          "width": 197.046875,
+          "height": 44,
+          "right": 283,
+          "bottom": 536.5,
+          "hit": true
+        },
+        {
+          "label": "保存して移動",
+          "x": 110.4375,
+          "y": 544.5,
+          "width": 172.5625,
+          "height": 44,
+          "right": 283,
+          "bottom": 588.5,
+          "hit": true
+        }
+      ]
+    },
+    {
+      "name": "editor-dopa-1440-text100",
+      "status": "pass",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "documentWidth": 1440,
+      "dialog": {
+        "x": 520,
+        "y": 339.5,
+        "width": 400,
+        "height": 221,
+        "right": 920,
+        "bottom": 560.5
+      },
+      "buttons": [
+        {
+          "label": "この画面に残る",
+          "x": 607.609375,
+          "y": 443.5,
+          "width": 142.015625,
+          "height": 44,
+          "right": 749.625,
+          "bottom": 487.5,
+          "hit": true
+        },
+        {
+          "label": "保存せずに移動",
+          "x": 757.625,
+          "y": 443.5,
+          "width": 141.375,
+          "height": 44,
+          "right": 899,
+          "bottom": 487.5,
+          "hit": true
+        },
+        {
+          "label": "保存して移動",
+          "x": 773.953125,
+          "y": 495.5,
+          "width": 125.046875,
+          "height": 44,
+          "right": 899,
+          "bottom": 539.5,
+          "hit": true
+        }
+      ]
+    },
+    {
+      "name": "material-dopa-1440-text100",
+      "status": "pass",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "documentWidth": 1440,
+      "dialog": {
+        "x": 520,
+        "y": 339.5,
+        "width": 400,
+        "height": 221,
+        "right": 920,
+        "bottom": 560.5
+      },
+      "buttons": [
+        {
+          "label": "この画面に残る",
+          "x": 607.609375,
+          "y": 443.5,
+          "width": 142.015625,
+          "height": 44,
+          "right": 749.625,
+          "bottom": 487.5,
+          "hit": true
+        },
+        {
+          "label": "保存せずに移動",
+          "x": 757.625,
+          "y": 443.5,
+          "width": 141.375,
+          "height": 44,
+          "right": 899,
+          "bottom": 487.5,
+          "hit": true
+        },
+        {
+          "label": "保存して移動",
+          "x": 773.953125,
+          "y": 495.5,
+          "width": 125.046875,
+          "height": 44,
+          "right": 899,
+          "bottom": 539.5,
+          "hit": true
+        }
+      ]
+    },
+    {
+      "name": "editor-moe-390-text100",
+      "status": "pass",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "documentWidth": 390,
+      "dialog": {
+        "x": 16,
+        "y": 311.5,
+        "width": 358,
+        "height": 221,
+        "right": 374,
+        "bottom": 532.5
+      },
+      "buttons": [
+        {
+          "label": "この画面に残る",
+          "x": 60.96875,
+          "y": 415.5,
+          "width": 142.015625,
+          "height": 44,
+          "right": 202.984375,
+          "bottom": 459.5,
+          "hit": true
+        },
+        {
+          "label": "保存せずに移動",
+          "x": 210.984375,
+          "y": 415.5,
+          "width": 142.015625,
+          "height": 44,
+          "right": 353,
+          "bottom": 459.5,
+          "hit": true
+        },
+        {
+          "label": "保存して移動",
+          "x": 226.984375,
+          "y": 467.5,
+          "width": 126.015625,
+          "height": 44,
+          "right": 353,
+          "bottom": 511.5,
+          "hit": true
+        }
+      ]
+    },
+    {
+      "name": "material-moe-390-text100",
+      "status": "pass",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "documentWidth": 390,
+      "dialog": {
+        "x": 16,
+        "y": 311.5,
+        "width": 358,
+        "height": 221,
+        "right": 374,
+        "bottom": 532.5
+      },
+      "buttons": [
+        {
+          "label": "この画面に残る",
+          "x": 60.96875,
+          "y": 415.5,
+          "width": 142.015625,
+          "height": 44,
+          "right": 202.984375,
+          "bottom": 459.5,
+          "hit": true
+        },
+        {
+          "label": "保存せずに移動",
+          "x": 210.984375,
+          "y": 415.5,
+          "width": 142.015625,
+          "height": 44,
+          "right": 353,
+          "bottom": 459.5,
+          "hit": true
+        },
+        {
+          "label": "保存して移動",
+          "x": 226.984375,
+          "y": 467.5,
+          "width": 126.015625,
+          "height": 44,
+          "right": 353,
+          "bottom": 511.5,
+          "hit": true
+        }
+      ]
+    },
+    {
+      "name": "editor-moe-320-text150",
+      "status": "pass",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "documentWidth": 320,
+      "dialog": {
+        "x": 16,
+        "y": 234.5,
+        "width": 288,
+        "height": 375,
+        "right": 304,
+        "bottom": 609.5
+      },
+      "buttons": [
+        {
+          "label": "この画面に残る",
+          "x": 85,
+          "y": 440.5,
+          "width": 198,
+          "height": 44,
+          "right": 283,
+          "bottom": 484.5,
+          "hit": true
+        },
+        {
+          "label": "保存せずに移動",
+          "x": 85,
+          "y": 492.5,
+          "width": 198,
+          "height": 44,
+          "right": 283,
+          "bottom": 536.5,
+          "hit": true
+        },
+        {
+          "label": "保存して移動",
+          "x": 109,
+          "y": 544.5,
+          "width": 174,
+          "height": 44,
+          "right": 283,
+          "bottom": 588.5,
+          "hit": true
+        }
+      ]
+    },
+    {
+      "name": "material-moe-320-text150",
+      "status": "pass",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "documentWidth": 320,
+      "dialog": {
+        "x": 16,
+        "y": 234.5,
+        "width": 288,
+        "height": 375,
+        "right": 304,
+        "bottom": 609.5
+      },
+      "buttons": [
+        {
+          "label": "この画面に残る",
+          "x": 85,
+          "y": 440.5,
+          "width": 198,
+          "height": 44,
+          "right": 283,
+          "bottom": 484.5,
+          "hit": true
+        },
+        {
+          "label": "保存せずに移動",
+          "x": 85,
+          "y": 492.5,
+          "width": 198,
+          "height": 44,
+          "right": 283,
+          "bottom": 536.5,
+          "hit": true
+        },
+        {
+          "label": "保存して移動",
+          "x": 109,
+          "y": 544.5,
+          "width": 174,
+          "height": 44,
+          "right": 283,
+          "bottom": 588.5,
+          "hit": true
+        }
+      ]
+    },
+    {
+      "name": "editor-moe-1440-text100",
+      "status": "pass",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "documentWidth": 1440,
+      "dialog": {
+        "x": 520,
+        "y": 339.5,
+        "width": 400,
+        "height": 221,
+        "right": 920,
+        "bottom": 560.5
+      },
+      "buttons": [
+        {
+          "label": "この画面に残る",
+          "x": 606.96875,
+          "y": 443.5,
+          "width": 142.015625,
+          "height": 44,
+          "right": 748.984375,
+          "bottom": 487.5,
+          "hit": true
+        },
+        {
+          "label": "保存せずに移動",
+          "x": 756.984375,
+          "y": 443.5,
+          "width": 142.015625,
+          "height": 44,
+          "right": 899,
+          "bottom": 487.5,
+          "hit": true
+        },
+        {
+          "label": "保存して移動",
+          "x": 772.984375,
+          "y": 495.5,
+          "width": 126.015625,
+          "height": 44,
+          "right": 899,
+          "bottom": 539.5,
+          "hit": true
+        }
+      ]
+    },
+    {
+      "name": "material-moe-1440-text100",
+      "status": "pass",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "documentWidth": 1440,
+      "dialog": {
+        "x": 520,
+        "y": 339.5,
+        "width": 400,
+        "height": 221,
+        "right": 920,
+        "bottom": 560.5
+      },
+      "buttons": [
+        {
+          "label": "この画面に残る",
+          "x": 606.96875,
+          "y": 443.5,
+          "width": 142.015625,
+          "height": 44,
+          "right": 748.984375,
+          "bottom": 487.5,
+          "hit": true
+        },
+        {
+          "label": "保存せずに移動",
+          "x": 756.984375,
+          "y": 443.5,
+          "width": 142.015625,
+          "height": 44,
+          "right": 899,
+          "bottom": 487.5,
+          "hit": true
+        },
+        {
+          "label": "保存して移動",
+          "x": 772.984375,
+          "y": 495.5,
+          "width": 126.015625,
+          "height": 44,
+          "right": 899,
+          "bottom": 539.5,
+          "hit": true
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "network": []
+}
