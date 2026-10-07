@@ -1,0 +1,65 @@
+[
+  {
+    "width": 320,
+    "status": "pass",
+    "youtube": "mocked",
+    "checks": [
+      "exact placeholder",
+      "note URL supported",
+      "duplicate draft/filter retained",
+      "list URL unchanged after registration",
+      "new card visible",
+      "form closed and reset",
+      "success focus",
+      "search cleared only on success",
+      "manual title and next auto title",
+      "late response ignored after new draft",
+      "unique IDs",
+      "old comment retained",
+      "no study increment",
+      "explicit details link still navigates"
+    ]
+  },
+  {
+    "width": 390,
+    "status": "pass",
+    "youtube": "mocked",
+    "checks": [
+      "exact placeholder",
+      "note URL supported",
+      "duplicate draft/filter retained",
+      "list URL unchanged after registration",
+      "new card visible",
+      "form closed and reset",
+      "success focus",
+      "search cleared only on success",
+      "manual title and next auto title",
+      "late response ignored after new draft",
+      "unique IDs",
+      "old comment retained",
+      "no study increment",
+      "explicit details link still navigates"
+    ]
+  },
+  {
+    "width": 1440,
+    "status": "pass",
+    "youtube": "mocked",
+    "checks": [
+      "exact placeholder",
+      "note URL supported",
+      "duplicate draft/filter retained",
+      "list URL unchanged after registration",
+      "new card visible",
+      "form closed and reset",
+      "success focus",
+      "search cleared only on success",
+      "manual title and next auto title",
+      "late response ignored after new draft",
+      "unique IDs",
+      "old comment retained",
+      "no study increment",
+      "explicit details link still navigates"
+    ]
+  }
+]
