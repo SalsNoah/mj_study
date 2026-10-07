@@ -4,6 +4,7 @@ import { createId, nowIso } from '@/domain/ids';
 import { normalizeStore } from '@/domain/records';
 import { normalizeTagKey } from '@/domain/tags';
 import { LIMITS, emptyStore, type Problem, type SampleCatalogReceipt, type Store, type StudyState } from '@/domain/types';
+import { createInitialStore } from '@/data/initialMaterials';
 import { hasErrors, validateProblem } from '@/domain/validate';
 import type { SaveResult } from './repository';
 
@@ -100,7 +101,7 @@ export class SampleCatalogStorage {
   private readCurrent(): Result<{ store: Store; raw: string | null }> {
     try {
       const raw = localStorage.getItem(this.key);
-      if (raw === null) return { ok: true, store: emptyStore(), raw };
+      if (raw === null) return { ok: true, store: createInitialStore(), raw };
       let parsed: unknown;
       try { parsed = JSON.parse(raw); } catch { return failure('保存データを読み取れません。更新を中止しました', 'corrupt'); }
       if (!validStore(parsed)) return failure('保存データまたは更新履歴の形式が不正です。更新を中止しました', 'corrupt');
@@ -230,7 +231,7 @@ export class SampleCatalogStorage {
     const id = createId('sample-backup');
     const createdAt = nowIso();
     const snapshot: CatalogSnapshot = { format: 'mahjong-study-sample-backup', version: 1, id, createdAt,
-      before: originalRaw === null ? emptyStore() : JSON.parse(originalRaw) as Store, removedIds, addedProblems, addedStudy, addedTags: tags };
+      before: originalRaw === null ? createInitialStore() : JSON.parse(originalRaw) as Store, removedIds, addedProblems, addedStudy, addedTags: tags };
     const removed = new Set(removedIds);
     const next: Store = { ...store, tags,
       problems: [...store.problems.filter((problem) => !removed.has(problem.id)), ...addedProblems],
