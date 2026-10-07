@@ -1,0 +1,143 @@
+
+> mahjong-study@1.0.0 test
+> vitest run
+
+
+ RUN  v3.2.7 /workspace/mj_study
+
+ ✓ src/storage/sampleCatalogStorage.test.ts (53 tests) 850ms
+ ✓ src/features/materials/MaterialsPage.test.tsx (33 tests) 1219ms
+ ✓ src/storage/sampleHistoryImport.test.ts (63 tests) 147ms
+ ✓ src/components/UkeirePanel.test.tsx (16 tests) 1725ms
+   ✓ ukeire UI and existing study flows (jsdom; not a layout/browser test) > updates on editing, saves unchanged fields, matches detail, keeps sharing retired and hides until answered  871ms
+   ✓ ukeire UI and existing study flows (jsdom; not a layout/browser test) > places the editor toggle immediately after clear, preserves adjustments across repeated toggles and resets on position changes  365ms
+ ✓ src/domain/recordSeries.test.ts (34 tests) 42ms
+ ✓ src/storage/materialsStorage.test.ts (33 tests) 187ms
+ ✓ src/features/records/RecordShareButton.test.tsx (27 tests) 524ms
+ ✓ src/features/records/RecordsPage.test.tsx (9 tests) 827ms
+ ✓ src/storage/materialArchive.test.ts (23 tests) 150ms
+ ✓ src/features/mobileNavigation.test.tsx (11 tests) 1528ms
+ ✓ src/features/editor/EditorScoreInput.test.tsx (14 tests) 2192ms
+   ✓ keeps invalid drafts visible without truncation or saving the last-valid value  355ms
+ ✓ src/features/unsavedChanges.test.tsx (25 tests) 5684ms
+   ✓ protects changed problem titles, traps focus, and restores the navigation link on Stay and Escape  701ms
+   ✓ discards only after confirmation and reopens the saved original, with no unload warning left behind  331ms
+   ✓ saves once to the requested destination and preserves problem study and attempt counts  461ms
+   ✓ does not prompt for unchanged values, view toggles, edit then revert, or after explicit save  420ms
+   ✓ preserves invalid score and cancels pending navigation when Save fails validation  353ms
+   ✓ protects Back and Forward with real hash history and stays on the editor after cancellation  757ms
+   ✓ warns during image preparation, disables Save, and ignores a late completion after discard  341ms
+   ✓ keeps drafts on same-page query and fragment updates and guards the next page change  342ms
+ ✓ src/features/test/SessionRetest.test.tsx (17 tests) 921ms
+ ✓ src/components/ProblemAttachments.test.tsx (8 tests) 184ms
+ ✓ src/features/import/import.test.ts (17 tests) 55ms
+ ✓ src/features/test/TestSetupControls.test.tsx (12 tests) 312ms
+ ✓ src/features/library/LibrarySampleCatalog.test.tsx (8 tests) 1581ms
+   ✓ adds ten samples from the initially closed library panel without navigating or revealing answers  369ms
+ ✓ src/features/answerVisibility.test.tsx (7 tests) 629ms
+ ✓ src/features/detail/DetailActions.test.tsx (9 tests) 1203ms
+ ✓ src/storage/materialProvenance.test.ts (17 tests) 90ms
+ ✓ src/storage/repository.test.ts (8 tests) 39ms
+stderr | src/features/share/RetiredProblemShare.test.tsx > leaves a retired link inert and returns without touching existing data (#share=%E0%A4%A)
+The URL path "/share=%E0%A4%A" could not be decoded because it is a malformed URL segment. This is probably due to a bad percent encoding (URIError: URI malformed).
+
+ ✓ src/features/settings/SampleBulkControls.test.tsx (8 tests) 284ms
+ ✓ src/features/share/RetiredProblemShare.test.tsx (14 tests) 1344ms
+   ✓ keeps old links inert after return, repeated Back/Forward and an app remount  360ms
+   ✓ keeps problem tools compact and the separate record-share and creator-X entries available  304ms
+ ✓ src/components/TileLimit.test.tsx (12 tests) 1767ms
+   ✓ blocks fifth clicks immediately, restores availability after removal and undo  332ms
+ ✓ src/domain/tagRecords.test.ts (7 tests) 9ms
+ ❯ src/domain/search.test.ts (26 tests | 1 failed) 387ms
+   ✓ parseHandNotation > parses basic and red 3ms
+   ✓ parseHandNotation > rejects incomplete and invalid without silent drop 1ms
+   ✓ A11 search examples (spec §7) > 234m ↔ 234p (色替え) 11ms
+   ✓ A11 search examples (spec §7) > 234m ↔ 678p (色替え+反転) 2ms
+   ✓ A11 search examples (spec §7) > 11123m ↔ 78999s 3ms
+   ✓ A11 search examples (spec §7) > 234m ↔ 345p (数字のずれ) 2ms
+   ✓ A11 search examples (spec §7) > 11123m ↔ 22234p 3ms
+   ✓ A11 search examples (spec §7) > 234m ↔ 356p 不一致 8ms
+   ✓ A11 search examples (spec §7) > 11123m ↔ 77789s 1ms
+   ✓ A11 search examples (spec §7) > 11123m ↔ 77799s 不一致 1ms
+   ✓ A11 search examples (spec §7) > 11m ↔ 1p 枚数不足 1ms
+   ✓ A11 search examples (spec §7) > 12m12p ↔ 1122s 色統合禁止 7ms
+   ✓ A11 search examples (spec §7) > 12m34p ↔ 89s34m 色別一括反転 5ms
+   ✓ A11 search examples (spec §7) > 1z ↔ 2z 不一致 0ms
+   ✓ A11 search examples (spec §7) > 5m ↔ 0p 赤同一視なら一致 1ms
+   ✓ A11 search examples (spec §7) > 5m ↔ 0p 赤区別なら不一致 2ms
+   ✓ A12 individual toggles > all OFF: only exact tiles 1ms
+   ✓ A12 individual toggles > shift OFF: 234 vs 345 mismatch 1ms
+   ✓ A41 A42 A43 > 11123m → 67888p (反転後-1) 2ms
+   ✓ A41 A42 A43 > 89m → 12p 一致、1256m→1267p 完全一致せず、循環なし 3ms
+   ✓ A41 A42 A43 > 05m → 66p 2ms
+   ✓ A10 A14 A15 A16 > requires multiplicity 2ms
+   ✓ A10 A14 A15 A16 > include melds toggle 3ms
+   ✓ A10 A14 A15 A16 > dora indicators never match alone 1ms
+   ✓ A10 A14 A15 A16 > exact vs contains 0ms
+   × A44 search performance smoke > 500 problems without images under ~200ms 321ms
+     → expected 312.079962 to be less than 200
+ ✓ src/features/editor/EditorAnswerDefaults.test.tsx (10 tests) 993ms
+ ✓ src/storage/initialMaterials.test.ts (12 tests) 67ms
+ ✓ src/features/records/renderRecordShare.test.ts (10 tests) 81ms
+ ✓ src/storage/testParticipation.test.ts (9 tests) 28ms
+ ✓ src/components/HandView.test.tsx (16 tests) 184ms
+ ✓ src/domain/sessionRetest.test.ts (7 tests) 20ms
+ ✓ src/domain/records.test.ts (12 tests) 18ms
+ ✓ src/domain/materialRecords.test.ts (6 tests) 15ms
+ ✓ src/features/records/TagStudySummary.test.tsx (3 tests) 397ms
+ ✓ src/features/settings/SampleCatalogSettings.test.tsx (7 tests) 162ms
+ ✓ src/features/editor/EditorHeader.test.tsx (5 tests) 894ms
+ ✓ src/features/settings/SampleCatalogFlow.test.tsx (3 tests) 329ms
+ ✓ src/domain/ukeire.test.ts (43 tests) 148ms
+ ✓ src/domain/unifiedHandCompatibility.test.ts (6 tests) 82ms
+ ✓ src/features/editor/EditorAttachments.test.tsx (3 tests) 860ms
+   ✓ blocks saving during a 問題画像 upload and preserves moves and deletions when compression finishes  439ms
+ ✓ src/features/editor/EditorDefaults.test.tsx (3 tests) 559ms
+ ✓ src/domain/materials.test.ts (39 tests) 25ms
+ ✓ src/features/detail/DetailAttachments.test.tsx (3 tests) 561ms
+   ✓ shows the question image beside the hand while keeping explanatory data out of the DOM until revealed  349ms
+ ✓ src/domain/recordShare.test.ts (9 tests) 24ms
+ ✓ src/features/settings/ThemeSettings.test.tsx (4 tests) 326ms
+ ✓ src/domain/domain.test.ts (11 tests) 9ms
+ ✓ src/domain/remaining.test.ts (18 tests) 49ms
+ ✓ src/domain/testEligibility.test.ts (11 tests) 9ms
+ ✓ src/domain/validate.test.ts (20 tests) 11ms
+ ✓ src/domain/attachments.test.ts (12 tests) 19ms
+ ✓ src/features/materials/materialList.test.ts (32 tests) 15ms
+ ✓ src/app/theme.test.ts (14 tests) 31ms
+ ✓ src/features/import/TileSupplyImport.test.tsx (2 tests) 293ms
+ ✓ src/components/WanpaiDora.test.tsx (8 tests) 79ms
+ ✓ src/components/useDecorativeMotion.test.tsx (3 tests) 41ms
+ ✓ src/features/editor/EditorResponsive.test.tsx (2 tests) 187ms
+ ✓ src/components/AppIcons.test.ts (6 tests) 10ms
+ ✓ src/features/settings/SettingsLinks.test.tsx (1 test) 68ms
+ ✓ src/domain/tileSupply.test.ts (2 tests) 13ms
+ ✓ src/domain/melds.test.ts (4 tests) 8ms
+ ✓ src/export/compressImageFile.test.ts (3 tests) 14ms
+ ✓ src/domain/scoreInput.test.ts (27 tests) 7ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/domain/search.test.ts > A44 search performance smoke > 500 problems without images under ~200ms
+AssertionError: expected 312.079962 to be less than 200
+ ❯ src/domain/search.test.ts:221:21
+    219|     const elapsed = performance.now() - start;
+    220|     expect(results.length).toBeGreaterThan(0);
+    221|     expect(elapsed).toBeLessThan(200);
+       |                     ^
+    222|   });
+    223| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 62 passed (63)
+      Tests  1 failed | 896 passed (897)
+   Start at  08:34:00
+   Duration  26.71s (transform 2.04s, setup 426ms, collect 6.99s, tests 30.51s, environment 25.67s, prepare 4.48s)
+
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+npm notice To update run: npm install -g npm@12.2.0
+npm notice

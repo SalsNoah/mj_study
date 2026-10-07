@@ -557,3 +557,42 @@ it('accepts repeated restore clicks without a stale conflict or an extra write',
   expect(button('教材をアーカイブ').disabled).toBe(false);
   expect(host.querySelector('[role="alert"]')).toBeNull();
 });
+
+it('records directly from the list once on double click, keeps comment/order, and confirms a further study', async () => {
+  seed([material('old', { title: '古い教材', comment: '残すコメント' }), material('new', { title: '新しい教材', url: 'https://example.com/new', updatedAt: '2026-10-04T00:00:00Z' })]);
+  await mount();
+  const cards = () => [...host.querySelectorAll<HTMLElement>('.material-card')];
+  expect(cards().map(card => card.querySelector('h2')!.textContent)).toEqual(['新しい教材', '古い教材']);
+  const study = button('学習した', cards()[1]);
+  await act(async () => { study.click(); study.click(); });
+  expect(persisted().materialStudyEvents).toHaveLength(1);
+  expect(persisted().materials?.find(m => m.id === 'old')?.comment).toBe('残すコメント');
+  expect(cards().map(card => card.querySelector('h2')!.textContent)).toEqual(['新しい教材', '古い教材']);
+  expect(host.querySelector('h1')!.textContent).toBe('学習教材');
+  await click(button('キャンセル', document.body));
+  expect(persisted().materialStudyEvents).toHaveLength(1);
+  await click(study);
+  await click(button('もう1回記録する', document.body));
+  expect(persisted().materialStudyEvents).toHaveLength(2);
+});
+
+it('archives from list with confirmation, retains data, focuses search, and restores without studies', async () => {
+  seed([material('one', { comment: 'そのまま残す' })]); await mount();
+  const before = persisted();
+  const archive = button('アーカイブ');
+  await click(archive); await click(button('キャンセル', document.body));
+  expect(persisted()).toEqual(before); expect(document.activeElement).toBe(archive);
+  await click(archive); await click(button('アーカイブする', document.body));
+  expect(persisted().materials?.[0]?.archivedAt).toBeTruthy();
+  expect(persisted().materials?.[0]?.comment).toBe('そのまま残す');
+  expect(persisted().materialStudyEvents).toEqual(before.materialStudyEvents);
+  expect(document.activeElement).toBe(host.querySelector('input[type="search"]'));
+  await click(button('アーカイブ 1 件')); expect(button('学習した').disabled).toBe(true);
+  await click(button('学習中に復元')); expect(persisted().materials?.[0]?.archivedAt).toBeUndefined();
+});
+
+it('list study and archive failures never claim success or remove cards',async()=>{
+  seed(); await mount(); vi.spyOn(Storage.prototype,'setItem').mockImplementation(()=>{throw new Error('quota');});
+  await click(button('学習した')); expect(persisted().materialStudyEvents).toHaveLength(0);expect(host.querySelector('[role="alert"]')).not.toBeNull();
+  await click(button('アーカイブ')); await click(button('アーカイブする',document.body)); expect(persisted().materials?.[0]?.archivedAt).toBeUndefined();expect(host.querySelectorAll('.material-card')).toHaveLength(1);
+});

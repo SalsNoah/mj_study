@@ -1,4 +1,4 @@
-import { useRef, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useApp } from '@/app/store';
 import { createId, nowIso } from '@/domain/ids';
@@ -6,6 +6,7 @@ import { countMaterialStudies, MATERIAL_LIMITS, normalizeMaterialUrl } from '@/d
 import { materialHost } from './materialPresentation';
 import { filterMaterials } from './materialList';
 import { useYoutubeTitle } from './useYoutubeTitle';
+import { MaterialCardActions } from './MaterialCardActions';
 import { MaterialThumbnail } from './MaterialThumbnail';
 
 export function MaterialsPage() {
@@ -20,8 +21,19 @@ export function MaterialsPage() {
   const [query, setQuery] = useState('');
   const saving = useRef(false);
   const searchInput = useRef<HTMLInputElement>(null);
+  const focusSearchAfterRemoval = useRef(false);
+  useEffect(() => {
+    if (focusSearchAfterRemoval.current) {
+      focusSearchAfterRemoval.current = false;
+      searchInput.current?.focus();
+    }
+  }, [store.materials]);
   const draftId = useRef(createId('material'));
-  const materials = [...(store.materials ?? [])].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+  // Keep cards under the pointer after a study updates updatedAt. New page visits
+  // still start in the existing most-recently-updated order.
+  const order = useRef(new Map([...(store.materials ?? [])].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)).map((item, index) => [item.id, index])));
+  const materials = [...(store.materials ?? [])].sort((a, b) =>
+    (order.current.get(a.id) ?? -1) - (order.current.get(b.id) ?? -1) || b.updatedAt.localeCompare(a.updatedAt));
   const archivedCount = materials.filter((material) => material.archivedAt !== undefined).length;
   const selectedMaterials = materials.filter((material) => (material.archivedAt !== undefined) === archived);
   const visibleMaterials = filterMaterials(selectedMaterials, query);
@@ -121,12 +133,10 @@ export function MaterialsPage() {
                   <span className="material-source">{materialHost(material.url)}</span>
                   {material.comment && <p className="material-card__comment">{material.comment}</p>}
                 </div>
-                <div className="material-card__actions">
-                  <a className="btn btn-primary material-direct-link" href={material.url} target="_blank" rel="noopener noreferrer"
-                    aria-label={`${material.title}のリンクを開く（新しいタブ）`}>リンクを開く <span aria-hidden="true">↗</span></a>
-                  <Link className="btn material-record-link" to={`/materials/${encodeURIComponent(material.id)}`}
-                    aria-label={`${material.title}の${archived ? '履歴・復元' : '記録・コメント'}`}>{archived ? '履歴・復元' : '記録・コメント'}</Link>
-                </div>
+                <MaterialCardActions material={material} onRemoved={() => {
+                  // The confirmed card disappears; move focus to the persistent search field.
+                  focusSearchAfterRemoval.current = true;
+                }} />
               </article>
             </li>
           ))}

@@ -1,0 +1,287 @@
+[
+  {
+    "width": 320,
+    "theme": "normal",
+    "status": "pass",
+    "checks": [
+      "100/150% text",
+      "failed image",
+      "long title/comment",
+      "four 44px actions no overlap",
+      "tab order",
+      "doubleclick one event stable card order",
+      "repeat confirmation",
+      "comment preserved",
+      "archive cancel/confirm",
+      "focus",
+      "restore",
+      "history retained"
+    ]
+  },
+  {
+    "width": 320,
+    "theme": "cool",
+    "status": "pass",
+    "checks": [
+      "100/150% text",
+      "failed image",
+      "long title/comment",
+      "four 44px actions no overlap",
+      "tab order",
+      "doubleclick one event stable card order",
+      "repeat confirmation",
+      "comment preserved",
+      "archive cancel/confirm",
+      "focus",
+      "restore",
+      "history retained"
+    ]
+  },
+  {
+    "width": 320,
+    "theme": "cute",
+    "status": "pass",
+    "checks": [
+      "100/150% text",
+      "failed image",
+      "long title/comment",
+      "four 44px actions no overlap",
+      "tab order",
+      "doubleclick one event stable card order",
+      "repeat confirmation",
+      "comment preserved",
+      "archive cancel/confirm",
+      "focus",
+      "restore",
+      "history retained"
+    ]
+  },
+  {
+    "width": 320,
+    "theme": "dopa",
+    "status": "pass",
+    "checks": [
+      "100/150% text",
+      "failed image",
+      "long title/comment",
+      "four 44px actions no overlap",
+      "tab order",
+      "doubleclick one event stable card order",
+      "repeat confirmation",
+      "comment preserved",
+      "archive cancel/confirm",
+      "focus",
+      "restore",
+      "history retained"
+    ]
+  },
+  {
+    "width": 320,
+    "theme": "moe",
+    "status": "pass",
+    "checks": [
+      "100/150% text",
+      "failed image",
+      "long title/comment",
+      "four 44px actions no overlap",
+      "tab order",
+      "doubleclick one event stable card order",
+      "repeat confirmation",
+      "comment preserved",
+      "archive cancel/confirm",
+      "focus",
+      "restore",
+      "history retained"
+    ]
+  },
+  {
+    "width": 390,
+    "theme": "normal",
+    "status": "pass",
+    "checks": [
+      "100/150% text",
+      "failed image",
+      "long title/comment",
+      "four 44px actions no overlap",
+      "tab order",
+      "doubleclick one event stable card order",
+      "repeat confirmation",
+      "comment preserved",
+      "archive cancel/confirm",
+      "focus",
+      "restore",
+      "history retained"
+    ]
+  },
+  {
+    "width": 390,
+    "theme": "cool",
+    "status": "pass",
+    "checks": [
+      "100/150% text",
+      "failed image",
+      "long title/comment",
+      "four 44px actions no overlap",
+      "tab order",
+      "doubleclick one event stable card order",
+      "repeat confirmation",
+      "comment preserved",
+      "archive cancel/confirm",
+      "focus",
+      "restore",
+      "history retained"
+    ]
+  },
+  {
+    "width": 390,
+    "theme": "cute",
+    "status": "pass",
+    "checks": [
+      "100/150% text",
+      "failed image",
+      "long title/comment",
+      "four 44px actions no overlap",
+      "tab order",
+      "doubleclick one event stable card order",
+      "repeat confirmation",
+      "comment preserved",
+      "archive cancel/confirm",
+      "focus",
+      "restore",
+      "history retained"
+    ]
+  },
+  {
+    "width": 390,
+    "theme": "dopa",
+    "status": "pass",
+    "checks": [
+      "100/150% text",
+      "failed image",
+      "long title/comment",
+      "four 44px actions no overlap",
+      "tab order",
+      "doubleclick one event stable card order",
+      "repeat confirmation",
+      "comment preserved",
+      "archive cancel/confirm",
+      "focus",
+      "restore",
+      "history retained"
+    ]
+  },
+  {
+    "width": 390,
+    "theme": "moe",
+    "status": "pass",
+    "checks": [
+      "100/150% text",
+      "failed image",
+      "long title/comment",
+      "four 44px actions no overlap",
+      "tab order",
+      "doubleclick one event stable card order",
+      "repeat confirmation",
+      "comment preserved",
+      "archive cancel/confirm",
+      "focus",
+      "restore",
+      "history retained"
+    ]
+  },
+  {
+    "width": 1440,
+    "theme": "normal",
+    "status": "pass",
+    "checks": [
+      "100/150% text",
+      "failed image",
+      "long title/comment",
+      "four 44px actions no overlap",
+      "tab order",
+      "doubleclick one event stable card order",
+      "repeat confirmation",
+      "comment preserved",
+      "archive cancel/confirm",
+      "focus",
+      "restore",
+      "history retained"
+    ]
+  },
+  {
+    "width": 1440,
+    "theme": "cool",
+    "status": "pass",
+    "checks": [
+      "100/150% text",
+      "failed image",
+      "long title/comment",
+      "four 44px actions no overlap",
+      "tab order",
+      "doubleclick one event stable card order",
+      "repeat confirmation",
+      "comment preserved",
+      "archive cancel/confirm",
+      "focus",
+      "restore",
+      "history retained"
+    ]
+  },
+  {
+    "width": 1440,
+    "theme": "cute",
+    "status": "pass",
+    "checks": [
+      "100/150% text",
+      "failed image",
+      "long title/comment",
+      "four 44px actions no overlap",
+      "tab order",
+      "doubleclick one event stable card order",
+      "repeat confirmation",
+      "comment preserved",
+      "archive cancel/confirm",
+      "focus",
+      "restore",
+      "history retained"
+    ]
+  },
+  {
+    "width": 1440,
+    "theme": "dopa",
+    "status": "pass",
+    "checks": [
+      "100/150% text",
+      "failed image",
+      "long title/comment",
+      "four 44px actions no overlap",
+      "tab order",
+      "doubleclick one event stable card order",
+      "repeat confirmation",
+      "comment preserved",
+      "archive cancel/confirm",
+      "focus",
+      "restore",
+      "history retained"
+    ]
+  },
+  {
+    "width": 1440,
+    "theme": "moe",
+    "status": "pass",
+    "checks": [
+      "100/150% text",
+      "failed image",
+      "long title/comment",
+      "four 44px actions no overlap",
+      "tab order",
+      "doubleclick one event stable card order",
+      "repeat confirmation",
+      "comment preserved",
+      "archive cancel/confirm",
+      "focus",
+      "restore",
+      "history retained"
+    ]
+  }
+]
