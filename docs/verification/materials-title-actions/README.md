@@ -55,3 +55,24 @@ Service Worker有効/無効の両方で`net::ERR_TUNNEL_CONNECTION_FAILED` / `Ty
 ローカルChromiumの画面であり実機iOS/Androidではない。全テーマ全条件画像は作業workspaceの`evidence/material-actions/`に保存。画像はリポジトリに添付し、Library IDは発行していない。
 
 再現スクリプト: `scripts/probe-youtube-oembed.mjs`（実通信）、`scripts/validate-youtube-title-ui.mjs`（モック）、`scripts/validate-material-actions-ui.mjs`。`MAHJONG_TEST_ORIGIN`にローカル配信origin、`CHROMIUM_PATH`にブラウザー実行パスを設定可能。
+
+## 独立UIレビュー追補（証拠追加のみ）
+
+cool/cuteの既存全画面画像を追加。アプリコードは変更していない。
+
+| テーマ | 320px・150% | 390px | PC |
+|---|---|---|---|
+| cool | [画像](after/320-cool-150.png) | [画像](after/390-cool-100.png) | [画像](after/1440-cool-100.png) |
+| cute | [画像](after/320-cute-150.png) | [画像](after/390-cute-100.png) | [画像](after/1440-cute-100.png) |
+
+fullPage撮影では固定bottom navが撮影時のviewport位置に合成される。実際の最下段への到達を別試験で確認した。高さ844px（PC900px）、320px/150%・390px/100%・1440px/100% × 全5テーマで、マウスホイールによる通常スクロールで文書末尾へ移動し、最下段カードの4操作がviewport内かつ固定navより上にあること、全4操作中心のhit testが操作自身に届くことを計測。学習・アーカイブ取消・詳細リンクの実クリックも15条件すべて成功。アプリのスクロール/ナビ/スタイル修正は不要だった。[座標と結果](logs/viewport-browser.json)。再現: `scripts/capture-material-actions-viewport.mjs`。
+
+| テーマ | 320px・150%の実viewport | 390pxの実viewport | PCの実viewport |
+|---|---|---|---|
+| normal | [画像](viewport/320-normal-150-bottom-viewport.png) | [画像](viewport/390-normal-100-bottom-viewport.png) | [画像](viewport/1440-normal-100-bottom-viewport.png) |
+| cool | [画像](viewport/320-cool-150-bottom-viewport.png) | [画像](viewport/390-cool-100-bottom-viewport.png) | [画像](viewport/1440-cool-100-bottom-viewport.png) |
+| cute | [画像](viewport/320-cute-150-bottom-viewport.png) | [画像](viewport/390-cute-100-bottom-viewport.png) | [画像](viewport/1440-cute-100-bottom-viewport.png) |
+
+### CIで検出した既存試験の通知領域セレクター
+
+`d4c712d`のResponsive UI checksは失敗。原因は`validate-material-ui.mjs`の検索結果なしassertがページ全体の`getByRole('status')`を単一要素と仮定し、新規タイトルの通知領域も選択したため。A44ではない。`.materials-empty[role="status"]`に絞って同じ文言の検証を維持した。アプリ側の通知や動作は変更していない。修正後のローカル既存教材UIスクリプトは74記録成功・errorsなし。liveThumbnailは環境通信失敗のまま（タイトルoEmbed成功とは無関係）。最終HEADのGitHub CI結果はPRで確認する。
