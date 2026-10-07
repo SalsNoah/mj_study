@@ -1,4 +1,4 @@
-const CACHE = 'mahjong-study-v50';
+const CACHE = 'mahjong-study-v51';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -19,6 +19,9 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const request = event.request;
   if (request.method !== 'GET') return;
+  // Metadata must fail normally, never use a stale title or the HTML fallback.
+  const url = new URL(request.url);
+  if (url.origin === 'https://www.youtube.com' && url.pathname === '/oembed') return;
   event.respondWith(
     fetch(request)
       .then((response) => {

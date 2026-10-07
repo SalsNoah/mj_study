@@ -1,0 +1,41 @@
+[
+  {
+    "width": 320,
+    "status": "passed",
+    "mocked": true,
+    "checks": [
+      "autofill",
+      "manual edit preserved",
+      "URL preserved",
+      "no study increment",
+      "save during request",
+      "no overflow"
+    ]
+  },
+  {
+    "width": 390,
+    "status": "passed",
+    "mocked": true,
+    "checks": [
+      "autofill",
+      "manual edit preserved",
+      "URL preserved",
+      "no study increment",
+      "save during request",
+      "no overflow"
+    ]
+  },
+  {
+    "width": 1440,
+    "status": "passed",
+    "mocked": true,
+    "checks": [
+      "autofill",
+      "manual edit preserved",
+      "URL preserved",
+      "no study increment",
+      "save during request",
+      "no overflow"
+    ]
+  }
+]

@@ -1,0 +1,573 @@
+{
+  "status": "pass",
+  "revision": {
+    "commit": "df0e034237fd2631ca8a19361bf2bf347db278de",
+    "tree": "b788a2c9bd5765dd2dc02e4f0f98c7707a2f1fce"
+  },
+  "results": [
+    {
+      "name": "archive-confirm-normal-390",
+      "status": "pass",
+      "width": 390,
+      "height": 844,
+      "documentWidth": 390,
+      "buttons": [
+        {
+          "width": 109.84375,
+          "height": 44,
+          "x": 93.46875,
+          "right": 203.3125,
+          "y": 489.5,
+          "bottom": 533.5,
+          "hit": true
+        },
+        {
+          "width": 141.6875,
+          "height": 44,
+          "x": 211.3125,
+          "right": 353,
+          "y": 489.5,
+          "bottom": 533.5,
+          "hit": true
+        }
+      ]
+    },
+    {
+      "name": "archived-detail-normal-390",
+      "status": "pass",
+      "width": 390,
+      "height": 844,
+      "documentWidth": 390
+    },
+    {
+      "name": "archive-list-normal-390",
+      "status": "pass",
+      "width": 390,
+      "height": 844,
+      "documentWidth": 390
+    },
+    {
+      "name": "restored-detail-normal-390",
+      "status": "pass",
+      "width": 390,
+      "height": 844,
+      "documentWidth": 390
+    },
+    {
+      "name": "archive-restore-dirty-cancel-reload-search-duplicate-backup",
+      "status": "pass"
+    },
+    {
+      "name": "confirm-normal-320-text150",
+      "status": "pass",
+      "width": 320,
+      "height": 844,
+      "documentWidth": 320,
+      "buttons": [
+        {
+          "width": 149.765625,
+          "height": 44,
+          "x": 133.234375,
+          "right": 283,
+          "y": 574.5,
+          "bottom": 618.5,
+          "hit": true
+        },
+        {
+          "width": 197.53125,
+          "height": 44,
+          "x": 85.46875,
+          "right": 283,
+          "y": 626.5,
+          "bottom": 670.5,
+          "hit": true
+        }
+      ]
+    },
+    {
+      "name": "archive-list-normal-320-text150",
+      "status": "pass",
+      "width": 320,
+      "height": 844,
+      "documentWidth": 320
+    },
+    {
+      "name": "confirm-normal-390-text100",
+      "status": "pass",
+      "width": 390,
+      "height": 844,
+      "documentWidth": 390,
+      "buttons": [
+        {
+          "width": 109.84375,
+          "height": 44,
+          "x": 93.46875,
+          "right": 203.3125,
+          "y": 489.5,
+          "bottom": 533.5,
+          "hit": true
+        },
+        {
+          "width": 141.6875,
+          "height": 44,
+          "x": 211.3125,
+          "right": 353,
+          "y": 489.5,
+          "bottom": 533.5,
+          "hit": true
+        }
+      ]
+    },
+    {
+      "name": "archive-list-normal-390-text100",
+      "status": "pass",
+      "width": 390,
+      "height": 844,
+      "documentWidth": 390
+    },
+    {
+      "name": "confirm-normal-1440-text100",
+      "status": "pass",
+      "width": 1440,
+      "height": 900,
+      "documentWidth": 1440,
+      "buttons": [
+        {
+          "width": 109.84375,
+          "height": 44,
+          "x": 639.46875,
+          "right": 749.3125,
+          "y": 505.5,
+          "bottom": 549.5,
+          "hit": true
+        },
+        {
+          "width": 141.6875,
+          "height": 44,
+          "x": 757.3125,
+          "right": 899,
+          "y": 505.5,
+          "bottom": 549.5,
+          "hit": true
+        }
+      ]
+    },
+    {
+      "name": "archive-list-normal-1440-text100",
+      "status": "pass",
+      "width": 1440,
+      "height": 900,
+      "documentWidth": 1440
+    },
+    {
+      "name": "confirm-cool-320-text150",
+      "status": "pass",
+      "width": 320,
+      "height": 844,
+      "documentWidth": 320,
+      "buttons": [
+        {
+          "width": 149.765625,
+          "height": 44,
+          "x": 133.234375,
+          "right": 283,
+          "y": 574.5,
+          "bottom": 618.5,
+          "hit": true
+        },
+        {
+          "width": 197.53125,
+          "height": 44,
+          "x": 85.46875,
+          "right": 283,
+          "y": 626.5,
+          "bottom": 670.5,
+          "hit": true
+        }
+      ]
+    },
+    {
+      "name": "archive-list-cool-320-text150",
+      "status": "pass",
+      "width": 320,
+      "height": 844,
+      "documentWidth": 320
+    },
+    {
+      "name": "confirm-cool-390-text100",
+      "status": "pass",
+      "width": 390,
+      "height": 844,
+      "documentWidth": 390,
+      "buttons": [
+        {
+          "width": 109.84375,
+          "height": 44,
+          "x": 93.46875,
+          "right": 203.3125,
+          "y": 489.5,
+          "bottom": 533.5,
+          "hit": true
+        },
+        {
+          "width": 141.6875,
+          "height": 44,
+          "x": 211.3125,
+          "right": 353,
+          "y": 489.5,
+          "bottom": 533.5,
+          "hit": true
+        }
+      ]
+    },
+    {
+      "name": "archive-list-cool-390-text100",
+      "status": "pass",
+      "width": 390,
+      "height": 844,
+      "documentWidth": 390
+    },
+    {
+      "name": "confirm-cool-1440-text100",
+      "status": "pass",
+      "width": 1440,
+      "height": 900,
+      "documentWidth": 1440,
+      "buttons": [
+        {
+          "width": 109.84375,
+          "height": 44,
+          "x": 639.46875,
+          "right": 749.3125,
+          "y": 505.5,
+          "bottom": 549.5,
+          "hit": true
+        },
+        {
+          "width": 141.6875,
+          "height": 44,
+          "x": 757.3125,
+          "right": 899,
+          "y": 505.5,
+          "bottom": 549.5,
+          "hit": true
+        }
+      ]
+    },
+    {
+      "name": "archive-list-cool-1440-text100",
+      "status": "pass",
+      "width": 1440,
+      "height": 900,
+      "documentWidth": 1440
+    },
+    {
+      "name": "confirm-cute-320-text150",
+      "status": "pass",
+      "width": 320,
+      "height": 844,
+      "documentWidth": 320,
+      "buttons": [
+        {
+          "width": 150,
+          "height": 44,
+          "x": 133,
+          "right": 283,
+          "y": 574.5,
+          "bottom": 618.5,
+          "hit": true
+        },
+        {
+          "width": 198,
+          "height": 44,
+          "x": 85,
+          "right": 283,
+          "y": 626.5,
+          "bottom": 670.5,
+          "hit": true
+        }
+      ]
+    },
+    {
+      "name": "archive-list-cute-320-text150",
+      "status": "pass",
+      "width": 320,
+      "height": 844,
+      "documentWidth": 320
+    },
+    {
+      "name": "confirm-cute-390-text100",
+      "status": "pass",
+      "width": 390,
+      "height": 844,
+      "documentWidth": 390,
+      "buttons": [
+        {
+          "width": 110.015625,
+          "height": 44,
+          "x": 92.96875,
+          "right": 202.984375,
+          "y": 489.5,
+          "bottom": 533.5,
+          "hit": true
+        },
+        {
+          "width": 142.015625,
+          "height": 44,
+          "x": 210.984375,
+          "right": 353,
+          "y": 489.5,
+          "bottom": 533.5,
+          "hit": true
+        }
+      ]
+    },
+    {
+      "name": "archive-list-cute-390-text100",
+      "status": "pass",
+      "width": 390,
+      "height": 844,
+      "documentWidth": 390
+    },
+    {
+      "name": "confirm-cute-1440-text100",
+      "status": "pass",
+      "width": 1440,
+      "height": 900,
+      "documentWidth": 1440,
+      "buttons": [
+        {
+          "width": 110.015625,
+          "height": 44,
+          "x": 638.96875,
+          "right": 748.984375,
+          "y": 505.5,
+          "bottom": 549.5,
+          "hit": true
+        },
+        {
+          "width": 142.015625,
+          "height": 44,
+          "x": 756.984375,
+          "right": 899,
+          "y": 505.5,
+          "bottom": 549.5,
+          "hit": true
+        }
+      ]
+    },
+    {
+      "name": "archive-list-cute-1440-text100",
+      "status": "pass",
+      "width": 1440,
+      "height": 900,
+      "documentWidth": 1440
+    },
+    {
+      "name": "confirm-dopa-320-text150",
+      "status": "pass",
+      "width": 320,
+      "height": 844,
+      "documentWidth": 320,
+      "buttons": [
+        {
+          "width": 149.765625,
+          "height": 44,
+          "x": 133.234375,
+          "right": 283,
+          "y": 574.5,
+          "bottom": 618.5,
+          "hit": true
+        },
+        {
+          "width": 197.53125,
+          "height": 44,
+          "x": 85.46875,
+          "right": 283,
+          "y": 626.5,
+          "bottom": 670.5,
+          "hit": true
+        }
+      ]
+    },
+    {
+      "name": "archive-list-dopa-320-text150",
+      "status": "pass",
+      "width": 320,
+      "height": 844,
+      "documentWidth": 320
+    },
+    {
+      "name": "confirm-dopa-390-text100",
+      "status": "pass",
+      "width": 390,
+      "height": 844,
+      "documentWidth": 390,
+      "buttons": [
+        {
+          "width": 109.84375,
+          "height": 44,
+          "x": 93.46875,
+          "right": 203.3125,
+          "y": 489.5,
+          "bottom": 533.5,
+          "hit": true
+        },
+        {
+          "width": 141.6875,
+          "height": 44,
+          "x": 211.3125,
+          "right": 353,
+          "y": 489.5,
+          "bottom": 533.5,
+          "hit": true
+        }
+      ]
+    },
+    {
+      "name": "archive-list-dopa-390-text100",
+      "status": "pass",
+      "width": 390,
+      "height": 844,
+      "documentWidth": 390
+    },
+    {
+      "name": "confirm-dopa-1440-text100",
+      "status": "pass",
+      "width": 1440,
+      "height": 900,
+      "documentWidth": 1440,
+      "buttons": [
+        {
+          "width": 109.84375,
+          "height": 44,
+          "x": 639.46875,
+          "right": 749.3125,
+          "y": 505.5,
+          "bottom": 549.5,
+          "hit": true
+        },
+        {
+          "width": 141.6875,
+          "height": 44,
+          "x": 757.3125,
+          "right": 899,
+          "y": 505.5,
+          "bottom": 549.5,
+          "hit": true
+        }
+      ]
+    },
+    {
+      "name": "archive-list-dopa-1440-text100",
+      "status": "pass",
+      "width": 1440,
+      "height": 900,
+      "documentWidth": 1440
+    },
+    {
+      "name": "confirm-moe-320-text150",
+      "status": "pass",
+      "width": 320,
+      "height": 844,
+      "documentWidth": 320,
+      "buttons": [
+        {
+          "width": 150,
+          "height": 44,
+          "x": 133,
+          "right": 283,
+          "y": 574.5,
+          "bottom": 618.5,
+          "hit": true
+        },
+        {
+          "width": 198,
+          "height": 44,
+          "x": 85,
+          "right": 283,
+          "y": 626.5,
+          "bottom": 670.5,
+          "hit": true
+        }
+      ]
+    },
+    {
+      "name": "archive-list-moe-320-text150",
+      "status": "pass",
+      "width": 320,
+      "height": 844,
+      "documentWidth": 320
+    },
+    {
+      "name": "confirm-moe-390-text100",
+      "status": "pass",
+      "width": 390,
+      "height": 844,
+      "documentWidth": 390,
+      "buttons": [
+        {
+          "width": 110.015625,
+          "height": 44,
+          "x": 92.96875,
+          "right": 202.984375,
+          "y": 489.5,
+          "bottom": 533.5,
+          "hit": true
+        },
+        {
+          "width": 142.015625,
+          "height": 44,
+          "x": 210.984375,
+          "right": 353,
+          "y": 489.5,
+          "bottom": 533.5,
+          "hit": true
+        }
+      ]
+    },
+    {
+      "name": "archive-list-moe-390-text100",
+      "status": "pass",
+      "width": 390,
+      "height": 844,
+      "documentWidth": 390
+    },
+    {
+      "name": "confirm-moe-1440-text100",
+      "status": "pass",
+      "width": 1440,
+      "height": 900,
+      "documentWidth": 1440,
+      "buttons": [
+        {
+          "width": 110.015625,
+          "height": 44,
+          "x": 638.96875,
+          "right": 748.984375,
+          "y": 505.5,
+          "bottom": 549.5,
+          "hit": true
+        },
+        {
+          "width": 142.015625,
+          "height": 44,
+          "x": 756.984375,
+          "right": 899,
+          "y": 505.5,
+          "bottom": 549.5,
+          "hit": true
+        }
+      ]
+    },
+    {
+      "name": "archive-list-moe-1440-text100",
+      "status": "pass",
+      "width": 1440,
+      "height": 900,
+      "documentWidth": 1440
+    }
+  ],
+  "errors": [],
+  "network": []
+}

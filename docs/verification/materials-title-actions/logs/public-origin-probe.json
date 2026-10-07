@@ -1,0 +1,4 @@
+{
+  "at": "2026-10-07T08:54:11.536Z",
+  "error": "Error: page.goto: net::ERR_TUNNEL_CONNECTION_FAILED at https://salsnoah.github.io/mj_study/\nCall log:\n\u001b[2m  - navigating to \"https://salsnoah.github.io/mj_study/\", waiting until \"load\"\u001b[22m\n"
+}

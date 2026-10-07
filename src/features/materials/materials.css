@@ -17,8 +17,13 @@
 .material-card { display: grid; grid-template-columns: 96px minmax(0, 1fr); align-items: start; gap: 12px; padding: 12px; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--panel); color: var(--ink); box-shadow: var(--tile-shadow); }
 .material-card__body { min-width: 0; }
 .material-card__body h2 { margin: 0 0 8px; font-size: 1rem; line-height: 1.5; overflow-wrap: anywhere; }
-.material-card__actions { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px; }
-.material-card__actions .btn { flex: 1 1 120px; min-height: 44px; padding-inline: 8px; text-align: center; white-space: nowrap; }
+.material-card__actions { grid-column: 1 / -1; display: grid; gap: 10px; min-width: 0; }
+.material-card__main-actions, .material-card__minor-actions { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; }
+.material-card__minor-actions { padding-top: 8px; border-top: 1px solid var(--line); }
+.material-card__minor-actions .btn { background: transparent; box-shadow: none; border-color: transparent; color: var(--ink); }
+.material-card__minor-actions .btn:hover { background: var(--panel); border-color: var(--line); }
+.material-card__feedback { margin: 0; overflow-wrap: anywhere; font-size: 0.9rem; }
+.material-card__actions .btn { min-width: 0; min-height: 44px; padding-inline: 8px; text-align: center; white-space: normal; overflow-wrap: anywhere; }
 .material-thumbnail { width: 100%; aspect-ratio: 16 / 9; border-radius: var(--r-sm); overflow: hidden; background: var(--accent-soft); color: var(--accent); }
 .material-thumbnail img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .material-thumbnail__placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; gap: 2px; font-size: 0.75rem; }
@@ -53,7 +58,27 @@
 
 @media (min-width: 700px) {
   .material-card { grid-template-columns: 160px minmax(0, 1fr) max-content; padding: 16px; gap: 16px; }
-  .material-card__actions { grid-column: auto; flex-direction: column; }
+  .material-card__actions { grid-column: auto; width: 288px; }
   .material-card__actions .btn { flex: auto; }
   .material-form { max-width: 560px; }
+}
+
+/* Keep action hierarchy visible even when a theme decorates every .btn. */
+html[data-theme] .material-card .material-card__minor-actions .btn {
+  color: var(--ink);
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  animation: none;
+}
+html[data-theme] .material-card .material-card__minor-actions .btn::after { content: none; }
+html[data-theme] .material-card .material-card__minor-actions .btn:not(:disabled):hover {
+  background: var(--panel);
+  border-color: var(--line);
+}
+html[data-theme] .material-card .material-study-action:not(:disabled) {
+  background: var(--panel);
+  border-color: var(--accent);
+  box-shadow: none;
+  animation: none;
 }

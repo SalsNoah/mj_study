@@ -1,0 +1,73 @@
+{
+  "results": [
+    "fresh-user order / zero study / reload / no player / responsive screenshots",
+    "unsaved comment guard / save-and-leave without study / exact-byte reload",
+    "duplicate URL refusal / archive survives reload / explicit restore",
+    "explicit clear of starter materials / restart never resurrects",
+    "actual backup replace / restart remains empty"
+  ],
+  "externalRequestsBlocked": [
+    {
+      "url": "https://i.ytimg.com/vi/apqIuvnVA9M/mqdefault.jpg",
+      "type": "image"
+    },
+    {
+      "url": "https://i.ytimg.com/vi/8emBEqgAFzc/mqdefault.jpg",
+      "type": "image"
+    },
+    {
+      "url": "https://i.ytimg.com/vi/2LjOtn6pgb8/mqdefault.jpg",
+      "type": "image"
+    },
+    {
+      "url": "https://i.ytimg.com/vi/apqIuvnVA9M/mqdefault.jpg",
+      "type": "image"
+    },
+    {
+      "url": "https://i.ytimg.com/vi/8emBEqgAFzc/mqdefault.jpg",
+      "type": "image"
+    },
+    {
+      "url": "https://i.ytimg.com/vi/2LjOtn6pgb8/mqdefault.jpg",
+      "type": "image"
+    },
+    {
+      "url": "https://i.ytimg.com/vi/apqIuvnVA9M/mqdefault.jpg",
+      "type": "image"
+    },
+    {
+      "url": "https://i.ytimg.com/vi/8emBEqgAFzc/mqdefault.jpg",
+      "type": "image"
+    },
+    {
+      "url": "https://i.ytimg.com/vi/2LjOtn6pgb8/mqdefault.jpg",
+      "type": "image"
+    },
+    {
+      "url": "https://i.ytimg.com/vi/apqIuvnVA9M/mqdefault.jpg",
+      "type": "image"
+    },
+    {
+      "url": "https://i.ytimg.com/vi/8emBEqgAFzc/mqdefault.jpg",
+      "type": "image"
+    },
+    {
+      "url": "https://i.ytimg.com/vi/2LjOtn6pgb8/mqdefault.jpg",
+      "type": "image"
+    },
+    {
+      "url": "https://i.ytimg.com/vi/apqIuvnVA9M/mqdefault.jpg",
+      "type": "image"
+    },
+    {
+      "url": "https://i.ytimg.com/vi/8emBEqgAFzc/mqdefault.jpg",
+      "type": "image"
+    },
+    {
+      "url": "https://i.ytimg.com/vi/2LjOtn6pgb8/mqdefault.jpg",
+      "type": "image"
+    }
+  ],
+  "pageErrors": [],
+  "actualVideosOpened": 0
+}

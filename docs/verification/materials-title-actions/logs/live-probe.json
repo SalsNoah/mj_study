@@ -1,0 +1,36 @@
+[
+  {
+    "at": "2026-10-07T08:47:23.385Z",
+    "origin": "http://127.0.0.1:5184",
+    "endpoint": "https://www.youtube.com/oembed?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DM7lc1UVf-VE&format=json",
+    "serviceWorkers": "allow",
+    "result": {
+      "error": "TypeError: Failed to fetch"
+    },
+    "events": [
+      {
+        "url": "https://www.youtube.com/oembed?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DM7lc1UVf-VE&format=json",
+        "failure": {
+          "errorText": "net::ERR_TUNNEL_CONNECTION_FAILED"
+        }
+      }
+    ]
+  },
+  {
+    "at": "2026-10-07T08:47:24.462Z",
+    "origin": "http://127.0.0.1:5184",
+    "endpoint": "https://www.youtube.com/oembed?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DM7lc1UVf-VE&format=json",
+    "serviceWorkers": "block",
+    "result": {
+      "error": "TypeError: Failed to fetch"
+    },
+    "events": [
+      {
+        "url": "https://www.youtube.com/oembed?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DM7lc1UVf-VE&format=json",
+        "failure": {
+          "errorText": "net::ERR_TUNNEL_CONNECTION_FAILED"
+        }
+      }
+    ]
+  }
+]

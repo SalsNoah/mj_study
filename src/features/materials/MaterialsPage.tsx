@@ -1,10 +1,12 @@
-import { useRef, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useApp } from '@/app/store';
 import { createId, nowIso } from '@/domain/ids';
 import { countMaterialStudies, MATERIAL_LIMITS, normalizeMaterialUrl } from '@/domain/materials';
 import { materialHost } from './materialPresentation';
 import { filterMaterials } from './materialList';
+import { useYoutubeTitle } from './useYoutubeTitle';
+import { MaterialCardActions } from './MaterialCardActions';
 import { MaterialThumbnail } from './MaterialThumbnail';
 
 export function MaterialsPage() {
@@ -13,15 +15,25 @@ export function MaterialsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const archived = searchParams.get('view') === 'archived';
   const [showForm, setShowForm] = useState(false);
-  const [url, setUrl] = useState('');
-  const [title, setTitle] = useState('');
+  const { url, title, status, changeUrl, changeTitle, cancel } = useYoutubeTitle(showForm || (store.materials ?? []).length === 0);
   const [error, setError] = useState<string | null>(null);
   const [duplicateId, setDuplicateId] = useState<string | null>(null);
   const [query, setQuery] = useState('');
   const saving = useRef(false);
   const searchInput = useRef<HTMLInputElement>(null);
+  const focusSearchAfterRemoval = useRef(false);
+  useEffect(() => {
+    if (focusSearchAfterRemoval.current) {
+      focusSearchAfterRemoval.current = false;
+      searchInput.current?.focus();
+    }
+  }, [store.materials]);
   const draftId = useRef(createId('material'));
-  const materials = [...(store.materials ?? [])].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+  // Keep cards under the pointer after a study updates updatedAt. New page visits
+  // still start in the existing most-recently-updated order.
+  const order = useRef(new Map([...(store.materials ?? [])].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)).map((item, index) => [item.id, index])));
+  const materials = [...(store.materials ?? [])].sort((a, b) =>
+    (order.current.get(a.id) ?? -1) - (order.current.get(b.id) ?? -1) || b.updatedAt.localeCompare(a.updatedAt));
   const archivedCount = materials.filter((material) => material.archivedAt !== undefined).length;
   const selectedMaterials = materials.filter((material) => (material.archivedAt !== undefined) === archived);
   const visibleMaterials = filterMaterials(selectedMaterials, query);
@@ -37,6 +49,7 @@ export function MaterialsPage() {
       setError(normalized.reason);
       return;
     }
+    cancel();
     saving.current = true;
     const timestamp = nowIso();
     const result = saveMaterial({
@@ -78,21 +91,23 @@ export function MaterialsPage() {
           <label className="field">
             <span>URL</span>
             <input type="url" inputMode="url" autoCapitalize="none" autoCorrect="off" spellCheck={false}
-              value={url} onChange={(event) => setUrl(event.target.value)} maxLength={MATERIAL_LIMITS.url}
+              value={url} onChange={(event) => changeUrl(event.target.value)} maxLength={MATERIAL_LIMITS.url}
               placeholder="YouTube・note などのURL" required aria-describedby={error ? 'material-add-error' : undefined} />
           </label>
           <label className="field">
             <span>タイトル（任意）</span>
-            <input value={title} onChange={(event) => setTitle(event.target.value)} maxLength={MATERIAL_LIMITS.title}
-              placeholder="あとで見つけやすい名前" />
+            <input value={title} onChange={(event) => changeTitle(event.target.value)} maxLength={MATERIAL_LIMITS.title}
+              placeholder="あとで見つけやすい名前" aria-describedby="material-title-help material-title-status" />
           </label>
+          <small id="material-title-help">100文字まで。YouTubeは空欄なら自動補完します。他のサイトは手入力できます。</small>
+          <p id="material-title-status" role="status">{status}</p>
           {error && <p className="error" role="alert" id="material-add-error">{error}
             {duplicateId && <> <Link to={`/materials/${encodeURIComponent(duplicateId)}`}>{duplicateArchived ? 'アーカイブした教材を開いて復元' : '登録済みの教材を開く'}</Link></>}
           </p>}
           {externalConflict && <p className="error" role="alert">別タブの更新を再読込してから登録してください。</p>}
           <div className="btn-row">
             <button className="btn btn-primary" type="submit" disabled={externalConflict}>登録する</button>
-            {materials.length > 0 && <button className="btn" type="button" onClick={() => setShowForm(false)}>閉じる</button>}
+            {materials.length > 0 && <button className="btn" type="button" onClick={() => { cancel(); setShowForm(false); }}>閉じる</button>}
           </div>
         </form>
       ) : <button className="btn btn-primary materials-add" type="button" onClick={() => setShowForm(true)}>教材を追加</button>}
@@ -118,12 +133,10 @@ export function MaterialsPage() {
                   <span className="material-source">{materialHost(material.url)}</span>
                   {material.comment && <p className="material-card__comment">{material.comment}</p>}
                 </div>
-                <div className="material-card__actions">
-                  <a className="btn btn-primary material-direct-link" href={material.url} target="_blank" rel="noopener noreferrer"
-                    aria-label={`${material.title}のリンクを開く（新しいタブ）`}>リンクを開く <span aria-hidden="true">↗</span></a>
-                  <Link className="btn material-record-link" to={`/materials/${encodeURIComponent(material.id)}`}
-                    aria-label={`${material.title}の${archived ? '履歴・復元' : '記録・コメント'}`}>{archived ? '履歴・復元' : '記録・コメント'}</Link>
-                </div>
+                <MaterialCardActions material={material} onRemoved={() => {
+                  // The confirmed card disappears; move focus to the persistent search field.
+                  focusSearchAfterRemoval.current = true;
+                }} />
               </article>
             </li>
           ))}
