@@ -205,10 +205,12 @@ try {
   await expect(page.getByRole('heading', { name: imported.title, exact: true })).toBeVisible();
   await openTools();
   const beforeActions = await readStore();
-  await page.getByRole('button', { name: '確認した', exact: true }).click();
+  await page.getByRole('button', { name: '確認した（問題一覧に戻る）', exact: true }).click();
   expect((await readStore()).study.find(entry => entry.problemId === imported.id).confirmationCount).toBe(4);
   await page.getByRole('button', { name: '取り消す', exact: true }).click();
   expect((await readStore()).study).toEqual(beforeActions.study);
+  await page.locator('.problem-card').filter({hasText:imported.title}).click();
+  await openTools();
   await page.getByRole('button', { name: '複製', exact: true }).click();
   await page.getByRole('dialog', { name: '問題を複製しますか？', exact: true }).getByRole('button', { name: 'キャンセル', exact: true }).click();
   expect((await readStore()).problems).toEqual(beforeActions.problems);

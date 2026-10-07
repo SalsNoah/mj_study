@@ -111,7 +111,8 @@ try {
     await answer().uncheck(); await expect(inTest()).toHaveCount(0);
     await expect(page.locator('.hand-stage--pick')).toHaveCount(0);
     await capture(`parent-off-${suffix}`, '.editor-notes > summary');
-    await saveToDetail('新規の既定値確認');
+    await page.getByRole('button', { name: '保存', exact: true }).click();
+    await expect(page.getByRole('heading', { name: '学習帳', exact: true })).toBeVisible();
     const offStore = await readStore();
     const added = offStore.problems.find(item => item.title === '新規の既定値確認');
     expect(added.answerEnabled).toBe(false); expect(added.acceptedDiscards).toEqual([]);

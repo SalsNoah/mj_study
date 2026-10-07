@@ -5,6 +5,7 @@ import { Route, Routes } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AppProvider } from '@/app/store';
 import { EditorPage } from '@/features/editor/EditorPage';
+import { LibraryPage } from '@/features/library/LibraryPage';
 import { DetailPage } from '@/features/detail/DetailPage';
 import { TestPage } from '@/features/test/TestPage';
 import { STORAGE_KEY, type Store } from '@/domain/types';
@@ -57,6 +58,7 @@ describe('ukeire UI and existing study flows (jsdom; not a layout/browser test)'
       <AppProvider><MemoryRouter><Routes>
         <Route path="/" element={<EditorPage />} />
         <Route path="/problems/:id" element={<DetailPage />} />
+        <Route path="/library" element={<LibraryPage />} />
       </Routes></MemoryRouter></AppProvider>,
     ));
     expect(host.querySelector('.ukeire-panel')!.textContent).toContain('13〜14枚で表示');
@@ -82,6 +84,8 @@ describe('ukeire UI and existing study flows (jsdom; not a layout/browser test)'
     expect(host.querySelector('.ukeire-expand')!.getAttribute('aria-expanded')).toBe('false');
     await click(byText('正解を設定する', 'label').querySelector<HTMLInputElement>('input')!);
     await click(byText('保存'));
+    expect(host.querySelector('h1')!.textContent).toBe('学習帳');
+    await click(host.querySelector<HTMLElement>('.problem-card')!);
     expect(host.querySelector('h1')!.textContent).toBe('無題の問題');
     await click(byText('受入れ'));
     expect(host.querySelector('.ukeire-list')!.textContent).toBe(editorRows);
@@ -100,7 +104,7 @@ describe('ukeire UI and existing study flows (jsdom; not a layout/browser test)'
     expect(host.textContent).not.toContain('共有URLを生成');
     expect(host.querySelector('.share-box')).toBeNull();
     expect(localStorage.getItem(STORAGE_KEY)).toBe(beforeAnalysisToggle);
-    await click(byText('確認した'));
+    await click(byText('確認した（問題一覧に戻る）'));
     expect(store().study[0]!.confirmationCount).toBe(1);
     await click(byText('取り消す'));
     expect(store().study[0]!.confirmationCount).toBe(0);

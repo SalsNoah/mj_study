@@ -218,6 +218,8 @@ try {
   await pick('中');
   await expect(page.locator('.ukeire-list > li:visible')).toHaveCount(3);
   await page.getByRole('button', { name: '保存', exact: true }).click();
+  await expect(page.getByRole('heading', { name: '学習帳', exact: true })).toBeVisible();
+  await page.locator('.problem-card').filter({hasText:'スマホ検証用の問題'}).click();
   await expect(page.getByRole('heading', { name: 'スマホ検証用の問題' })).toBeVisible();
   await expect(page.locator('#detail-view-panel-notes')).toBeVisible();
   await allSizes('detail-notes');
@@ -264,7 +266,7 @@ try {
   await expect(page.locator('.remaining-panel')).not.toBeVisible();
   await allSizes('detail-ukeire-after-retired-url', '.ukeire-panel');
   expect(await page.evaluate(() => localStorage.getItem('mahjong-study:v1'))).toBe(saved);
-  await page.getByRole('button', { name: '確認した', exact: true }).click();
+  await page.getByRole('button', { name: '確認した（問題一覧に戻る）', exact: true }).click();
   await page.getByRole('button', { name: '取り消す', exact: true }).click();
   await page.getByRole('link', { name: 'テスト', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'テスト', exact: true })).toBeVisible();
@@ -316,6 +318,8 @@ try {
   await page.getByLabel('解説', { exact: true }).fill('正解表示を開いた後の検証用解説');
   await page.getByLabel('自分のメモ', { exact: true }).fill('正解表示を開いた後の私用メモ');
   await page.getByRole('button', { name: '保存', exact: true }).click();
+  await expect(page.getByRole('heading', { name: '学習帳', exact: true })).toBeVisible();
+  await page.locator('.problem-card').filter({hasText:'正解あり検証用の問題'}).click();
   await expect(page.getByRole('heading', { name: '正解あり検証用の問題' })).toBeVisible();
   await expect(page.locator('.hand-stage .is-correct')).toHaveCount(0);
   await expect(page.getByText('正解表示を開いた後の検証用解説', { exact: true })).toHaveCount(0);

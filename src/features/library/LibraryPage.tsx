@@ -15,6 +15,7 @@ import { isInTest } from '@/domain/quiz';
 import { formatShortDate } from '@/domain/records';
 import type { TileCode } from '@/domain/types';
 import { LIMITS } from '@/domain/types';
+import { ConfirmationNotice } from './ConfirmationNotice';
 import { SampleCatalogManager } from '@/features/settings/SampleCatalogManager';
 
 type SortKey = 'updated' | 'confirmAsc' | 'lastConfirmOld' | 'lastSolvedOld';
@@ -145,6 +146,7 @@ export function LibraryPage() {
 
   return (
     <div className="page page--library">
+      <ConfirmationNotice />
       <header className="page-header page-header--compact">
         <h1>学習帳</h1>
         <p className="count-pill" role="status">{filtered.length} 問</p>

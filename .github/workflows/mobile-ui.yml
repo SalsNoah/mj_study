@@ -10,6 +10,8 @@ on:
       - 'scripts/validate-desktop-ui.mjs'
       - 'scripts/validate-sample-ui.mjs'
       - 'scripts/validate-study-ui.mjs'
+      - 'scripts/validate-problem-return-ui.mjs'
+      - 'scripts/validate-problem-confirm-dock-ui.mjs'
       - 'scripts/check-record-cumulative.mjs'
       - 'scripts/validate-material-ui.mjs'
       - 'scripts/validate-theme-ui.mjs'
@@ -49,6 +51,8 @@ jobs:
           node scripts/validate-dora-ui.mjs || status=1
           node scripts/validate-icon-ui.mjs || status=1
           node scripts/validate-sample-ui.mjs || status=1
+          MAHJONG_TEST_ORIGIN=http://127.0.0.1:5176 node scripts/validate-problem-return-ui.mjs || status=1
+          MAHJONG_TEST_ORIGIN=http://127.0.0.1:5176 node scripts/validate-problem-confirm-dock-ui.mjs || status=1
           node scripts/validate-study-ui.mjs || status=1
           node scripts/validate-material-ui.mjs || status=1
           node scripts/validate-theme-ui.mjs || status=1
@@ -74,6 +78,8 @@ jobs:
           path: |
             evidence/samples/
             evidence/study-ui/
+            evidence/problem-return/
+            evidence/problem-confirm-dock/
           retention-days: 7
       - uses: actions/upload-artifact@v4
         if: always()

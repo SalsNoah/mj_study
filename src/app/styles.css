@@ -1477,7 +1477,25 @@ details > summary:focus-visible { outline: 2px solid var(--accent); outline-offs
 .view-tabs > button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 .tile-input-tip { margin: 6px 0; font-size: 0.75rem; color: var(--muted); }
 .detail-primary-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 12px; }
-.detail-primary-actions .btn-primary { flex: 1; }
+.detail-confirm-dock { flex: 1; }
+.detail-confirm-dock > .btn { width: 100%; min-height: 44px; white-space: normal; }
+@media (max-width: 1099px) {
+  .page--detail {
+    --detail-nav-height: calc(var(--nav-h) + var(--safe-bottom));
+    --detail-action-height: 68px;
+    padding-bottom: calc(var(--detail-action-height) + var(--detail-nav-height) - var(--nav-h) - var(--safe-bottom) + 16px);
+  }
+  .detail-primary-actions { justify-content: flex-end; }
+  .detail-confirm-dock {
+    position: fixed;
+    left: 0; right: 0; bottom: var(--detail-nav-height);
+    z-index: 21;
+    padding: 8px max(12px, env(safe-area-inset-right, 0px)) 8px max(12px, env(safe-area-inset-left, 0px));
+    background: var(--panel-solid);
+    border-top: 1px solid var(--line);
+  }
+  html:has(.page--detail) { scroll-padding-bottom: calc(var(--nav-h) + var(--safe-bottom) + 160px); }
+}
 .library-filters > summary { display: flex; align-items: center; justify-content: flex-start; flex-wrap: wrap; gap: 8px; }
 .library-filters > summary > strong { font: inherit; }
 .filter-summary { margin-left: auto; color: var(--muted); font-size: 0.75rem; font-weight: 400; }
