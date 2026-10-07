@@ -1,0 +1,989 @@
+{
+  "status": "pass",
+  "results": [
+    {
+      "name": "fresh-before-320",
+      "geometry": {
+        "width": 320,
+        "documentWidth": 320,
+        "separateDrawn": 0,
+        "controls": [
+          {
+            "text": "サンプル10題を追加",
+            "height": 44
+          },
+          {
+            "text": "一括削除できるサンプルはありません",
+            "height": 50
+          }
+        ]
+      }
+    },
+    {
+      "name": "fresh-before-320-primary-viewport",
+      "control": {
+        "top": 442.78125,
+        "bottom": 486.78125,
+        "clearTop": 0,
+        "clearBottom": 783,
+        "hit": true
+      }
+    },
+    {
+      "name": "fresh-before-375",
+      "geometry": {
+        "width": 375,
+        "documentWidth": 375,
+        "separateDrawn": 0,
+        "controls": [
+          {
+            "text": "サンプル10題を追加",
+            "height": 44
+          },
+          {
+            "text": "一括削除できるサンプルはありません",
+            "height": 44
+          }
+        ]
+      }
+    },
+    {
+      "name": "fresh-before-375-primary-viewport",
+      "control": {
+        "top": 448.78125,
+        "bottom": 492.78125,
+        "clearTop": 0,
+        "clearBottom": 783,
+        "hit": true
+      }
+    },
+    {
+      "name": "fresh-before-390",
+      "geometry": {
+        "width": 390,
+        "documentWidth": 390,
+        "separateDrawn": 0,
+        "controls": [
+          {
+            "text": "サンプル10題を追加",
+            "height": 44
+          },
+          {
+            "text": "一括削除できるサンプルはありません",
+            "height": 44
+          }
+        ]
+      }
+    },
+    {
+      "name": "fresh-before-390-primary-viewport",
+      "control": {
+        "top": 448.625,
+        "bottom": 492.625,
+        "clearTop": 0,
+        "clearBottom": 783,
+        "hit": true
+      }
+    },
+    {
+      "name": "fresh-before-1440",
+      "geometry": {
+        "width": 1440,
+        "documentWidth": 1440,
+        "separateDrawn": 0,
+        "controls": [
+          {
+            "text": "サンプル10題を追加",
+            "height": 44
+          },
+          {
+            "text": "一括削除できるサンプルはありません",
+            "height": 44
+          }
+        ]
+      }
+    },
+    {
+      "name": "fresh-before-1440-primary-viewport",
+      "control": {
+        "top": 573.328125,
+        "bottom": 617.328125,
+        "clearTop": 66,
+        "clearBottom": 900,
+        "hit": true
+      }
+    },
+    {
+      "name": "fresh-added-backup-320",
+      "geometry": {
+        "width": 320,
+        "documentWidth": 320,
+        "separateDrawn": 0,
+        "controls": [
+          {
+            "text": "この10題は追加済み",
+            "height": 44
+          },
+          {
+            "text": "サンプル10題を一括削除",
+            "height": 44
+          },
+          {
+            "text": "更新前のJSON",
+            "height": 44
+          },
+          {
+            "text": "更新前の問題を復元",
+            "height": 44
+          }
+        ]
+      }
+    },
+    {
+      "name": "fresh-added-backup-320-primary-viewport",
+      "control": {
+        "top": 362.78125,
+        "bottom": 406.78125,
+        "clearTop": 0,
+        "clearBottom": 783,
+        "hit": true
+      }
+    },
+    {
+      "name": "fresh-added-backup-320-restore-viewport",
+      "control": {
+        "top": 553.109375,
+        "bottom": 597.109375,
+        "clearTop": 0,
+        "clearBottom": 783,
+        "hit": true
+      }
+    },
+    {
+      "name": "fresh-added-backup-375",
+      "geometry": {
+        "width": 375,
+        "documentWidth": 375,
+        "separateDrawn": 0,
+        "controls": [
+          {
+            "text": "この10題は追加済み",
+            "height": 44
+          },
+          {
+            "text": "サンプル10題を一括削除",
+            "height": 44
+          },
+          {
+            "text": "更新前のJSON",
+            "height": 44
+          },
+          {
+            "text": "更新前の問題を復元",
+            "height": 44
+          }
+        ]
+      }
+    },
+    {
+      "name": "fresh-added-backup-375-primary-viewport",
+      "control": {
+        "top": 362.78125,
+        "bottom": 406.78125,
+        "clearTop": 0,
+        "clearBottom": 783,
+        "hit": true
+      }
+    },
+    {
+      "name": "fresh-added-backup-375-restore-viewport",
+      "control": {
+        "top": 553.109375,
+        "bottom": 597.109375,
+        "clearTop": 0,
+        "clearBottom": 783,
+        "hit": true
+      }
+    },
+    {
+      "name": "fresh-added-backup-390",
+      "geometry": {
+        "width": 390,
+        "documentWidth": 390,
+        "separateDrawn": 0,
+        "controls": [
+          {
+            "text": "この10題は追加済み",
+            "height": 44
+          },
+          {
+            "text": "サンプル10題を一括削除",
+            "height": 44
+          },
+          {
+            "text": "更新前のJSON",
+            "height": 44
+          },
+          {
+            "text": "更新前の問題を復元",
+            "height": 44
+          }
+        ]
+      }
+    },
+    {
+      "name": "fresh-added-backup-390-primary-viewport",
+      "control": {
+        "top": 362.625,
+        "bottom": 406.625,
+        "clearTop": 0,
+        "clearBottom": 783,
+        "hit": true
+      }
+    },
+    {
+      "name": "fresh-added-backup-390-restore-viewport",
+      "control": {
+        "top": 552.953125,
+        "bottom": 596.953125,
+        "clearTop": 0,
+        "clearBottom": 783,
+        "hit": true
+      }
+    },
+    {
+      "name": "fresh-added-backup-1440",
+      "geometry": {
+        "width": 1440,
+        "documentWidth": 1440,
+        "separateDrawn": 0,
+        "controls": [
+          {
+            "text": "この10題は追加済み",
+            "height": 44
+          },
+          {
+            "text": "サンプル10題を一括削除",
+            "height": 44
+          },
+          {
+            "text": "更新前のJSON",
+            "height": 44
+          },
+          {
+            "text": "更新前の問題を復元",
+            "height": 44
+          }
+        ]
+      }
+    },
+    {
+      "name": "fresh-added-backup-1440-primary-viewport",
+      "control": {
+        "top": 457.328125,
+        "bottom": 501.328125,
+        "clearTop": 66,
+        "clearBottom": 900,
+        "hit": true
+      }
+    },
+    {
+      "name": "fresh-added-backup-1440-restore-viewport",
+      "control": {
+        "top": 657.484375,
+        "bottom": 701.484375,
+        "clearTop": 66,
+        "clearBottom": 900,
+        "hit": true
+      }
+    },
+    {
+      "name": "catalog-library-320",
+      "geometry": {
+        "width": 320,
+        "documentWidth": 320,
+        "separateDrawn": 0,
+        "controls": []
+      }
+    },
+    {
+      "name": "catalog-library-375",
+      "geometry": {
+        "width": 375,
+        "documentWidth": 375,
+        "separateDrawn": 0,
+        "controls": []
+      }
+    },
+    {
+      "name": "catalog-library-390",
+      "geometry": {
+        "width": 390,
+        "documentWidth": 390,
+        "separateDrawn": 0,
+        "controls": []
+      }
+    },
+    {
+      "name": "catalog-library-1440",
+      "geometry": {
+        "width": 1440,
+        "documentWidth": 1440,
+        "separateDrawn": 0,
+        "controls": []
+      }
+    },
+    {
+      "name": "sample03-answer-320",
+      "geometry": {
+        "width": 320,
+        "documentWidth": 320,
+        "separateDrawn": 0,
+        "controls": []
+      }
+    },
+    {
+      "name": "sample03-answer-375",
+      "geometry": {
+        "width": 375,
+        "documentWidth": 375,
+        "separateDrawn": 0,
+        "controls": []
+      }
+    },
+    {
+      "name": "sample03-answer-390",
+      "geometry": {
+        "width": 390,
+        "documentWidth": 390,
+        "separateDrawn": 0,
+        "controls": []
+      }
+    },
+    {
+      "name": "sample03-answer-1440",
+      "geometry": {
+        "width": 1440,
+        "documentWidth": 1440,
+        "separateDrawn": 0,
+        "controls": []
+      }
+    },
+    {
+      "name": "answer-only-eight",
+      "geometry": {
+        "width": 1440,
+        "documentWidth": 1440,
+        "separateDrawn": 0,
+        "controls": []
+      }
+    },
+    {
+      "name": "sample03-test-correct",
+      "geometry": {
+        "width": 1440,
+        "documentWidth": 1440,
+        "separateDrawn": 0,
+        "controls": []
+      }
+    },
+    {
+      "name": "all-eight-answered",
+      "count": 8,
+      "sample03Correct": true
+    },
+    {
+      "name": "legacy-candidates-320",
+      "geometry": {
+        "width": 320,
+        "documentWidth": 320,
+        "separateDrawn": 0,
+        "controls": [
+          {
+            "text": "旧候補をまとめて選択",
+            "height": 44
+          },
+          {
+            "text": "旧問題を残して10題を追加",
+            "height": 44
+          },
+          {
+            "text": "一括削除できるサンプルはありません",
+            "height": 50
+          }
+        ]
+      }
+    },
+    {
+      "name": "legacy-candidates-320-candidate-viewport",
+      "control": {
+        "top": 363.375,
+        "bottom": 407.375,
+        "clearTop": 0,
+        "clearBottom": 783,
+        "hit": true
+      }
+    },
+    {
+      "name": "legacy-candidates-320-primary-viewport",
+      "control": {
+        "top": 443.34375,
+        "bottom": 487.34375,
+        "clearTop": 0,
+        "clearBottom": 783,
+        "hit": true
+      }
+    },
+    {
+      "name": "legacy-candidates-375",
+      "geometry": {
+        "width": 375,
+        "documentWidth": 375,
+        "separateDrawn": 0,
+        "controls": [
+          {
+            "text": "旧候補をまとめて選択",
+            "height": 44
+          },
+          {
+            "text": "旧問題を残して10題を追加",
+            "height": 44
+          },
+          {
+            "text": "一括削除できるサンプルはありません",
+            "height": 44
+          }
+        ]
+      }
+    },
+    {
+      "name": "legacy-candidates-375-candidate-viewport",
+      "control": {
+        "top": 363.375,
+        "bottom": 407.375,
+        "clearTop": 0,
+        "clearBottom": 783,
+        "hit": true
+      }
+    },
+    {
+      "name": "legacy-candidates-375-primary-viewport",
+      "control": {
+        "top": 449.34375,
+        "bottom": 493.34375,
+        "clearTop": 0,
+        "clearBottom": 783,
+        "hit": true
+      }
+    },
+    {
+      "name": "legacy-candidates-390",
+      "geometry": {
+        "width": 390,
+        "documentWidth": 390,
+        "separateDrawn": 0,
+        "controls": [
+          {
+            "text": "旧候補をまとめて選択",
+            "height": 44
+          },
+          {
+            "text": "旧問題を残して10題を追加",
+            "height": 44
+          },
+          {
+            "text": "一括削除できるサンプルはありません",
+            "height": 44
+          }
+        ]
+      }
+    },
+    {
+      "name": "legacy-candidates-390-candidate-viewport",
+      "control": {
+        "top": 363.21875,
+        "bottom": 407.21875,
+        "clearTop": 0,
+        "clearBottom": 783,
+        "hit": true
+      }
+    },
+    {
+      "name": "legacy-candidates-390-primary-viewport",
+      "control": {
+        "top": 449.1875,
+        "bottom": 493.1875,
+        "clearTop": 0,
+        "clearBottom": 783,
+        "hit": true
+      }
+    },
+    {
+      "name": "legacy-candidates-1440",
+      "geometry": {
+        "width": 1440,
+        "documentWidth": 1440,
+        "separateDrawn": 0,
+        "controls": [
+          {
+            "text": "旧候補をまとめて選択",
+            "height": 44
+          },
+          {
+            "text": "旧問題を残して10題を追加",
+            "height": 44
+          },
+          {
+            "text": "一括削除できるサンプルはありません",
+            "height": 44
+          }
+        ]
+      }
+    },
+    {
+      "name": "legacy-candidates-1440-candidate-viewport",
+      "control": {
+        "top": 456.921875,
+        "bottom": 500.921875,
+        "clearTop": 66,
+        "clearBottom": 900,
+        "hit": true
+      }
+    },
+    {
+      "name": "legacy-candidates-1440-primary-viewport",
+      "control": {
+        "top": 573.5,
+        "bottom": 617.5,
+        "clearTop": 66,
+        "clearBottom": 900,
+        "hit": true
+      }
+    },
+    {
+      "name": "legacy-updated-320",
+      "geometry": {
+        "width": 320,
+        "documentWidth": 320,
+        "separateDrawn": 0,
+        "controls": [
+          {
+            "text": "この10題は追加済み",
+            "height": 44
+          },
+          {
+            "text": "サンプル10題を一括削除",
+            "height": 44
+          },
+          {
+            "text": "更新前のJSON",
+            "height": 44
+          },
+          {
+            "text": "更新前の問題を復元",
+            "height": 44
+          }
+        ]
+      }
+    },
+    {
+      "name": "legacy-updated-320-primary-viewport",
+      "control": {
+        "top": 362.78125,
+        "bottom": 406.78125,
+        "clearTop": 0,
+        "clearBottom": 783,
+        "hit": true
+      }
+    },
+    {
+      "name": "legacy-updated-320-restore-viewport",
+      "control": {
+        "top": 553.109375,
+        "bottom": 597.109375,
+        "clearTop": 0,
+        "clearBottom": 783,
+        "hit": true
+      }
+    },
+    {
+      "name": "legacy-updated-375",
+      "geometry": {
+        "width": 375,
+        "documentWidth": 375,
+        "separateDrawn": 0,
+        "controls": [
+          {
+            "text": "この10題は追加済み",
+            "height": 44
+          },
+          {
+            "text": "サンプル10題を一括削除",
+            "height": 44
+          },
+          {
+            "text": "更新前のJSON",
+            "height": 44
+          },
+          {
+            "text": "更新前の問題を復元",
+            "height": 44
+          }
+        ]
+      }
+    },
+    {
+      "name": "legacy-updated-375-primary-viewport",
+      "control": {
+        "top": 362.78125,
+        "bottom": 406.78125,
+        "clearTop": 0,
+        "clearBottom": 783,
+        "hit": true
+      }
+    },
+    {
+      "name": "legacy-updated-375-restore-viewport",
+      "control": {
+        "top": 553.109375,
+        "bottom": 597.109375,
+        "clearTop": 0,
+        "clearBottom": 783,
+        "hit": true
+      }
+    },
+    {
+      "name": "legacy-updated-390",
+      "geometry": {
+        "width": 390,
+        "documentWidth": 390,
+        "separateDrawn": 0,
+        "controls": [
+          {
+            "text": "この10題は追加済み",
+            "height": 44
+          },
+          {
+            "text": "サンプル10題を一括削除",
+            "height": 44
+          },
+          {
+            "text": "更新前のJSON",
+            "height": 44
+          },
+          {
+            "text": "更新前の問題を復元",
+            "height": 44
+          }
+        ]
+      }
+    },
+    {
+      "name": "legacy-updated-390-primary-viewport",
+      "control": {
+        "top": 362.625,
+        "bottom": 406.625,
+        "clearTop": 0,
+        "clearBottom": 783,
+        "hit": true
+      }
+    },
+    {
+      "name": "legacy-updated-390-restore-viewport",
+      "control": {
+        "top": 552.953125,
+        "bottom": 596.953125,
+        "clearTop": 0,
+        "clearBottom": 783,
+        "hit": true
+      }
+    },
+    {
+      "name": "legacy-updated-1440",
+      "geometry": {
+        "width": 1440,
+        "documentWidth": 1440,
+        "separateDrawn": 0,
+        "controls": [
+          {
+            "text": "この10題は追加済み",
+            "height": 44
+          },
+          {
+            "text": "サンプル10題を一括削除",
+            "height": 44
+          },
+          {
+            "text": "更新前のJSON",
+            "height": 44
+          },
+          {
+            "text": "更新前の問題を復元",
+            "height": 44
+          }
+        ]
+      }
+    },
+    {
+      "name": "legacy-updated-1440-primary-viewport",
+      "control": {
+        "top": 457.328125,
+        "bottom": 501.328125,
+        "clearTop": 66,
+        "clearBottom": 900,
+        "hit": true
+      }
+    },
+    {
+      "name": "legacy-updated-1440-restore-viewport",
+      "control": {
+        "top": 657.484375,
+        "bottom": 701.484375,
+        "clearTop": 66,
+        "clearBottom": 900,
+        "hit": true
+      }
+    },
+    {
+      "name": "legacy-restored-320",
+      "geometry": {
+        "width": 320,
+        "documentWidth": 320,
+        "separateDrawn": 0,
+        "controls": [
+          {
+            "text": "旧候補をまとめて選択",
+            "height": 44
+          },
+          {
+            "text": "旧問題を残して10題を追加",
+            "height": 44
+          },
+          {
+            "text": "一括削除できるサンプルはありません",
+            "height": 50
+          },
+          {
+            "text": "更新前のJSON",
+            "height": 44
+          },
+          {
+            "text": "復元済み",
+            "height": 44
+          }
+        ]
+      }
+    },
+    {
+      "name": "legacy-restored-320-candidate-viewport",
+      "control": {
+        "top": 363.375,
+        "bottom": 407.375,
+        "clearTop": 0,
+        "clearBottom": 783,
+        "hit": true
+      }
+    },
+    {
+      "name": "legacy-restored-320-primary-viewport",
+      "control": {
+        "top": 363.34375,
+        "bottom": 407.34375,
+        "clearTop": 0,
+        "clearBottom": 783,
+        "hit": true
+      }
+    },
+    {
+      "name": "legacy-restored-320-restore-viewport",
+      "control": {
+        "top": 552.671875,
+        "bottom": 596.671875,
+        "clearTop": 0,
+        "clearBottom": 783,
+        "hit": true
+      }
+    },
+    {
+      "name": "legacy-restored-375",
+      "geometry": {
+        "width": 375,
+        "documentWidth": 375,
+        "separateDrawn": 0,
+        "controls": [
+          {
+            "text": "旧候補をまとめて選択",
+            "height": 44
+          },
+          {
+            "text": "旧問題を残して10題を追加",
+            "height": 44
+          },
+          {
+            "text": "一括削除できるサンプルはありません",
+            "height": 44
+          },
+          {
+            "text": "更新前のJSON",
+            "height": 44
+          },
+          {
+            "text": "復元済み",
+            "height": 44
+          }
+        ]
+      }
+    },
+    {
+      "name": "legacy-restored-375-candidate-viewport",
+      "control": {
+        "top": 363.375,
+        "bottom": 407.375,
+        "clearTop": 0,
+        "clearBottom": 783,
+        "hit": true
+      }
+    },
+    {
+      "name": "legacy-restored-375-primary-viewport",
+      "control": {
+        "top": 363.34375,
+        "bottom": 407.34375,
+        "clearTop": 0,
+        "clearBottom": 783,
+        "hit": true
+      }
+    },
+    {
+      "name": "legacy-restored-375-restore-viewport",
+      "control": {
+        "top": 552.671875,
+        "bottom": 596.671875,
+        "clearTop": 0,
+        "clearBottom": 783,
+        "hit": true
+      }
+    },
+    {
+      "name": "legacy-restored-390",
+      "geometry": {
+        "width": 390,
+        "documentWidth": 390,
+        "separateDrawn": 0,
+        "controls": [
+          {
+            "text": "旧候補をまとめて選択",
+            "height": 44
+          },
+          {
+            "text": "旧問題を残して10題を追加",
+            "height": 44
+          },
+          {
+            "text": "一括削除できるサンプルはありません",
+            "height": 44
+          },
+          {
+            "text": "更新前のJSON",
+            "height": 44
+          },
+          {
+            "text": "復元済み",
+            "height": 44
+          }
+        ]
+      }
+    },
+    {
+      "name": "legacy-restored-390-candidate-viewport",
+      "control": {
+        "top": 363.21875,
+        "bottom": 407.21875,
+        "clearTop": 0,
+        "clearBottom": 783,
+        "hit": true
+      }
+    },
+    {
+      "name": "legacy-restored-390-primary-viewport",
+      "control": {
+        "top": 363.1875,
+        "bottom": 407.1875,
+        "clearTop": 0,
+        "clearBottom": 783,
+        "hit": true
+      }
+    },
+    {
+      "name": "legacy-restored-390-restore-viewport",
+      "control": {
+        "top": 552.515625,
+        "bottom": 596.515625,
+        "clearTop": 0,
+        "clearBottom": 783,
+        "hit": true
+      }
+    },
+    {
+      "name": "legacy-restored-1440",
+      "geometry": {
+        "width": 1440,
+        "documentWidth": 1440,
+        "separateDrawn": 0,
+        "controls": [
+          {
+            "text": "旧候補をまとめて選択",
+            "height": 44
+          },
+          {
+            "text": "旧問題を残して10題を追加",
+            "height": 44
+          },
+          {
+            "text": "一括削除できるサンプルはありません",
+            "height": 44
+          },
+          {
+            "text": "更新前のJSON",
+            "height": 44
+          },
+          {
+            "text": "復元済み",
+            "height": 44
+          }
+        ]
+      }
+    },
+    {
+      "name": "legacy-restored-1440-candidate-viewport",
+      "control": {
+        "top": 456.921875,
+        "bottom": 500.921875,
+        "clearTop": 66,
+        "clearBottom": 900,
+        "hit": true
+      }
+    },
+    {
+      "name": "legacy-restored-1440-primary-viewport",
+      "control": {
+        "top": 456.5,
+        "bottom": 500.5,
+        "clearTop": 66,
+        "clearBottom": 900,
+        "hit": true
+      }
+    },
+    {
+      "name": "legacy-restored-1440-restore-viewport",
+      "control": {
+        "top": 656.65625,
+        "bottom": 700.65625,
+        "clearTop": 66,
+        "clearBottom": 900,
+        "hit": true
+      }
+    }
+  ],
+  "errors": []
+}
