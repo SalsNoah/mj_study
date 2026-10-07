@@ -1,3 +1,4 @@
+import { isPriorSample03 } from './sample03Revision';
 import type { Problem, Store } from '@/domain/types';
 import { createLegacySampleProblems } from './legacySamples';
 import { createSampleProblems } from './samples';
@@ -34,7 +35,8 @@ export function matchingCatalogTemplate(problem: Problem, templates = createSamp
 export function missingCatalogProblems(store: Store): Problem[] {
   const templates = createSampleProblems().problems;
   return templates.filter((template) => !store.problems.some((problem) =>
-    matchingCatalogTemplate(problem, [template])));
+    matchingCatalogTemplate(problem, [template]) ||
+      template.sample?.itemId === 'sample-v2-03' && isPriorSample03(problem)));
 }
 
 export function getSampleUpdatePreview(store: Store): SampleUpdatePreview {
@@ -45,7 +47,9 @@ export function getSampleUpdatePreview(store: Store): SampleUpdatePreview {
   let preservedEdited = 0;
   for (const problem of store.problems) {
     const fingerprint = contentFingerprint(problem, store.tags);
-    if (matchingCatalogTemplate(problem, templates)) {
+    if (isPriorSample03(problem)) {
+      preservedEdited++; // Kept old versions must not trigger a second copy or become removable.
+    } else if (matchingCatalogTemplate(problem, templates)) {
       if (fingerprint !== problem.sample!.fingerprint) preservedEdited++;
     } else if (problem.sample === undefined && fingerprints.has(fingerprint)) {
       // Exact content match still does not prove origin. The UI requires explicit ID selection.

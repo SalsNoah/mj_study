@@ -1,7 +1,8 @@
+import { isPriorSample03 } from './sample03Revision';
 import { createId, nowIso } from '@/domain/ids';
 import type { Problem, Store } from '@/domain/types';
 import catalogData from './sampleCatalogData.json';
-import { contentFingerprint, SAMPLE_CATALOG_ID, SAMPLE_CATALOG_VERSION, SAMPLE_TAG_NAME } from './sampleIdentity';
+import { contentFingerprint, SAMPLE_CATALOG_ID, SAMPLE_TAG_NAME } from './sampleIdentity';
 
 export function createSampleProblems(): { problems: Problem[]; tagName: string } {
   const now = nowIso();
@@ -17,7 +18,7 @@ export function createSampleProblems(): { problems: Problem[]; tagName: string }
     };
     problem.sample = {
       catalogId: SAMPLE_CATALOG_ID,
-      version: SAMPLE_CATALOG_VERSION,
+      version: entry.contentVersion,
       itemId: entry.sampleId,
       fingerprint: contentFingerprint(problem, [], [SAMPLE_TAG_NAME]),
     };
@@ -34,6 +35,7 @@ export function samplesAlreadyPresent(store: Store): boolean {
     return identity?.catalogId === template.sample!.catalogId &&
       identity?.version === template.sample!.version &&
       identity?.itemId === template.sample!.itemId &&
-      identity?.fingerprint === template.sample!.fingerprint;
+      identity?.fingerprint === template.sample!.fingerprint ||
+      template.sample!.itemId === 'sample-v2-03' && isPriorSample03(problem);
   }));
 }

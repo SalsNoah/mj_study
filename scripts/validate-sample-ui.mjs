@@ -63,7 +63,7 @@ try {
   const added=await stored();expect(added.problems).toHaveLength(10);
   expect(added.problems.filter(p=>p.answerEnabled)).toHaveLength(8);
   for(const p of added.problems){expect(p.drawn).toBe(null);expect(p.concealed).toHaveLength(14);expect(p.tagIds.some(id=>added.tags.find(t=>t.id===id)?.name==='サンプル')).toBe(true);}
-  const p03=added.problems.find(p=>p.title.includes('03 '));expect(p03.acceptedDiscards).toEqual(['4s']);expect(p03.explanation).toContain('内側');
+  const p03=added.problems.find(p=>p.title.includes('03 '));expect(p03.acceptedDiscards).toEqual(['2s']);expect(p03.explanation).toContain('外側');
   await page.locator('.sample-backups > summary').click();await sizes('fresh-added-backup');
   await page.getByRole('link',{name:'学習帳',exact:true}).click();
   await expect(page.locator('.problem-card')).toHaveCount(10);await expect(page.locator('.problem-card .is-correct')).toHaveCount(0);await sizes('catalog-library');

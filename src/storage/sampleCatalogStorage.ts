@@ -1,3 +1,4 @@
+import { protectSample03Edits, isUneditedPriorSample03, isPriorSample03 } from '@/data/sample03Revision';
 import { getSampleRemovalPreview, getSampleUpdatePreview, matchingCatalogTemplate, missingCatalogProblems } from '@/data/sampleCatalog';
 import { canonicalJson, contentFingerprint, SAMPLE_TAG_NAME } from '@/data/sampleIdentity';
 import { createId, nowIso } from '@/domain/ids';
@@ -212,6 +213,17 @@ export class SampleCatalogStorage {
     return this.applyChange(store, current.raw, removedIds, addedProblems, addedStudy, tags);
   }
 
+  /** Retire only the exact unedited pre-revision sample 03, with the existing reversible snapshot protocol. */
+  retirePriorSample03(store: Store): SaveResult {
+    const removedIds = store.problems.filter(problem => isUneditedPriorSample03(problem, store)).map(problem => problem.id);
+    if (!removedIds.length) return { ok: true, store };
+    const current = this.currentMatches(store);
+    if (!current.ok) return current;
+    const previous = this.readAll(store);
+    if (!previous.ok) return previous;
+    return this.applyChange(store, current.raw, removedIds, [], [], store.tags, true);
+  }
+
   remove(store: Store, expectedIds: string[]): SaveResult {
     const current = this.currentMatches(store);
     if (!current.ok) return current;
@@ -328,10 +340,16 @@ export class SampleCatalogStorage {
     if (!current.ok) return current;
     const all = this.readAll(store);
     if (!all.ok) return all;
-    const snapshot = all.snapshots.find((entry) => entry.id === id);
+    let snapshot = all.snapshots.find((entry) => entry.id === id);
     const receipt = store.sampleCatalogUpdates?.find((entry) => entry.id === id);
     if (!snapshot || !receipt) return failure('適用済みの更新とバックアップを確認できません。データは変更していません', 'corrupt');
     if (receipt.restoredAt) return { ok: true, store, preservedCopies: 0 };
+    // An explicit restore is authoritative: retain the old card on subsequent loads.
+    // Preserve raw edit exclusions before tag normalization/rebinding.
+    const protectedBefore = protectSample03Edits(snapshot.before);
+    snapshot = { ...snapshot, before: { ...protectedBefore, problems: protectedBefore.problems.map(problem =>
+      isPriorSample03(problem) ? { ...problem, sample: { ...problem.sample!, retirementSkipped: 'sample03-2026-10-07.1' as const } } : problem) } };
+
     const removable = new Set(snapshot.addedProblems.filter((original) => {
       const problem = store.problems.find((entry) => entry.id === original.id);
       const states = store.study.filter((state) => state.problemId === original.id);
@@ -348,13 +366,19 @@ export class SampleCatalogStorage {
       // can give way to the original card/history; edits or learning always keep their copy.
       for (const original of snapshot.before.problems.filter((problem) => snapshot.removedIds.includes(problem.id))) {
         const template = matchingCatalogTemplate(original);
-        if (!template || contentFingerprint(original, snapshot.before.tags) !== template.sample!.fingerprint) continue;
+        const oldOriginal = isPriorSample03(original) && contentFingerprint(original, snapshot.before.tags) === original.sample!.fingerprint;
+        if (!oldOriginal && (!template || contentFingerprint(original, snapshot.before.tags) !== template.sample!.fingerprint)) continue;
         retainedOriginalIds.add(original.id);
+        if (oldOriginal) {
+          for (const candidate of store.problems) {
+            if (candidate.id !== original.id && matchingCatalogTemplate(candidate)?.sample?.itemId === 'sample-v2-03') preservedCopies.add(candidate.id);
+          }
+        }
         for (const candidate of store.problems) {
           if (snapshot.before.problems.some((problem) => problem.id === candidate.id) ||
-            !matchingCatalogTemplate(candidate, [template])) continue;
+            !(template ? matchingCatalogTemplate(candidate, [template]) : isPriorSample03(candidate))) continue;
           const states = store.study.filter((state) => state.problemId === candidate.id);
-          if (contentFingerprint(candidate, store.tags) === template.sample!.fingerprint &&
+          if (contentFingerprint(candidate, store.tags) === original.sample!.fingerprint &&
             states.length === 1 && sameStudy(states[0]!, initialStudy(candidate.id)) &&
             !store.attempts.some((attempt) => attempt.problemId === candidate.id)) removable.add(candidate.id);
           else preservedCopies.add(candidate.id);

@@ -70,10 +70,10 @@ describe('sample catalog data and identity', () => {
       expect(validateProblem(problem)).toEqual([]);
       expect(problem.sample?.fingerprint).toBe(contentFingerprint(problem, [], ['サンプル']));
     }
-    expect(problems[2]!.acceptedDiscards).toEqual(['4s']);
+    expect(problems[2]!.acceptedDiscards).toEqual(['2s']);
     expect(problems[2]!.explanation).toContain('同率');
-    expect(problems[2]!.explanation).toContain('内側');
-    expect(problems[2]!.explanation).toContain('確定');
+    expect(problems[2]!.explanation).toContain('外側');
+    expect(problems[2]!.privateMemo).toContain('保証');
   });
 
   it('keeps every pre-unification v2 discard analysis identical, including the four-copy ceiling', () => {
@@ -801,4 +801,28 @@ describe('safe bulk removal of current samples', () => {
     expect(repo.removeSampleCatalog(store, targetIds)).toMatchObject({ ok: false, code: 'conflict' });
     expect(data.get(KEY)).toBe(after);
   });
+});
+
+
+describe('sample 03 ledger correction', () => {
+  it('verifies both equal six-tile waits with the real engine and prefers the ledger answer', () => {
+    const problem = createSampleProblems().problems[2]!;
+    expect(problem.sample!.itemId).toBe('sample-v2-03');
+    expect(problem.sample!.version).toBe('2026-10-07.1');
+    expect(problem.acceptedDiscards).toEqual(['2s']);
+    const analysis = analyzeHand(problem);
+    expect(analysis.status).toBe('ready');
+    if (analysis.status !== 'ready') throw Error('analysis unavailable');
+    for (const [discard, effective] of [
+      ['2s', [['1s', 4], ['4s', 2]]], ['4s', [['2s', 2], ['5s', 4]]],
+    ] as const) {
+      const row = analysis.discards.find(entry => entry.discard === discard)!;
+      expect(row.shanten).toBe(0); expect(row.total).toBe(6);
+      expect(row.effective.map(entry => [entry.tile, entry.remaining])).toEqual(effective);
+    }
+    expect(createSampleProblems().problems.filter(p => p.sample!.itemId !== 'sample-v2-03')
+      .every(p => p.sample!.version === '2026-10-05.3')).toBe(true);
+  });
+
+
 });

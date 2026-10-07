@@ -13,6 +13,7 @@ import {
   type Tag,
 } from '../domain/types';
 import { createId, nowIso } from '../domain/ids';
+import { protectSample03Edits, isUneditedPriorSample03 } from '../data/sample03Revision';
 import { createInitialStore } from '../data/initialMaterials';
 import { isContentRevisionChange, validateProblem, hasErrors } from '../domain/validate';
 import { normalizeTagKey, validateTagName, canAddTag } from '../domain/tags';
@@ -222,8 +223,18 @@ export class LocalStorageRepository {
     const materialData = validateMaterialData(parsed);
     if (!materialData.ok) return { ok: false, reason: materialData.reason, code: 'corrupt', raw };
     const { ok: _ok, ...materialFields } = materialData;
+    const previousMemoryRevision = this.memoryRevision;
     this.memoryRevision = parsed.revision;
-    return { ok: true, store: normalizeStore({ ...parsed, ...materialFields }) };
+    const original = { ...parsed, ...materialFields };
+    if (original.problems.some(problem => isUneditedPriorSample03(problem, original))) {
+      const saved = this.sampleCatalogStorage().retirePriorSample03(original);
+      if (!saved.ok) {
+        this.memoryRevision = previousMemoryRevision;
+        return { ok: false, code: 'access', reason: `旧サンプル03の削除前バックアップまたは削除を保存できません。元データは保持しています。${saved.reason}`, raw };
+      }
+      return { ok: true, store: normalizeStore(saved.store) };
+    }
+    return { ok: true, store: normalizeStore(original) };
   }
 
   private persist(store: Store, expectedRaw?: string | null): SaveResult {
@@ -640,7 +651,7 @@ export class LocalStorageRepository {
     const materialData = validateMaterialData(parsed);
     if (!materialData.ok) return { ok: false, reason: materialData.reason, code: 'validation' };
     const { ok: _ok, ...materialFields } = materialData;
-    const backup: Store = { ...parsed, ...materialFields };
+    const backup: Store = protectSample03Edits({ ...parsed, ...materialFields });
     let expectedRaw: string | null | undefined;
     if (current.materials !== undefined || current.materialStudyEvents !== undefined ||
       backup.materials !== undefined || backup.materialStudyEvents !== undefined) {
