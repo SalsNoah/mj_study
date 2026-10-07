@@ -1,6 +1,6 @@
 # サンプル03の台帳原稿反映
 
-基点main `b35407fdba277ce220cc27adc9c0063c2e6fe724`。原稿訂正と旧03の同ID移行を含むDraft。公開承認は未取得。
+基点main `b35407fdba277ce220cc27adc9c0063c2e6fe724`。原稿訂正と未編集旧03の復元可能な削除を含むDraft。公開承認は未取得。
 
 ## 正本と変更
 
@@ -12,28 +12,30 @@
 - 03のcontentVersionだけ`2026-10-07.1`。項目別contentVersionをsample.versionへ反映し、他9題のversion/内容/認識は変えない。
 - 14枚の手牌、ドラ表示牌5z、context等は不変。台帳E8の旧ツモ9sはD8へ統合済みのため重ねて追加しない。
 
-## 保存済み旧03の同ID移行
+## 保存済み旧03：未編集なら削除、編集済みなら保持
 
-旧配布原本のcatalogId/version/itemId/fingerprintと、明示した全content field、タグ名/参照、未知fieldの有無を、正規化前のrawデータで比較する。完全一致した旧03だけを起動時・JSON取込・旧catalog復元時に訂正する。追加/削除せず、問題ID・createdAt/updatedAt・タグID・確認回数・理解度・過去attemptのID/結果/所属・日別記録・他9題を維持。study.contentRevisionだけ+1し、過去4s正解を新しい2s正解で再採点しない。旧回答は「現行版成績」から区別されるが、履歴/累計から削除しない。
+2026-10-07 15:15 UTCのユーザー方針に従い、同ID上書き案は撤去。既知の旧catalogId/version/itemId/fingerprintと全content field、タグ名・参照、未知fieldの有無を正規化前に照合する。完全一致した旧03だけを起動時に学習帳から削除する。他9題と編集済み・出所不明・状態が曖昧な問題は変更しない。削除済み問題を復活させない。
 
-本人編集があるもの、出所不明、重複ID/学習状態、状態欠落、不正revision/加算上限、未来revisionの履歴などは訂正しない。既知旧03の出所が残る場合は既導入と扱い、新03の重複追加もしない。未知の出所から旧03と推測して更新しない。削除済みはproblemがないため復活しない。新versionが二重移行防止となり、移行後に本人が編集したものも再訂正しない。
+既存サンプル管理のバックアップ保存→完全な読戻し→main保存直前のexpectedRaw照合を使う。バックアップ・容量・アクセス・競合エラーでは削除を行わず、元データを保持する。学習状態、過去attemptのID/結果/所属、日次記録、タグ、教材は保持し、内容リビジョンを進めず再採点もしない。バックアップ原本には削除前の問題・ID・日時・参照がすべて残る。
 
-タグの正規化を跨いでも本人編集の除外を保つため、import/restore時には必要に応じてsample出所情報にcorrectionSkippedを保存する。本文/履歴には手を加えない。独立レビューで見つかった「空白付きタグ名→mergeで整形→再loadで誤訂正」の回帰を防止した。
+サンプル管理の「更新前バックアップ」から元の旧03を同じID・日時で復元できる。復元時に出所metadataへretirementSkippedを付け、次の読み込みでも再削除しない。古いsnapshot原本/digestは変更しない。衝突したIDの復元には既存の安全な参照再接続・競合停止を使用する。
 
-保存はサイズ確認とexpectedRawの再比較を経て一回のmain-store書込み。容量不足・アクセス失敗・別タブ競合では旧データを維持してエラーを表示する。古いsnapshotの原本/digestは変更せず、追加undoの比較で既知の訂正だけを仮想的に適用する。旧削除snapshotは同じ問題IDと履歴を復元したうえで訂正する。後から本人が編集/学習した問題は復元で消さない。
+旧03削除後は改訂03だけが未導入となり「サンプル1題を追加」から新しいID・初期学習状態で追加できる。旧学習履歴を改訂版へ付け替えない。編集済み・復元済みの旧03がある間は、通常追加で新版を重複追加しない。新版を追加した後に明示的に旧版を復元した場合は両方を保持し、その件数を画面に表示する。新版を勝手に削除しない。
 
-旧追加/削除のfixtureはPR36の実配布artifact（旧03の内容が同じ）をローカルで動かし、隔離browserの合成データから生成。ユーザー保存データではない。
+旧JSONの置換・結合では既存取込仕様に従い、次のloadで未編集旧03をバックアップ付き削除する。取込時にはrawの編集除外をmetadataに保持し、空白付きタグ名の正規化を通しても誤削除しない。
+
+実旧アプリ（PR36の配布artifact）をローカルで動かした隔離browserの合成データから、旧追加・削除snapshot fixtureを作成。ユーザーの実保存データは操作していない。公開・mainマージ・Pagesデプロイなし。
 
 ## 検証
 
-- 型検査を含むproduction build成功。
-- 最終全980件中979成功。既存A44性能のみ508.27msで200ms閾値超過。検索処理・閾値変更なし。[全体ログ](all-tests.log)
-- 移行38試験、catalog54試験、history import63試験が成功。各content編集、タグ正規化、未知field、同ID/履歴保持、重複なし、削除済み、再起動、本人再編集、JSON merge/replace、旧snapshot追加undo/削除復元、quota/access/size/conflictを検証。
-- 実計算エンジンと独立手計算: 2s切りは1s×4＋4s×2、4s切りは2s×2＋5s×4。双方シャンテン0、6枚。
-- 既存sample UI71チェック成功。320/375/390/1440px、03表示/2索正解、全8正解問題、バックアップ復元。[実測](sample-results.json)
-- 専用移行browserは320/390/1440px×旧原本/本人編集/削除済みの9シナリオ成功。同ID/同時刻/同問題数・旧4s回答保持・他9件不変・再load保存不変・本人編集版の重複追加抑止。[移行実測](migration-results.json)
-- 独立担当が移行設計、raw判定、履歴保護、snapshot比較をreview。タグ正規化の保護抜けを修正後、独立92試験と同じ再現手順で解消確認。残るreview阻害事項なし。
+- 型検査およびproduction build成功。
+- 全981件中980成功。既知A44性能試験のみ423.261msで200ms閾値超過。検索処理・閾値不変。[集約ログ](all-tests.log)
+- 専用39件、catalog54件、history import63件成功。全編集field、曖昧な参照、quota/access/size/conflict、バックアップ読戻し失敗、反復load、元IDの復元、別IDの新版追加、旧snapshot追加undo/削除復元、JSON merge/replaceを検証。
+- 独立担当が削除対象・snapshot保存・原本維持・競合・復元・新版保持をreview。独立93件成功、重大な指摘なし。
+- 既存sample UI71チェック成功。[結果](sample-results.json)
+- 専用browserは320/390/1440px×原本/本人編集/削除済みの9ケース成功。旧03だけ削除、他9件・過去4s回答・学習状態・日次記録不変、元ID/日時の復元、復元後再削除なし、編集保持・重複抑止を確認。[結果](retirement-results.json)
+- 2s切りは1s×4＋4s×2、4s切りは2s×2＋5s×4。双方シャンテン0、受け入れ6枚。牌姿不変。
 
-[同ID訂正・スマホ](390-same-id-corrected.png) / [本人編集保護](390-edited-protected.png)
+[スマホ：削除と復元導線](390-retired-with-backup.png) / [PC：元の旧03を復元](1440-restored-original.png) / [編集済みを保持](390-edited-protected.png)
 
-[スマホ表示](sample03-answer-390.png) / [PC表示](sample03-answer-1440.png) / [2索で正解](sample03-test-correct.png)
+[改訂03スマホ](sample03-answer-390.png) / [改訂03 PC](sample03-answer-1440.png) / [2索で正解](sample03-test-correct.png)

@@ -54,6 +54,7 @@ export function SampleCatalogSettings({ inline = false, preview, removalPreview,
 
   const content = <>
     <p>新サンプル10題：正解あり8題・正解なし2題</p>
+    <p className="hint">未編集の旧版03はバックアップを残して一覧から削除します。学習履歴は残り、下の「更新前バックアップ」から元の問題を復元できます。</p>
     {preview.preservedEdited > 0 && <p className="hint">編集したサンプル {preview.preservedEdited} 題はそのまま残します。</p>}
     {preview.candidates.length > 0 && <fieldset className="sample-candidates">
       <legend>削除する旧問題を選択</legend>

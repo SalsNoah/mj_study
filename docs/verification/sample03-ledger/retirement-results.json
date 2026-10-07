@@ -5,12 +5,12 @@
     "status": "pass",
     "id": "prob_e17134ced67498171d3636d7",
     "checks": [
-      "same problem count",
+      "only eligible old 03 removed",
       "other nine untouched",
       "historical 4s result preserved",
       "daily unchanged",
       "reload no second write",
-      "same ID and timestamps; new answer revision only"
+      "verified backup; explicit restore preserves ID and timestamps; no repeated deletion"
     ]
   },
   {
@@ -19,7 +19,7 @@
     "status": "pass",
     "id": "prob_e17134ced67498171d3636d7",
     "checks": [
-      "same problem count",
+      "only eligible old 03 removed",
       "other nine untouched",
       "historical 4s result preserved",
       "daily unchanged",
@@ -33,7 +33,7 @@
     "status": "pass",
     "id": "prob_e17134ced67498171d3636d7",
     "checks": [
-      "same problem count",
+      "only eligible old 03 removed",
       "other nine untouched",
       "historical 4s result preserved",
       "daily unchanged",
@@ -47,12 +47,12 @@
     "status": "pass",
     "id": "prob_e17134ced67498171d3636d7",
     "checks": [
-      "same problem count",
+      "only eligible old 03 removed",
       "other nine untouched",
       "historical 4s result preserved",
       "daily unchanged",
       "reload no second write",
-      "same ID and timestamps; new answer revision only"
+      "verified backup; explicit restore preserves ID and timestamps; no repeated deletion"
     ]
   },
   {
@@ -61,7 +61,7 @@
     "status": "pass",
     "id": "prob_e17134ced67498171d3636d7",
     "checks": [
-      "same problem count",
+      "only eligible old 03 removed",
       "other nine untouched",
       "historical 4s result preserved",
       "daily unchanged",
@@ -75,7 +75,7 @@
     "status": "pass",
     "id": "prob_e17134ced67498171d3636d7",
     "checks": [
-      "same problem count",
+      "only eligible old 03 removed",
       "other nine untouched",
       "historical 4s result preserved",
       "daily unchanged",
@@ -89,12 +89,12 @@
     "status": "pass",
     "id": "prob_e17134ced67498171d3636d7",
     "checks": [
-      "same problem count",
+      "only eligible old 03 removed",
       "other nine untouched",
       "historical 4s result preserved",
       "daily unchanged",
       "reload no second write",
-      "same ID and timestamps; new answer revision only"
+      "verified backup; explicit restore preserves ID and timestamps; no repeated deletion"
     ]
   },
   {
@@ -103,7 +103,7 @@
     "status": "pass",
     "id": "prob_e17134ced67498171d3636d7",
     "checks": [
-      "same problem count",
+      "only eligible old 03 removed",
       "other nine untouched",
       "historical 4s result preserved",
       "daily unchanged",
@@ -117,7 +117,7 @@
     "status": "pass",
     "id": "prob_e17134ced67498171d3636d7",
     "checks": [
-      "same problem count",
+      "only eligible old 03 removed",
       "other nine untouched",
       "historical 4s result preserved",
       "daily unchanged",
