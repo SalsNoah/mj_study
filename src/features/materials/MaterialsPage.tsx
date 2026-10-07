@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useApp } from '@/app/store';
 import { createId, nowIso } from '@/domain/ids';
 import { countMaterialStudies, MATERIAL_LIMITS, normalizeMaterialUrl } from '@/domain/materials';
@@ -11,14 +11,18 @@ import { MaterialThumbnail } from './MaterialThumbnail';
 
 export function MaterialsPage() {
   const { store, saveMaterial, externalConflict } = useApp();
-  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const archived = searchParams.get('view') === 'archived';
   const [showForm, setShowForm] = useState(false);
-  const { url, title, status, changeUrl, changeTitle, cancel } = useYoutubeTitle(showForm || (store.materials ?? []).length === 0);
+  const { url, title, status, changeUrl, changeTitle, cancel, reset } = useYoutubeTitle(showForm || (store.materials ?? []).length === 0);
   const [error, setError] = useState<string | null>(null);
   const [duplicateId, setDuplicateId] = useState<string | null>(null);
   const [query, setQuery] = useState('');
+  const [registeredMessage, setRegisteredMessage] = useState('');
+  const registrationStatus = useRef<HTMLParagraphElement>(null);
+  useEffect(() => {
+    if (registeredMessage) registrationStatus.current?.focus();
+  }, [registeredMessage]);
   const saving = useRef(false);
   const searchInput = useRef<HTMLInputElement>(null);
   const focusSearchAfterRemoval = useRef(false);
@@ -66,7 +70,16 @@ export function MaterialsPage() {
       saving.current = false;
       return;
     }
-    navigate(`/materials/${encodeURIComponent(draftId.current)}`, { state: { registered: true } });
+    order.current.set(draftId.current, Math.min(0, ...order.current.values()) - 1);
+    draftId.current = createId('material');
+    reset();
+    setShowForm(false);
+    setQuery('');
+    if (archived) setSearchParams((previous) => {
+      const next = new URLSearchParams(previous); next.delete('view'); return next;
+    }, { replace: true });
+    setRegisteredMessage(`教材を登録しました。${query.trim() ? '検索条件をクリアして表示しています。' : ''}${archived ? '学習中の一覧に表示しています。' : ''}`);
+    // Keep the submit lock until the next explicit Add action, including double clicks.
   };
 
   return (
@@ -85,6 +98,8 @@ export function MaterialsPage() {
         })}>アーカイブ {archivedCount} 件</button>
       </div>
 
+      {registeredMessage && <p ref={registrationStatus} className="material-registration-status" role="status" tabIndex={-1}>{registeredMessage}</p>}
+
       {(showForm || materials.length === 0) ? (
         <form className="panel material-form" aria-labelledby="material-add-title" onSubmit={register} noValidate>
           <h2 className="section-title" id="material-add-title">教材を追加</h2>
@@ -92,7 +107,7 @@ export function MaterialsPage() {
             <span>URL</span>
             <input type="url" inputMode="url" autoCapitalize="none" autoCorrect="off" spellCheck={false}
               value={url} onChange={(event) => changeUrl(event.target.value)} maxLength={MATERIAL_LIMITS.url}
-              placeholder="YouTube・note などのURL" required aria-describedby={error ? 'material-add-error' : undefined} />
+              placeholder="YouTubeなどのURL" required aria-describedby={error ? 'material-add-error' : undefined} />
           </label>
           <label className="field">
             <span>タイトル（任意）</span>
@@ -110,7 +125,7 @@ export function MaterialsPage() {
             {materials.length > 0 && <button className="btn" type="button" onClick={() => { cancel(); setShowForm(false); }}>閉じる</button>}
           </div>
         </form>
-      ) : <button className="btn btn-primary materials-add" type="button" onClick={() => setShowForm(true)}>教材を追加</button>}
+      ) : <button className="btn btn-primary materials-add" type="button" onClick={() => { saving.current = false; setRegisteredMessage(''); setShowForm(true); }}>教材を追加</button>}
 
       {materials.length > 0 && <div className="material-search">
         <label className="field">

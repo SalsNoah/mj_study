@@ -99,15 +99,17 @@ it('registers a URL and title, reopens saved fields, and never counts registrati
   await input(field('URL'), 'https://www.youtube.com/watch?v=lesson-a');
   await input(field('タイトル（任意）'), '  受入れの基本  ');
   await click(button('登録する'));
-  expect(host.querySelector('h1')!.textContent).toBe('受入れの基本');
+  expect(host.querySelector('h1')!.textContent).toBe('学習教材');
+  expect(host.querySelector('.material-card h2')!.textContent).toBe('受入れの基本');
+  expect(host.querySelector('.material-form')).toBeNull();
+  expect(document.activeElement).toBe(host.querySelector('.material-registration-status'));
   expect(host.querySelector('.material-count')!.textContent).toBe('学習 0 回');
-  const external = host.querySelector<HTMLAnchorElement>('.material-open')!;
+  const external = host.querySelector<HTMLAnchorElement>('.material-direct-link')!;
   expect(external.href).toBe('https://www.youtube.com/watch?v=lesson-a');
   expect(external.target).toBe('_blank');
   expect(external.rel).toBe('noopener noreferrer');
   await click(external);
   expect(persisted().materialStudyEvents).toHaveLength(0);
-  await click(host.querySelector<HTMLElement>('.material-back')!);
   expect(host.querySelectorAll('.material-card')).toHaveLength(1);
   await click(host.querySelector<HTMLElement>('.material-record-link')!);
   expect(field('タイトル').value).toBe('受入れの基本');
@@ -120,7 +122,8 @@ it('uses the source hostname when the optional registration title is blank', asy
   await mount();
   await input(field('URL'), 'https://note.com/example/n/lesson');
   await click(button('登録する'));
-  expect(host.querySelector('h1')!.textContent).toBe('note.com');
+  expect(host.querySelector('h1')!.textContent).toBe('学習教材');
+  expect(host.querySelector('.material-card h2')!.textContent).toBe('note.com');
 });
 
 it('keeps a duplicate registration draft and links to the existing material', async () => {
@@ -595,4 +598,49 @@ it('list study and archive failures never claim success or remove cards',async()
   seed(); await mount(); vi.spyOn(Storage.prototype,'setItem').mockImplementation(()=>{throw new Error('quota');});
   await click(button('学習した')); expect(persisted().materialStudyEvents).toHaveLength(0);expect(host.querySelector('[role="alert"]')).not.toBeNull();
   await click(button('アーカイブ')); await click(button('アーカイブする',document.body)); expect(persisted().materials?.[0]?.archivedAt).toBeUndefined();expect(host.querySelectorAll('.material-card')).toHaveLength(1);
+});
+
+it('stays on the list, clears search only on success, and allows a fresh next registration without duplicates', async () => {
+  seed(); await mount();
+  const search = host.querySelector<HTMLInputElement>('input[type="search"]')!;
+  await input(search, '見つからない検索'); await click(button('教材を追加'));
+  expect(field('URL').getAttribute('placeholder')).toBe('YouTubeなどのURL');
+  await input(field('URL'), 'https://note.com/new-lesson'); await input(field('タイトル（任意）'), '新しい教材');
+  const submit = button('登録する'); await act(async () => { submit.click(); submit.click(); });
+  expect(host.querySelector('h1')!.textContent).toBe('学習教材');
+  expect(host.querySelector('.material-form')).toBeNull(); expect(search.value).toBe('');
+  expect(host.querySelector('.material-registration-status')!.textContent).toContain('検索条件をクリア');
+  expect(host.querySelector('.material-card h2')!.textContent).toBe('新しい教材');
+  expect(persisted().materials).toHaveLength(2); expect(persisted().materialStudyEvents).toHaveLength(0);
+  await click(button('教材を追加')); expect(field('URL').value).toBe(''); expect(field('タイトル（任意）').value).toBe('');
+  await input(field('URL'), 'https://example.com/second'); await input(field('タイトル（任意）'), '次の教材'); await click(button('登録する'));
+  expect(persisted().materials).toHaveLength(3); expect(new Set(persisted().materials!.map(m => m.id)).size).toBe(3);
+  expect(host.querySelector('.material-card h2')!.textContent).toBe('次の教材');
+  await click(host.querySelector<HTMLElement>('.material-record-link')!);
+  expect(host.querySelector('h1')!.textContent).toBe('次の教材');
+});
+
+it('shows a newly registered active card when adding from the archived list',async()=>{
+  seed([material('archived',{archivedAt:'2026-10-02T00:00:00Z'})]); await mount('/materials?view=archived');
+  await click(button('教材を追加')); await input(field('URL'),'https://example.com/active'); await click(button('登録する'));
+  expect(host.querySelector('h1')!.textContent).toBe('学習教材'); expect(button('学習中 1 件').getAttribute('aria-pressed')).toBe('true');
+  expect(host.querySelectorAll('.material-card')).toHaveLength(1); expect(host.querySelector('.material-card h2')!.textContent).toBe('example.com');
+  expect(persisted().materials!.find(m=>m.id==='archived')!.archivedAt).toBeTruthy(); expect(persisted().materialStudyEvents).toHaveLength(0);
+});
+
+it('preserves filter and draft after a duplicate fails, then resets manual ownership for the next YouTube draft',async()=>{
+  seed();await mount();const search=host.querySelector<HTMLInputElement>('input[type="search"]')!;
+  await input(search,'検索条件'); await click(button('教材を追加'));await input(field('URL'),'https://example.com/lesson-a');await input(field('タイトル（任意）'),'手動');await click(button('登録する'));
+  expect(search.value).toBe('検索条件');expect(field('タイトル（任意）').value).toBe('手動');expect(persisted().materials).toHaveLength(1);
+  await input(field('URL'),'https://example.com/unique');await click(button('登録する'));await click(button('教材を追加'));
+  vi.stubGlobal('fetch',vi.fn().mockResolvedValue({ok:true,json:async()=>({title:'次の自動タイトル'})}));
+  await input(field('URL'),'https://youtu.be/M7lc1UVf-VE');await act(async()=>vi.advanceTimersByTimeAsync(300));expect(field('タイトル（任意）').value).toBe('次の自動タイトル');
+});
+
+it('ignores a late YouTube response after saving and starting another draft',async()=>{
+  seed([]);await mount();let resolve!:(v:unknown)=>void;vi.stubGlobal('fetch',vi.fn(()=>new Promise(r=>resolve=r)));
+  await input(field('URL'),'https://youtu.be/M7lc1UVf-VE');await act(async()=>vi.advanceTimersByTimeAsync(300));await click(button('登録する'));
+  expect(host.querySelector('h1')!.textContent).toBe('学習教材');expect(persisted().materials![0]!.title).toBe('youtu.be');
+  await click(button('教材を追加'));await input(field('URL'),'https://note.com/new');await input(field('タイトル（任意）'),'新しい入力');
+  await act(async()=>resolve({ok:true,json:async()=>({title:'古い応答'})}));expect(field('タイトル（任意）').value).toBe('新しい入力');expect(persisted().materials![0]!.title).toBe('youtu.be');expect(persisted().materialStudyEvents).toHaveLength(0);
 });

@@ -15,9 +15,9 @@ try {for(const width of [320,390,1440]){
  expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBe(width);
  await page.screenshot({path:`${out}/${width}-autofill.png`,fullPage:true});
  await input.fill('自分で編集した名前');await url.fill('https://youtube.com/shorts/abcdefghijk');await expect(input).toHaveValue('自分で編集した名前');
- await url.fill(savedUrl);await page.getByRole('button',{name:'登録する',exact:true}).click();await expect(page.getByRole('heading',{name:'自分で編集した名前',exact:true})).toBeVisible();
+ await url.fill(savedUrl);await page.getByRole('button',{name:'登録する',exact:true}).click();await expect(page.getByRole('heading',{name:'自分で編集した名前',exact:true})).toBeVisible();await expect(page.getByRole('heading',{name:'学習教材',exact:true})).toBeVisible();
  const store=await page.evaluate(()=>JSON.parse(localStorage.getItem('mahjong-study:v1')));expect(store.materials.find(m=>m.title==='自分で編集した名前').url).toBe(savedUrl);expect(store.materialStudyEvents??[]).toHaveLength(0);
  // Fresh draft, save before delayed response: host fallback is permanent.
- await page.locator('.material-back').click();await page.getByRole('button',{name:'教材を追加',exact:true}).click();delay=700;title='保存後に届くタイトル';await url.fill('https://youtu.be/abcdefghijk');await page.waitForTimeout(350);await page.getByRole('button',{name:'登録する',exact:true}).click();await expect(page.getByRole('heading',{name:'youtu.be',exact:true})).toBeVisible();await page.waitForTimeout(800);await expect(page.getByRole('heading',{name:'youtu.be',exact:true})).toBeVisible();
+ await expect(page).toHaveURL(`${origin}/#/materials`);await page.getByRole('button',{name:'教材を追加',exact:true}).click();delay=700;title='保存後に届くタイトル';await url.fill('https://youtu.be/abcdefghijk');await page.waitForTimeout(350);await page.getByRole('button',{name:'登録する',exact:true}).click();await expect(page.getByRole('heading',{name:'youtu.be',exact:true})).toBeVisible();await page.waitForTimeout(800);await expect(page.getByRole('heading',{name:'youtu.be',exact:true})).toBeVisible();
  results.push({width,status:'passed',mocked:true,checks:['autofill','manual edit preserved','URL preserved','no study increment','save during request','no overflow']});await context.close();
 }}finally{await writeFile(`${out}/browser-results.json`,JSON.stringify(results,null,2));await browser.close();}

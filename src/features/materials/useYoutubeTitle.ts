@@ -16,6 +16,12 @@ export function useYoutubeTitle(active: boolean) {
     controller.current?.abort();
     controller.current = null;
   };
+  const reset = () => {
+    cancel();
+    manual.current = false;
+    setUrl('');
+    setTitle('');
+  };
   const changeUrl = (value: string) => {
     cancel();
     setUrl(value);
@@ -74,5 +80,5 @@ export function useYoutubeTitle(active: boolean) {
       generation.current += 1;
     };
   }, [url, active]);
-  return { url, title, status, changeUrl, changeTitle, cancel };
+  return { url, title, status, changeUrl, changeTitle, cancel, reset };
 }
