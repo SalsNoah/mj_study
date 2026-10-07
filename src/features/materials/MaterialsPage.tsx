@@ -5,6 +5,7 @@ import { createId, nowIso } from '@/domain/ids';
 import { countMaterialStudies, MATERIAL_LIMITS, normalizeMaterialUrl } from '@/domain/materials';
 import { materialHost } from './materialPresentation';
 import { filterMaterials } from './materialList';
+import { sortMaterials, type MaterialSortKey, type MaterialSortDirection } from './materialSort';
 import { useYoutubeTitle } from './useYoutubeTitle';
 import { MaterialCardActions } from './MaterialCardActions';
 import { MaterialThumbnail } from './MaterialThumbnail';
@@ -33,11 +34,19 @@ export function MaterialsPage() {
     }
   }, [store.materials]);
   const draftId = useRef(createId('material'));
-  // Keep cards under the pointer after a study updates updatedAt. New page visits
-  // still start in the existing most-recently-updated order.
-  const order = useRef(new Map([...(store.materials ?? [])].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)).map((item, index) => [item.id, index])));
+  const [sortKey, setSortKey] = useState<MaterialSortKey>('updatedAt');
+  const [sortDirection, setSortDirection] = useState<MaterialSortDirection>('desc');
+  const [order, setOrder] = useState(() => new Map(sortMaterials(store.materials ?? [], store.materialStudyEvents, 'updatedAt', 'desc')
+    .map((item, index) => [item.id, index])));
+  // Reorder only on an explicit sorting/registration action, never under a study click.
+  const applySort = (key: MaterialSortKey, direction: MaterialSortDirection) => {
+    setSortKey(key);
+    setSortDirection(direction);
+    setOrder(new Map(sortMaterials(store.materials ?? [], store.materialStudyEvents, key, direction)
+      .map((item, index) => [item.id, index])));
+  };
   const materials = [...(store.materials ?? [])].sort((a, b) =>
-    (order.current.get(a.id) ?? -1) - (order.current.get(b.id) ?? -1) || b.updatedAt.localeCompare(a.updatedAt));
+    (order.get(a.id) ?? -1) - (order.get(b.id) ?? -1) || Date.parse(b.updatedAt) - Date.parse(a.updatedAt));
   const archivedCount = materials.filter((material) => material.archivedAt !== undefined).length;
   const selectedMaterials = materials.filter((material) => (material.archivedAt !== undefined) === archived);
   const visibleMaterials = filterMaterials(selectedMaterials, query);
@@ -70,7 +79,8 @@ export function MaterialsPage() {
       saving.current = false;
       return;
     }
-    order.current.set(draftId.current, Math.min(0, ...order.current.values()) - 1);
+    setOrder(new Map(sortMaterials(result.store.materials ?? [], result.store.materialStudyEvents, sortKey, sortDirection)
+      .map((item, index) => [item.id, index])));
     draftId.current = createId('material');
     reset();
     setShowForm(false);
@@ -133,6 +143,29 @@ export function MaterialsPage() {
           <input ref={searchInput} type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="タイトル・URLで検索" />
         </label>
         {query && <button className="btn" type="button" onClick={() => { setQuery(''); searchInput.current?.focus(); }}>検索をクリア</button>}
+      </div>}
+      {materials.length > 0 && <div className="material-sort" role="group" aria-label="教材の並び順">
+        <label className="field">
+          <span>並び替え</span>
+          <select value={sortKey} onChange={(event) => applySort(event.target.value as MaterialSortKey, sortDirection)}>
+            <option value="updatedAt">更新日</option>
+            <option value="studyCount">学習回数</option>
+            <option value="lastStudiedAt">最終学習日</option>
+          </select>
+        </label>
+        <label className="field">
+          <span>順序</span>
+          <select value={sortDirection} onChange={(event) => applySort(sortKey, event.target.value as MaterialSortDirection)}>
+            <option value="desc">降順</option>
+            <option value="asc">昇順</option>
+          </select>
+        </label>
+        <button className="btn" type="button" onClick={() => applySort(sortKey, sortDirection)}>並べ直す</button>
+        <p className="material-sort__hint">{sortKey === 'studyCount'
+          ? (sortDirection === 'asc' ? '少ない順。' : '多い順。')
+          : (sortDirection === 'asc' ? '古い順。' : '新しい順。')}
+          {sortKey === 'lastStudiedAt' && '未学習は最後に表示。'}
+          学習後の並びは保ち、「並べ直す」で更新します。</p>
       </div>}
       {selectedMaterials.length === 0 ? <div className="empty materials-empty" role="status"><p>{archived ? 'アーカイブした教材はありません。' : materials.length === 0 ? '教材はまだありません。' : '学習中の教材はありません。アーカイブから復元できます。'}</p></div> : visibleMaterials.length === 0 ? (
         <div className="empty materials-empty" role="status"><p>条件に合う教材はありません。</p></div>
