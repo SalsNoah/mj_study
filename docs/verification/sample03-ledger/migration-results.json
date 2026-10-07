@@ -1,0 +1,128 @@
+[
+  {
+    "width": 320,
+    "scenario": "original",
+    "status": "pass",
+    "id": "prob_e17134ced67498171d3636d7",
+    "checks": [
+      "same problem count",
+      "other nine untouched",
+      "historical 4s result preserved",
+      "daily unchanged",
+      "reload no second write",
+      "same ID and timestamps; new answer revision only"
+    ]
+  },
+  {
+    "width": 320,
+    "scenario": "edited",
+    "status": "pass",
+    "id": "prob_e17134ced67498171d3636d7",
+    "checks": [
+      "same problem count",
+      "other nine untouched",
+      "historical 4s result preserved",
+      "daily unchanged",
+      "reload no second write",
+      "edited content protected; no duplicate addition"
+    ]
+  },
+  {
+    "width": 320,
+    "scenario": "deleted",
+    "status": "pass",
+    "id": "prob_e17134ced67498171d3636d7",
+    "checks": [
+      "same problem count",
+      "other nine untouched",
+      "historical 4s result preserved",
+      "daily unchanged",
+      "reload no second write",
+      "deleted problem not resurrected"
+    ]
+  },
+  {
+    "width": 390,
+    "scenario": "original",
+    "status": "pass",
+    "id": "prob_e17134ced67498171d3636d7",
+    "checks": [
+      "same problem count",
+      "other nine untouched",
+      "historical 4s result preserved",
+      "daily unchanged",
+      "reload no second write",
+      "same ID and timestamps; new answer revision only"
+    ]
+  },
+  {
+    "width": 390,
+    "scenario": "edited",
+    "status": "pass",
+    "id": "prob_e17134ced67498171d3636d7",
+    "checks": [
+      "same problem count",
+      "other nine untouched",
+      "historical 4s result preserved",
+      "daily unchanged",
+      "reload no second write",
+      "edited content protected; no duplicate addition"
+    ]
+  },
+  {
+    "width": 390,
+    "scenario": "deleted",
+    "status": "pass",
+    "id": "prob_e17134ced67498171d3636d7",
+    "checks": [
+      "same problem count",
+      "other nine untouched",
+      "historical 4s result preserved",
+      "daily unchanged",
+      "reload no second write",
+      "deleted problem not resurrected"
+    ]
+  },
+  {
+    "width": 1440,
+    "scenario": "original",
+    "status": "pass",
+    "id": "prob_e17134ced67498171d3636d7",
+    "checks": [
+      "same problem count",
+      "other nine untouched",
+      "historical 4s result preserved",
+      "daily unchanged",
+      "reload no second write",
+      "same ID and timestamps; new answer revision only"
+    ]
+  },
+  {
+    "width": 1440,
+    "scenario": "edited",
+    "status": "pass",
+    "id": "prob_e17134ced67498171d3636d7",
+    "checks": [
+      "same problem count",
+      "other nine untouched",
+      "historical 4s result preserved",
+      "daily unchanged",
+      "reload no second write",
+      "edited content protected; no duplicate addition"
+    ]
+  },
+  {
+    "width": 1440,
+    "scenario": "deleted",
+    "status": "pass",
+    "id": "prob_e17134ced67498171d3636d7",
+    "checks": [
+      "same problem count",
+      "other nine untouched",
+      "historical 4s result preserved",
+      "daily unchanged",
+      "reload no second write",
+      "deleted problem not resurrected"
+    ]
+  }
+]

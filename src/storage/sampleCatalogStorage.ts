@@ -1,3 +1,4 @@
+import { protectSample03Edits, reviseSample03 } from '@/data/sample03Revision';
 import { getSampleRemovalPreview, getSampleUpdatePreview, matchingCatalogTemplate, missingCatalogProblems } from '@/data/sampleCatalog';
 import { canonicalJson, contentFingerprint, SAMPLE_TAG_NAME } from '@/data/sampleIdentity';
 import { createId, nowIso } from '@/domain/ids';
@@ -328,10 +329,15 @@ export class SampleCatalogStorage {
     if (!current.ok) return current;
     const all = this.readAll(store);
     if (!all.ok) return all;
-    const snapshot = all.snapshots.find((entry) => entry.id === id);
+    let snapshot = all.snapshots.find((entry) => entry.id === id);
     const receipt = store.sampleCatalogUpdates?.find((entry) => entry.id === id);
     if (!snapshot || !receipt) return failure('適用済みの更新とバックアップを確認できません。データは変更していません', 'corrupt');
     if (receipt.restoredAt) return { ok: true, store, preservedCopies: 0 };
+    // Compare the same automatic correction on both sides without rewriting original backup contents.
+    const correctedAdditions = reviseSample03({ ...emptyStore(), problems: snapshot.addedProblems,
+      study: snapshot.addedStudy, tags: snapshot.addedTags });
+    snapshot = { ...snapshot, before: protectSample03Edits(snapshot.before), addedProblems: correctedAdditions.problems, addedStudy: correctedAdditions.study };
+
     const removable = new Set(snapshot.addedProblems.filter((original) => {
       const problem = store.problems.find((entry) => entry.id === original.id);
       const states = store.study.filter((state) => state.problemId === original.id);
@@ -347,8 +353,9 @@ export class SampleCatalogStorage {
       // Only undo a removal of recognized originals. A later untouched, unstudied re-add
       // can give way to the original card/history; edits or learning always keep their copy.
       for (const original of snapshot.before.problems.filter((problem) => snapshot.removedIds.includes(problem.id))) {
-        const template = matchingCatalogTemplate(original);
-        if (!template || contentFingerprint(original, snapshot.before.tags) !== template.sample!.fingerprint) continue;
+        const comparison = reviseSample03(snapshot.before).problems.find(problem => problem.id === original.id)!;
+        const template = matchingCatalogTemplate(comparison);
+        if (!template || contentFingerprint(comparison, snapshot.before.tags) !== template.sample!.fingerprint) continue;
         retainedOriginalIds.add(original.id);
         for (const candidate of store.problems) {
           if (snapshot.before.problems.some((problem) => problem.id === candidate.id) ||

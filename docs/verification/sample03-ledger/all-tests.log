@@ -5,140 +5,157 @@
 
  RUN  v3.2.7 /workspace/mj_study
 
- ❯ src/domain/search.test.ts (26 tests | 1 failed) 775ms
-   ✓ parseHandNotation > parses basic and red 4ms
-   ✓ parseHandNotation > rejects incomplete and invalid without silent drop 1ms
-   ✓ A11 search examples (spec §7) > 234m ↔ 234p (色替え) 18ms
-   ✓ A11 search examples (spec §7) > 234m ↔ 678p (色替え+反転) 9ms
-   ✓ A11 search examples (spec §7) > 11123m ↔ 78999s 2ms
-   ✓ A11 search examples (spec §7) > 234m ↔ 345p (数字のずれ) 3ms
+ ❯ src/domain/search.test.ts (26 tests | 1 failed) 681ms
+   ✓ parseHandNotation > parses basic and red 3ms
+   ✓ parseHandNotation > rejects incomplete and invalid without silent drop 8ms
+   ✓ A11 search examples (spec §7) > 234m ↔ 234p (色替え) 29ms
+   ✓ A11 search examples (spec §7) > 234m ↔ 678p (色替え+反転) 2ms
+   ✓ A11 search examples (spec §7) > 11123m ↔ 78999s 5ms
+   ✓ A11 search examples (spec §7) > 234m ↔ 345p (数字のずれ) 5ms
    ✓ A11 search examples (spec §7) > 11123m ↔ 22234p 2ms
-   ✓ A11 search examples (spec §7) > 234m ↔ 356p 不一致 6ms
-   ✓ A11 search examples (spec §7) > 11123m ↔ 77789s 5ms
+   ✓ A11 search examples (spec §7) > 234m ↔ 356p 不一致 5ms
+   ✓ A11 search examples (spec §7) > 11123m ↔ 77789s 2ms
    ✓ A11 search examples (spec §7) > 11123m ↔ 77799s 不一致 2ms
-   ✓ A11 search examples (spec §7) > 11m ↔ 1p 枚数不足 2ms
-   ✓ A11 search examples (spec §7) > 12m12p ↔ 1122s 色統合禁止 56ms
-   ✓ A11 search examples (spec §7) > 12m34p ↔ 89s34m 色別一括反転 58ms
+   ✓ A11 search examples (spec §7) > 11m ↔ 1p 枚数不足 1ms
+   ✓ A11 search examples (spec §7) > 12m12p ↔ 1122s 色統合禁止 28ms
+   ✓ A11 search examples (spec §7) > 12m34p ↔ 89s34m 色別一括反転 17ms
    ✓ A11 search examples (spec §7) > 1z ↔ 2z 不一致 0ms
-   ✓ A11 search examples (spec §7) > 5m ↔ 0p 赤同一視なら一致 5ms
-   ✓ A11 search examples (spec §7) > 5m ↔ 0p 赤区別なら不一致 2ms
-   ✓ A12 individual toggles > all OFF: only exact tiles 0ms
+   ✓ A11 search examples (spec §7) > 5m ↔ 0p 赤同一視なら一致 1ms
+   ✓ A11 search examples (spec §7) > 5m ↔ 0p 赤区別なら不一致 6ms
+   ✓ A12 individual toggles > all OFF: only exact tiles 1ms
    ✓ A12 individual toggles > shift OFF: 234 vs 345 mismatch 1ms
-   ✓ A41 A42 A43 > 11123m → 67888p (反転後-1) 2ms
-   ✓ A41 A42 A43 > 89m → 12p 一致、1256m→1267p 完全一致せず、循環なし 5ms
+   ✓ A41 A42 A43 > 11123m → 67888p (反転後-1) 6ms
+   ✓ A41 A42 A43 > 89m → 12p 一致、1256m→1267p 完全一致せず、循環なし 7ms
    ✓ A41 A42 A43 > 05m → 66p 2ms
-   ✓ A10 A14 A15 A16 > requires multiplicity 4ms
-   ✓ A10 A14 A15 A16 > include melds toggle 8ms
-   ✓ A10 A14 A15 A16 > dora indicators never match alone 6ms
-   ✓ A10 A14 A15 A16 > exact vs contains 1ms
-   × A44 search performance smoke > 500 problems without images under ~200ms 566ms
-     → expected 555.2080539999997 to be less than 200
- ✓ src/features/mobileNavigation.test.tsx (11 tests) 3255ms
-   ✓ shows the library list immediately and distinguishes no matches from an empty notebook  319ms
-   ✓ keeps conditions above the full palette and preserves drafts while opening optional notes  783ms
-   ✓ opens optional notes for answer errors while conditions always stay directly available  856ms
- ✓ src/features/materials/MaterialsPage.test.tsx (41 tests) 2897ms
- ✓ src/components/UkeirePanel.test.tsx (16 tests) 3782ms
-   ✓ ukeire UI and existing study flows (jsdom; not a layout/browser test) > updates on editing, saves unchanged fields, matches detail, keeps sharing retired and hides until answered  1727ms
-   ✓ ukeire UI and existing study flows (jsdom; not a layout/browser test) > keeps the same session on reordering/re-render and resets on indicators, drawn and problem changes  342ms
-   ✓ ukeire UI and existing study flows (jsdom; not a layout/browser test) > places the editor toggle immediately after clear, preserves adjustments across repeated toggles and resets on position changes  715ms
- ✓ src/features/editor/EditorScoreInput.test.tsx (14 tests) 2985ms
-   ✓ has one score UI with fixed sibling suffixes and saves zero, maximum prefix, blank and negative scores  408ms
-   ✓ keeps invalid drafts visible without truncation or saving the last-valid value  539ms
-   ✓ creates exact remainder and boundary scores only through the explicit full-point action  407ms
-   ✓ keeps the exact multiplier stable while focused and compacts only on blur  325ms
- ✓ src/features/unsavedChanges.test.tsx (25 tests) 8896ms
-   ✓ protects changed problem titles, traps focus, and restores the navigation link on Stay and Escape  1001ms
-   ✓ discards only after confirmation and reopens the saved original, with no unload warning left behind  755ms
-   ✓ saves once to the requested destination and preserves problem study and attempt counts  558ms
-   ✓ does not prompt for unchanged values, view toggles, edit then revert, or after explicit save  894ms
-   ✓ preserves invalid score and cancels pending navigation when Save fails validation  593ms
-   ✓ preserves bad URL and cancels pending navigation when Save fails validation  622ms
-   ✓ keeps a failed save draft and allows a fresh save-and-leave retry without duplication  327ms
-   ✓ protects Back and Forward with real hash history and stays on the editor after cancellation  1017ms
-   ✓ follows the newest blocked navigation and remounts the next problem without inheriting the draft  432ms
-   ✓ warns during image preparation, disables Save, and ignores a late completion after discard  446ms
-   ✓ keeps drafts on same-page query and fragment updates and guards the next page change  385ms
+   ✓ A10 A14 A15 A16 > requires multiplicity 9ms
+   ✓ A10 A14 A15 A16 > include melds toggle 4ms
+   ✓ A10 A14 A15 A16 > dora indicators never match alone 7ms
+   ✓ A10 A14 A15 A16 > exact vs contains 2ms
+   × A44 search performance smoke > 500 problems without images under ~200ms 524ms
+     → expected 508.2739630000001 to be less than 200
+ ✓ src/features/editor/EditorScoreInput.test.tsx (14 tests) 4504ms
+   ✓ has one score UI with fixed sibling suffixes and saves zero, maximum prefix, blank and negative scores  430ms
+   ✓ keeps invalid drafts visible without truncation or saving the last-valid value  562ms
+   ✓ preserves unedited legacy remainders and large or negative values without a detail mode  301ms
+   ✓ creates exact remainder and boundary scores only through the explicit full-point action  445ms
+   ✓ keeps the exact multiplier stable while focused and compacts only on blur  425ms
+   ✓ normalizes raw 99900 to compact 999 on blur without confusing zero and blank  407ms
+   ✓ normalizes raw -99900 to compact -999 on blur without confusing zero and blank  367ms
+   ✓ normalizes raw  to compact  on blur without confusing zero and blank  323ms
+   ✓ preserves new exact values during editing and does not normalize non-hundreds on blur  315ms
+ ✓ src/components/UkeirePanel.test.tsx (16 tests) 3816ms
+   ✓ ukeire UI and existing study flows (jsdom; not a layout/browser test) > updates on editing, saves unchanged fields, matches detail, keeps sharing retired and hides until answered  2007ms
+   ✓ ukeire UI and existing study flows (jsdom; not a layout/browser test) > places the editor toggle immediately after clear, preserves adjustments across repeated toggles and resets on position changes  561ms
+ ✓ src/features/mobileNavigation.test.tsx (11 tests) 1525ms
+ ✓ src/features/library/LibrarySampleCatalog.test.tsx (8 tests) 2610ms
+   ✓ adds ten samples from the initially closed library panel without navigating or revealing answers  656ms
+   ✓ requires a fresh explicit legacy selection after closing and offers restoration in the library  411ms
+   ✓ preserves text, tile and tag filters, sorting and answer visibility (false) across panel updates and reopening  392ms
+   ✓ preserves text, tile and tag filters, sorting and answer visibility (true) across panel updates and reopening  343ms
+ ✓ src/features/materials/MaterialsPage.test.tsx (41 tests) 2063ms
+ ✓ src/features/unsavedChanges.test.tsx (25 tests) 10928ms
+   ✓ protects changed problem titles, traps focus, and restores the navigation link on Stay and Escape  1250ms
+   ✓ discards only after confirmation and reopens the saved original, with no unload warning left behind  960ms
+   ✓ saves once to the requested destination and preserves problem study and attempt counts  547ms
+   ✓ does not prompt for unchanged values, view toggles, edit then revert, or after explicit save  808ms
+   ✓ preserves invalid score and cancels pending navigation when Save fails validation  413ms
+   ✓ preserves unfinished tag and cancels pending navigation when Save fails validation  436ms
+   ✓ preserves bad URL and cancels pending navigation when Save fails validation  479ms
+   ✓ keeps a failed save draft and allows a fresh save-and-leave retry without duplication  400ms
+   ✓ protects Back and Forward with real hash history and stays on the editor after cancellation  1244ms
+   ✓ follows the newest blocked navigation and remounts the next problem without inheriting the draft  571ms
+   ✓ warns during image preparation, disables Save, and ignores a late completion after discard  734ms
+   ✓ does not overwrite newer saved data from /edit/problem-a  480ms
+   ✓ keeps a problem draft blocked after explicitly reloading a newer store in the same tab  308ms
+   ✓ keeps drafts on same-page query and fragment updates and guards the next page change  619ms
 stderr | src/features/share/RetiredProblemShare.test.tsx > leaves a retired link inert and returns without touching existing data (#share=%E0%A4%A)
 The URL path "/share=%E0%A4%A" could not be decoded because it is a malformed URL segment. This is probably due to a bad percent encoding (URIError: URI malformed).
 
- ✓ src/features/share/RetiredProblemShare.test.tsx (14 tests) 1757ms
-   ✓ keeps old links inert after return, repeated Back/Forward and an app remount  415ms
-   ✓ keeps problem tools compact and the separate record-share and creator-X entries available  476ms
- ✓ src/components/TileLimit.test.tsx (12 tests) 1310ms
- ✓ src/features/test/SessionRetest.test.tsx (17 tests) 1023ms
- ✓ src/features/editor/EditorAttachments.test.tsx (3 tests) 1013ms
-   ✓ blocks saving during a 問題画像 upload and preserves moves and deletions when compression finishes  492ms
-   ✓ blocks saving during a 解説画像 upload and preserves moves and deletions when compression finishes  361ms
- ✓ src/features/records/RecordsPage.test.tsx (9 tests) 1386ms
- ✓ src/features/library/LibrarySampleCatalog.test.tsx (8 tests) 2059ms
-   ✓ adds ten samples from the initially closed library panel without navigating or revealing answers  548ms
-   ✓ preserves text, tile and tag filters, sorting and answer visibility (false) across panel updates and reopening  300ms
- ✓ src/features/answerVisibility.test.tsx (7 tests) 667ms
- ✓ src/features/editor/EditorAnswerDefaults.test.tsx (10 tests) 1660ms
-   ✓ opens notes and enables answers and testing only for a new manual entry, without saving or selecting answers  395ms
- ✓ src/features/editor/EditorHeader.test.tsx (5 tests) 1239ms
-   ✓ keeps one accessible title beside the heading and before header actions with notes closed  371ms
- ✓ src/features/detail/DetailActions.test.tsx (9 tests) 1987ms
-   ✓ leaves saved data unchanged on cancel and restores focus to the opener  507ms
-   ✓ creates exactly one copy only after confirmation, preserving the existing content and new-study semantics  424ms
- ✓ src/features/import/TileSupplyImport.test.tsx (2 tests) 349ms
- ✓ src/storage/sampleCatalogStorage.test.ts (56 tests) 1279ms
- ✓ src/features/detail/DetailAttachments.test.tsx (3 tests) 685ms
-   ✓ shows the question image beside the hand while keeping explanatory data out of the DOM until revealed  434ms
- ✓ src/features/test/TestSetupControls.test.tsx (12 tests) 477ms
- ✓ src/features/records/TagStudySummary.test.tsx (3 tests) 416ms
- ✓ src/features/editor/EditorDefaults.test.tsx (3 tests) 791ms
-   ✓ starts only a new manual problem with east 1/east seat/turn 6/25000 and a north indicator  388ms
-   ✓ does not fill defaults into an existing problem with empty conditions or indicators  345ms
- ✓ src/features/records/RecordShareButton.test.tsx (27 tests) 818ms
- ✓ src/storage/materialsStorage.test.ts (33 tests) 267ms
- ✓ src/components/HandView.test.tsx (16 tests) 306ms
- ✓ src/features/settings/SampleCatalogFlow.test.tsx (3 tests) 454ms
- ✓ src/features/settings/SampleBulkControls.test.tsx (8 tests) 302ms
- ✓ src/features/settings/ThemeSettings.test.tsx (4 tests) 432ms
- ✓ src/components/ProblemAttachments.test.tsx (8 tests) 386ms
- ✓ src/domain/ukeire.test.ts (43 tests) 166ms
- ✓ src/storage/sampleHistoryImport.test.ts (63 tests) 227ms
- ✓ src/storage/materialArchive.test.ts (23 tests) 246ms
- ✓ src/features/editor/EditorResponsive.test.tsx (2 tests) 257ms
- ✓ src/features/materials/useYoutubeTitle.test.tsx (27 tests) 162ms
- ✓ src/components/WanpaiDora.test.tsx (8 tests) 215ms
- ✓ src/features/settings/SampleCatalogSettings.test.tsx (7 tests) 248ms
- ✓ src/features/settings/SettingsLinks.test.tsx (1 test) 133ms
- ✓ src/features/records/renderRecordShare.test.ts (10 tests) 78ms
- ✓ src/storage/materialProvenance.test.ts (17 tests) 105ms
- ✓ src/storage/initialMaterials.test.ts (12 tests) 87ms
- ✓ src/features/import/import.test.ts (17 tests) 72ms
- ✓ src/domain/unifiedHandCompatibility.test.ts (6 tests) 136ms
- ✓ src/domain/recordSeries.test.ts (34 tests) 32ms
- ✓ src/storage/testParticipation.test.ts (9 tests) 41ms
- ✓ src/domain/remaining.test.ts (18 tests) 136ms
- ✓ src/storage/repository.test.ts (8 tests) 34ms
- ✓ src/components/useDecorativeMotion.test.tsx (3 tests) 52ms
- ✓ src/domain/recordShare.test.ts (9 tests) 26ms
- ✓ src/app/theme.test.ts (14 tests) 42ms
- ✓ src/domain/materials.test.ts (39 tests) 17ms
- ✓ src/features/materials/materialList.test.ts (32 tests) 27ms
- ✓ src/domain/records.test.ts (12 tests) 29ms
- ✓ src/domain/attachments.test.ts (12 tests) 20ms
+ ✓ src/components/TileLimit.test.tsx (12 tests) 2498ms
+   ✓ blocks fifth clicks immediately, restores availability after removal and undo  534ms
+   ✓ shares red and ordinary limits and permits other suits  310ms
+   ✓ counts all tiles in a proposed meld before confirming and frees supply on meld removal  425ms
+   ✓ kan uses four physical copies and known dora can prevent even a chi anchor  362ms
+ ✓ src/features/share/RetiredProblemShare.test.tsx (14 tests) 1396ms
+   ✓ keeps old links inert after return, repeated Back/Forward and an app remount  378ms
+   ✓ keeps problem tools compact and the separate record-share and creator-X entries available  316ms
+ ✓ src/features/editor/EditorAttachments.test.tsx (3 tests) 963ms
+   ✓ blocks saving during a 問題画像 upload and preserves moves and deletions when compression finishes  503ms
+   ✓ blocks saving during a 解説画像 upload and preserves moves and deletions when compression finishes  303ms
+ ✓ src/features/test/SessionRetest.test.tsx (17 tests) 981ms
+ ✓ src/features/editor/EditorHeader.test.tsx (5 tests) 1171ms
+   ✓ preserves understood learning state and history when saving only a legacy problem title  311ms
+ ✓ src/features/detail/DetailActions.test.tsx (9 tests) 1414ms
+ ✓ src/features/editor/EditorAnswerDefaults.test.tsx (10 tests) 2043ms
+   ✓ opens notes and enables answers and testing only for a new manual entry, without saving or selecting answers  349ms
+   ✓ retains the child test choice false while its parent is off and back on  303ms
+ ✓ src/storage/sampleCatalogStorage.test.ts (54 tests) 1640ms
+   ✓ sample catalog data and identity > keeps every pre-unification v2 discard analysis identical, including the four-copy ceiling  327ms
+ ✓ src/features/records/RecordsPage.test.tsx (9 tests) 1579ms
+   ✓ offers only three time periods and explains zero histories with an accessible number table  316ms
+   ✓ shows cumulative period endpoints and unchanged titles while preserving the stored history  357ms
+ ✓ src/features/answerVisibility.test.tsx (7 tests) 1129ms
+   ✓ omits detail answer marks and all explanatory material until explicitly shown  374ms
+ ✓ src/features/records/RecordShareButton.test.tsx (27 tests) 1290ms
+ ✓ src/features/editor/EditorDefaults.test.tsx (3 tests) 1353ms
+   ✓ starts only a new manual problem with east 1/east seat/turn 6/25000 and a north indicator  714ms
+   ✓ does not fill defaults into an existing problem with empty conditions or indicators  566ms
+ ✓ src/features/detail/DetailAttachments.test.tsx (3 tests) 946ms
+   ✓ shows the question image beside the hand while keeping explanatory data out of the DOM until revealed  507ms
+ ✓ src/features/records/TagStudySummary.test.tsx (3 tests) 1154ms
+   ✓ shows weighted answer evidence and current understanding separately, with unknown rather than zero accuracy  491ms
+   ✓ follows current rename, membership and removal without altering history or badges  566ms
+ ✓ src/features/test/TestSetupControls.test.tsx (12 tests) 1078ms
+   ✓ provides numeric, triangle and keyboard count controls with one-question steps up to all eligible problems  410ms
+ ✓ src/features/import/TileSupplyImport.test.tsx (2 tests) 322ms
+ ✓ src/features/settings/SampleCatalogFlow.test.tsx (3 tests) 415ms
+ ✓ src/features/settings/ThemeSettings.test.tsx (4 tests) 389ms
+ ✓ src/features/settings/SampleBulkControls.test.tsx (8 tests) 277ms
+ ✓ src/features/editor/EditorResponsive.test.tsx (2 tests) 272ms
+ ✓ src/storage/sample03Revision.test.ts (38 tests) 319ms
+ ✓ src/features/settings/SampleCatalogSettings.test.tsx (7 tests) 231ms
+ ✓ src/components/ProblemAttachments.test.tsx (8 tests) 332ms
+ ✓ src/domain/ukeire.test.ts (43 tests) 190ms
+ ✓ src/features/materials/useYoutubeTitle.test.tsx (27 tests) 185ms
+ ✓ src/storage/sampleHistoryImport.test.ts (63 tests) 216ms
+ ✓ src/storage/materialArchive.test.ts (23 tests) 207ms
+ ✓ src/storage/materialsStorage.test.ts (33 tests) 342ms
+ ✓ src/components/HandView.test.tsx (16 tests) 405ms
+ ✓ src/features/settings/SettingsLinks.test.tsx (1 test) 269ms
+ ✓ src/storage/initialMaterials.test.ts (12 tests) 164ms
+ ✓ src/storage/materialProvenance.test.ts (17 tests) 127ms
+ ✓ src/components/WanpaiDora.test.tsx (8 tests) 156ms
+ ✓ src/domain/unifiedHandCompatibility.test.ts (6 tests) 116ms
+ ✓ src/features/records/renderRecordShare.test.ts (10 tests) 87ms
+ ✓ src/features/import/import.test.ts (17 tests) 109ms
+ ✓ src/app/theme.test.ts (14 tests) 64ms
+ ✓ src/domain/remaining.test.ts (18 tests) 67ms
+ ✓ src/components/useDecorativeMotion.test.tsx (3 tests) 64ms
+ ✓ src/domain/recordSeries.test.ts (34 tests) 74ms
+ ✓ src/domain/recordShare.test.ts (9 tests) 64ms
  ✓ src/domain/sessionRetest.test.ts (7 tests) 22ms
- ✓ src/domain/validate.test.ts (20 tests) 13ms
- ✓ src/features/materials/materialSort.test.ts (9 tests) 6ms
- ✓ src/domain/materialRecords.test.ts (6 tests) 21ms
- ✓ src/export/compressImageFile.test.ts (3 tests) 15ms
- ✓ src/domain/domain.test.ts (11 tests) 19ms
- ✓ src/domain/testEligibility.test.ts (11 tests) 12ms
+ ✓ src/storage/testParticipation.test.ts (9 tests) 33ms
+ ✓ src/domain/records.test.ts (12 tests) 43ms
+ ✓ src/domain/materialRecords.test.ts (6 tests) 14ms
+ ✓ src/domain/materials.test.ts (39 tests) 23ms
+ ✓ src/storage/repository.test.ts (8 tests) 29ms
+ ✓ src/features/materials/materialList.test.ts (32 tests) 34ms
+ ✓ src/domain/attachments.test.ts (12 tests) 22ms
+ ✓ src/domain/domain.test.ts (11 tests) 9ms
+ ✓ src/export/compressImageFile.test.ts (3 tests) 11ms
+ ✓ src/domain/validate.test.ts (20 tests) 17ms
  ✓ src/components/AppIcons.test.ts (6 tests) 10ms
- ✓ src/domain/scoreInput.test.ts (27 tests) 12ms
- ✓ src/domain/tagRecords.test.ts (7 tests) 9ms
+ ✓ src/domain/scoreInput.test.ts (27 tests) 15ms
+ ✓ src/features/materials/materialSort.test.ts (9 tests) 8ms
+ ✓ src/domain/testEligibility.test.ts (11 tests) 13ms
+ ✓ src/domain/tagRecords.test.ts (7 tests) 7ms
  ✓ src/domain/melds.test.ts (4 tests) 8ms
  ✓ src/domain/tileSupply.test.ts (2 tests) 6ms
 
 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
 
  FAIL  src/domain/search.test.ts > A44 search performance smoke > 500 problems without images under ~200ms
-AssertionError: expected 555.2080539999997 to be less than 200
+AssertionError: expected 508.2739630000001 to be less than 200
  ❯ src/domain/search.test.ts:221:21
     219|     const elapsed = performance.now() - start;
     220|     expect(results.length).toBeGreaterThan(0);
@@ -150,10 +167,10 @@ AssertionError: expected 555.2080539999997 to be less than 200
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
 
 
- Test Files  1 failed | 64 passed (65)
-      Tests  1 failed | 943 passed (944)
-   Start at  14:31:21
-   Duration  39.77s (transform 3.37s, setup 757ms, collect 10.89s, tests 46.39s, environment 36.60s, prepare 6.70s)
+ Test Files  1 failed | 65 passed (66)
+      Tests  1 failed | 979 passed (980)
+   Start at  15:00:34
+   Duration  45.95s (transform 3.57s, setup 867ms, collect 12.91s, tests 52.55s, environment 43.16s, prepare 7.93s)
 
 npm notice
 npm notice New major version of npm available! 11.9.0 -> 12.2.0

@@ -50,6 +50,8 @@ export type Attachment = {
 
 /** Optional catalog identity; user edits retain it, user duplicates do not. */
 export type SampleProvenance = {
+  /** Preserve an edited old sample across import tag normalization. */
+  correctionSkipped?: 'sample03-2026-10-07.1';
   catalogId: string;
   version: string;
   itemId: string;

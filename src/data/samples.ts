@@ -1,3 +1,4 @@
+import { isPriorSample03 } from './sample03Revision';
 import { createId, nowIso } from '@/domain/ids';
 import type { Problem, Store } from '@/domain/types';
 import catalogData from './sampleCatalogData.json';
@@ -34,6 +35,7 @@ export function samplesAlreadyPresent(store: Store): boolean {
     return identity?.catalogId === template.sample!.catalogId &&
       identity?.version === template.sample!.version &&
       identity?.itemId === template.sample!.itemId &&
-      identity?.fingerprint === template.sample!.fingerprint;
+      identity?.fingerprint === template.sample!.fingerprint ||
+      template.sample!.itemId === 'sample-v2-03' && isPriorSample03(problem);
   }));
 }

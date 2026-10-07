@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import previousSample03 from '@/data/fixtures/sample03-2026-10-05.3.json';
 import { createLegacySampleProblems } from '@/data/legacySamples';
 import { getSampleRemovalPreview, getSampleUpdatePreview } from '@/data/sampleCatalog';
 import { createSampleProblems, samplesAlreadyPresent } from '@/data/samples';
@@ -806,22 +805,6 @@ describe('safe bulk removal of current samples', () => {
 
 
 describe('sample 03 ledger correction', () => {
-  function priorCatalog(edited = false) {
-    const { problems, tagName } = createSampleProblems();
-    const { sampleId: _sampleId, contentVersion: _contentVersion, ...content } = previousSample03;
-    const prior = { ...problems[2]!, ...structuredClone(content) } as Problem;
-    prior.sample = { ...problems[2]!.sample!, version: previousSample03.contentVersion,
-      fingerprint: contentFingerprint(prior, [], [tagName]) };
-    if (edited) prior.privateMemo = '本人が追記したメモ';
-    problems[2] = prior;
-    let store = success(repo.addProblems(load(), problems, tagName));
-    store = { ...store, attempts: [attempt(prior.id)], daily: { '2026-10-05': { tested: 1, confirmed: 2 } },
-      study: store.study.map(state => state.problemId === prior.id ? { ...state, confirmationCount: 2, understanding: 'understood' as const } : state) };
-    data.set(KEY, JSON.stringify(store));
-    repo.dispose(); repo = new LocalStorageRepository(KEY);
-    return load();
-  }
-
   it('verifies both equal six-tile waits with the real engine and prefers the ledger answer', () => {
     const problem = createSampleProblems().problems[2]!;
     expect(problem.sample!.itemId).toBe('sample-v2-03');
@@ -841,23 +824,5 @@ describe('sample 03 ledger correction', () => {
       .every(p => p.sample!.version === '2026-10-05.3')).toBe(true);
   });
 
-  it.each([false, true])('preserves prior sample 03 and history (edited=%s), adds only the revision explicitly, and safely undoes it', (edited) => {
-    const before = priorCatalog(edited);
-    expect(getSampleUpdatePreview(before).additions).toBe(1);
-    expect(getSampleUpdatePreview(before).candidates).toEqual([]);
-    const raw = data.get(KEY);
-    repo.dispose(); repo = new LocalStorageRepository(KEY); expect(data.get(KEY)).toBe(raw);
-    const after = update(load());
-    expect(after.problems).toHaveLength(11);
-    for (const original of before.problems) expect(after.problems.find(p => p.id === original.id)).toEqual(original);
-    expect(after.attempts).toEqual(before.attempts); expect(after.daily).toEqual(before.daily);
-    for (const state of before.study) expect(after.study.find(s => s.problemId === state.problemId)).toEqual(state);
-    const added = after.problems.filter(p => !before.problems.some(old => old.id === p.id));
-    expect(added).toHaveLength(1); expect(added[0]!.sample!.itemId).toBe('sample-v2-03');
-    expect(added[0]!.acceptedDiscards).toEqual(['2s']); expect(getSampleUpdatePreview(after).additions).toBe(0);
-    expect(update(after)).toEqual(after);
-    const restored = success(repo.restoreSampleCatalog(after, backupId()));
-    expect(restored.problems).toEqual(before.problems); expect(restored.study).toEqual(before.study);
-    expect(restored.attempts).toEqual(before.attempts); expect(restored.daily).toEqual(before.daily);
-  });
+
 });

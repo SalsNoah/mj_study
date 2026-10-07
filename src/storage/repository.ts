@@ -13,6 +13,7 @@ import {
   type Tag,
 } from '../domain/types';
 import { createId, nowIso } from '../domain/ids';
+import { protectSample03Edits, reviseSample03 } from '../data/sample03Revision';
 import { createInitialStore } from '../data/initialMaterials';
 import { isContentRevisionChange, validateProblem, hasErrors } from '../domain/validate';
 import { normalizeTagKey, validateTagName, canAddTag } from '../domain/tags';
@@ -222,8 +223,19 @@ export class LocalStorageRepository {
     const materialData = validateMaterialData(parsed);
     if (!materialData.ok) return { ok: false, reason: materialData.reason, code: 'corrupt', raw };
     const { ok: _ok, ...materialFields } = materialData;
+    const previousMemoryRevision = this.memoryRevision;
     this.memoryRevision = parsed.revision;
-    return { ok: true, store: normalizeStore({ ...parsed, ...materialFields }) };
+    const original = { ...parsed, ...materialFields };
+    const revised = reviseSample03(original);
+    if (revised !== original) {
+      const saved = this.persist(revised, raw);
+      if (!saved.ok) {
+        this.memoryRevision = previousMemoryRevision;
+        return { ok: false, code: 'access', reason: `サンプル03の訂正を保存できません。元データは保持しています。${saved.reason}`, raw };
+      }
+      return { ok: true, store: normalizeStore(saved.store) };
+    }
+    return { ok: true, store: normalizeStore(original) };
   }
 
   private persist(store: Store, expectedRaw?: string | null): SaveResult {
@@ -288,7 +300,7 @@ export class LocalStorageRepository {
       if (this.memoryRevision !== null && this.memoryRevision !== store.revision) {
         return { ok: false, code: 'conflict', reason: '保存後にデータが更新されています。再読込してください' };
       }
-      const next: Store = { ...store, revision: store.revision + 1 };
+      const next: Store = { ...reviseSample03(store), revision: store.revision + 1 };
       const text = JSON.stringify(next);
       if (utf16Size(text) > LIMITS.storageMaxBytes) {
         return { ok: false, code: 'size', reason: '保存サイズが上限を超えます。データは変更していません' };
@@ -640,7 +652,7 @@ export class LocalStorageRepository {
     const materialData = validateMaterialData(parsed);
     if (!materialData.ok) return { ok: false, reason: materialData.reason, code: 'validation' };
     const { ok: _ok, ...materialFields } = materialData;
-    const backup: Store = { ...parsed, ...materialFields };
+    const backup: Store = reviseSample03(protectSample03Edits({ ...parsed, ...materialFields }));
     let expectedRaw: string | null | undefined;
     if (current.materials !== undefined || current.materialStudyEvents !== undefined ||
       backup.materials !== undefined || backup.materialStudyEvents !== undefined) {
