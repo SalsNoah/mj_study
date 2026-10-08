@@ -41,7 +41,9 @@ try{
  await page.getByRole('tab',{name:'手牌',exact:true}).click();
  for(const name of ['一萬','二萬','三萬','一筒','二筒','三筒','一索','二索','三索','四索','五索','六索','白','白'])await page.locator('.tile-palette').getByRole('button',{name,exact:true}).click();
  await openEditorNotes(page);await page.getByLabel('正解を設定する',{exact:true}).check();await page.locator('.hand-stage--pick').getByRole('button',{name:'白',exact:true}).first().click();
- await page.getByRole('button',{name:'保存',exact:true}).click();await page.getByRole('heading',{name:'無題の問題',exact:true}).waitFor();
+ await page.getByRole('button',{name:'保存',exact:true}).click();
+ await expect(page.getByRole('heading',{name:'学習帳',exact:true})).toBeVisible();
+ await page.locator('.problem-card').click();await page.getByRole('heading',{name:'無題の問題',exact:true}).waitFor();
  await capture('detail-five',['北','一萬','赤五筒','中','北']);
  const saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('mahjong-study:v1')));
  expect(saved.problems[0].doraIndicators).toEqual(['4z','1m','0p','7z','4z']);
