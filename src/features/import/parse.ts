@@ -1,6 +1,8 @@
 import { createMeld } from '@/domain/melds';
 import { isRed, isTileCode, tileRank, tileSuit } from '@/domain/tiles';
 import type { Meld, MeldFrom, ProblemContext, TileCode, Wind } from '@/domain/types';
+import { tileSupplyIssues } from '@/domain/tileSupply';
+import type { MeldEvidence } from './meldEvidence';
 
 export const WIND_CHARS: Record<string, Wind> = { 東: '1z', 南: '2z', 西: '3z', 北: '4z' };
 const WIND_ORDER: Wind[] = ['1z', '2z', '3z', '4z'];
@@ -174,7 +176,7 @@ export function sortedLabels(candidates: Array<Map<string, number>>): string[] {
   return out;
 }
 
-export type MeldCell = { label: string | null; rotated: boolean };
+export type MeldCell = { label: string | null; rotated: boolean; meldEvidence?: MeldEvidence };
 
 function canonical(code: TileCode): string {
   return `${tileRank(code)}${tileSuit(code)}`;
@@ -194,12 +196,25 @@ function fromIndex(idx: number, size: number): MeldFrom {
 export function inferMeld(cells: MeldCell[]): { ok: true; meld: Meld } | { ok: false; reason: string } {
   const labels = cells.map((c) => c.label);
   const rot = cells.findIndex((c) => c.rotated);
+  const stacked = cells.filter((c) => typeof c.meldEvidence?.stack === 'object');
+  const ambiguous = { ok: false as const, reason: '槓の種類を判定できません。元画像を確認し、作成画面で副露を手入力してください' };
+  if (cells.some((c) => {
+    const e = c.meldEvidence;
+    return e && ((e.orientation === 'sideways' && !c.rotated) || (e.orientation === 'upright' && c.rotated) ||
+      (e.face === 'front' && c.label === 'back') || (e.face === 'back' && c.label !== null && c.label !== 'back'));
+  })) return ambiguous;
 
-  if (cells.length === 4 && labels[0] === 'back' && labels[3] === 'back') {
+  const isBack = (c: MeldCell) => c.label === 'back' || c.meldEvidence?.face === 'back';
+  if (cells.length === 4 && isBack(cells[0]!) && isBack(cells[3]!)) {
+    if (stacked.length || cells.some((c) => c.rotated)) return ambiguous;
     const mid = labels.slice(1, 3).filter((l): l is TileCode => !!l && isTileCode(l));
-    if (mid.length === 0) return { ok: false, reason: '暗槓の牌が読めません' };
+    if (mid.length !== 2 || canonical(mid[0]!) !== canonical(mid[1]!)) return { ok: false, reason: '暗槓の中央2枚が確定していません' };
+    // A hidden red five cannot be reconstructed from two normal visible fives.
+    if (tileRank(mid[0]!) === 5 && tileSuit(mid[0]!) !== 'z' && !mid.some(isRed)) return { ok: false, reason: '暗槓の裏牌に赤五があるか確認できません' };
     const base = normalFive(mid[0]!);
-    return createMeld('closedKan', [base, mid[0]!, mid[1] ?? base, base], null, null, null);
+    const tiles = [base, mid[0]!, mid[1]!, base];
+    if (tileSupplyIssues(tiles).length) return ambiguous;
+    return createMeld('closedKan', tiles, null, null, null);
   }
 
   if (!labels.every((l): l is TileCode => !!l && isTileCode(l))) {
@@ -207,10 +222,28 @@ export function inferMeld(cells: MeldCell[]): { ok: true; meld: Meld } | { ok: f
   }
   const codes = labels as TileCode[];
   const same = codes.every((c) => canonical(c) === canonical(codes[0]!));
+  if (tileSupplyIssues(codes).length) return { ok: false, reason: '副露の牌枚数または赤牌が不正です' };
+
+  if (stacked.length) {
+    if (codes.length !== 4 || !same || stacked.length !== 2 || cells.some((c) => c.meldEvidence?.face !== 'front')) return ambiguous;
+    const lower = cells.findIndex((c) => typeof c.meldEvidence?.stack === 'object' && c.meldEvidence.stack.level === 'lower');
+    const upper = cells.findIndex((c) => typeof c.meldEvidence?.stack === 'object' && c.meldEvidence.stack.level === 'upper');
+    if (lower < 0 || upper < 0) return ambiguous;
+    const a = cells[lower]!.meldEvidence!.stack;
+    const b = cells[upper]!.meldEvidence!.stack;
+    if (typeof a !== 'object' || typeof b !== 'object' || !a.pairId.trim() || a.pairId !== b.pairId ||
+      !cells[lower]!.rotated || !cells[upper]!.rotated ||
+      cells.some((c, i) => c.meldEvidence?.orientation !== (i === lower || i === upper ? 'sideways' : 'upright') ||
+        (i !== lower && i !== upper && (c.rotated || c.meldEvidence?.stack !== 'none')))) return ambiguous;
+    // Domain format: original pon in image order, added tile last; addedIndex is its stack position.
+    const baseCells = cells.filter((_, i) => i !== upper);
+    const called = baseCells.indexOf(cells[lower]!);
+    return createMeld('addedKan', [...codes.filter((_, i) => i !== upper), codes[upper]!], fromIndex(called, 3), called, called);
+  }
 
   if (codes.length === 4 && same) {
-    const idx = rot >= 0 ? rot : 0;
-    return createMeld('openKan', codes, fromIndex(idx, 4), idx, null);
+    if (cells.filter((c) => c.rotated).length !== 1 || cells.some((c) => c.meldEvidence?.stack !== 'none' || c.meldEvidence.face !== 'front' || c.meldEvidence.orientation === 'unknown')) return ambiguous;
+    return createMeld('openKan', codes, fromIndex(rot, 4), rot, null);
   }
   if (codes.length === 3 && same) {
     const idx = rot >= 0 ? rot : 0;
@@ -228,6 +261,9 @@ export function inferMeld(cells: MeldCell[]): { ok: true; meld: Meld } | { ok: f
  */
 export function splitMelds<T extends MeldCell>(cells: T[]): T[][] {
   const chunkScore = (chunk: T[]): number | null => {
+    // A proposed split must not separate a known stack pair (or accept an orphan).
+    const pairs = chunk.flatMap((c) => typeof c.meldEvidence?.stack === 'object' ? [c.meldEvidence.stack] : []);
+    if (pairs.some((p) => pairs.filter((q) => q.pairId === p.pairId).length !== 2)) return null;
     const rotated = chunk.filter((c) => c.rotated).length;
     const closedKan = chunk.length === 4 && chunk[0]!.label === 'back' && chunk[3]!.label === 'back';
     if (!closedKan && rotated > (chunk.length === 4 ? 2 : 1)) return null;
@@ -248,4 +284,35 @@ export function splitMelds<T extends MeldCell>(cells: T[]): T[][] {
     }
   }
   return best[cells.length]?.parts ?? [cells];
+}
+
+/** Only rescue a short hand when all four complete melds and their tile supply agree. */
+export function supportedHandCount(hand: Array<MeldCell & { sure: boolean }>, melds: Array<Array<MeldCell & { sure: boolean }>>): boolean {
+  if (hand.length >= 4) return hand.length <= 14;
+  if ((hand.length !== 1 && hand.length !== 2) || melds.length !== 4 ||
+    [...hand, ...melds.flat()].some((c) => !c.sure)) return false;
+  const concealed = hand.flatMap((c) => c.label && isTileCode(c.label) ? [c.label] : []);
+  if (concealed.length !== hand.length) return false;
+  const tiles: TileCode[] = [...concealed];
+  for (const group of melds) {
+    const m = inferMeld(group);
+    if (!m.ok) return false;
+    const expectedRotated = m.meld.type === 'closedKan' ? 0 : m.meld.type === 'addedKan' ? 2 : 1;
+    if (group.filter((c) => c.rotated).length !== expectedRotated) return false;
+    tiles.push(...m.meld.tiles);
+  }
+  return tileSupplyIssues(tiles).length === 0;
+}
+
+/** Build a confirmation candidate; persist it only after an explicit user action. */
+export function confirmOpenKan<T extends MeldCell>(cells: T[]): T[] | null {
+  if (cells.length !== 4 || cells.filter((c) => c.rotated).length !== 1 ||
+    cells.some((c) => c.meldEvidence?.face === 'back' || typeof c.meldEvidence?.stack === 'object' ||
+      (c.meldEvidence?.orientation === 'sideways' && !c.rotated) || (c.meldEvidence?.orientation === 'upright' && c.rotated))) return null;
+  const confirmed = cells.map((c) => ({ ...c, meldEvidence: {
+    source: 'manualConfirmation' as const, face: 'front' as const,
+    orientation: c.rotated ? 'sideways' as const : 'upright' as const, stack: 'none' as const,
+  } }));
+  const result = inferMeld(confirmed);
+  return result.ok && result.meld.type === 'openKan' ? confirmed : null;
 }

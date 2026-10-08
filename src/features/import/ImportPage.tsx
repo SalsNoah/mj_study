@@ -17,7 +17,7 @@ import {
   type Model,
 } from './autoRead';
 import { putImportDraft, takePendingShot } from './draft';
-import { inferMeld, scoresBySeat, type Seat } from './parse';
+import { confirmOpenKan, inferMeld, scoresBySeat, type Seat } from './parse';
 import { loadImage, type TileCell } from './recognize';
 
 const WIND_NAME: Record<Wind, string> = { '1z': '東', '2z': '南', '3z': '西', '4z': '北' };
@@ -320,6 +320,7 @@ export function ImportPage() {
                 <div className="read-melds">
                   {result.melds.map((g, gi) => {
                     const m = g.every((c) => c.label) ? inferMeld(g) : null;
+                    const confirmedKan = !m?.ok ? confirmOpenKan(g) : null;
                     return (
                       <div key={gi} className="read-meld">
                         <div className="read-row read-row--small">
@@ -337,6 +338,12 @@ export function ImportPage() {
                             ? { chi: 'チー', pon: 'ポン', openKan: '明槓', closedKan: '暗槓', addedKan: '加槓' }[m.meld.type]
                             : '判定できません'}
                         </span>
+                        {confirmedKan && <button type="button" className="btn" onClick={() => {
+                          const next = { ...result, melds: result.melds.map((group, index) => index === gi ? confirmedKan : group) };
+                          setError(null);
+                          setPhase({ kind: 'review', result: next });
+                          setTarget(firstUnsure(next));
+                        }}>重なりなし・横向き1枚の大明槓と確認</button>}
                       </div>
                     );
                   })}

@@ -1,4 +1,5 @@
 import type { Img } from './imageTools';
+import type { MeldEvidence } from './meldEvidence';
 
 export type TileCell = {
   label: string | null;
@@ -6,6 +7,7 @@ export type TileCell = {
   feat: Uint8Array;
   preview: string;
   rotated: boolean;
+  meldEvidence?: MeldEvidence;
 };
 
 /** 画像を時計回りに回す角度。自分以外の点数や鳴いた牌は横向き・逆さまで表示される */
