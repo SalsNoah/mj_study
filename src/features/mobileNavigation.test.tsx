@@ -270,7 +270,7 @@ it('opens detail notes first and retains remaining adjustments and all-candidate
   const before = localStorage.getItem(STORAGE_KEY);
   await mountProblem(<DetailPage />, '/problems/:id', data.problems[0]!.id);
   expect(host.querySelector<HTMLDivElement>('#detail-view-panel-notes')!.hidden).toBe(false);
-  expect(button('確認した').closest('[role="tabpanel"]')).toBeNull();
+  expect(button('確認した（問題一覧に戻る）').closest('[role="tabpanel"]')).toBeNull();
   await click(button('受入れ'));
   expect(host.querySelectorAll('.ukeire-list > li:not([hidden])')).toHaveLength(3);
   expect(host.querySelector('.ukeire-order')!.textContent).toBe('最小シャンテン内・枚数順');

@@ -373,7 +373,7 @@ function ProblemEditor() {
   };
   const unsaved = useUnsavedChanges({ dirty, onSave: saveDraft, saveDisabled: imageBusy });
   const save = () => {
-    if (saveDraft()) unsaved.leave(() => { void navigate(`/problems/${draftProblem.id}`); });
+    if (saveDraft()) unsaved.leave(() => { void navigate(isNew || !existing ? '/library' : `/problems/${draftProblem.id}`); });
   };
 
   const onImage = async (file: File | null, role: AttachmentRole) => {

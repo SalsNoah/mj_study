@@ -549,7 +549,8 @@ export class LocalStorageRepository {
 
   undoConfirm(store: Store, problemId: string, previous: StudyState): SaveResult {
     const study = store.study.map((s) => (s.problemId === problemId ? { ...previous } : s));
-    const daily = bumpDaily(store.daily, dayKey(), 'confirmed', -1);
+    const confirmedAt = store.study.find((s) => s.problemId === problemId)?.lastConfirmedAt;
+    const daily = bumpDaily(store.daily, confirmedAt ? dayKeyFromIso(confirmedAt) : dayKey(), 'confirmed', -1);
     return this.persist({ ...store, study, daily });
   }
 

@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useApp } from '@/app/store';
 import { HandBoard } from '@/components/HandBoard';
@@ -8,17 +8,31 @@ import { ExplanationAttachments, QuestionAttachments } from '@/components/Proble
 import { accuracyForProblem, isInTest } from '@/domain/quiz';
 import { attachmentsForRole } from '@/domain/attachments';
 import { formatShortDate } from '@/domain/records';
-import type { StudyState } from '@/domain/types';
 import { DuplicateProblemButton } from './DuplicateProblemButton';
 
 export function DetailPage() {
+  const pageRef = useRef<HTMLDivElement>(null);
+  const dockRef = useRef<HTMLDivElement>(null);
   const { id } = useParams();
+  useLayoutEffect(() => {
+    const page = pageRef.current, dock = dockRef.current;
+    const nav = document.querySelector<HTMLElement>('.bottom-nav');
+    if (!page || !dock || !nav) return;
+    const measure = () => {
+      page.style.setProperty('--detail-nav-height', `${nav.getBoundingClientRect().height}px`);
+      page.style.setProperty('--detail-action-height', `${dock.getBoundingClientRect().height}px`);
+    };
+    measure();
+    const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(measure);
+    observer?.observe(nav); observer?.observe(dock);
+    window.addEventListener('resize', measure);
+    return () => { observer?.disconnect(); window.removeEventListener('resize', measure); };
+  }, [id]);
   const navigate = useNavigate();
   const {
     store,
     getTagName,
     confirmProblem,
-    undoConfirm,
     deleteProblem,
     duplicateProblem,
     setInTest,
@@ -30,8 +44,8 @@ export function DetailPage() {
   const [answerState, setAnswerState] = useState({ key: answerKey, visible: false });
   const answerVisible = answerState.key === answerKey && answerState.visible;
   if (answerState.key !== answerKey) setAnswerState({ key: answerKey, visible: false });
-  const [undoState, setUndoState] = useState<StudyState | null>(null);
   const confirmLock = useRef(false);
+  const [confirmError, setConfirmError] = useState<string | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
 
   if (!problem) {
@@ -52,29 +66,19 @@ export function DetailPage() {
   const onConfirm = () => {
     if (confirmLock.current || !study) return;
     confirmLock.current = true;
-    setUndoState({ ...study });
     const r = confirmProblem(problem.id);
     if (!r.ok) {
-      setMsg(r.reason);
+      setConfirmError(r.reason);
       confirmLock.current = false;
-      setUndoState(null);
       return;
     }
-    window.setTimeout(() => {
-      setUndoState(null);
-      confirmLock.current = false;
-    }, 5000);
-  };
-
-  const onUndo = () => {
-    if (!undoState) return;
-    undoConfirm(problem.id, undoState);
-    setUndoState(null);
-    confirmLock.current = false;
+    void navigate('/library', { state: { confirmation: {
+      previous: { ...study }, revision: r.store.revision, expiresAt: Date.now() + 5000,
+    } } });
   };
 
   return (
-    <div className="page">
+    <div className="page page--detail" ref={pageRef}>
       <header className="page-header page-header--problem">
         <h1>{problem.title.trim() || '無題の問題'}</h1>
         <span className={`badge ${problem.answerEnabled ? 'badge-answer' : 'badge-memo'}`}>
@@ -114,14 +118,12 @@ export function DetailPage() {
       </section>
 
         <div className="detail-primary-actions">
-          <button type="button" className="btn btn-primary" onClick={onConfirm} disabled={!!undoState}>
-            確認した
-          </button>
-          {undoState && (
-            <button type="button" className="btn" onClick={onUndo}>
-              取り消す
+          <div className="detail-confirm-dock" ref={dockRef}>
+            {confirmError && <p className="error" role="alert">{confirmError}</p>}
+            <button type="button" className="btn btn-primary" onClick={onConfirm}>
+              確認した（問題一覧に戻る）
             </button>
-          )}
+          </div>
           <Link className="btn" to={`/edit/${problem.id}`}>編集</Link>
         </div>
       <ViewTabs id="detail-view" label="問題の表示" value={view} onChange={setView}

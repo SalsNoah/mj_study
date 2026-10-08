@@ -22,6 +22,7 @@ async function mount(id = 'new') {
   await act(async () => root.render(<AppProvider><MemoryRouter initialEntries={[`/edit/${id}`]}><Routes>
     <Route path="/edit/:id" element={<EditorPage />} />
     <Route path="/problems/:id" element={<div>saved</div>} />
+    <Route path="/library" element={<div>saved to library</div>} />
   </Routes></MemoryRouter></AppProvider>));
 }
 function checkbox(text: string) {
@@ -69,7 +70,7 @@ it('opens notes and enables answers and testing only for a new manual entry, wit
   expect(localStorage.getItem(STORAGE_KEY)).toBeNull();
   await click(host.querySelector<HTMLButtonElement>('.hand-stage--pick button[aria-label="一萬"]')!);
   await click(save());
-  expect(host.textContent).toBe('saved');
+  expect(host.textContent).toBe('saved to library');
   expect(readStore().problems[0]).toMatchObject({ answerEnabled: true, acceptedDiscards: ['1m'] });
   expect(readStore().study[0]?.inTest).toBe(true);
 });

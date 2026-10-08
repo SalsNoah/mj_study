@@ -1,0 +1,38 @@
+[
+  {
+    "width": 320,
+    "status": "pass",
+    "checks": [
+      "new save returns to visible unfiltered library",
+      "unsaved guard stays active",
+      "confirmation returns with 5-second undo",
+      "undo restores count",
+      "existing edit still returns to detail",
+      "no test or material records created"
+    ]
+  },
+  {
+    "width": 390,
+    "status": "pass",
+    "checks": [
+      "new save returns to visible unfiltered library",
+      "unsaved guard stays active",
+      "confirmation returns with 5-second undo",
+      "undo restores count",
+      "existing edit still returns to detail",
+      "no test or material records created"
+    ]
+  },
+  {
+    "width": 1440,
+    "status": "pass",
+    "checks": [
+      "new save returns to visible unfiltered library",
+      "unsaved guard stays active",
+      "confirmation returns with 5-second undo",
+      "undo restores count",
+      "existing edit still returns to detail",
+      "no test or material records created"
+    ]
+  }
+]
