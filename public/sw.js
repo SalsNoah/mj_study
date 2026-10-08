@@ -1,4 +1,4 @@
-const CACHE = 'mahjong-study-v51';
+const CACHE = 'mahjong-study-v52';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -21,6 +21,9 @@ self.addEventListener('fetch', (event) => {
   if (request.method !== 'GET') return;
   // Metadata must fail normally, never use a stale title or the HTML fallback.
   const url = new URL(request.url);
+  // Standalone checker: never fall back to the study app or cache its model.
+  if (url.pathname.endsWith('/ocr-check.html') ||
+      (request.referrer && new URL(request.referrer).pathname.endsWith('/ocr-check.html'))) return;
   if (url.origin === 'https://www.youtube.com' && url.pathname === '/oembed') return;
   event.respondWith(
     fetch(request)
