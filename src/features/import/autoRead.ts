@@ -39,10 +39,12 @@ import {
   parseTurn,
   sortedLabels,
   splitMelds,
+  supportedHandCount,
   type Seat,
 } from './parse';
 import { toDataUrl, type TileCell, type Turn } from './recognize';
 import { classify, labelScores, learn, prepareBank, type Bank, type PreparedBank } from './templates';
+import { columnMeldEvidence } from './meldEvidence';
 
 export type { Game } from './auto';
 
@@ -611,7 +613,7 @@ export function autoRead(img: Img, banks: Prepared): AutoResult | null {
     feats.reduce((sum, f) => sum + classify(banks[g].tiles, f).score, 0) / feats.length;
   const fits = { jantama: fit('jantama'), tenhou: fit('tenhou') };
   const game: Game = fits.jantama >= fits.tenhou ? 'jantama' : 'tenhou';
-  if (tiles.length < 4 || fits[game] < HAND_OK) return null;
+  if (fits[game] < HAND_OK) return null;
   const bank = banks[game];
 
   const hand = sortedHand(tiles, feats, bank.tiles);
@@ -622,12 +624,16 @@ export function autoRead(img: Img, banks: Prepared): AutoResult | null {
     melds = segmentMelds(region, TILE_ASPECT)
       .flatMap((group) =>
         splitMelds(
-          group.map((s) => toCell(cropBrightRows(region, s), bank.tiles, s.rotated ? [90, 270] : [0], s.rotated)),
+          group.map((s) => ({
+            ...toCell(cropBrightRows(region, s), bank.tiles, s.rotated ? [90, 270] : [0], s.rotated),
+            meldEvidence: columnMeldEvidence(s.rotated),
+          })),
         ),
       )
       // 副露として成り立たない組は、画面の端で欠けた牌などの読み違いがあるので確認してもらう
       .map((m) => (inferMeld(m).ok ? m : m.map((c) => ({ ...c, sure: false }))));
   }
+  if (!supportedHandCount(hand, melds)) return null;
 
   let dora: TileCell[] = [];
   if (game === 'jantama') {

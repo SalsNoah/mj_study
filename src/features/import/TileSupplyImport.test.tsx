@@ -20,3 +20,17 @@ mock.result.hand=Array.from({length:5},()=>cell('1m'));await mount();expect(peek
 it('known dora/melds constrain correction and automatic reread cannot reintroduce overflow',async()=>{
 mock.result.hand=[cell('2m',false),cell('3m')];mock.result.melds=[[cell('1m'),cell('1m'),cell('1m')]];mock.result.dora=[cell('1m')];mock.badRematch=true;await mount();expect(tile('一萬').disabled).toBe(true);expect(tile('二萬').disabled).toBe(false);await click(tile('二萬'));expect(host.querySelectorAll('[aria-label="読み取り結果 1m"]')).toHaveLength(4);expect(host.querySelectorAll('[aria-label="読み取り結果 2m"]')).toHaveLength(1);expect(host.querySelectorAll('[aria-label="読み取り結果 3m"]')).toHaveLength(1);expect(mock.remember).toHaveBeenCalledTimes(1);
 });
+it('does not auto-draft an ambiguous four-tile kan even when every label is sure',async()=>{
+mock.result.hand=[cell('9s')];mock.result.melds=[[{...cell('1z'),rotated:true},cell('1z'),cell('1z'),cell('1z')]];
+await mount();expect(peekImportDraft()).toBeNull();expect(host.textContent).toContain('槓の種類を判定できません');expect(host.querySelectorAll('.read-cell')).toHaveLength(5);
+const create=[...host.querySelectorAll<HTMLButtonElement>('button')].find(x=>x.textContent==='この内容で作成')!;
+await click(create);expect(peekImportDraft()).toBeNull();expect(host.querySelectorAll('.read-cell')).toHaveLength(5);
+const confirm=[...host.querySelectorAll<HTMLButtonElement>('button')].find(x=>x.textContent==='重なりなし・横向き1枚の大明槓と確認')!;
+await click(confirm);await click([...host.querySelectorAll<HTMLButtonElement>('button')].find(x=>x.textContent==='この内容で作成')!);
+expect(peekImportDraft()!.melds[0]).toMatchObject({type:'openKan',tiles:['1z','1z','1z','1z'],from:'left'});
+});
+it('passes proven added-kan identity, order and red tile into the editor draft',async()=>{
+const observed=(label:string,rotated=false,stack:any='none')=>({...cell(label),rotated,meldEvidence:{source:'manualConfirmation',face:'front',orientation:rotated?'sideways':'upright',stack}});
+mock.result.hand=[cell('9s')];mock.result.melds=[[observed('5p'),observed('5p',true,{pairId:'fixture',level:'lower'}),observed('0p',true,{pairId:'fixture',level:'upper'}),observed('5p')]];
+await mount();expect(peekImportDraft()!.melds).toHaveLength(1);expect(peekImportDraft()!.melds[0]).toMatchObject({type:'addedKan',tiles:['5p','5p','5p','0p'],from:'opposite',calledIndex:1,addedIndex:1});expect(host.textContent).toBe('editor');
+});
