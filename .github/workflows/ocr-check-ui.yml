@@ -1,0 +1,40 @@
+name: OCR checker checks
+on:
+  pull_request:
+    paths:
+      - 'src/ocr-check/**'
+      - 'src/features/import/**'
+      - 'src/domain/tiles*'
+      - 'public/import-model.json'
+      - 'public/sw.js'
+      - 'ocr-check.html'
+      - 'vite.config.ts'
+      - 'scripts/validate-ocr-check-*.mjs'
+      - '.github/workflows/ocr-check-ui.yml'
+permissions:
+  contents: read
+jobs:
+  checker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm test -- src/ocr-check src/features/import
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - name: Synthetic browser and real engine checks
+        run: |
+          npm run dev -- --host 127.0.0.1 --port 5177 > /tmp/ocr-check-vite.log 2>&1 &
+          for i in {1..30}; do curl --silent --fail http://127.0.0.1:5177/ocr-check.html > /dev/null && break; sleep 1; done
+          node scripts/validate-ocr-check-ui.mjs
+          node scripts/validate-ocr-check-engine.mjs
+      - name: Production subpath smoke test
+        run: |
+          npm run preview -- --host 127.0.0.1 --port 5186 --base /mj_study/ > /tmp/ocr-check-preview.log 2>&1 &
+          for i in {1..30}; do curl --silent --fail http://127.0.0.1:5186/mj_study/ocr-check.html > /dev/null && break; sleep 1; done
+          node scripts/validate-ocr-check-production.mjs
